@@ -25,6 +25,8 @@ add_commonlibsse_plugin(
 	VERSION ${PROJECT_VERSION}
 	SOURCES
 		src/main.cpp
+		src/Camera.cpp
+		src/Hooks.cpp
 		src/Registry.cpp
 		src/State.cpp
 		src/Shift.cpp

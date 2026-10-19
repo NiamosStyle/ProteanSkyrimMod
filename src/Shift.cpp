@@ -1,5 +1,6 @@
 #include "Shift.h"
 
+#include "Camera.h"
 #include "State.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
@@ -285,6 +286,7 @@ namespace protean::Shift
 		RE::ActorEquipManager::GetSingleton()->EquipSpell(p, reg.Revert());
 
 		SetControlsLocked(true);
+		Camera::Begin(a_c.cameraHeight);
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 			cam->ForceThirdPerson();
 		}
@@ -309,6 +311,7 @@ namespace protean::Shift
 		LogVitals("before", p);
 
 		SetControlsLocked(false);
+		Camera::End();
 		LeaveFactions(p);
 
 		if (auto* race = RE::TESForm::LookupByID<RE::TESRace>(s.realRace)) {
@@ -382,6 +385,9 @@ namespace protean::Shift
 		// the control lock and the camera are not.
 		logger::info("loaded a save made as '{}': restoring the control lock", s.active);
 		SetControlsLocked(true);
+		if (const auto* c = Active()) {
+			Camera::Begin(c->cameraHeight);
+		}
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 			cam->ForceThirdPerson();
 		}

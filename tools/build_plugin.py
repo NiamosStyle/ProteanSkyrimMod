@@ -21,7 +21,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GAME = "C:/Games/steamapps/common/Skyrim Special Edition"
 PLUGIN = "Protean.esp"
 
-EFFECT, STARTER, REVERT, TOME = 0x800, 0x801, 0x802, 0x803
+EFFECT, STARTER, REVERT, TOME, HEART_EFFECT = 0x800, 0x801, 0x802, 0x803, 0x804
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 
@@ -80,6 +80,16 @@ def main():
           "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
           "Description:\n  TargetLanguage: English\n  Value: ''\n")
 
+    # Hearts need ONE effect: the inventory menu dereferences an ingestible's first effect, and a food
+    # with none crashed the game (measured 2026-10-19). This one does nothing at all.
+    write(os.path.join(y, "MagicEffects", "Protean_HeartEffect - %s_%s.yaml" % (fid(HEART_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_HeartEffect\n" % (fid(HEART_EFFECT), PLUGIN)
+          + name_block("Shapeshifter's Hunger")
+          + "Flags:\n- NoDuration\n- NoMagnitude\n- NoArea\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: FireAndForget\n"
+          "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: ''\n")
+
     def power(local, editor_id, title, desc):
         write(os.path.join(y, "Spells", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
               "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id)
@@ -118,7 +128,8 @@ def main():
               + "Keywords:\n- 08CDEA:Skyrim.esm\n"
               "Model:\n  File: %s\n" % table["item_model"].replace("\\", "\\\\").join(['"', '"'])
               + "PickUpSound: 03EDBD:Skyrim.esm\nPutDownSound: 03EDC0:Skyrim.esm\nWeight: 0.5\nValue: 5\n"
-              "Flags:\n- NoAutoCalc\n- FoodItem\nConsumeSound: 0B6435:Skyrim.esm\n")
+              "Flags:\n- NoAutoCalc\n- FoodItem\nConsumeSound: 0B6435:Skyrim.esm\n"
+              "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(HEART_EFFECT), PLUGIN))
         power(pw, "Protean_Power_%s" % c["id"], "Shapeshift: %s" % c["name"],
               "Become a %s. Cast again, or use Revert Form, to return." % c["name"].lower())
 
@@ -128,6 +139,7 @@ def main():
             "race": {"file": rf, "id": int(rid, 16)},
             "heart": heart, "power": pw,
             "size": c["size_class"],
+            "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
             "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"]],
             "ladder": c["health_ladder"],
             # vanilla NPC records of this creature: dead ones get a heart when looted

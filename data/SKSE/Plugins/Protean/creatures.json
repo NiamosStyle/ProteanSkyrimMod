@@ -15,6 +15,7 @@
    "heart": 2064,
    "power": 2065,
    "size": "medium",
+   "camera_height": 70,
    "factions": [
     {
      "file": "Skyrim.esm",
@@ -53,6 +54,7 @@
    "heart": 2070,
    "power": 2071,
    "size": "medium",
+   "camera_height": 161,
    "factions": [
     {
      "file": "Skyrim.esm",
@@ -91,6 +93,7 @@
    "heart": 2100,
    "power": 2101,
    "size": "small",
+   "camera_height": 50,
    "factions": [
     {
      "file": "Skyrim.esm",

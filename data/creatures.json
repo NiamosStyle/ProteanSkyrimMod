@@ -32,6 +32,7 @@
     22,
     50
    ],
+   "bound_height": 78,
    "health_ladder": [
     [
      2,
@@ -125,6 +126,7 @@
     137,
     137
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      6,
@@ -218,6 +220,7 @@
     22,
     22
    ],
+   "bound_height": 78,
    "health_ladder": [
     [
      2,
@@ -313,6 +316,7 @@
     50,
     50
    ],
+   "bound_height": 179,
    "health_ladder": [
     [
      1,
@@ -368,6 +372,7 @@
     50,
     50
    ],
+   "bound_height": 179,
    "health_ladder": [
     [
      1,
@@ -413,6 +418,7 @@
     22,
     22
    ],
+   "bound_height": 78,
    "health_ladder": [
     [
      2,
@@ -500,6 +506,7 @@
     25,
     25
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      1,
@@ -544,6 +551,7 @@
     21,
     21
    ],
+   "bound_height": 78,
    "health_ladder": [
     [
      2,
@@ -586,6 +594,7 @@
     22,
     25
    ],
+   "bound_height": 78,
    "health_ladder": [
     [
      1,
@@ -654,6 +663,7 @@
     37,
     87
    ],
+   "bound_height": 100,
    "health_ladder": [
     [
      3,
@@ -716,6 +726,7 @@
     260,
     260
    ],
+   "bound_height": 98,
    "health_ladder": [
     [
      12,
@@ -817,6 +828,7 @@
     450,
     450
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      16,
@@ -920,6 +932,7 @@
     550,
     550
    ],
+   "bound_height": 98,
    "health_ladder": [
     [
      20,
@@ -1000,6 +1013,7 @@
     150,
     150
    ],
+   "bound_height": 109,
    "health_ladder": [
     [
      6,
@@ -1098,6 +1112,7 @@
     275,
     275
    ],
+   "bound_height": 109,
    "health_ladder": [
     [
      11,
@@ -1196,6 +1211,7 @@
     150,
     150
    ],
+   "bound_height": 109,
    "health_ladder": [
     [
      6,
@@ -1295,6 +1311,7 @@
     121,
     121
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      5,
@@ -1372,6 +1389,7 @@
    "vanilla_npc_records": 0,
    "vanilla_level_range": null,
    "vanilla_health_range": null,
+   "bound_height": null,
    "health_ladder": [],
    "factions": [],
    "attack_count": 6,
@@ -1433,6 +1451,7 @@
     15,
     15
    ],
+   "bound_height": 56,
    "health_ladder": [
     [
      1,
@@ -1520,6 +1539,7 @@
     25,
     25
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      1,
@@ -1563,6 +1583,7 @@
     155,
     160
    ],
+   "bound_height": 79,
    "health_ladder": [
     [
      4,
@@ -1643,6 +1664,7 @@
     5,
     55
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      1,
@@ -1732,6 +1754,7 @@
     1,
     41
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      5,
@@ -1821,6 +1844,7 @@
     253,
     253
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      12,
@@ -1945,6 +1969,7 @@
     280,
     280
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      14,
@@ -2049,6 +2074,7 @@
     460,
     460
    ],
+   "bound_height": 128,
    "health_ladder": [
     [
      22,
@@ -2182,6 +2208,7 @@
     289,
     289
    ],
+   "bound_height": 169,
    "health_ladder": [
     [
      4,
@@ -2222,6 +2249,7 @@
     192,
     192
    ],
+   "bound_height": 73,
    "health_ladder": [
     [
      3,
@@ -2277,6 +2305,7 @@
     931,
     931
    ],
+   "bound_height": 388,
    "health_ladder": [
     [
      38,
@@ -2356,6 +2385,7 @@
     591,
     591
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      32,
@@ -2428,6 +2458,7 @@
     100,
     100
    ],
+   "bound_height": 128,
    "health_ladder": [
     [
      1,
@@ -2525,6 +2556,7 @@
     740,
     740
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      25,
@@ -2618,6 +2650,7 @@
     360,
     360
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      1,
@@ -2662,6 +2695,7 @@
     636,
     636
    ],
+   "bound_height": 198,
    "health_ladder": [
     [
      32,
@@ -2740,6 +2774,7 @@
     375,
     375
    ],
+   "bound_height": null,
    "health_ladder": [
     [
      16,

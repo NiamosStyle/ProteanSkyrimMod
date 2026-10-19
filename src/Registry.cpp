@@ -61,6 +61,7 @@ namespace protean
 			cr.id = c.at("id");
 			cr.name = c.at("name");
 			cr.size = c.value("size", "medium");
+			cr.cameraHeight = c.value("camera_height", 60.0f);
 			const auto& r = c.at("race");
 			cr.race = dh->LookupForm<RE::TESRace>(r.at("id").get<RE::FormID>(), r.at("file").get<std::string>());
 			cr.heart = dh->LookupForm<RE::AlchemyItem>(c.at("heart").get<RE::FormID>(), plugin);

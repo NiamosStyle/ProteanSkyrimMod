@@ -12,6 +12,7 @@ namespace protean
 		RE::AlchemyItem*                  heart{ nullptr };
 		RE::SpellItem*                    power{ nullptr };
 		std::string                       size;      // small | medium | large_cave_ok | outdoor_only
+		float                             cameraHeight{ 60.0f };  // game units above the root, for the third-person camera
 		std::vector<RE::TESFaction*>      factions;  // the factions this animal's own records share
 		std::vector<std::pair<int, int>>  ladder;    // (level, health) rungs from the vanilla NPC records
 

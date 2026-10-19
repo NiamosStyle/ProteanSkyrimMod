@@ -124,6 +124,8 @@ for cid, name, race, nnames, size, rank, item, notes in CREATURES:
     # Factions the creature's own records share (the player joins them while transformed).
     fsets = [set(f["Faction"] for f in x["json"].get("Factions", [])) for x in good if x["race"] == race]
     shared = sorted(set.intersection(*fsets)) if fsets else []
+    zs = [x["json"].get("OBND - Object Bounds", {}).get("Z2") for x in good if x["race"] == race]
+    zs = [z for z in zs if z]
     atk = attacks_of(r)
     special = [a for a in atk if a["flags"] or a["spell"]]
     rows.append({
@@ -142,6 +144,7 @@ for cid, name, race, nnames, size, rank, item, notes in CREATURES:
         "vanilla_npc_records": len(recs),
         "vanilla_level_range": [min(levels), max(levels)] if levels else None,
         "vanilla_health_range": [min(hps), max(hps)] if hps else None,
+        "bound_height": max(zs) if zs else None,
         "health_ladder": ladder,
         "factions": shared,
         "attack_count": len(atk),

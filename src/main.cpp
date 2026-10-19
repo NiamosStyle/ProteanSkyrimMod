@@ -1,3 +1,5 @@
+#include "Camera.h"
+#include "Hooks.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -69,9 +71,13 @@ namespace
 				events->AddEventSink<RE::TESEquipEvent>(Sink::Get());
 				events->AddEventSink<RE::TESSpellCastEvent>(Sink::Get());
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
+				protean::Hooks::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
+			break;
+		case SKSE::MessagingInterface::kPreLoadGame:
+			protean::Camera::Reset();
 			break;
 		case SKSE::MessagingInterface::kPostLoadGame:
 			if (g_ready) {
