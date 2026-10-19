@@ -39,3 +39,22 @@ Each phase: plain-English plan, user approves, build, test live with DevBench, s
 - Chaurus Hunter race has no Flies flag: flight is built from scratch.
 - Slaughterfish race is swim-only (no Walks flag): land behaviour must be spiked early.
 - Equip Enchantment Fix has no build named for 1.7.104; the "1.6.629 and newer" build must be tested.
+
+## Status (2026-10-19, end of the first session)
+Verified live on SE 1.7.104: eating a heart teaches the form; the voice-slot power transforms; race swap is
+fine; the health bonus works; revert restores race, health and gear; the revert-death rule kills.
+Fixed after live failures: hearts need one effect (an effect-less food crashed the inventory menu);
+animal skeletons have no third-person camera node, so the mod attaches its own.
+Built but NOT yet tested live (branch `wip/offline`): witness factions, indoor size rule with auto-revert,
+camera height measured from the model, attack-button translation, dev command channel, test harness.
+
+## Design notes worth keeping
+- NPC reactions come from FACTIONS: the player joins the animal's own factions plus Protean_BeastFaction.
+  Predator/Prey are enemies, animals are friends with their own kind, humans have no relation to animals.
+  Anyone hostile who SAW the change goes into Protean_WitnessFaction (enemy of BeastFaction).
+- Indoor rule: 757 vanilla locations measured: 274 clearly cave-like, 271 clearly buildings, 7 conflicting
+  (orc strongholds, mines tagged as settlements), 205 neither (mostly exteriors). Cave-like keywords win.
+  An interior cell with no location counts as a building (conservative).
+- Corpse hearts are keyed by RACE. Ice Wolf / Pit Wolf share the Wolf race, so Phase 3 must key variants by
+  base NPC to give them their own hearts.
+- Vanilla "special attacks" are power attacks, bashes and a few spell attacks, not bespoke moves.
