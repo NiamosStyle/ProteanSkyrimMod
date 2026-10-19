@@ -1,0 +1,2402 @@
+{
+ "generated_from": "vanilla Skyrim.esm/Update.esm/Dawnguard.esm/Dragonborn.esm",
+ "creatures": [
+  {
+   "id": "wolf",
+   "name": "Wolf",
+   "race": "WolfRace",
+   "race_form": "Skyrim.esm:01320A",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Wolf Heart",
+   "notes": "Predator.",
+   "race_base_health": 12,
+   "race_base_stamina": 200,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/Canine/Character Assets Wolf/skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    2,
+    2
+   ],
+   "vanilla_health_range": [
+    22,
+    50
+   ],
+   "attack_count": 12,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    }
+   ]
+  },
+  {
+   "id": "ice_wolf",
+   "name": "Ice Wolf",
+   "race": "WolfRace",
+   "race_form": "Skyrim.esm:01320A",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Ice Wolf Pelt Strip",
+   "notes": "Same race as Wolf; own skin.",
+   "race_base_health": 12,
+   "race_base_stamina": 200,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/Canine/Character Assets Wolf/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    6,
+    6
+   ],
+   "vanilla_health_range": [
+    137,
+    137
+   ],
+   "attack_count": 12,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    }
+   ]
+  },
+  {
+   "id": "pit_wolf",
+   "name": "Pit Wolf",
+   "race": "WolfRace",
+   "race_form": "Skyrim.esm:01320A",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Pit Wolf Scarred Hide",
+   "notes": "Same race as Wolf; own skin.",
+   "race_base_health": 12,
+   "race_base_stamina": 200,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/Canine/Character Assets Wolf/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    2,
+    2
+   ],
+   "vanilla_health_range": [
+    22,
+    22
+   ],
+   "attack_count": 12,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    }
+   ]
+  },
+  {
+   "id": "deer",
+   "name": "Deer",
+   "race": "DeerRace",
+   "race_form": "Skyrim.esm:0CF89B",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Deer Tongue",
+   "notes": "Prey; name 'Deer' is a base object, not an NPC name.",
+   "race_base_health": 50,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Deer/Character Assets/Skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    50,
+    50
+   ],
+   "attack_count": 12,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    }
+   ]
+  },
+  {
+   "id": "elk",
+   "name": "Elk",
+   "race": "ElkRace",
+   "race_form": "Skyrim.esm:0131ED",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Elk Antler Velvet",
+   "notes": "Prey.",
+   "race_base_health": 50,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Deer/Character Assets/Skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    50,
+    50
+   ],
+   "attack_count": 12,
+   "special_attacks": []
+  },
+  {
+   "id": "fox",
+   "name": "Fox",
+   "race": "FoxRace",
+   "race_form": "Skyrim.esm:109C7C",
+   "size_class": "small",
+   "difficulty_rank": 1,
+   "unique_item": "Fox Brush",
+   "notes": "Tiny-ish; fast. FoxRace is also the game's placeholder race for template actors.",
+   "race_base_health": 12,
+   "race_base_stamina": 200,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Canine/Character Assets Wolf/skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    2,
+    2
+   ],
+   "vanilla_health_range": [
+    22,
+    22
+   ],
+   "attack_count": 12,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    }
+   ]
+  },
+  {
+   "id": "hare",
+   "name": "Hare",
+   "race": "HareRace",
+   "race_form": "Skyrim.esm:06DC99",
+   "size_class": "small",
+   "difficulty_rank": 1,
+   "unique_item": "Hare Leg",
+   "notes": "Tiny; both reference mods already do this one.",
+   "race_base_health": 5,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Walks",
+    "No Combat In Water",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Ambient/Hare/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    25,
+    25
+   ],
+   "attack_count": 0,
+   "special_attacks": []
+  },
+  {
+   "id": "dog",
+   "name": "Dog",
+   "race": "DogRace",
+   "race_form": "Skyrim.esm:0131EE",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Dog Snout",
+   "notes": "Livestock-like; friendly to most.",
+   "race_base_health": 10,
+   "race_base_stamina": 20,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Allow PC Dialogue"
+   ],
+   "skeleton": "Actors/Canine/Character Assets Dog/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    2,
+    2
+   ],
+   "vanilla_health_range": [
+    21,
+    21
+   ],
+   "attack_count": 6,
+   "special_attacks": []
+  },
+  {
+   "id": "goat",
+   "name": "Goat",
+   "race": "GoatRace",
+   "race_form": "Skyrim.esm:0131FA",
+   "size_class": "medium",
+   "difficulty_rank": 1,
+   "unique_item": "Goat Horn Marrow",
+   "notes": "Livestock.",
+   "race_base_health": 25,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Goat/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 4,
+   "vanilla_level_range": [
+    1,
+    3
+   ],
+   "vanilla_health_range": [
+    22,
+    25
+   ],
+   "attack_count": 3,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    }
+   ]
+  },
+  {
+   "id": "cow",
+   "name": "Cow",
+   "race": "CowRace",
+   "race_form": "Skyrim.esm:04E785",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Cow Udder",
+   "notes": "Livestock.",
+   "race_base_health": 15,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Cow/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 4,
+   "vanilla_level_range": [
+    3,
+    3
+   ],
+   "vanilla_health_range": [
+    37,
+    87
+   ],
+   "attack_count": 4,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 7.0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    }
+   ]
+  },
+  {
+   "id": "bear",
+   "name": "Bear",
+   "race": "BearBlackRace",
+   "race_form": "Skyrim.esm:0131E8",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Bear Heart",
+   "notes": "Race is the black bear; brown and snow bears have their own races.",
+   "race_base_health": 150,
+   "race_base_stamina": 75,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/Bear/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    12,
+    12
+   ],
+   "vanilla_health_range": [
+    260,
+    260
+   ],
+   "attack_count": 7,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.1
+    }
+   ]
+  },
+  {
+   "id": "cave_bear",
+   "name": "Cave Bear",
+   "race": "BearBrownRace",
+   "race_form": "Skyrim.esm:0131E7",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Cave Bear Liver",
+   "notes": "Brown bear race.",
+   "race_base_health": 200,
+   "race_base_stamina": 150,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/Bear/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    16,
+    16
+   ],
+   "vanilla_health_range": [
+    450,
+    450
+   ],
+   "attack_count": 7,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.1
+    }
+   ]
+  },
+  {
+   "id": "snow_bear",
+   "name": "Snow Bear",
+   "race": "BearSnowRace",
+   "race_form": "Skyrim.esm:0131E9",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Snow Bear Paw Pad",
+   "notes": "",
+   "race_base_health": 200,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/Bear/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    20,
+    20
+   ],
+   "vanilla_health_range": [
+    550,
+    550
+   ],
+   "attack_count": 7,
+   "special_attacks": [
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.35
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.35
+    }
+   ]
+  },
+  {
+   "id": "sabre_cat",
+   "name": "Sabre Cat",
+   "race": "SabreCatRace",
+   "race_form": "Skyrim.esm:013200",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Sabre Cat Fang Root",
+   "notes": "",
+   "race_base_health": 100,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/SabreCat/Character Assets/Skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    6,
+    6
+   ],
+   "vanilla_health_range": [
+    150,
+    150
+   ],
+   "attack_count": 8,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    }
+   ]
+  },
+  {
+   "id": "snowy_sabre_cat",
+   "name": "Snowy Sabre Cat",
+   "race": "SabreCatSnowyRace",
+   "race_form": "Skyrim.esm:013202",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Snowy Sabre Cat Whisker Gland",
+   "notes": "",
+   "race_base_health": 175,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/SabreCat/Character Assets/Skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    11,
+    11
+   ],
+   "vanilla_health_range": [
+    275,
+    275
+   ],
+   "attack_count": 8,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    }
+   ]
+  },
+  {
+   "id": "vale_sabre_cat",
+   "name": "Vale Sabre Cat",
+   "race": "DLC1SabreCatGlowRace",
+   "race_form": "Dawnguard.esm:00D0B6",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Vale Sabre Cat Glowing Gland",
+   "notes": "Dawnguard.",
+   "race_base_health": 100,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/SabreCat/Character Assets/Skeleton.nif",
+   "vanilla_npc_records": 4,
+   "vanilla_level_range": [
+    6,
+    6
+   ],
+   "vanilla_health_range": [
+    150,
+    150
+   ],
+   "attack_count": 8,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    }
+   ]
+  },
+  {
+   "id": "death_hound",
+   "name": "Death Hound",
+   "race": "DLC1DeathHoundRace",
+   "race_form": "Dawnguard.esm:00C5F0",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Death Hound Fang",
+   "notes": "Dawnguard.",
+   "race_base_health": 75,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Can't Open Doors",
+    "Allow PC Dialogue"
+   ],
+   "skeleton": "Actors/Canine/Character Assets Wolf/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    5,
+    5
+   ],
+   "vanilla_health_range": [
+    121,
+    121
+   ],
+   "attack_count": 6,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "boar",
+   "name": "Boar",
+   "race": "DLC2BoarRace",
+   "race_form": "Dragonborn.esm:024038",
+   "size_class": "medium",
+   "difficulty_rank": 2,
+   "unique_item": "Boar Shoulder",
+   "notes": "Dragonborn. Added at the user's request.",
+   "race_base_health": 200,
+   "race_base_stamina": 50,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims"
+   ],
+   "skeleton": "Actors/DLC02/BoarRiekling/Character Assets/SkeletonBoar.nif",
+   "vanilla_npc_records": 0,
+   "vanilla_level_range": null,
+   "vanilla_health_range": null,
+   "attack_count": 6,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPowerLarge",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.7
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.5
+    }
+   ]
+  },
+  {
+   "id": "skeever",
+   "name": "Skeever",
+   "race": "SkeeverRace",
+   "race_form": "Skyrim.esm:013201",
+   "size_class": "small",
+   "difficulty_rank": 3,
+   "unique_item": "Skeever Tail Tip",
+   "notes": "Tiny: camera check.",
+   "race_base_health": 15,
+   "race_base_stamina": 15,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/Skeever/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 4,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    15,
+    15
+   ],
+   "attack_count": 6,
+   "special_attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0.1
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "chicken",
+   "name": "Chicken",
+   "race": "ChickenRace",
+   "race_form": "Skyrim.esm:0A919D",
+   "size_class": "small",
+   "difficulty_rank": 3,
+   "unique_item": "Chicken Wing",
+   "notes": "Tiny: camera check. Has no attacks at all.",
+   "race_base_health": 5,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Walks",
+    "No Combat In Water",
+    "Can't Open Doors",
+    "Non-Hostile"
+   ],
+   "skeleton": "Actors/Ambient/Chicken/Character Assets/Skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    25,
+    25
+   ],
+   "attack_count": 0,
+   "special_attacks": []
+  },
+  {
+   "id": "ash_hopper",
+   "name": "Ash Hopper",
+   "race": "DLC2AshHopperRace",
+   "race_form": "Dragonborn.esm:01B658",
+   "size_class": "small",
+   "difficulty_rank": 3,
+   "unique_item": "Ash Hopper Foreleg",
+   "notes": "Dragonborn. Tiny: camera check.",
+   "race_base_health": 125,
+   "race_base_stamina": 120,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Spells Align w/Magic Node",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/DLC02/Scrib/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    4,
+    4
+   ],
+   "vanilla_health_range": [
+    155,
+    160
+   ],
+   "attack_count": 10,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "mudcrab",
+   "name": "Mudcrab",
+   "race": "MudcrabRace",
+   "race_form": "Skyrim.esm:0BA545",
+   "size_class": "small",
+   "difficulty_rank": 3,
+   "unique_item": "Mudcrab Claw Meat",
+   "notes": "Tiny: camera check.",
+   "race_base_health": 25,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Swims",
+    "Walks",
+    "Can't Open Doors",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/Mudcrab/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 3,
+   "vanilla_level_range": [
+    1,
+    3
+   ],
+   "vanilla_health_range": [
+    5,
+    55
+   ],
+   "attack_count": 6,
+   "special_attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "albino_spider",
+   "name": "Albino Spider",
+   "race": "DLC2ExpSpiderBaseRace",
+   "race_form": "Dragonborn.esm:014449",
+   "size_class": "small",
+   "difficulty_rank": 3,
+   "unique_item": "Albino Spider Gland",
+   "notes": "Dragonborn Expedition spider. Its own race, NOT Frostbite.",
+   "race_base_health": 1,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Walks",
+    "No Combat In Water",
+    "Don't Show Blood Decal",
+    "Spells Align w/Magic Node",
+    "Don't Show Weapon Blood",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/FrostbiteSpider/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 3,
+   "vanilla_level_range": [
+    5,
+    1000
+   ],
+   "vanilla_health_range": [
+    1,
+    41
+   ],
+   "attack_count": 7,
+   "special_attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_Bite1",
+     "flags": [],
+     "spell": "DLC2ExpSpiderAlbinoPoisonBite",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Bite2",
+     "flags": [],
+     "spell": "DLC2ExpSpiderAlbinoPoisonBite",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 0.6,
+     "stagger": 0.1
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "chaurus",
+   "name": "Chaurus",
+   "race": "ChaurusRace",
+   "race_form": "Skyrim.esm:0131EB",
+   "size_class": "medium",
+   "difficulty_rank": 4,
+   "unique_item": "Chaurus Egg Sac",
+   "notes": "",
+   "race_base_health": 125,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Walks",
+    "No Combat In Water",
+    "Don't Show Blood Decal",
+    "Spells Align w/Magic Node",
+    "Can't Open Doors",
+    "Don't Show Weapon Blood"
+   ],
+   "skeleton": "Actors/Chaurus/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    12,
+    12
+   ],
+   "vanilla_health_range": [
+    253,
+    253
+   ],
+   "attack_count": 12,
+   "special_attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crChaurusPoisonBite01",
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "AttackStart_LBite4",
+     "flags": [],
+     "spell": "crChaurusPoisonBite01",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LeftChop",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LeftSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LHeadBash",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "AttackStart_RBite3",
+     "flags": [],
+     "spell": "crChaurusPoisonBite01",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RHeadBash",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "AttackStart_RightChop",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RightSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "troll",
+   "name": "Troll",
+   "race": "TrollRace",
+   "race_form": "Skyrim.esm:013205",
+   "size_class": "large_cave_ok",
+   "difficulty_rank": 4,
+   "unique_item": "Troll Fat",
+   "notes": "Caves ok, buildings no.",
+   "race_base_health": 150,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Walks",
+    "No Combat In Water",
+    "Regen HP In Combat",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/Troll/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    14,
+    14
+   ],
+   "vanilla_health_range": [
+    280,
+    280
+   ],
+   "attack_count": 17,
+   "special_attacks": [
+    {
+     "event": "attackStartBackwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStartForwardPowerRush",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftB",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartPowerX2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "frost_troll",
+   "name": "Frost Troll",
+   "race": "TrollFrostRace",
+   "race_form": "Skyrim.esm:013206",
+   "size_class": "large_cave_ok",
+   "difficulty_rank": 4,
+   "unique_item": "Frost Troll Sinew",
+   "notes": "Caves ok, buildings no.",
+   "race_base_health": 250,
+   "race_base_stamina": 125,
+   "race_flags": [
+    "Walks",
+    "No Combat In Water",
+    "Regen HP In Combat",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/Troll/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 3,
+   "vanilla_level_range": [
+    22,
+    22
+   ],
+   "vanilla_health_range": [
+    460,
+    460
+   ],
+   "attack_count": 17,
+   "special_attacks": [
+    {
+     "event": "attackStartBackwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStartForwardPowerRush",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftB",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartPowerComboA",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboB",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboC",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerX2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "horse",
+   "name": "Horse",
+   "race": "HorseRace",
+   "race_form": "Skyrim.esm:0131FD",
+   "size_class": "medium",
+   "difficulty_rank": 4,
+   "unique_item": "Horse Flank",
+   "notes": "NPCs/game must not try to ride or claim the player.",
+   "race_base_health": 250,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "No Knockdowns"
+   ],
+   "skeleton": "Actors/Horse/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 11,
+   "vanilla_level_range": [
+    4,
+    4
+   ],
+   "vanilla_health_range": [
+    289,
+    289
+   ],
+   "attack_count": 2,
+   "special_attacks": []
+  },
+  {
+   "id": "horker",
+   "name": "Horker",
+   "race": "HorkerRace",
+   "race_form": "Skyrim.esm:0131FC",
+   "size_class": "large_cave_ok",
+   "difficulty_rank": 5,
+   "unique_item": "Horker Blubber",
+   "notes": "Land and water.",
+   "race_base_health": 150,
+   "race_base_stamina": 150,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Swims",
+    "Walks",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/Horker/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    3,
+    3
+   ],
+   "vanilla_health_range": [
+    192,
+    192
+   ],
+   "attack_count": 6,
+   "special_attacks": [
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    }
+   ]
+  },
+  {
+   "id": "mammoth",
+   "name": "Mammoth",
+   "race": "MammothRace",
+   "race_form": "Skyrim.esm:0131FF",
+   "size_class": "outdoor_only",
+   "difficulty_rank": 5,
+   "unique_item": "Mammoth Snout Flesh",
+   "notes": "Huge, outdoors only.",
+   "race_base_health": 500,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "No Knockdowns",
+    "Avoids Roads"
+   ],
+   "skeleton": "Actors/Mammoth/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    38,
+    38
+   ],
+   "vanilla_health_range": [
+    931,
+    931
+   ],
+   "attack_count": 6,
+   "special_attacks": [
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.5
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.5
+    }
+   ]
+  },
+  {
+   "id": "giant",
+   "name": "Giant",
+   "race": "GiantRace",
+   "race_form": "Skyrim.esm:0131F9",
+   "size_class": "outdoor_only",
+   "difficulty_rank": 5,
+   "unique_item": "Giant Marrow",
+   "notes": "Added at the user's request. Outdoors only is MY assumption: confirm.",
+   "race_base_health": 250,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Can't Open Doors",
+    "Avoids Roads",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/Giant/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    32,
+    32
+   ],
+   "vanilla_health_range": [
+    591,
+    591
+   ],
+   "attack_count": 7,
+   "special_attacks": [
+    {
+     "event": "attackPowerStart_ForwardPowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crGiantClubSlam",
+     "damage_mult": 1.5,
+     "stagger": 1.5
+    },
+    {
+     "event": "attackPowerStart_Stomp",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crGiantStomp",
+     "damage_mult": 1.5,
+     "stagger": 0.5
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    }
+   ]
+  },
+  {
+   "id": "werewolf",
+   "name": "Werewolf",
+   "race": "WerewolfBeastRace",
+   "race_form": "Skyrim.esm:0CDD84",
+   "size_class": "medium",
+   "difficulty_rank": 6,
+   "unique_item": "Werewolf Heart",
+   "notes": "Needs OUR OWN race copy: no lycanthropy, no Companions conflict.",
+   "race_base_health": 100,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Regen HP In Combat",
+    "Allow PC Dialogue",
+    "Override Head Part List",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/WerewolfBeast/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 3,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    100,
+    100
+   ],
+   "attack_count": 15,
+   "special_attacks": [
+    {
+     "event": "AttackStartBackHand",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 0.3,
+     "stagger": 0.5
+    },
+    {
+     "event": "AttackStartDual",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.2
+    },
+    {
+     "event": "AttackStartLeftPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartLeftRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 1.3,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartRightRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 1.3,
+     "stagger": 1.25
+    }
+   ]
+  },
+  {
+   "id": "werebear",
+   "name": "Werebear",
+   "race": "DLC2WerebearBeastRace",
+   "race_form": "Dragonborn.esm:01E17B",
+   "size_class": "medium",
+   "difficulty_rank": 6,
+   "unique_item": "Werebear Heart",
+   "notes": "Dragonborn. Same caution as Werewolf.",
+   "race_base_health": 500,
+   "race_base_stamina": 250,
+   "race_flags": [
+    "Swims",
+    "Walks",
+    "No Combat In Water",
+    "Uses Head Track Anims",
+    "Override Head Part List",
+    "Use Advanced Avoidance"
+   ],
+   "skeleton": "Actors/WerewolfBeast/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 2,
+   "vanilla_level_range": [
+    25,
+    25
+   ],
+   "vanilla_health_range": [
+    740,
+    740
+   ],
+   "attack_count": 15,
+   "special_attacks": [
+    {
+     "event": "AttackStartBackHand",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 0.3,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartDual",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.2
+    },
+    {
+     "event": "AttackStartLeftPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartLeftRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartRightRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    }
+   ]
+  },
+  {
+   "id": "slaughterfish",
+   "name": "Slaughterfish",
+   "race": "SlaughterfishRace",
+   "race_form": "Skyrim.esm:013203",
+   "size_class": "small",
+   "difficulty_rank": 7,
+   "unique_item": "Slaughterfish Fin",
+   "notes": "Swim-only: real swimming/diving, cannot leave water.",
+   "race_base_health": 35,
+   "race_base_stamina": 25,
+   "race_flags": [
+    "Swims",
+    "Can't Open Doors"
+   ],
+   "skeleton": "Actors/Slaughterfish/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    1,
+    1
+   ],
+   "vanilla_health_range": [
+    360,
+    360
+   ],
+   "attack_count": 4,
+   "special_attacks": []
+  },
+  {
+   "id": "chaurus_hunter",
+   "name": "Chaurus Hunter",
+   "race": "DLC1ChaurusHunterRace",
+   "race_form": "Dawnguard.esm:0051FB",
+   "size_class": "medium",
+   "difficulty_rank": 8,
+   "unique_item": "Chaurus Hunter Wing Membrane",
+   "notes": "Dawnguard. Needs real flight (vanilla race has no Flies flag).",
+   "race_base_health": 125,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Walks",
+    "No Combat In Water",
+    "Don't Show Blood Decal",
+    "Spells Align w/Magic Node",
+    "Can't Open Doors",
+    "Don't Show Weapon Blood"
+   ],
+   "skeleton": "Actors/DLC01/ChaurusFlyer/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    32,
+    32
+   ],
+   "vanilla_health_range": [
+    636,
+    636
+   ],
+   "attack_count": 4,
+   "special_attacks": [
+    {
+     "event": "attackPowerStart_GroundDive",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackPowerStart_PowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DLC1crChaurusPoisonBite03",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLtoR",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRtoL",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  },
+  {
+   "id": "chaurus_hunter_fledgling",
+   "name": "Chaurus Hunter Fledgling",
+   "race": "DLC1ChaurusHunterRace",
+   "race_form": "Dawnguard.esm:0051FB",
+   "size_class": "medium",
+   "difficulty_rank": 8,
+   "unique_item": "Fledgling Wing Bud",
+   "notes": "Dawnguard. Same race as Chaurus Hunter.",
+   "race_base_health": 125,
+   "race_base_stamina": 100,
+   "race_flags": [
+    "Tilt Front/Back",
+    "Tilt Left/Right",
+    "Walks",
+    "No Combat In Water",
+    "Don't Show Blood Decal",
+    "Spells Align w/Magic Node",
+    "Can't Open Doors",
+    "Don't Show Weapon Blood"
+   ],
+   "skeleton": "Actors/DLC01/ChaurusFlyer/Character Assets/skeleton.nif",
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    16,
+    16
+   ],
+   "vanilla_health_range": [
+    375,
+    375
+   ],
+   "attack_count": 4,
+   "special_attacks": [
+    {
+     "event": "attackPowerStart_GroundDive",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackPowerStart_PowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DLC1crChaurusPoisonBite03",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLtoR",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRtoL",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ]
+  }
+ ]
+}
