@@ -1,5 +1,6 @@
 #include "Shift.h"
 
+#include "Attacks.h"
 #include "Camera.h"
 #include "State.h"
 
@@ -273,6 +274,11 @@ namespace protean::Shift
 		}
 	}
 
+	const Creature* ActiveCreature()
+	{
+		return Active();
+	}
+
 	void Notify(const std::string& a_text)
 	{
 		RE::SendHUDMessage::ShowHUDMessage(a_text.c_str());
@@ -349,6 +355,7 @@ namespace protean::Shift
 		RE::ActorEquipManager::GetSingleton()->EquipSpell(p, reg.Revert());
 
 		SetControlsLocked(true);
+		Attacks::Cancel();
 		Camera::Begin(a_c.cameraHeight);
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 			cam->ForceThirdPerson();

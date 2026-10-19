@@ -1,5 +1,6 @@
 #include "Hooks.h"
 
+#include "Attacks.h"
 #include "Camera.h"
 #include "Dev.h"
 #include "Shift.h"
@@ -14,6 +15,7 @@ namespace protean::Hooks
 			{
 				func(a_this, a_delta);
 				Camera::OnFrame(a_this);
+				Attacks::OnFrame();
 				Shift::OnFrame();
 				Dev::Poll();
 			}

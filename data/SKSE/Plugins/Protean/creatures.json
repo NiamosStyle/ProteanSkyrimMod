@@ -114,6 +114,74 @@
    "heart": 2064,
    "power": 2065,
    "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    }
+   ],
    "camera_height": 70,
    "factions": [
     {
@@ -153,6 +221,70 @@
    "heart": 2070,
    "power": 2071,
    "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null
+    }
+   ],
    "camera_height": 161,
    "factions": [
     {
@@ -192,6 +324,40 @@
    "heart": 2100,
    "power": 2101,
    "size": "small",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseAtaxia"
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseAtaxia"
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseAtaxia"
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseAtaxia"
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseAtaxia"
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseAtaxia"
+    }
+   ],
    "camera_height": 50,
    "factions": [
     {

@@ -15,6 +15,9 @@ namespace protean::Shift
 	// a dead animal was activated: add its heart if the player is a shapeshifter
 	void OnCorpseActivated(RE::Actor* a_corpse);
 
+	// the creature the player is currently transformed into, or null
+	const Creature* ActiveCreature();
+
 	void Transform(const Creature& a_creature);
 	void Revert(std::string_view a_why);
 

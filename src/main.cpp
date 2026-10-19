@@ -1,3 +1,4 @@
+#include "Attacks.h"
 #include "Camera.h"
 #include "Dev.h"
 #include "Hooks.h"
@@ -73,6 +74,7 @@ namespace
 				events->AddEventSink<RE::TESSpellCastEvent>(Sink::Get());
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
 				protean::Dev::Init();
+				protean::Attacks::Install();
 				protean::Hooks::Install();
 				g_ready = true;
 				logger::info("Protean is active");
@@ -80,6 +82,7 @@ namespace
 			break;
 		case SKSE::MessagingInterface::kPreLoadGame:
 			protean::Camera::Reset();
+			protean::Attacks::Cancel();
 			break;
 		case SKSE::MessagingInterface::kPostLoadGame:
 			if (g_ready) {

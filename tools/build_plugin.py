@@ -153,6 +153,7 @@ def main():
             "race": {"file": rf, "id": int(rid, 16)},
             "heart": heart, "power": pw,
             "size": c["size_class"],
+            "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", [])],
             "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
             "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"]],
             "ladder": c["health_ladder"],

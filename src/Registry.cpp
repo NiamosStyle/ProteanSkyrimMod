@@ -88,6 +88,20 @@ namespace protean
 					cr.factions.push_back(fac);
 				}
 			}
+			for (const auto& a : c.value("attacks", nlohmann::json::array())) {
+				Attack at;
+				at.event = a.value("event", "");
+				for (const auto& fl : a.value("flags", nlohmann::json::array())) {
+					const auto name = fl.get<std::string>();
+					at.power = at.power || name == "Power Attack";
+					at.bash = at.bash || name == "Bash Attack";
+					at.rotating = at.rotating || name == "Rotating Attack";
+				}
+				at.hasSpell = a.contains("spell") && !a["spell"].is_null();
+				if (!at.event.empty()) {
+					cr.attacks.push_back(std::move(at));
+				}
+			}
 			for (const auto& rung : c.value("ladder", nlohmann::json::array())) {
 				cr.ladder.emplace_back(rung.at(0).get<int>(), rung.at(1).get<int>());
 			}

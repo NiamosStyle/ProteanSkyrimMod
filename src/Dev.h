@@ -6,7 +6,8 @@ namespace protean::Dev
 	// Data/SKSE/Plugins/Protean.cmd for new lines of the form  "<sequence number> <command> [args]"
 	// and runs each once (sequence numbers must increase). It lets an automated test drive the mod
 	// without anyone pressing keys: transform / revert / learn / hearts / dump.
-	// Commands:  learn <id> | unlearn <id> | transform <id> | revert | starter | hearts | dump | kill
+	// Commands:  learn <id> | unlearn <id> | transform <id> | revert | starter | hearts | dump | kill |
+	//            anim <graph event> | draw | scan | spawn <hex base FormID>
 	// Results go to Protean.log lines starting "dev:".
 	void Init();   // kDataLoaded: reads the INI switch
 	void Poll();   // every frame; does real work every 20th frame, and only when enabled

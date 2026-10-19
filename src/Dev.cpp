@@ -50,6 +50,53 @@ namespace protean::Dev
 					p->GetRace() ? p->GetRace()->GetName() : "?", p->GetLevel(), av->GetActorValue(RE::ActorValue::kHealth),
 					av->GetPermanentActorValue(RE::ActorValue::kHealth), s.active, s.known.size(), s.healthBonus, s.witnesses.size(),
 					s.hostileWitnesses.size(), s.addedFactions.size(), s.looted.size());
+			} else if (a_cmd == "anim" && !a_arg.empty()) {
+				// send an animation-graph event to the player; the result says whether the graph accepted it
+				const bool ok = p->NotifyAnimationGraph(a_arg);
+				logger::info("dev: anim '{}' accepted by the graph: {}", a_arg, ok);
+			} else if (a_cmd == "scan") {
+				// how does everyone nearby feel about the player right now?
+				auto* pl = RE::ProcessLists::GetSingleton();
+				int   n = 0;
+				if (pl) {
+					for (auto& h : pl->highActorHandles) {
+						auto a = h.get();
+						if (!a || a.get() == p) {
+							continue;
+						}
+						const float dist = p->GetPosition().GetDistance(a->GetPosition());
+						if (dist > 5000.0f) {
+							continue;
+						}
+						auto target = a->GetActorRuntimeData().currentCombatTarget.get();
+						logger::info("dev: scan {:08X} '{}' dist {:.0f} dead {} hostile {} detection {} targetsPlayer {} inCombat {}", a->GetFormID(),
+							a->GetName(), dist, a->IsDead(), a->IsHostileToActor(p), a->RequestDetectionLevel(p),
+							target && target.get() == p, a->IsInCombat());
+						++n;
+					}
+				}
+				logger::info("dev: scan done, {} actor(s)", n);
+			} else if (a_cmd == "spawn" && !a_arg.empty()) {
+				// spawn <hex base FormID> about 8 m in front of the player
+				RE::FormID id = 0;
+				try {
+					id = static_cast<RE::FormID>(std::stoul(a_arg, nullptr, 16));
+				} catch (...) {
+				}
+				auto* base = id ? RE::TESForm::LookupByID<RE::TESBoundObject>(id) : nullptr;
+				if (!base) {
+					logger::warn("dev: spawn: no base object {}", a_arg);
+				} else {
+					auto ref = p->PlaceObjectAtMe(base, false);
+					if (ref) {
+						const float yaw = p->GetAngleZ();
+						ref->SetPosition(p->GetPositionX() + std::sin(yaw) * 560.0f, p->GetPositionY() + std::cos(yaw) * 560.0f, p->GetPositionZ());
+						logger::info("dev: spawned {:08X} '{}' (ref {:08X})", id, base->GetName(), ref->GetFormID());
+					}
+				}
+			} else if (a_cmd == "draw") {
+				p->DrawWeaponMagicHands(true);
+				logger::info("dev: draw requested");
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");

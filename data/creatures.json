@@ -45,6 +45,98 @@
     "Skyrim.esm:03E093",
     "Skyrim.esm:03E691"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    }
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -138,6 +230,98 @@
     "Skyrim.esm:02E893",
     "Skyrim.esm:03E093",
     "Skyrim.esm:03E691"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    }
    ],
    "attack_count": 12,
    "special_attacks": [
@@ -234,6 +418,98 @@
     "Skyrim.esm:03E093",
     "Skyrim.esm:03E691"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    }
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -329,6 +605,94 @@
     "Skyrim.esm:03E095",
     "Skyrim.esm:0F1ABC"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -385,6 +749,92 @@
     "Skyrim.esm:03E095",
     "Skyrim.esm:0F1ABC"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 12,
    "special_attacks": []
   },
@@ -426,6 +876,98 @@
     ]
    ],
    "factions": [],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint",
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    }
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -518,6 +1060,7 @@
     "Skyrim.esm:0A3087",
     "Skyrim.esm:0F1ABC"
    ],
+   "attacks": [],
    "attack_count": 0,
    "special_attacks": []
   },
@@ -561,6 +1104,50 @@
    "factions": [
     "Skyrim.esm:000013",
     "Skyrim.esm:043596"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 6,
    "special_attacks": []
@@ -610,6 +1197,33 @@
     "Skyrim.esm:02E894",
     "Skyrim.esm:03E095",
     "Skyrim.esm:04359D"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.25
+    }
    ],
    "attack_count": 3,
    "special_attacks": [
@@ -676,6 +1290,40 @@
     "Skyrim.esm:03E095",
     "Skyrim.esm:04E849"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 10.0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 10.0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 7.0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    }
+   ],
    "attack_count": 4,
    "special_attacks": [
     {
@@ -738,6 +1386,65 @@
     "Skyrim.esm:02E893",
     "Skyrim.esm:03E093",
     "Skyrim.esm:0FBBF3"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.1
+    }
    ],
    "attack_count": 7,
    "special_attacks": [
@@ -840,6 +1547,67 @@
     "Skyrim.esm:02E893",
     "Skyrim.esm:03E093",
     "Skyrim.esm:0FBBF3"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.1
+    }
    ],
    "attack_count": 7,
    "special_attacks": [
@@ -945,6 +1713,65 @@
     "Skyrim.esm:03E093",
     "Skyrim.esm:0FBBF3"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.35
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseBoneBreakFever",
+     "damage_mult": 1.5,
+     "stagger": 1.35
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    }
+   ],
    "attack_count": 7,
    "special_attacks": [
     {
@@ -1025,6 +1852,76 @@
     "Skyrim.esm:02E893",
     "Skyrim.esm:03E093",
     "Skyrim.esm:0435A2"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    }
    ],
    "attack_count": 8,
    "special_attacks": [
@@ -1125,6 +2022,76 @@
     "Skyrim.esm:03E093",
     "Skyrim.esm:0435A2"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    }
+   ],
    "attack_count": 8,
    "special_attacks": [
     {
@@ -1224,6 +2191,76 @@
     "Skyrim.esm:03E093",
     "Skyrim.esm:0435A2"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseWitbane",
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    }
+   ],
    "attack_count": 8,
    "special_attacks": [
     {
@@ -1322,6 +2359,50 @@
     "Dawnguard.esm:018C4F",
     "Skyrim.esm:02E893"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 2.0,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 6,
    "special_attacks": [
     {
@@ -1392,6 +2473,56 @@
    "bound_height": null,
    "health_ladder": [],
    "factions": [],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPowerLarge",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0.7
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.5
+    }
+   ],
    "attack_count": 6,
    "special_attacks": [
     {
@@ -1462,6 +2593,52 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:02E894",
     "Skyrim.esm:0330B1"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0.1
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseAtaxia",
+     "damage_mult": 1.5,
+     "stagger": 0
+    }
    ],
    "attack_count": 6,
    "special_attacks": [
@@ -1550,6 +2727,7 @@
     "Skyrim.esm:02E894",
     "Skyrim.esm:0B2849"
    ],
+   "attacks": [],
    "attack_count": 0,
    "special_attacks": []
   },
@@ -1593,6 +2771,80 @@
    "factions": [
     "Skyrim.esm:000013",
     "Skyrim.esm:02E893"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DLC2DiseaseDroops",
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 10,
    "special_attacks": [
@@ -1683,6 +2935,58 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:02E894"
    ],
+   "attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LeftChop",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RightChop",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 6,
    "special_attacks": [
     {
@@ -1767,6 +3071,63 @@
    ],
    "factions": [
     "Skyrim.esm:02997F"
+   ],
+   "attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "attackStart_Bite1",
+     "flags": [],
+     "spell": "DLC2ExpSpiderAlbinoPoisonBite",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Bite2",
+     "flags": [],
+     "spell": "DLC2ExpSpiderAlbinoPoisonBite",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 0.6,
+     "stagger": 0.1
+    },
+    {
+     "event": "AttackStart_LeftChop",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0.4,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RightChop",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0.4,
+     "stagger": 0
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 7,
    "special_attacks": [
@@ -1855,6 +3216,104 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:02E893",
     "Skyrim.esm:03C9A8"
+   ],
+   "attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crChaurusPoisonBite01",
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_Bite1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Bite2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.25
+    },
+    {
+     "event": "AttackStart_LBite4",
+     "flags": [],
+     "spell": "crChaurusPoisonBite01",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LeftChop",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LeftSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LHeadBash",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "AttackStart_RBite3",
+     "flags": [],
+     "spell": "crChaurusPoisonBite01",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RHeadBash",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    },
+    {
+     "event": "AttackStart_RightChop",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RightSide",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 12,
    "special_attacks": [
@@ -1980,6 +3439,141 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:0435A1"
    ],
+   "attacks": [
+    {
+     "event": "attackStartBackwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStartForwardPowerRush",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftA",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftB",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartLeftC",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftD",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboA",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboB",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboC",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerX2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartRightA",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightB",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightC",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.2,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightD",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.2,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 17,
    "special_attacks": [
     {
@@ -2084,6 +3678,147 @@
    "factions": [
     "Skyrim.esm:000013",
     "Skyrim.esm:0435A1"
+   ],
+   "attacks": [
+    {
+     "event": "attackStartBackwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.25
+    },
+    {
+     "event": "attackStartForwardPowerRush",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftA",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftB",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartLeftC",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeftD",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboA",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboB",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerComboC",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartPowerX2",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStartRightA",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightB",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightC",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.2,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightD",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.2,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 17,
    "special_attacks": [
@@ -2219,6 +3954,22 @@
     "Skyrim.esm:02E894",
     "Skyrim.esm:03E095"
    ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 2,
    "special_attacks": []
   },
@@ -2260,6 +4011,52 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:02E894",
     "Skyrim.esm:04359F"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackStart_HorkerSwim",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 6,
    "special_attacks": [
@@ -2315,6 +4112,58 @@
    "factions": [
     "Skyrim.esm:000013",
     "Skyrim.esm:04359B"
+   ],
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.5
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.5
+    }
    ],
    "attack_count": 6,
    "special_attacks": [
@@ -2396,6 +4245,63 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:04359A"
    ],
+   "attacks": [
+    {
+     "event": "attackPowerStart_ForwardPowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crGiantClubSlam",
+     "damage_mult": 1.5,
+     "stagger": 1.5
+    },
+    {
+     "event": "attackPowerStart_Stomp",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crGiantStomp",
+     "damage_mult": 1.5,
+     "stagger": 0.5
+    },
+    {
+     "event": "attackStart_BackAttack",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_ClubAttack1",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_ClubAttack2",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "attackStart_HandSwipeAttack",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.25
+    }
+   ],
    "attack_count": 7,
    "special_attacks": [
     {
@@ -2468,6 +4374,125 @@
    "factions": [
     "Skyrim.esm:000013",
     "Skyrim.esm:043594"
+   ],
+   "attacks": [
+    {
+     "event": "AttackStartBackHand",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 0.3,
+     "stagger": 0.5
+    },
+    {
+     "event": "AttackStartDual",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0.2
+    },
+    {
+     "event": "AttackStartDualRunning",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartDualSprinting",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartHowlExplode",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeft",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartLeftPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartLeftRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 1.3,
+     "stagger": 1.25
+    },
+    {
+     "event": "AttackStartLeftSide",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartLeftSprinting",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRight",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartRightRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 1.3,
+     "stagger": 1.25
+    },
+    {
+     "event": "AttackStartRightSide",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartRightSprinting",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 15,
    "special_attacks": [
@@ -2567,6 +4592,125 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:043594"
    ],
+   "attacks": [
+    {
+     "event": "AttackStartBackHand",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 0.3,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartDual",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.2
+    },
+    {
+     "event": "AttackStartDualRunning",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartDualSprinting",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartHowlExplode",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartLeft",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartLeftPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartLeftRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    },
+    {
+     "event": "AttackStartLeftSide",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartLeftSprinting",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRight",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 1.0
+    },
+    {
+     "event": "AttackStartRightRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell",
+     "damage_mult": 2.0,
+     "stagger": 1.25
+    },
+    {
+     "event": "AttackStartRightSide",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStartRightSprinting",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 2.0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 15,
    "special_attacks": [
     {
@@ -2661,6 +4805,36 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:0418EA"
    ],
+   "attacks": [
+    {
+     "event": "AttackStart_LCross",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_LSlash",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RCorss",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "AttackStart_RUppercut",
+     "flags": [],
+     "spell": null,
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
+   ],
    "attack_count": 4,
    "special_attacks": []
   },
@@ -2706,6 +4880,40 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:02E893",
     "Skyrim.esm:03C9A8"
+   ],
+   "attacks": [
+    {
+     "event": "attackPowerStart_GroundDive",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackPowerStart_PowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DLC1crChaurusPoisonBite03",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLtoR",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRtoL",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 4,
    "special_attacks": [
@@ -2785,6 +4993,40 @@
     "Skyrim.esm:000013",
     "Skyrim.esm:02E893",
     "Skyrim.esm:03C9A8"
+   ],
+   "attacks": [
+    {
+     "event": "attackPowerStart_GroundDive",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null,
+     "damage_mult": 1.5,
+     "stagger": 0.75
+    },
+    {
+     "event": "attackPowerStart_PowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DLC1crChaurusPoisonBite03",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackLtoR",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    },
+    {
+     "event": "attackStart_AttackRtoL",
+     "flags": [],
+     "spell": "DiseaseRattles",
+     "damage_mult": 1.0,
+     "stagger": 0
+    }
    ],
    "attack_count": 4,
    "special_attacks": [

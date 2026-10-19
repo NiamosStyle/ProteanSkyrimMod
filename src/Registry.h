@@ -4,6 +4,17 @@ namespace protean
 {
 	// One row of data/SKSE/Plugins/Protean/creatures.json (generated from data/creatures.json by
 	// tools/build_plugin.py). Every creature is described by data; no creature has its own code.
+	// One entry of the animal's attack list (from its race record): the animation-graph event that starts
+	// it, and what kind of attack it is. The player's attack button is translated into these events.
+	struct Attack
+	{
+		std::string event;
+		bool        power{ false };
+		bool        bash{ false };
+		bool        rotating{ false };
+		bool        hasSpell{ false };
+	};
+
 	struct Creature
 	{
 		std::string                       id;
@@ -15,6 +26,7 @@ namespace protean
 		float                             cameraHeight{ 60.0f };  // game units above the root, for the third-person camera
 		std::vector<RE::TESFaction*>      factions;  // the factions this animal's own records share
 		std::vector<std::pair<int, int>>  ladder;    // (level, health) rungs from the vanilla NPC records
+		std::vector<Attack>               attacks;   // the animal's attack events (race record)
 
 		// Health this animal has at the given player level: the highest rung at or below the level,
 		// or the lowest rung when the player is below all of them.
