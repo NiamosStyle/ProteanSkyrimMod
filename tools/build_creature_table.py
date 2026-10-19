@@ -110,6 +110,20 @@ for cid, name, race, nnames, size, rank, item, notes in CREATURES:
     levels = [x["json"]["ACBS - Configuration"]["Level"] for x in recs]
     hps = [x["json"].get("DNAM - Player Skills", {}).get("Health") for x in recs]
     hps = [h for h in hps if h]
+    # Health ladder: one rung per level, using the vanilla NPC records for this creature (skipping
+    # test/dead duplicates). Runtime picks the highest rung with level <= player level (or the lowest
+    # rung if the player is below all of them): this is "the health this creature has at your level".
+    good = [x for x in recs if not re.search(r"Dead|Test", x["json"].get("EDID - Editor ID", ""))]
+    rungs = {}
+    for x in good:
+        lv = x["json"]["ACBS - Configuration"]["Level"]
+        hp = x["json"].get("DNAM - Player Skills", {}).get("Health")
+        if hp:
+            rungs[lv] = min(hp, rungs.get(lv, hp))
+    ladder = sorted(rungs.items())
+    # Factions the creature's own records share (the player joins them while transformed).
+    fsets = [set(f["Faction"] for f in x["json"].get("Factions", [])) for x in good if x["race"] == race]
+    shared = sorted(set.intersection(*fsets)) if fsets else []
     atk = attacks_of(r)
     special = [a for a in atk if a["flags"] or a["spell"]]
     rows.append({
@@ -128,6 +142,8 @@ for cid, name, race, nnames, size, rank, item, notes in CREATURES:
         "vanilla_npc_records": len(recs),
         "vanilla_level_range": [min(levels), max(levels)] if levels else None,
         "vanilla_health_range": [min(hps), max(hps)] if hps else None,
+        "health_ladder": ladder,
+        "factions": shared,
         "attack_count": len(atk),
         "special_attacks": special,
     })

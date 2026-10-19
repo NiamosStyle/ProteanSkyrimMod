@@ -1,0 +1,16 @@
+FormKey: 000801:Protean.esp
+EditorID: Protean_Instinct
+Name:
+  TargetLanguage: English
+  Value: 'Shapeshifter''s Instinct'
+MenuDisplayObject: 0435A5:Skyrim.esm
+EquipmentType: 025BEE:Skyrim.esm
+Description:
+  TargetLanguage: English
+  Value: 'You can learn the forms of animals by eating their hearts. Cast to recall the forms you know.'
+Type: LesserPower
+ChargeTime: 0.5
+CastType: FireAndForget
+Effects:
+- BaseEffect: 000800:Protean.esp
+  Data: {}

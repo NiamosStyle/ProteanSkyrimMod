@@ -1,0 +1,15 @@
+SpriggitSource:
+  PackageName: Spriggit.Yaml.Skyrim
+  Version: 0.41
+ModKey: Protean.esp
+GameRelease: SkyrimSE
+ModHeader:
+  Flags:
+  - Small
+  Stats:
+    Version: 1.7
+  Author: NiamosStyle mods
+  Description: Protean - animal shapeshifting
+  MasterReferences:
+  - Master: Skyrim.esm
+    FileSize: 0

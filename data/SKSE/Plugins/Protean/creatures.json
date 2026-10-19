@@ -1,0 +1,119 @@
+{
+ "plugin": "Protean.esp",
+ "effect": 2048,
+ "starter": 2049,
+ "revert": 2050,
+ "tome": 2051,
+ "creatures": [
+  {
+   "id": "wolf",
+   "name": "Wolf",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78346
+   },
+   "heart": 2064,
+   "power": 2065,
+   "size": "medium",
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190611
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254099
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 255633
+    }
+   ],
+   "ladder": [
+    [
+     2,
+     22
+    ]
+   ],
+   "race_names": [
+    "WolfRace"
+   ]
+  },
+  {
+   "id": "deer",
+   "name": "Deer",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 850075
+   },
+   "heart": 2070,
+   "power": 2071,
+   "size": "medium",
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190612
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254101
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 989884
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     50
+    ]
+   ],
+   "race_names": [
+    "DeerRace"
+   ]
+  },
+  {
+   "id": "skeever",
+   "name": "Skeever",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78337
+   },
+   "heart": 2100,
+   "power": 2101,
+   "size": "small",
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190612
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 209073
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     15
+    ]
+   ],
+   "race_names": [
+    "SkeeverRace"
+   ]
+  }
+ ]
+}

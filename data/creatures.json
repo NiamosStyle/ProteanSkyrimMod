@@ -32,6 +32,18 @@
     22,
     50
    ],
+   "health_ladder": [
+    [
+     2,
+     22
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:03E691"
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -113,6 +125,18 @@
     137,
     137
    ],
+   "health_ladder": [
+    [
+     6,
+     137
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:03E691"
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -193,6 +217,19 @@
    "vanilla_health_range": [
     22,
     22
+   ],
+   "health_ladder": [
+    [
+     2,
+     22
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:01BCC0",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:03E691"
    ],
    "attack_count": 12,
    "special_attacks": [
@@ -276,6 +313,18 @@
     50,
     50
    ],
+   "health_ladder": [
+    [
+     1,
+     50
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:03E095",
+    "Skyrim.esm:0F1ABC"
+   ],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -319,6 +368,18 @@
     50,
     50
    ],
+   "health_ladder": [
+    [
+     1,
+     50
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:03E095",
+    "Skyrim.esm:0F1ABC"
+   ],
    "attack_count": 12,
    "special_attacks": []
   },
@@ -352,6 +413,13 @@
     22,
     22
    ],
+   "health_ladder": [
+    [
+     2,
+     22
+    ]
+   ],
+   "factions": [],
    "attack_count": 12,
    "special_attacks": [
     {
@@ -432,6 +500,17 @@
     25,
     25
    ],
+   "health_ladder": [
+    [
+     1,
+     25
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:0A3087",
+    "Skyrim.esm:0F1ABC"
+   ],
    "attack_count": 0,
    "special_attacks": []
   },
@@ -465,6 +544,16 @@
     21,
     21
    ],
+   "health_ladder": [
+    [
+     2,
+     21
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:043596"
+   ],
    "attack_count": 6,
    "special_attacks": []
   },
@@ -496,6 +585,22 @@
    "vanilla_health_range": [
     22,
     25
+   ],
+   "health_ladder": [
+    [
+     1,
+     25
+    ],
+    [
+     3,
+     22
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:03E095",
+    "Skyrim.esm:04359D"
    ],
    "attack_count": 3,
    "special_attacks": [
@@ -549,6 +654,18 @@
     37,
     87
    ],
+   "health_ladder": [
+    [
+     3,
+     37
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:03E095",
+    "Skyrim.esm:04E849"
+   ],
    "attack_count": 4,
    "special_attacks": [
     {
@@ -598,6 +715,18 @@
    "vanilla_health_range": [
     260,
     260
+   ],
+   "health_ladder": [
+    [
+     12,
+     260
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:0FBBF3"
    ],
    "attack_count": 7,
    "special_attacks": [
@@ -687,6 +816,18 @@
    "vanilla_health_range": [
     450,
     450
+   ],
+   "health_ladder": [
+    [
+     16,
+     450
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:0FBBF3"
    ],
    "attack_count": 7,
    "special_attacks": [
@@ -779,6 +920,18 @@
     550,
     550
    ],
+   "health_ladder": [
+    [
+     20,
+     550
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:0FBBF3"
+   ],
    "attack_count": 7,
    "special_attacks": [
     {
@@ -846,6 +999,18 @@
    "vanilla_health_range": [
     150,
     150
+   ],
+   "health_ladder": [
+    [
+     6,
+     150
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:0435A2"
    ],
    "attack_count": 8,
    "special_attacks": [
@@ -933,6 +1098,18 @@
     275,
     275
    ],
+   "health_ladder": [
+    [
+     11,
+     275
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:0435A2"
+   ],
    "attack_count": 8,
    "special_attacks": [
     {
@@ -1018,6 +1195,18 @@
    "vanilla_health_range": [
     150,
     150
+   ],
+   "health_ladder": [
+    [
+     6,
+     150
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03E093",
+    "Skyrim.esm:0435A2"
    ],
    "attack_count": 8,
    "special_attacks": [
@@ -1106,6 +1295,16 @@
     121,
     121
    ],
+   "health_ladder": [
+    [
+     5,
+     121
+    ]
+   ],
+   "factions": [
+    "Dawnguard.esm:018C4F",
+    "Skyrim.esm:02E893"
+   ],
    "attack_count": 6,
    "special_attacks": [
     {
@@ -1173,6 +1372,8 @@
    "vanilla_npc_records": 0,
    "vanilla_level_range": null,
    "vanilla_health_range": null,
+   "health_ladder": [],
+   "factions": [],
    "attack_count": 6,
    "special_attacks": [
     {
@@ -1231,6 +1432,17 @@
    "vanilla_health_range": [
     15,
     15
+   ],
+   "health_ladder": [
+    [
+     1,
+     15
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:0330B1"
    ],
    "attack_count": 6,
    "special_attacks": [
@@ -1308,6 +1520,16 @@
     25,
     25
    ],
+   "health_ladder": [
+    [
+     1,
+     25
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:0B2849"
+   ],
    "attack_count": 0,
    "special_attacks": []
   },
@@ -1340,6 +1562,16 @@
    "vanilla_health_range": [
     155,
     160
+   ],
+   "health_ladder": [
+    [
+     4,
+     155
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893"
    ],
    "attack_count": 10,
    "special_attacks": [
@@ -1411,6 +1643,24 @@
     5,
     55
    ],
+   "health_ladder": [
+    [
+     1,
+     5
+    ],
+    [
+     2,
+     35
+    ],
+    [
+     3,
+     55
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894"
+   ],
    "attack_count": 6,
    "special_attacks": [
     {
@@ -1481,6 +1731,19 @@
    "vanilla_health_range": [
     1,
     41
+   ],
+   "health_ladder": [
+    [
+     5,
+     41
+    ],
+    [
+     1000,
+     1
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:02997F"
    ],
    "attack_count": 7,
    "special_attacks": [
@@ -1557,6 +1820,17 @@
    "vanilla_health_range": [
     253,
     253
+   ],
+   "health_ladder": [
+    [
+     12,
+     253
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03C9A8"
    ],
    "attack_count": 12,
    "special_attacks": [
@@ -1671,6 +1945,16 @@
     280,
     280
    ],
+   "health_ladder": [
+    [
+     14,
+     280
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:0435A1"
+   ],
    "attack_count": 17,
    "special_attacks": [
     {
@@ -1764,6 +2048,16 @@
    "vanilla_health_range": [
     460,
     460
+   ],
+   "health_ladder": [
+    [
+     22,
+     460
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:0435A1"
    ],
    "attack_count": 17,
    "special_attacks": [
@@ -1888,6 +2182,16 @@
     289,
     289
    ],
+   "health_ladder": [
+    [
+     4,
+     289
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:03E095"
+   ],
    "attack_count": 2,
    "special_attacks": []
   },
@@ -1917,6 +2221,17 @@
    "vanilla_health_range": [
     192,
     192
+   ],
+   "health_ladder": [
+    [
+     3,
+     192
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E894",
+    "Skyrim.esm:04359F"
    ],
    "attack_count": 6,
    "special_attacks": [
@@ -1961,6 +2276,16 @@
    "vanilla_health_range": [
     931,
     931
+   ],
+   "health_ladder": [
+    [
+     38,
+     931
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:04359B"
    ],
    "attack_count": 6,
    "special_attacks": [
@@ -2031,6 +2356,16 @@
     591,
     591
    ],
+   "health_ladder": [
+    [
+     32,
+     591
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:04359A"
+   ],
    "attack_count": 7,
    "special_attacks": [
     {
@@ -2092,6 +2427,16 @@
    "vanilla_health_range": [
     100,
     100
+   ],
+   "health_ladder": [
+    [
+     1,
+     100
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:043594"
    ],
    "attack_count": 15,
    "special_attacks": [
@@ -2180,6 +2525,16 @@
     740,
     740
    ],
+   "health_ladder": [
+    [
+     25,
+     740
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:043594"
+   ],
    "attack_count": 15,
    "special_attacks": [
     {
@@ -2263,6 +2618,16 @@
     360,
     360
    ],
+   "health_ladder": [
+    [
+     1,
+     360
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:0418EA"
+   ],
    "attack_count": 4,
    "special_attacks": []
   },
@@ -2296,6 +2661,17 @@
    "vanilla_health_range": [
     636,
     636
+   ],
+   "health_ladder": [
+    [
+     32,
+     636
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03C9A8"
    ],
    "attack_count": 4,
    "special_attacks": [
@@ -2363,6 +2739,17 @@
    "vanilla_health_range": [
     375,
     375
+   ],
+   "health_ladder": [
+    [
+     16,
+     375
+    ]
+   ],
+   "factions": [
+    "Skyrim.esm:000013",
+    "Skyrim.esm:02E893",
+    "Skyrim.esm:03C9A8"
    ],
    "attack_count": 4,
    "special_attacks": [

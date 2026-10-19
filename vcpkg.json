@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "protean",
+  "version-semver": "0.1.0",
+  "description": "Protean - animal shapeshifting SKSE plugin (personal use).",
+  "supports": "windows & x64",
+  "builtin-baseline": "ee12231b20c95013c6638d845d04c91559a1d1ff",
+  "dependencies": [
+    "spdlog",
+    "fmt",
+    "directxtk",
+    "directxmath",
+    "nlohmann-json",
+    "rapidcsv",
+    "simpleini",
+    "toml11",
+    "xbyak"
+  ]
+}
