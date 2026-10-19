@@ -307,7 +307,7 @@ namespace protean::Shift
 		if (!p->HasSpell(reg.Starter())) {
 			return;
 		}
-		const auto* c = reg.ByRace(a_corpse->GetRace());
+		const auto* c = reg.ByActor(a_corpse);
 		if (!c) {
 			return;
 		}

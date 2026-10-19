@@ -141,6 +141,32 @@ namespace protean
 		return nullptr;
 	}
 
+	const Creature* Registry::ByActor(const RE::Actor* a_actor) const
+	{
+		if (!a_actor) {
+			return nullptr;
+		}
+		const auto*       race = a_actor->GetRace();
+		const char* const raw = a_actor->GetName();
+		std::string       name = raw ? raw : "";
+		std::transform(name.begin(), name.end(), name.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+		const Creature* fallback = nullptr;
+		for (const auto& c : _creatures) {
+			if (c.race != race) {
+				continue;
+			}
+			if (!fallback) {
+				fallback = &c;
+			}
+			std::string cn = c.name;
+			std::transform(cn.begin(), cn.end(), cn.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+			if (cn == name) {
+				return &c;
+			}
+		}
+		return fallback;
+	}
+
 	const Creature* Registry::ById(std::string_view a_id) const
 	{
 		for (const auto& c : _creatures) {

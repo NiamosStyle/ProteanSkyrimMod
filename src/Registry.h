@@ -48,6 +48,9 @@ namespace protean
 		[[nodiscard]] const Creature* ByPower(RE::FormID a_id) const;
 		[[nodiscard]] const Creature* ByHeart(RE::FormID a_id) const;
 		[[nodiscard]] const Creature* ByRace(const RE::TESRace* a_race) const;
+		// The creature a (dead) actor counts as: among the creatures sharing its race, the one whose name equals
+		// the actor's display name (Ice Wolf, Pit Wolf, Cave Bear...), else the first creature of that race.
+		[[nodiscard]] const Creature* ByActor(const RE::Actor* a_actor) const;
 		[[nodiscard]] const Creature* ById(std::string_view a_id) const;
 		[[nodiscard]] const std::vector<Creature>& All() const { return _creatures; }
 
