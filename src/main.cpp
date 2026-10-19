@@ -1,5 +1,9 @@
+#include "Attacks.h"
 #include "Camera.h"
+#include "Dev.h"
+#include "Face.h"
 #include "Hooks.h"
+#include "Moves.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -36,7 +40,7 @@ namespace
 			if (a_event && a_event->object && a_event->object->IsPlayerRef()) {
 				auto* spell = RE::TESForm::LookupByID<RE::SpellItem>(a_event->spell);
 				auto& reg = protean::Registry::Get();
-				if (spell && (spell == reg.Revert() || spell == reg.Starter() || reg.ByPower(spell->GetFormID()))) {
+				if (spell && (spell == reg.Revert() || spell == reg.Starter() || spell == reg.FacePower() || reg.ByPower(spell->GetFormID()))) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Shift::OnPowerCast(spell); });
 				}
 			}
@@ -65,22 +69,36 @@ namespace
 	void OnMessage(SKSE::MessagingInterface::Message* a_msg)
 	{
 		switch (a_msg->type) {
+		case SKSE::MessagingInterface::kPostLoad:
+			protean::Face::Register();
+			protean::Moves::Register();  // every plugin is loaded now, including SKSEMenuFramework.dll
+			break;
 		case SKSE::MessagingInterface::kDataLoaded:
 			if (protean::Registry::Get().Load()) {
 				auto* events = RE::ScriptEventSourceHolder::GetSingleton();
 				events->AddEventSink<RE::TESEquipEvent>(Sink::Get());
 				events->AddEventSink<RE::TESSpellCastEvent>(Sink::Get());
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
+				protean::Dev::Init();
+				protean::Attacks::Install();
+				protean::Moves::Install();
+				protean::Face::Install();
 				protean::Hooks::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
 			break;
 		case SKSE::MessagingInterface::kPreLoadGame:
+			protean::Face::BeforeLoad();
 			protean::Camera::Reset();
+			protean::Attacks::Cancel();
+			break;
+		case SKSE::MessagingInterface::kNewGame:
+			protean::Face::BeforeLoad();
 			break;
 		case SKSE::MessagingInterface::kPostLoadGame:
 			if (g_ready) {
+				protean::Face::OnGameLoaded();
 				protean::Shift::OnGameLoaded();
 			}
 			break;

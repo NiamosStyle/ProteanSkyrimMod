@@ -1,0 +1,10 @@
+FormKey: 000808:Protean.esp
+EditorID: Protean_DisguiseFaction
+Name:
+  TargetLanguage: English
+Relations:
+- Target: 000809:Protean.esp
+  Reaction: Enemy
+Flags:
+- HiddenFromPC
+VendorValues: {}

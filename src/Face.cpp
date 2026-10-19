@@ -1,0 +1,513 @@
+﻿#include "Face.h"
+
+#include "Registry.h"
+#include "Shift.h"
+#include "State.h"
+
+#include <SKSEMenuFramework.h>
+
+#include <atomic>
+#include <mutex>
+
+namespace protean::Face
+{
+	namespace
+	{
+		namespace ui = ImGuiMCP;
+
+		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
+		constexpr int  kOfferFrames = 120;  // how long to wait for the loot window to open before giving up
+
+		bool  g_copyHeadData{ true };    // [Face] CopyHeadData: also share the corpse's head-part / face-data / tint pointers
+		float g_range{ 3000.0f };        // [Face] WitnessRange, game units
+		bool  g_enabled{ true };         // [Face] Enabled
+
+		SKSEMenuFramework::Model::WindowInterface* g_window{ nullptr };
+
+		// The choice currently on offer.
+		std::mutex             g_lock;
+		std::string            g_offerName;
+		std::atomic<RE::FormID> g_offerId{ 0 };
+		int                    g_wait{ 0 };
+		bool                   g_shown{ false };
+		RE::FormID             g_bypass{ 0 };  // corpse we are opening ourselves for looting: do not offer again
+
+		// What was in the player's base record before we borrowed the corpse's look. These are runtime
+		// pointers, so they are not saved; they are handed back before any game load (BeforeLoad), because
+		// loading a save can write into those structures.
+		struct Borrowed
+		{
+			bool                         on{ false };
+			RE::TESNPC*                  faceNpc{ nullptr };
+			RE::BGSHeadPart**            headParts{ nullptr };
+			std::int8_t                  numHeadParts{ 0 };
+			RE::TESNPC::HeadRelatedData* headRelated{ nullptr };
+			RE::TESNPC::FaceData*        faceData{ nullptr };
+			decltype(RE::TESNPC::tintLayers) tintLayers{ nullptr };
+		};
+		Borrowed g_orig;
+
+		RE::PlayerCharacter* Player() { return RE::PlayerCharacter::GetSingleton(); }
+
+		void LoadIni()
+		{
+			std::ifstream in(kIni);
+			std::string   line;
+			bool          inSection = false;
+			while (std::getline(in, line)) {
+				if (!line.empty() && line[0] == '[') {
+					inSection = line.starts_with("[Face]");
+				} else if (inSection && line.starts_with("Enabled=")) {
+					g_enabled = line.size() > 8 && line[8] == '1';
+				} else if (inSection && line.starts_with("CopyHeadData=")) {
+					g_copyHeadData = line.size() > 13 && line[13] == '1';
+				} else if (inSection && line.starts_with("WitnessRange=")) {
+					try {
+						g_range = std::stof(line.substr(13));
+					} catch (...) {
+					}
+				}
+			}
+		}
+
+		// ---- the look ---------------------------------------------------------------------------------
+
+		void Capture(RE::TESNPC* a_base)
+		{
+			if (g_orig.on) {
+				return;
+			}
+			g_orig.on = true;
+			g_orig.faceNpc = a_base->faceNPC;
+			g_orig.headParts = a_base->headParts;
+			g_orig.numHeadParts = a_base->numHeadParts;
+			g_orig.headRelated = a_base->headRelatedData;
+			g_orig.faceData = a_base->faceData;
+			g_orig.tintLayers = a_base->tintLayers;
+		}
+
+		// Put the corpse's look on the player's base record. Only memory is changed: nothing is marked as
+		// changed, so a save keeps the player's own face. The stolen one is re-applied after a load.
+		void ApplyLook(RE::TESNPC* a_src)
+		{
+			auto* base = Player()->GetActorBase();
+			auto* root = a_src->GetRootFaceNPC();
+			if (!base || !root) {
+				return;
+			}
+			Capture(base);
+			base->faceNPC = root == base ? nullptr : root;
+			if (a_src->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale)) {
+				base->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			} else {
+				base->actorData.actorBaseFlags.reset(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			}
+			base->height = root->height;
+			base->weight = root->weight;
+			base->bodyTintColor = root->bodyTintColor;
+			if (g_copyHeadData) {
+				base->headParts = root->headParts;
+				base->numHeadParts = root->numHeadParts;
+				base->headRelatedData = root->headRelatedData;
+				base->faceData = root->faceData;
+				base->tintLayers = root->tintLayers;
+			}
+		}
+
+		void RestoreLook()
+		{
+			auto* base = Player()->GetActorBase();
+			auto& s = State::Get();
+			if (!base) {
+				return;
+			}
+			if (g_orig.on) {
+				base->faceNPC = g_orig.faceNpc;
+				base->headParts = g_orig.headParts;
+				base->numHeadParts = g_orig.numHeadParts;
+				base->headRelatedData = g_orig.headRelated;
+				base->faceData = g_orig.faceData;
+				base->tintLayers = g_orig.tintLayers;
+				g_orig.on = false;
+			}
+			if (s.ownFemale) {
+				base->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			} else {
+				base->actorData.actorBaseFlags.reset(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			}
+			base->height = s.ownHeight;
+			base->weight = s.ownWeight;
+			base->bodyTintColor.red = s.ownTint[0];
+			base->bodyTintColor.green = s.ownTint[1];
+			base->bodyTintColor.blue = s.ownTint[2];
+		}
+
+		void RefreshModel()
+		{
+			SKSE::GetTaskInterface()->AddTask([]() {
+				if (auto* p = Player(); p && p->Is3DLoaded()) {
+					p->DoReset3D(true);
+				}
+			});
+		}
+
+		void SnapshotOwn(RE::TESNPC* a_base)
+		{
+			auto* p = Player();
+			auto& s = State::Get();
+			s.ownRace = p->GetRace() ? p->GetRace()->GetFormID() : 0;
+			s.ownFemale = a_base->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			s.ownHeight = a_base->height;
+			s.ownWeight = a_base->weight;
+			s.ownTint[0] = a_base->bodyTintColor.red;
+			s.ownTint[1] = a_base->bodyTintColor.green;
+			s.ownTint[2] = a_base->bodyTintColor.blue;
+			s.ownFaceNpc = a_base->faceNPC ? a_base->faceNPC->GetFormID() : 0;
+		}
+
+		// ---- factions and witnesses ------------------------------------------------------------------
+
+		void JoinFactions(RE::TESNPC* a_src)
+		{
+			auto* p = Player();
+			auto& s = State::Get();
+			auto& reg = Registry::Get();
+			auto  join = [&](RE::TESFaction* f) {
+				if (f && !p->IsInFaction(f)) {
+					p->AddToFaction(f, 0);
+					s.disguiseFactions.push_back(f->GetFormID());
+				}
+			};
+			for (const auto& fr : a_src->factions) {
+				if (fr.faction && fr.rank >= 0) {
+					join(fr.faction);
+				}
+			}
+			join(reg.DisguiseFaction());
+		}
+
+		void LeaveFactions()
+		{
+			auto* p = Player();
+			auto& s = State::Get();
+			for (auto id : s.disguiseFactions) {
+				if (auto* f = RE::TESForm::LookupByID<RE::TESFaction>(id)) {
+					p->RemoveFromFaction(f);
+				}
+			}
+			s.disguiseFactions.clear();
+			if (auto* ex = Registry::Get().ExposedFaction()) {
+				for (auto id : s.exposed) {
+					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
+						a->RemoveFromFaction(ex);
+					}
+				}
+			}
+			s.exposed.clear();
+		}
+
+		// Seeing someone take a dead person's face is treated like seeing a vampire feed: whoever could see
+		// it (alive, not on the player's side) turns on the player, and stays hostile while the face is worn.
+		void Expose(RE::Actor* a_corpse)
+		{
+			auto* p = Player();
+			auto& s = State::Get();
+			auto* ex = Registry::Get().ExposedFaction();
+			auto* pl = RE::ProcessLists::GetSingleton();
+			if (!pl) {
+				return;
+			}
+			const auto here = p->GetPosition();
+			int        seen = 0;
+			for (auto& handle : pl->highActorHandles) {
+				auto actor = handle.get();
+				if (!actor || actor.get() == p || actor.get() == a_corpse || actor->IsDead() || actor->IsPlayerTeammate()) {
+					continue;
+				}
+				if (here.GetDistance(actor->GetPosition()) > g_range || actor->RequestDetectionLevel(p) <= 0) {
+					continue;
+				}
+				++seen;
+				if (ex) {
+					actor->AddToFaction(ex, 0);
+					s.exposed.push_back(actor->GetFormID());
+				}
+				actor->StartCombat(p);
+				logger::info("  {:08X} '{}' saw the theft", actor->GetFormID(), actor->GetName());
+			}
+			logger::info("face theft witnessed by {} actor(s)", seen);
+			if (seen > 0) {
+				Shift::Notify("You were seen!");
+			}
+		}
+
+		bool Eligible(RE::Actor* a_corpse)
+		{
+			if (!a_corpse || !a_corpse->IsDead() || a_corpse->IsPlayerRef()) {
+				return false;
+			}
+			auto* npc = a_corpse->GetActorBase();
+			auto* race = a_corpse->GetRace();
+			if (!npc || !race || !race->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) || race->IsChildRace()) {
+				return false;
+			}
+			if (Registry::Get().ByRace(race)) {
+				return false;  // an animal: that is a heart, not a face
+			}
+			return (npc->GetFormID() >> 24) != 0xFF;  // a generated NPC could not be found again after a load
+		}
+
+		// ---- the choice window (render thread) ----------------------------------------------------------
+
+		void CloseOffer()
+		{
+			g_offerId = 0;
+			g_wait = 0;
+			g_shown = false;
+			if (g_window) {
+				g_window->IsOpen = false;
+			}
+		}
+
+		void __stdcall RenderWindow()
+		{
+			const auto id = g_offerId.load();
+			if (!id) {
+				ui::Text("%s", "Nothing here.");
+				return;
+			}
+			std::string name;
+			{
+				std::scoped_lock lk(g_lock);
+				name = g_offerName;
+			}
+			ui::Text("%s", name.c_str());
+			ui::TextDisabled("You kneel beside the body.");
+			ui::Separator();
+			if (ui::Button("Loot")) {
+				SKSE::GetTaskInterface()->AddTask([id]() {
+					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
+						g_bypass = id;
+						a->ActivateRef(Player(), 0, nullptr, 1, false);
+					}
+					CloseOffer();
+				});
+			}
+			ui::SameLine();
+			if (ui::Button("Copy appearance")) {
+				SKSE::GetTaskInterface()->AddTask([id]() {
+					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
+						Steal(a->GetActorBase(), a, true);
+					}
+					CloseOffer();
+				});
+			}
+			ui::SameLine();
+			if (ui::Button("Cancel")) {
+				SKSE::GetTaskInterface()->AddTask([]() { CloseOffer(); });
+			}
+		}
+	}
+
+	// ---- public --------------------------------------------------------------------------------------
+
+	void Register()
+	{
+		if (!SKSEMenuFramework::IsInstalled()) {
+			logger::warn("SKSE Menu Framework not installed: corpses can only be looted (no face stealing choice)");
+			return;
+		}
+		g_window = SKSEMenuFramework::AddWindow(RenderWindow, false);
+		logger::info("face stealing window registered");
+	}
+
+	void Install()
+	{
+		LoadIni();
+		logger::info("face stealing {} (CopyHeadData {}, WitnessRange {:.0f})", g_enabled ? "on" : "off", g_copyHeadData, g_range);
+	}
+
+	bool Disguised()
+	{
+		return State::Get().disguised;
+	}
+
+	bool OnCorpseActivated(RE::Actor* a_corpse)
+	{
+		auto* p = Player();
+		auto& s = State::Get();
+		if (!g_enabled || !g_window || !a_corpse || !p) {
+			return false;
+		}
+		if (g_bypass == a_corpse->GetFormID()) {
+			g_bypass = 0;  // our own loot request coming back through the activation event
+			return false;
+		}
+		if (!s.active.empty() || !p->HasSpell(Registry::Get().Starter()) || !p->IsSneaking() || !Eligible(a_corpse)) {
+			return false;
+		}
+		{
+			std::scoped_lock lk(g_lock);
+			g_offerName = std::format("Body of {}", a_corpse->GetDisplayFullName());
+		}
+		g_offerId = a_corpse->GetFormID();
+		g_wait = kOfferFrames;
+		g_shown = false;
+		logger::info("face offer started for {:08X} '{}'", a_corpse->GetFormID(), a_corpse->GetName());
+		return true;
+	}
+
+	void Steal(RE::TESNPC* a_source, RE::Actor* a_corpse, bool a_witnessed)
+	{
+		auto* p = Player();
+		auto& s = State::Get();
+		auto* base = p->GetActorBase();
+		if (!a_source || !base || !a_source->GetRace()) {
+			return;
+		}
+		if (!s.active.empty()) {
+			Shift::Notify("You must return to your own form first.");
+			return;
+		}
+		logger::info("=== steal face of {:08X} '{}' (race '{}', witnessed check {}) ===", a_source->GetFormID(), a_source->GetName(),
+			a_source->GetRace()->GetName(), a_witnessed);
+		if (s.disguised) {
+			// swapping one stolen face for another: keep the player's own look from the first theft
+			LeaveFactions();
+		} else {
+			SnapshotOwn(base);
+		}
+		if (a_witnessed) {
+			Expose(a_corpse);
+		}
+		auto* race = a_source->GetRace();
+		const bool sameRace = p->GetRace() == race;
+		ApplyLook(a_source);
+		JoinFactions(a_source);
+		s.bankedNpc = a_source->GetFormID();
+		s.disguised = true;
+		p->SwitchRace(race, true);
+		if (sameRace) {
+			RefreshModel();
+		}
+		Shift::Notify(std::format("You have taken the face of {}.", a_source->GetName()));
+		Dump();
+	}
+
+	void TakeOff(std::string_view a_why)
+	{
+		auto* p = Player();
+		auto& s = State::Get();
+		if (!s.disguised) {
+			return;
+		}
+		logger::info("=== take off the stolen face ({}) ===", a_why);
+		LeaveFactions();
+		RestoreLook();
+		const auto* own = RE::TESForm::LookupByID<RE::TESRace>(s.ownRace);
+		const bool  sameRace = own && p->GetRace() == own;
+		if (own) {
+			p->SwitchRace(const_cast<RE::TESRace*>(own), true);
+		} else {
+			logger::error("own race {:08X} not found; staying in the stolen face's race", s.ownRace);
+		}
+		if (sameRace) {
+			RefreshModel();
+		}
+		s.disguised = false;
+		Shift::Notify("You wear your own face again.");
+		Dump();
+	}
+
+	void OnPower()
+	{
+		auto& s = State::Get();
+		if (!s.active.empty()) {
+			Shift::Notify("Return to your own form first.");
+			return;
+		}
+		if (s.disguised) {
+			TakeOff("power");
+			return;
+		}
+		auto* npc = s.bankedNpc ? RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc) : nullptr;
+		if (!npc) {
+			Shift::Notify(s.bankedNpc ? "The face you kept can no longer be found." : "You have no face kept. Sneak next to a body and activate it.");
+			return;
+		}
+		Steal(npc, nullptr, false);
+	}
+
+	void OnFrame()
+	{
+		const auto id = g_offerId.load();
+		if (!id) {
+			return;
+		}
+		auto* p = Player();
+		auto* corpse = RE::TESForm::LookupByID<RE::Actor>(id);
+		if (!corpse || !p || p->IsDead() || !State::Get().active.empty()) {
+			CloseOffer();
+			return;
+		}
+		if (!g_shown) {
+			auto* ui = RE::UI::GetSingleton();
+			if (ui && ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME)) {
+				// the game opened the loot window; ours replaces it
+				RE::UIMessageQueue::GetSingleton()->AddMessage(RE::ContainerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
+				if (g_window) {
+					g_window->IsOpen = true;
+				}
+				g_shown = true;
+			} else if (--g_wait <= 0) {
+				logger::info("face offer: the loot window never opened; dropping the offer");
+				CloseOffer();
+			}
+			return;
+		}
+		if (!g_window || !g_window->IsOpen || p->GetPosition().GetDistance(corpse->GetPosition()) > 400.0f) {
+			CloseOffer();
+		}
+	}
+
+	void OnGameLoaded()
+	{
+		auto& s = State::Get();
+		g_orig = Borrowed{};
+		if (!s.disguised) {
+			return;
+		}
+		auto* npc = s.bankedNpc ? RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc) : nullptr;
+		if (!npc) {
+			logger::warn("loaded a save made in a stolen face whose source is gone; putting the own face back");
+			s.disguised = false;
+			return;
+		}
+		logger::info("loaded a save made in the face of '{}': re-applying", npc->GetName());
+		ApplyLook(npc);
+		RefreshModel();
+	}
+
+	void BeforeLoad()
+	{
+		CloseOffer();
+		if (g_orig.on) {
+			logger::info("handing the player's own face data back before loading");
+			RestoreLook();
+		}
+	}
+
+	void Dump()
+	{
+		auto* p = Player();
+		auto& s = State::Get();
+		auto* base = p->GetActorBase();
+		if (!base) {
+			return;
+		}
+		logger::info("face: disguised {} bank {:08X} race '{}' female {} height {:.3f} weight {:.1f} faceNPC '{}' headParts {} faction(s) {} exposed {}",
+			s.disguised, s.bankedNpc, p->GetRace() ? p->GetRace()->GetName() : "?",
+			base->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale), base->height, base->weight,
+			base->faceNPC ? base->faceNPC->GetName() : "-", static_cast<int>(base->numHeadParts), s.disguiseFactions.size(), s.exposed.size());
+	}
+}

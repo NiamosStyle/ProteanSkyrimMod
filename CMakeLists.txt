@@ -25,13 +25,19 @@ add_commonlibsse_plugin(
 	VERSION ${PROJECT_VERSION}
 	SOURCES
 		src/main.cpp
+		src/Attacks.cpp
 		src/Camera.cpp
+		src/Dev.cpp
+		src/Face.cpp
 		src/Hooks.cpp
+		src/Moves.cpp
 		src/Registry.cpp
 		src/State.cpp
 		src/Shift.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+# SKSE Menu Framework API header (LGPL-2.1, header-only; resolves its DLL at runtime). See extern/SKSEMenuFramework/SOURCE.txt.
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/extern/SKSEMenuFramework")
 target_compile_options(${PROJECT_NAME} PRIVATE /external:W0)
 target_precompile_headers(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/PCH.h")
 target_compile_options(${PROJECT_NAME} PRIVATE /W4 /permissive- /utf-8 /Zc:preprocessor)

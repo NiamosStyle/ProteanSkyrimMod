@@ -1,0 +1,3 @@
+SKSEMenuFramework.h (LGPL-2.1, see LICENSE)
+From https://github.com/QTR-Modding/SKSE-Menu-Framework-3-Example include/SKSEMenuFramework.h
+Commit aa8effa0fea681d89633541991072c7d4bbe6b93 2026-09-17 12:50:52 -0300 -- matches SKSE Menu Framework 3.18 (Nexus 120352). Unmodified.

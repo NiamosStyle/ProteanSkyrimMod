@@ -147,6 +147,7 @@ for cid, name, race, nnames, size, rank, item, notes in CREATURES:
         "bound_height": max(zs) if zs else None,
         "health_ladder": ladder,
         "factions": shared,
+        "attacks": atk,
         "attack_count": len(atk),
         "special_attacks": special,
     })

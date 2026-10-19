@@ -1,6 +1,8 @@
 #include "Shift.h"
 
+#include "Attacks.h"
 #include "Camera.h"
+#include "Face.h"
 #include "State.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
@@ -11,8 +13,10 @@ namespace protean::Shift
 	{
 		using Flag = RE::UserEvents::USER_EVENT_FLAG;
 
-		// Controls locked while transformed (like the werewolf): no camera switching, no inventory/magic menus.
-		constexpr auto kLocked = static_cast<Flag>(std::to_underlying(Flag::kPOVSwitch) | std::to_underlying(Flag::kMenu));
+		// Controls locked while transformed (like the werewolf): no camera switching, no inventory/magic menus, and
+		// (user decision) no activating: no doors, containers, dialogue or picking things up.
+		constexpr auto kLocked = static_cast<Flag>(std::to_underlying(Flag::kPOVSwitch) | std::to_underlying(Flag::kMenu) |
+		                                           std::to_underlying(Flag::kActivate));
 
 		constexpr float kWitnessRange = 4000.0f;  // game units (~57 m)
 
@@ -155,10 +159,15 @@ namespace protean::Shift
 
 		// ---- who saw it ------------------------------------------------------------------------
 
+		// Anyone who could see the player change, and was hostile at that moment, keeps being the
+		// player's enemy: they go into Protean_WitnessFaction, which is an enemy of Protean_BeastFaction
+		// (the faction the player is in while transformed). Everyone else just meets the animal.
 		void CollectWitnesses(RE::PlayerCharacter* a_p)
 		{
 			auto& s = State::Get();
+			auto& reg = Registry::Get();
 			s.witnesses.clear();
+			s.hostileWitnesses.clear();
 			auto* pl = RE::ProcessLists::GetSingleton();
 			if (!pl) {
 				return;
@@ -174,25 +183,45 @@ namespace protean::Shift
 					continue;
 				}
 				const auto level = actor->RequestDetectionLevel(a_p);
-				logger::info("  nearby {:08X} '{}' dist {:.0f} detection {} hostile {}", actor->GetFormID(), actor->GetName(), dist, level,
-					actor->IsHostileToActor(a_p));
+				const bool hostile = actor->IsHostileToActor(a_p);
+				logger::info("  nearby {:08X} '{}' dist {:.0f} detection {} hostile {}", actor->GetFormID(), actor->GetName(), dist, level, hostile);
 				if (level > 0) {
 					s.witnesses.push_back(actor->GetFormID());
+					if (hostile && reg.WitnessFaction()) {
+						actor->AddToFaction(reg.WitnessFaction(), 0);
+						s.hostileWitnesses.push_back(actor->GetFormID());
+					}
 				}
 			}
-			logger::info("witnesses: {}", s.witnesses.size());
+			logger::info("witnesses: {} ({} hostile)", s.witnesses.size(), s.hostileWitnesses.size());
+		}
+
+		void ReleaseWitnesses()
+		{
+			auto& s = State::Get();
+			auto& reg = Registry::Get();
+			for (auto id : s.hostileWitnesses) {
+				if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id); a && reg.WitnessFaction()) {
+					a->RemoveFromFaction(reg.WitnessFaction());
+				}
+			}
+			s.hostileWitnesses.clear();
 		}
 
 		void JoinFactions(RE::PlayerCharacter* a_p, const Creature& a_c)
 		{
 			auto& s = State::Get();
 			s.addedFactions.clear();
-			for (auto* f : a_c.factions) {
-				if (!a_p->IsInFaction(f)) {
+			auto join = [&](RE::TESFaction* f) {
+				if (f && !a_p->IsInFaction(f)) {
 					a_p->AddToFaction(f, 0);
 					s.addedFactions.push_back(f->GetFormID());
 				}
+			};
+			for (auto* f : a_c.factions) {
+				join(f);
 			}
+			join(Registry::Get().BeastFaction());
 		}
 
 		void LeaveFactions(RE::PlayerCharacter* a_p)
@@ -204,6 +233,39 @@ namespace protean::Shift
 				}
 			}
 			s.addedFactions.clear();
+			ReleaseWitnesses();
+		}
+
+		// ---- where the animal fits ---------------------------------------------------------------
+
+		// small / medium: anywhere. outdoor_only (Mammoth, Giant): open air only. large_cave_ok (Troll,
+		// Horker): open air, or an interior whose location carries a cave-like keyword (dungeon, mine,
+		// crypt, den, lair, ruin...), checked up the chain of parent locations. An interior with no
+		// location at all counts as a building.
+		bool PlaceAllows(const Creature& a_c, std::string* a_why = nullptr)
+		{
+			if (a_c.size != "outdoor_only" && a_c.size != "large_cave_ok") {
+				return true;
+			}
+			auto* p = Player();
+			auto* cell = p ? p->GetParentCell() : nullptr;
+			if (!cell || !cell->IsInteriorCell()) {
+				return true;
+			}
+			if (a_c.size == "large_cave_ok") {
+				const auto& kws = Registry::Get().OpenInteriorKeywords();
+				for (auto* loc = cell->GetLocation(); loc; loc = loc->parentLoc) {
+					for (auto* kw : kws) {
+						if (loc->HasKeyword(kw)) {
+							return true;
+						}
+					}
+				}
+			}
+			if (a_why) {
+				*a_why = std::format("The {} is too big to be indoors here.", a_c.name);
+			}
+			return false;
 		}
 
 		void LogVitals(const char* a_tag, RE::PlayerCharacter* a_p)
@@ -213,6 +275,11 @@ namespace protean::Shift
 				av->GetActorValue(RE::ActorValue::kHealth), av->GetBaseActorValue(RE::ActorValue::kHealth),
 				av->GetPermanentActorValue(RE::ActorValue::kHealth));
 		}
+	}
+
+	const Creature* ActiveCreature()
+	{
+		return Active();
 	}
 
 	void Notify(const std::string& a_text)
@@ -238,12 +305,15 @@ namespace protean::Shift
 		if (!a_corpse || !a_corpse->IsDead()) {
 			return;
 		}
+		if (Face::OnCorpseActivated(a_corpse)) {
+			return;  // the Loot / Copy appearance choice took over
+		}
 		auto* p = Player();
 		auto& reg = Registry::Get();
 		if (!p->HasSpell(reg.Starter())) {
 			return;
 		}
-		const auto* c = reg.ByRace(a_corpse->GetRace());
+		const auto* c = reg.ByActor(a_corpse);
 		if (!c) {
 			return;
 		}
@@ -264,6 +334,12 @@ namespace protean::Shift
 			Notify("You must return to your own form first.");
 			return;
 		}
+		if (std::string why; !PlaceAllows(a_c, &why)) {
+			Notify(why);
+			logger::info("transform into '{}' refused: {}", a_c.id, why);
+			return;
+		}
+		Face::TakeOff("transforming");  // a stolen face does not carry over into an animal; the banked face is kept
 		logger::info("=== transform into '{}' ===", a_c.id);
 		LogVitals("before", p);
 
@@ -286,6 +362,7 @@ namespace protean::Shift
 		RE::ActorEquipManager::GetSingleton()->EquipSpell(p, reg.Revert());
 
 		SetControlsLocked(true);
+		Attacks::Cancel();
 		Camera::Begin(a_c.cameraHeight);
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 			cam->ForceThirdPerson();
@@ -351,6 +428,10 @@ namespace protean::Shift
 			Revert("revert power");
 			return;
 		}
+		if (a_spell == reg.FacePower()) {
+			Face::OnPower();
+			return;
+		}
 		if (a_spell == reg.Starter()) {
 			if (s.known.empty()) {
 				Notify("You know no forms yet. Eat the heart of an animal.");
@@ -390,6 +471,22 @@ namespace protean::Shift
 		}
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 			cam->ForceThirdPerson();
+		}
+	}
+
+	void OnFrame()
+	{
+		static int frames = 0;
+		if (++frames % 30 != 0) {
+			return;
+		}
+		const auto* c = Active();
+		if (!c) {
+			return;
+		}
+		if (std::string why; !PlaceAllows(*c, &why)) {
+			Notify(why + " You return to your own form.");
+			SKSE::GetTaskInterface()->AddTask([]() { Revert("too big for this place"); });
 		}
 	}
 }

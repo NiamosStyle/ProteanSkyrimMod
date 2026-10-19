@@ -51,6 +51,24 @@ namespace protean
 		}
 		_starter = dh->LookupForm<RE::SpellItem>(j.at("starter").get<RE::FormID>(), plugin);
 		_revert = dh->LookupForm<RE::SpellItem>(j.at("revert").get<RE::FormID>(), plugin);
+		_beast = dh->LookupForm<RE::TESFaction>(j.value("beastFaction", 0u), plugin);
+		_witness = dh->LookupForm<RE::TESFaction>(j.value("witnessFaction", 0u), plugin);
+		if (!_beast || !_witness) {
+			logger::warn("beast/witness factions missing: witnesses will not keep their hostility");
+		}
+		_facePower = dh->LookupForm<RE::SpellItem>(j.value("facePower", 0u), plugin);
+		_disguise = dh->LookupForm<RE::TESFaction>(j.value("disguiseFaction", 0u), plugin);
+		_exposed = dh->LookupForm<RE::TESFaction>(j.value("exposedFaction", 0u), plugin);
+		if (!_facePower || !_disguise || !_exposed) {
+			logger::warn("face stealing records missing from {}: regenerate the plugin", plugin);
+		}
+		_openKeywords.clear();
+		for (const auto& k : j.value("openInteriorKeywords", nlohmann::json::array())) {
+			if (auto* kw = dh->LookupForm<RE::BGSKeyword>(k.at("id").get<RE::FormID>(), k.at("file").get<std::string>())) {
+				_openKeywords.push_back(kw);
+			}
+		}
+		logger::info("registry: {} cave-like location keyword(s)", _openKeywords.size());
 		if (!_starter || !_revert) {
 			logger::critical("starter/revert spell missing from {}", plugin);
 			return false;
@@ -74,6 +92,20 @@ namespace protean
 			for (const auto& f : c.value("factions", nlohmann::json::array())) {
 				if (auto* fac = dh->LookupForm<RE::TESFaction>(f.at("id").get<RE::FormID>(), f.at("file").get<std::string>())) {
 					cr.factions.push_back(fac);
+				}
+			}
+			for (const auto& a : c.value("attacks", nlohmann::json::array())) {
+				Attack at;
+				at.event = a.value("event", "");
+				for (const auto& fl : a.value("flags", nlohmann::json::array())) {
+					const auto name = fl.get<std::string>();
+					at.power = at.power || name == "Power Attack";
+					at.bash = at.bash || name == "Bash Attack";
+					at.rotating = at.rotating || name == "Rotating Attack";
+				}
+				at.hasSpell = a.contains("spell") && !a["spell"].is_null();
+				if (!at.event.empty()) {
+					cr.attacks.push_back(std::move(at));
 				}
 			}
 			for (const auto& rung : c.value("ladder", nlohmann::json::array())) {
@@ -113,6 +145,32 @@ namespace protean
 			}
 		}
 		return nullptr;
+	}
+
+	const Creature* Registry::ByActor(const RE::Actor* a_actor) const
+	{
+		if (!a_actor) {
+			return nullptr;
+		}
+		const auto*       race = a_actor->GetRace();
+		const char* const raw = a_actor->GetName();
+		std::string       name = raw ? raw : "";
+		std::transform(name.begin(), name.end(), name.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+		const Creature* fallback = nullptr;
+		for (const auto& c : _creatures) {
+			if (c.race != race) {
+				continue;
+			}
+			if (!fallback) {
+				fallback = &c;
+			}
+			std::string cn = c.name;
+			std::transform(cn.begin(), cn.end(), cn.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+			if (cn == name) {
+				return &c;
+			}
+		}
+		return fallback;
 	}
 
 	const Creature* Registry::ById(std::string_view a_id) const

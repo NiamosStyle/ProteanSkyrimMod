@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 1;
+		constexpr std::uint32_t kVersion = 4;  // 3 (before face stealing) is still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -81,9 +81,33 @@ namespace protean
 			for (auto f : s.witnesses) {
 				PutForm(a, f);
 			}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.hostileWitnesses.size()));
+			for (auto f : s.hostileWitnesses) {
+				PutForm(a, f);
+			}
 			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.looted.size()));
 			for (auto f : s.looted) {
 				PutForm(a, f);
+			}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.moves.size()));
+			for (const auto& [id, pair] : s.moves) {
+				PutStr(a, id);
+				PutStr(a, pair.first);
+				PutStr(a, pair.second);
+			}
+			Put<std::uint8_t>(a, s.disguised ? 1 : 0);
+			PutForm(a, s.bankedNpc);
+			PutForm(a, s.ownRace);
+			Put<std::uint8_t>(a, s.ownFemale ? 1 : 0);
+			Put(a, s.ownHeight);
+			Put(a, s.ownWeight);
+			a->WriteRecordData(s.ownTint, 3);
+			PutForm(a, s.ownFaceNpc);
+			for (auto* list : { &s.disguiseFactions, &s.exposed }) {
+				Put<std::uint32_t>(a, static_cast<std::uint32_t>(list->size()));
+				for (auto f : *list) {
+					PutForm(a, f);
+				}
 			}
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
@@ -94,7 +118,7 @@ namespace protean
 			s.Reset();
 			std::uint32_t type = 0, version = 0, length = 0;
 			while (a->GetNextRecordInfo(type, version, length)) {
-				if (type != kRecord || version != kVersion) {
+				if (type != kRecord || version < 3 || version > kVersion) {
 					logger::warn("co-save: skipping unknown record");
 					continue;
 				}
@@ -131,7 +155,7 @@ namespace protean
 				s.leftHand = GetForm(a);
 				s.rightHand = GetForm(a);
 				s.power = GetForm(a);
-				for (auto* list : { &s.addedFactions, &s.witnesses }) {
+				for (auto* list : { &s.addedFactions, &s.witnesses, &s.hostileWitnesses }) {
 					if (!Get(a, n) || n > 100000) {
 						return;
 					}
@@ -147,6 +171,38 @@ namespace protean
 				for (std::uint32_t i = 0; i < n; ++i) {
 					if (auto f = GetForm(a)) {
 						s.looted.insert(f);
+					}
+				}
+				if (Get(a, n) && n <= 1000) {
+					for (std::uint32_t i = 0; i < n; ++i) {
+						std::string id, l, r;
+						if (!GetStr(a, id) || !GetStr(a, l) || !GetStr(a, r)) {
+							break;
+						}
+						s.moves[id] = { l, r };
+					}
+				}
+				if (version >= 4) {
+					std::uint8_t b = 0;
+					Get(a, b);
+					s.disguised = b != 0;
+					s.bankedNpc = GetForm(a);
+					s.ownRace = GetForm(a);
+					Get(a, b);
+					s.ownFemale = b != 0;
+					Get(a, s.ownHeight);
+					Get(a, s.ownWeight);
+					a->ReadRecordData(s.ownTint, 3);
+					s.ownFaceNpc = GetForm(a);
+					for (auto* list : { &s.disguiseFactions, &s.exposed }) {
+						if (!Get(a, n) || n > 100000) {
+							break;
+						}
+						for (std::uint32_t i = 0; i < n; ++i) {
+							if (auto f = GetForm(a)) {
+								list->push_back(f);
+							}
+						}
 					}
 				}
 			}
