@@ -28,6 +28,9 @@ namespace protean
 		std::vector<RE::FormID>   witnesses;       // who saw the transformation
 		std::vector<RE::FormID>   hostileWitnesses;  // the witnesses that were hostile, now in Protean_WitnessFaction
 
+		// Phase 2: the move on each mouse button, per animal: creature id -> (LMB event, RMB event); empty = default attacks.
+		std::map<std::string, std::pair<std::string, std::string>> moves;
+
 		// Corpses that already had their heart added, so a taken heart is not added again.
 		std::set<RE::FormID> looted;
 

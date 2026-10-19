@@ -12,8 +12,10 @@ namespace protean::Shift
 	{
 		using Flag = RE::UserEvents::USER_EVENT_FLAG;
 
-		// Controls locked while transformed (like the werewolf): no camera switching, no inventory/magic menus.
-		constexpr auto kLocked = static_cast<Flag>(std::to_underlying(Flag::kPOVSwitch) | std::to_underlying(Flag::kMenu));
+		// Controls locked while transformed (like the werewolf): no camera switching, no inventory/magic menus, and
+		// (user decision) no activating: no doors, containers, dialogue or picking things up.
+		constexpr auto kLocked = static_cast<Flag>(std::to_underlying(Flag::kPOVSwitch) | std::to_underlying(Flag::kMenu) |
+		                                           std::to_underlying(Flag::kActivate));
 
 		constexpr float kWitnessRange = 4000.0f;  // game units (~57 m)
 

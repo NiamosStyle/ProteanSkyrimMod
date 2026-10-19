@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Dev.h"
 #include "Hooks.h"
+#include "Moves.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -67,6 +68,9 @@ namespace
 	void OnMessage(SKSE::MessagingInterface::Message* a_msg)
 	{
 		switch (a_msg->type) {
+		case SKSE::MessagingInterface::kPostLoad:
+			protean::Moves::Register();  // every plugin is loaded now, including SKSEMenuFramework.dll
+			break;
 		case SKSE::MessagingInterface::kDataLoaded:
 			if (protean::Registry::Get().Load()) {
 				auto* events = RE::ScriptEventSourceHolder::GetSingleton();
@@ -75,6 +79,7 @@ namespace
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
 				protean::Dev::Init();
 				protean::Attacks::Install();
+				protean::Moves::Install();
 				protean::Hooks::Install();
 				g_ready = true;
 				logger::info("Protean is active");

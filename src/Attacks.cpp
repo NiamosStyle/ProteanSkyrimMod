@@ -1,5 +1,6 @@
 #include "Attacks.h"
 
+#include "Moves.h"
 #include "Registry.h"
 #include "Shift.h"
 
@@ -72,7 +73,11 @@ namespace protean::Attacks
 			if (!c || !p) {
 				return;
 			}
-			const Attack* a = Pick(*c, a_power, g_press.left);
+			// a tap uses the move assigned to that mouse button (Beast Moves menu); a hold is always a power attack
+			const Attack* a = a_power ? nullptr : Moves::Assigned(*c, g_press.left ? Moves::Slot::kRmb : Moves::Slot::kLmb);
+			if (!a) {
+				a = Pick(*c, a_power, g_press.left);
+			}
 			if (!a && a_power) {
 				a = Pick(*c, false, g_press.left);  // no power attack in the list: fall back to a normal one
 			}
@@ -98,13 +103,23 @@ namespace protean::Attacks
 
 			RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*) override
 			{
-				if (!g_enabled || !a_event || !Shift::ActiveCreature()) {
+				if (!g_enabled || !a_event || !Shift::ActiveCreature() || Moves::WindowOpen()) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto* ue = RE::UserEvents::GetSingleton();
 				for (auto* e = *a_event; e; e = e->next) {
 					auto* b = e->AsButtonEvent();
 					if (!b) {
+						continue;
+					}
+					if (b->userEvent == ue->activate && b->IsDown()) {
+						// doors, containers, talking, picking things up: blocked in animal form (user decision)
+						static auto last = std::chrono::steady_clock::time_point{};
+						const auto  now = std::chrono::steady_clock::now();
+						if (now - last > std::chrono::seconds(3)) {
+							last = now;
+							Shift::Notify("You cannot do that in animal form. Change back first.");
+						}
 						continue;
 					}
 					const bool isLeft = b->userEvent == ue->leftAttack;

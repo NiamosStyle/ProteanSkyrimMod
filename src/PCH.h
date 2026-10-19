@@ -10,7 +10,10 @@
 #include <cstdint>
 #include <filesystem>
 #include <format>
+#include <cctype>
 #include <fstream>
+#include <map>
+#include <mutex>
 #include <optional>
 #include <set>
 #include <sstream>

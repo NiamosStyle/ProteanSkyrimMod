@@ -37,3 +37,11 @@ and cross-checks the plugin against DevBench (race, health, camera).
    have not touched crime yet.)
 4. Save and load while transformed (state restored from the co-save; camera/controls re-applied).
 5. Corpse hearts: open a dead wolf as a shapeshifter and see whether the heart appears.
+
+## Manual checks for Phase 2 (need a person)
+- Transform (console: `player.addspell FE004811` after learning, or the dev channel), then press **B**: the Beast Moves
+  window should open with the animal's moves; click LMB/RMB beside a move; the strip at the bottom should update.
+- Keys **1-8** set the left mouse button, **Shift+1-8** the right one; tapping the button then fires that move.
+- Press **E** as an animal: nothing opens, a short message appears (at most every 3 seconds).
+- Assignments should survive save and load (they live in the co-save).
+- Clicking inside the window must NOT make the animal attack.

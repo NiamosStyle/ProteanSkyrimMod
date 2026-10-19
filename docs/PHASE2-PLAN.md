@@ -1,4 +1,6 @@
-# Phase 2 plan (PROPOSAL, awaiting approval): attacks and the transformed-only menu
+# Phase 2 plan (APPROVED 2026-10-19: Option A + B): attacks and the transformed-only menu
+
+**Status:** built on branch `wip/offline` (Moves.cpp, Attacks.cpp), compiles, NOT yet tested in game.
 
 Written 2026-10-19 while the user was away. Nothing here is built except the attack-button translation
 prototype (branch `wip/offline`, untested). Plain English first, technical notes after.

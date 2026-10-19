@@ -23,6 +23,17 @@
 ## Still open (ask before building)
 - Nothing blocking Phase 1. Size classes in `docs/creature-table.md` stand as approved.
 
+## Decisions added 2026-10-19 (remote answers)
+- **Crime:** normal vanilla rules. Attacking humans is a crime as usual (the wolf is still the player); attacks on
+  animals are not (the game never counted them). Nothing is suppressed or frozen.
+- **Activating things as an animal is blocked:** no doors, no containers, no dialogue, no picking things up
+  (the Activate control is locked while transformed; pressing E shows a short message). Menus stay locked as before.
+- **Phase 2 menu approved:** Beast Moves window (key B) + HUD strip + number keys (1-8 = left mouse button,
+  Shift+1-8 = right mouse button), assignments saved per animal in the co-save.
+- **Flight v1 approved:** hovering with the wing-idle animation and the ground-dive animation (see FLIGHT-RESEARCH.md).
+- **Starter tome: console only for now** (`player.additem FE004803 1` or `player.addspell FE004801`). No vendor,
+  no crafting recipe, no SPID.
+
 ## Phases
 1. Core system, 3 creatures: Wolf (predator), Deer (prey), Skeever (tiny).
 2. Special attacks and the transformed-only attack menu (SKSE Menu Framework is installed).
