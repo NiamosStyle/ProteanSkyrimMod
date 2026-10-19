@@ -1,4 +1,4 @@
-#include "Face.h"
+﻿#include "Face.h"
 
 #include "Registry.h"
 #include "Shift.h"
@@ -248,7 +248,7 @@ namespace protean::Face
 			}
 			auto* npc = a_corpse->GetActorBase();
 			auto* race = a_corpse->GetRace();
-			if (!npc || !race || !race->data.flags.all(RE::TESRace::Flag::kFaceGenHead) || race->IsChildRace()) {
+			if (!npc || !race || !race->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) || race->IsChildRace()) {
 				return false;
 			}
 			if (Registry::Get().ByRace(race)) {

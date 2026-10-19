@@ -6,6 +6,9 @@
  "tome": 2051,
  "beastFaction": 2053,
  "witnessFaction": 2054,
+ "facePower": 2055,
+ "disguiseFaction": 2056,
+ "exposedFaction": 2057,
  "openInteriorKeywords": [
   {
    "file": "Skyrim.esm",
