@@ -10,7 +10,9 @@ namespace protean::Camera
 		// Tuning, re-read from Protean.ini at every transform so it can be adjusted without restarting.
 		struct Tuning
 		{
-			float heightScale{ 1.3f };  // multiplies the per-animal camera height from the table
+			float heightScale{ 1.0f };  // multiplies the camera height (measured from the model, or from the table)
+			bool  autoHeight{ true };   // measure the animal's loaded model; false = use the table value only
+			float topFactor{ 0.9f };    // camera height = model centre + this * bounding radius
 			float shoulderX{ 0.0f };    // engine over-the-shoulder offset: 30 = right shoulder, 0 = centred, negative = left
 			float shoulderZ{ 0.0f };    // extra vertical engine offset
 			float sideOffset{ 0.0f };   // our camera node, sideways in the animal's space (+ = right)
@@ -55,12 +57,16 @@ namespace protean::Camera
 					g_tune.sideOffset = v;
 				} else if (key == "BackOffset") {
 					g_tune.backOffset = v;
+				} else if (key == "AutoHeight") {
+					g_tune.autoHeight = v != 0.0f;
+				} else if (key == "TopFactor") {
+					g_tune.topFactor = v;
 				} else if (key == "Zoom") {
 					g_tune.zoom = v;
 				}
 			}
-			logger::info("[camera] tuning: heightScale {} shoulderX {} shoulderZ {} side {} back {} zoom {}", g_tune.heightScale, g_tune.shoulderX,
-				g_tune.shoulderZ, g_tune.sideOffset, g_tune.backOffset, g_tune.zoom);
+			logger::info("[camera] tuning: heightScale {} auto {} topFactor {} shoulderX {} shoulderZ {} side {} back {} zoom {}", g_tune.heightScale,
+				g_tune.autoHeight, g_tune.topFactor, g_tune.shoulderX, g_tune.shoulderZ, g_tune.sideOffset, g_tune.backOffset, g_tune.zoom);
 		}
 
 		RE::ThirdPersonState* Tps()
@@ -98,7 +104,7 @@ namespace protean::Camera
 	{
 		LoadTuning();
 		g_active = true;
-		g_height = a_height * g_tune.heightScale;
+		g_height = a_height;  // the table's value: used until (or unless) the model can be measured
 		g_frames = 0;
 		g_restoreIn = -1;
 	}
@@ -147,7 +153,17 @@ namespace protean::Camera
 		}
 
 		// find or create our node under the current root (a race swap reloads the 3D)
-		const RE::NiPoint3 where{ g_tune.sideOffset, g_tune.backOffset, g_height };
+		// Height: measure the loaded model once it has settled (the bounding sphere is empty for the first
+		// frames after the race swap), so any animal, including modded ones, gets a camera above its back.
+		float base = g_height;
+		if (g_tune.autoHeight && g_frames >= 20 && root->worldBound.radius > 1.0f) {
+			base = (root->worldBound.center.z - root->world.translate.z) + root->worldBound.radius * g_tune.topFactor;
+			if (g_frames == 20) {
+				logger::info("[camera] measured model: centre dz {:.1f} radius {:.1f} -> height {:.1f} (table said {:.1f})",
+					root->worldBound.center.z - root->world.translate.z, root->worldBound.radius, base, g_height);
+			}
+		}
+		const RE::NiPoint3 where{ g_tune.sideOffset, g_tune.backOffset, base * g_tune.heightScale };
 		RE::NiAVObject*    found = rootNode->GetObjectByName(kNodeName);
 		if (!found) {
 			auto* n = RE::NiNode::Create(0);
