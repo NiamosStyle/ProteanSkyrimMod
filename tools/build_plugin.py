@@ -23,6 +23,7 @@ PLUGIN = "Protean.esp"
 
 EFFECT, STARTER, REVERT, TOME, HEART_EFFECT = 0x800, 0x801, 0x802, 0x803, 0x804
 BEAST_FACTION, WITNESS_FACTION = 0x805, 0x806
+FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stealing
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 
@@ -103,6 +104,10 @@ def main():
 
     faction(BEAST_FACTION, "Protean_BeastFaction", WITNESS_FACTION)
     faction(WITNESS_FACTION, "Protean_WitnessFaction", BEAST_FACTION)
+    # Face stealing: same idea. The player is in Protean_DisguiseFaction while wearing a stolen face; whoever saw
+    # the theft is in Protean_ExposedFaction, its enemy.
+    faction(DISGUISE_FACTION, "Protean_DisguiseFaction", EXPOSED_FACTION)
+    faction(EXPOSED_FACTION, "Protean_ExposedFaction", DISGUISE_FACTION)
 
     def power(local, editor_id, title, desc):
         write(os.path.join(y, "Spells", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
@@ -117,6 +122,8 @@ def main():
           "You can learn the forms of animals by eating their hearts. Cast to recall the forms you know.")
     power(REVERT, "Protean_RevertForm", "Shapeshift: Revert Form",
           "Return to your own form.")
+    power(FACE_POWER, "Protean_FacePower", "Shapeshift: Stolen Face",
+          "Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.")
 
     write(os.path.join(y, "Books", "Protean_SpellTomeInstinct - %s_%s.yaml" % (fid(TOME), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_SpellTomeInstinct\n" % (fid(TOME), PLUGIN)
@@ -181,6 +188,7 @@ def main():
     out = os.path.join(ROOT, "data", "SKSE", "Plugins", "Protean", "creatures.json")
     write(out, json.dumps({"plugin": PLUGIN, "effect": EFFECT, "starter": STARTER, "revert": REVERT,
                            "tome": TOME, "beastFaction": BEAST_FACTION, "witnessFaction": WITNESS_FACTION,
+                           "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))
 

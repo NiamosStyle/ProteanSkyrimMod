@@ -2,6 +2,7 @@
 
 #include "Attacks.h"
 #include "Camera.h"
+#include "Face.h"
 #include "State.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
@@ -304,6 +305,9 @@ namespace protean::Shift
 		if (!a_corpse || !a_corpse->IsDead()) {
 			return;
 		}
+		if (Face::OnCorpseActivated(a_corpse)) {
+			return;  // the Loot / Copy appearance choice took over
+		}
 		auto* p = Player();
 		auto& reg = Registry::Get();
 		if (!p->HasSpell(reg.Starter())) {
@@ -335,6 +339,7 @@ namespace protean::Shift
 			logger::info("transform into '{}' refused: {}", a_c.id, why);
 			return;
 		}
+		Face::TakeOff("transforming");  // a stolen face does not carry over into an animal; the banked face is kept
 		logger::info("=== transform into '{}' ===", a_c.id);
 		LogVitals("before", p);
 
@@ -421,6 +426,10 @@ namespace protean::Shift
 		auto& s = State::Get();
 		if (a_spell == reg.Revert()) {
 			Revert("revert power");
+			return;
+		}
+		if (a_spell == reg.FacePower()) {
+			Face::OnPower();
 			return;
 		}
 		if (a_spell == reg.Starter()) {

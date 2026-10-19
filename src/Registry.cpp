@@ -56,6 +56,12 @@ namespace protean
 		if (!_beast || !_witness) {
 			logger::warn("beast/witness factions missing: witnesses will not keep their hostility");
 		}
+		_facePower = dh->LookupForm<RE::SpellItem>(j.value("facePower", 0u), plugin);
+		_disguise = dh->LookupForm<RE::TESFaction>(j.value("disguiseFaction", 0u), plugin);
+		_exposed = dh->LookupForm<RE::TESFaction>(j.value("exposedFaction", 0u), plugin);
+		if (!_facePower || !_disguise || !_exposed) {
+			logger::warn("face stealing records missing from {}: regenerate the plugin", plugin);
+		}
 		_openKeywords.clear();
 		for (const auto& k : j.value("openInteriorKeywords", nlohmann::json::array())) {
 			if (auto* kw = dh->LookupForm<RE::BGSKeyword>(k.at("id").get<RE::FormID>(), k.at("file").get<std::string>())) {

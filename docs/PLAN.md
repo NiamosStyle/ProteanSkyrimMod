@@ -69,3 +69,16 @@ camera height measured from the model, attack-button translation, dev command ch
 - Corpse hearts are keyed by RACE. Ice Wolf / Pit Wolf share the Wolf race, so Phase 3 must key variants by
   base NPC to give them their own hearts.
 - Vanilla "special attacks" are power attacks, bashes and a few spell attacks, not bespoke moves.
+
+
+## Face stealing (requested 2026-10-19, built offline on wip/offline, untested)
+Sneak beside a corpse and activate it: a small window offers Loot / Copy appearance / Cancel. Copy gives the player the corpse's face,
+hair, body, sex and race and puts them in the corpse's factions (plus Protean_DisguiseFaction). The most recent face stays banked
+(one slot); the new **Stolen Face** power (0x807) puts it on / takes it off. Whoever sees the theft is treated like a witness of a
+vampire feeding: they go hostile and stay in Protean_ExposedFaction (enemy of the disguise faction) until the face comes off.
+- Only memory is changed, never marked changed in the save: the player's own face stays in the save; the stolen one is re-applied after a load
+  (co-save v4: disguised flag, bank = source NPC id, own race/sex/height/weight/tint, joined factions, exposed actors).
+- Appearance method (uncertain, ~50%): set the player base record's `faceNPC` to the corpse's root face NPC, copy sex/height/weight/tint,
+  and (INI `CopyHeadData=1`) share the corpse's head-part / face-data / tint-layer pointers. Pointers are handed back before any game load.
+- Transforming into an animal while disguised takes the face off first; the bank is kept.
+- Not done on purpose: no bounty for witnesses (they only turn hostile), no kneel animation (sneaking counts as kneeling), no vendor/recipe.

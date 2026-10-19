@@ -178,8 +178,33 @@ def scenario_death():
     print("Check in game: death sound and the normal death camera.")
 
 
+def scenario_face():
+    """Face stealing without a corpse: steal Ulfric's face (0001414D), take it off, wear the bank again, then transform."""
+    preflight()
+    send("starter")
+    own = player().get("race", {}).get("name")
+    t = send("stealq", "1414D", wait_for=r"face: disguised")
+    check("disguised after stealing", "face: disguised true" in t, t[-300:])
+    check("faceNPC is now Ulfric", "faceNPC 'Ulfric Stormcloak'" in t)
+    time.sleep(2)
+    check("race is the corpse's race", player().get("race", {}).get("name") in ("Nord", "Nord Vampire"), str(player().get("race")))
+    t = send("takeoff", wait_for=r"face: disguised")
+    check("own face back", "face: disguised false" in t and "faceNPC '-'" in t, t[-300:])
+    time.sleep(2)
+    check("own race back", player().get("race", {}).get("name") == own, str(player().get("race")))
+    t = send("facepower", wait_for=r"face: disguised")
+    check("bank re-worn by the power", "face: disguised true" in t and "bank 0001414D" in t.upper(), t[-300:])
+    send("learn", "wolf", wait_for=r"dev: learn")
+    t = send("transform", "wolf", wait_for=r"health bonus")
+    check("transforming ends the disguise", "take off the stolen face" in t, t[-300:])
+    send("revert", wait_for=r"dev: revert done")
+    t = send("facepower", wait_for=r"face: disguised")
+    check("bank survived the animal form", "bank 0001414D" in t.upper())
+    send("takeoff", wait_for=r"face: disguised")
+
+
 if __name__ == "__main__":
     name = sys.argv[1] if len(sys.argv) > 1 else "core"
-    {"core": scenario_core, "attacks": scenario_attacks, "reactions": scenario_reactions, "death": scenario_death}[name]()
+    {"core": scenario_core, "attacks": scenario_attacks, "reactions": scenario_reactions, "death": scenario_death, "face": scenario_face}[name]()
     print("\nRESULT:", "ALL PASSED" if not FAILS else "FAILED: " + ", ".join(FAILS))
     sys.exit(1 if FAILS else 0)

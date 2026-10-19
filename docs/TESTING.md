@@ -45,3 +45,15 @@ and cross-checks the plugin against DevBench (race, health, camera).
 - Press **E** as an animal: nothing opens, a short message appears (at most every 3 seconds).
 - Assignments should survive save and load (they live in the co-save).
 - Clicking inside the window must NOT make the animal attack.
+
+## Face stealing (built offline, nothing tested live)
+- Automated (no corpse needed): `python -I tools/devtest.py face` — steals Ulfric's face, takes it off, re-wears the bank with the
+  Stolen Face power, then transforms into a wolf (which must end the disguise but keep the bank).
+- Dev commands: `steal <hex NPC base id>` (witnesses count), `stealq <id>` (nobody sees it), `facepower`, `takeoff`, `facedump`.
+- Give yourself the starter first (`starter`). The Stolen Face power is `FE004807` (`player.addspell FE004807`, also given... see PLAN.md).
+- By hand: sneak next to a dead NPC and press E. The loot window should be replaced by a small window with
+  **Loot / Copy appearance / Cancel**. Copy: look at yourself in third person — face, hair, body, sex, race should match the corpse.
+  Walk up to a guard/townsperson while wearing it: they should treat you as one of their own faction.
+  Have an NPC watch you do it: they should turn hostile ("You were seen!").
+- Open questions to settle live: (1) does the player's face actually change (`faceNPC` and/or the shared head-part pointers,
+  `[Face] CopyHeadData=` in Protean.ini)? (2) does an Exposed relation beat a shared faction? (3) save while disguised, quit, load.

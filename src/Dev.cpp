@@ -1,5 +1,6 @@
 #include "Dev.h"
 
+#include "Face.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -94,6 +95,24 @@ namespace protean::Dev
 						logger::info("dev: spawned {:08X} '{}' (ref {:08X})", id, base->GetName(), ref->GetFormID());
 					}
 				}
+			} else if ((a_cmd == "steal" || a_cmd == "stealq") && !a_arg.empty()) {
+				// steal <hex base NPC FormID>: copy that NPC's face (stealq = nobody sees it)
+				RE::FormID id = 0;
+				try {
+					id = static_cast<RE::FormID>(std::stoul(a_arg, nullptr, 16));
+				} catch (...) {
+				}
+				auto* npc = id ? RE::TESForm::LookupByID<RE::TESNPC>(id) : nullptr;
+				logger::info("dev: steal {} -> {}", a_arg, npc ? npc->GetName() : "no such NPC");
+				if (npc) {
+					Face::Steal(npc, nullptr, a_cmd == "steal");
+				}
+			} else if (a_cmd == "facepower") {
+				Face::OnPower();
+			} else if (a_cmd == "takeoff") {
+				Face::TakeOff("dev command");
+			} else if (a_cmd == "facedump") {
+				Face::Dump();
 			} else if (a_cmd == "draw") {
 				p->DrawWeaponMagicHands(true);
 				logger::info("dev: draw requested");

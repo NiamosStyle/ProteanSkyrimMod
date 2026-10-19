@@ -34,6 +34,19 @@ namespace protean
 		// Corpses that already had their heart added, so a taken heart is not added again.
 		std::set<RE::FormID> looted;
 
+		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and
+		// taken off with the Stolen Face power. The player's own look is kept here while a stolen one is worn.
+		RE::FormID              bankedNpc{ 0 };  // base NPC of the banked face, 0 = none
+		bool                    disguised{ false };
+		RE::FormID              ownRace{ 0 };    // the player's own race
+		bool                    ownFemale{ false };
+		float                   ownHeight{ 1.0f };
+		float                   ownWeight{ 0.0f };
+		std::uint8_t            ownTint[3]{ 0, 0, 0 };
+		RE::FormID              ownFaceNpc{ 0 };  // the player's faceNPC pointer (normally none)
+		std::vector<RE::FormID> disguiseFactions;  // factions joined with the stolen face
+		std::vector<RE::FormID> exposed;           // who saw the theft; now in Protean_ExposedFaction
+
 		static State& Get();
 		void          Reset();
 	};
