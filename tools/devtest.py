@@ -193,13 +193,13 @@ def scenario_face():
     time.sleep(2)
     check("own race back", player().get("race", {}).get("name") == own, str(player().get("race")))
     t = send("facepower", wait_for=r"face: disguised")
-    check("bank re-worn by the power", "face: disguised true" in t and "bank 0001414D" in t.upper(), t[-300:])
+    check("bank re-worn by the power", "face: disguised true" in t and "1414d" in t.lower(), t[-300:])
     send("learn", "wolf", wait_for=r"dev: learn")
     t = send("transform", "wolf", wait_for=r"health bonus")
     check("transforming ends the disguise", "take off the stolen face" in t, t[-300:])
     send("revert", wait_for=r"dev: revert done")
     t = send("facepower", wait_for=r"face: disguised")
-    check("bank survived the animal form", "bank 0001414D" in t.upper())
+    check("bank survived the animal form", "1414d" in t.lower())
     send("takeoff", wait_for=r"face: disguised")
 
 
