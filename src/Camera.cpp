@@ -5,12 +5,63 @@ namespace protean::Camera
 	namespace
 	{
 		constexpr auto kNodeName = "ProteanCam"sv;
+		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 
-		bool                    g_active{ false };
-		float                   g_height{ 0.0f };
-		int                     g_frames{ 0 };
-		int                     g_restoreIn{ -1 };  // frames until we re-bind the engine's own node after a revert
-		RE::NiPointer<RE::NiNode> g_node;           // held so the engine can never see a dangling pointer
+		// Tuning, re-read from Protean.ini at every transform so it can be adjusted without restarting.
+		struct Tuning
+		{
+			float heightScale{ 1.3f };  // multiplies the per-animal camera height from the table
+			float shoulderX{ 0.0f };    // engine over-the-shoulder offset: 30 = right shoulder, 0 = centred, negative = left
+			float shoulderZ{ 0.0f };    // extra vertical engine offset
+			float sideOffset{ 0.0f };   // our camera node, sideways in the animal's space (+ = right)
+			float backOffset{ 0.0f };   // our camera node, forwards/back in the animal's space (+ = forward)
+			float zoom{ 0.35f };        // starting camera distance (0 = closest); the wheel still works
+		};
+
+		Tuning g_tune;
+		bool   g_active{ false };
+		float  g_height{ 0.0f };
+		int    g_frames{ 0 };
+		int    g_restoreIn{ -1 };  // frames until we re-bind the engine's own node after a revert
+		RE::NiPointer<RE::NiNode> g_node;  // held so the engine can never see a dangling pointer
+
+		void LoadTuning()
+		{
+			g_tune = Tuning{};
+			std::ifstream in(kIni);
+			std::string   line;
+			while (std::getline(in, line)) {
+				if (line.empty() || line[0] == ';' || line[0] == '[') {
+					continue;
+				}
+				const auto eq = line.find('=');
+				if (eq == std::string::npos) {
+					continue;
+				}
+				const std::string key = line.substr(0, eq);
+				float             v = 0.0f;
+				try {
+					v = std::stof(line.substr(eq + 1));
+				} catch (...) {
+					continue;
+				}
+				if (key == "HeightScale") {
+					g_tune.heightScale = v;
+				} else if (key == "ShoulderX") {
+					g_tune.shoulderX = v;
+				} else if (key == "ShoulderZ") {
+					g_tune.shoulderZ = v;
+				} else if (key == "SideOffset") {
+					g_tune.sideOffset = v;
+				} else if (key == "BackOffset") {
+					g_tune.backOffset = v;
+				} else if (key == "Zoom") {
+					g_tune.zoom = v;
+				}
+			}
+			logger::info("[camera] tuning: heightScale {} shoulderX {} shoulderZ {} side {} back {} zoom {}", g_tune.heightScale, g_tune.shoulderX,
+				g_tune.shoulderZ, g_tune.sideOffset, g_tune.backOffset, g_tune.zoom);
+		}
 
 		RE::ThirdPersonState* Tps()
 		{
@@ -28,16 +79,9 @@ namespace protean::Camera
 			float       camZ = (a_tps && a_tps->thirdPersonCameraObj) ? a_tps->thirdPersonCameraObj->world.translate.z : 0.0f;
 			logger::info("[camera:{}] bound node '{}' worldZ {:.1f}; player Z {:.1f}; root '{}'", a_tag, camName, camZ, a_p->GetPositionZ(),
 				root ? root->name.c_str() : "(none)");
-			if (root) {
-				if (auto* n = root->AsNode()) {
-					std::string kids;
-					for (auto& c : n->GetChildren()) {
-						if (c) {
-							kids += std::string(c->name.c_str()) + " | ";
-						}
-					}
-					logger::info("[camera:{}] root children: {}", a_tag, kids);
-				}
+			if (a_tps) {
+				logger::info("[camera:{}] zoom {:.2f}/{:.2f} offsets actual ({:.1f},{:.1f},{:.1f})", a_tag, a_tps->currentZoomOffset, a_tps->targetZoomOffset,
+					a_tps->posOffsetActual.x, a_tps->posOffsetActual.y, a_tps->posOffsetActual.z);
 			}
 		}
 	}
@@ -52,8 +96,9 @@ namespace protean::Camera
 
 	void Begin(float a_height)
 	{
+		LoadTuning();
 		g_active = true;
-		g_height = a_height;
+		g_height = a_height * g_tune.heightScale;
 		g_frames = 0;
 		g_restoreIn = -1;
 	}
@@ -74,7 +119,7 @@ namespace protean::Camera
 		if (g_restoreIn >= 0) {
 			if (--g_restoreIn == 0) {
 				g_restoreIn = -1;
-				auto* root = a_p->Get3D(false);
+				auto*           root = a_p->Get3D(false);
 				RE::NiAVObject* own = root ? root->GetObjectByName("Camera3rd [Cam3]"sv) : nullptr;
 				Describe("restore", a_p, tps);
 				if (own) {
@@ -102,25 +147,38 @@ namespace protean::Camera
 		}
 
 		// find or create our node under the current root (a race swap reloads the 3D)
-		RE::NiAVObject* found = rootNode->GetObjectByName(kNodeName);
+		const RE::NiPoint3 where{ g_tune.sideOffset, g_tune.backOffset, g_height };
+		RE::NiAVObject*    found = rootNode->GetObjectByName(kNodeName);
 		if (!found) {
 			auto* n = RE::NiNode::Create(0);
 			n->name = kNodeName;
-			n->local.translate = RE::NiPoint3{ 0.0f, 0.0f, g_height };
+			n->local.translate = where;
 			rootNode->AttachChild(n, true);
 			g_node.reset(n);
 			found = n;
-			logger::info("[camera] created '{}' at height {:.0f}", kNodeName, g_height);
+			logger::info("[camera] created '{}' at ({:.0f},{:.0f},{:.0f})", kNodeName, where.x, where.y, where.z);
 		} else {
-			found->local.translate.z = g_height;
+			found->local.translate = where;
 		}
-
-		if (g_frames == 90) {  // about a second in: record what the engine did, for the log
-			Describe("transformed", a_p, tps);
-		}
-		++g_frames;
 		if (tps->thirdPersonCameraObj != found) {
 			tps->thirdPersonCameraObj = found;
 		}
+
+		// the engine's shoulder offset: centre it (written after the engine's own update each frame)
+		tps->posOffsetExpected.x = tps->posOffsetActual.x = g_tune.shoulderX;
+		tps->posOffsetExpected.z = tps->posOffsetActual.z = g_tune.shoulderZ;
+
+		// Start at our own distance. Done a few times in the first half second because switching from first
+		// person plays a camera transition that rewrites the zoom; the wheel is free afterwards.
+		if (g_frames == 5 || g_frames == 15 || g_frames == 30) {
+			if (auto* cam = RE::PlayerCamera::GetSingleton(); cam && !cam->IsInThirdPerson()) {
+				cam->ForceThirdPerson();
+			}
+			tps->targetZoomOffset = tps->currentZoomOffset = g_tune.zoom;
+		}
+		if (g_frames == 90) {
+			Describe("transformed", a_p, tps);
+		}
+		++g_frames;
 	}
 }

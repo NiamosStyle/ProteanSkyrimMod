@@ -339,7 +339,7 @@ namespace protean::Shift
 		if (hp <= 0.0f) {
 			logger::info("health {:.1f} after reverting: the damage taken exceeds the real maximum, killing the player", hp);
 			Notify("The wounds of the beast follow you home.");
-			p->KillImmediate();
+			p->KillImpl(nullptr, 0.0f, true, false);  // the normal death (sound, animation, death camera); KillImmediate is silent
 		}
 	}
 
