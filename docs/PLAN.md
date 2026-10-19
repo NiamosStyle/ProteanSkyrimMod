@@ -12,11 +12,16 @@
   Papyrus only where it is the better tool.
 - Project folder: `C:/Modding/Protean`.
 
+- **Items:** every unlock item is named "<Animal> Heart" and uses the vanilla Human Heart mesh
+  (`Clutter\Ingredients\HumanHeart.nif`, Skyrim.esm:0B18CD), referenced in place, no asset copied.
+  Plan: food (ALCH) records so they show "Eat" and stay out of alchemy; confirm in the Phase 1 spike.
+- **Giant:** outdoors only, like the Mammoth.
+- **Too-big places:** a form that is too big for where the player is gets auto-reverted with a message
+  (applies when entering such a place while transformed, and blocks transforming there).
+- **Eating a known heart again:** does nothing for now. Bonus feature deferred to later.
+
 ## Still open (ask before building)
-- Approve the item names and size classes in `docs/creature-table.md`. Giant outdoors-only is an assumption.
-- Behaviour when a big creature walks through a door into a place it is not allowed (proposal: auto-revert
-  with a message).
-- Small bonus for eating an item of an already-known form.
+- Nothing blocking Phase 1. Size classes in `docs/creature-table.md` stand as approved.
 
 ## Phases
 1. Core system, 3 creatures: Wolf (predator), Deer (prey), Skeever (tiny).

@@ -7,40 +7,40 @@ Health: the race value is only a base. Real health is measured live in Phase 1.
 | # | Creature | Race | Size rule | Rank | Proposed item | Vanilla HP seen | Vanilla level | Attacks (special) |
 |---|---|---|---|---|---|---|---|---|
 | 1 | Wolf | WolfRace | medium | 1 | Wolf Heart | 22-50 | 2-2 | 12 (6) |
-| 2 | Ice Wolf | WolfRace | medium | 1 | Ice Wolf Pelt Strip | 137-137 | 6-6 | 12 (6) |
-| 3 | Pit Wolf | WolfRace | medium | 1 | Pit Wolf Scarred Hide | 22-22 | 2-2 | 12 (6) |
-| 4 | Deer | DeerRace | medium | 1 | Deer Tongue | 50-50 | 1-1 | 12 (1) |
-| 5 | Elk | ElkRace | medium | 1 | Elk Antler Velvet | 50-50 | 1-1 | 12 (0) |
-| 6 | Fox | FoxRace | small | 1 | Fox Brush | 22-22 | 2-2 | 12 (6) |
-| 7 | Hare | HareRace | small | 1 | Hare Leg | 25-25 | 1-1 | 0 (0) |
-| 8 | Dog | DogRace | medium | 1 | Dog Snout | 21-21 | 2-2 | 6 (0) |
-| 9 | Goat | GoatRace | medium | 1 | Goat Horn Marrow | 22-25 | 1-3 | 3 (2) |
-| 10 | Cow | CowRace | medium | 2 | Cow Udder | 37-87 | 3-3 | 4 (2) |
+| 2 | Ice Wolf | WolfRace | medium | 1 | Ice Wolf Heart | 137-137 | 6-6 | 12 (6) |
+| 3 | Pit Wolf | WolfRace | medium | 1 | Pit Wolf Heart | 22-22 | 2-2 | 12 (6) |
+| 4 | Deer | DeerRace | medium | 1 | Deer Heart | 50-50 | 1-1 | 12 (1) |
+| 5 | Elk | ElkRace | medium | 1 | Elk Heart | 50-50 | 1-1 | 12 (0) |
+| 6 | Fox | FoxRace | small | 1 | Fox Heart | 22-22 | 2-2 | 12 (6) |
+| 7 | Hare | HareRace | small | 1 | Hare Heart | 25-25 | 1-1 | 0 (0) |
+| 8 | Dog | DogRace | medium | 1 | Dog Heart | 21-21 | 2-2 | 6 (0) |
+| 9 | Goat | GoatRace | medium | 1 | Goat Heart | 22-25 | 1-3 | 3 (2) |
+| 10 | Cow | CowRace | medium | 2 | Cow Heart | 37-87 | 3-3 | 4 (2) |
 | 11 | Bear | BearBlackRace | medium | 2 | Bear Heart | 260-260 | 12-12 | 7 (7) |
-| 12 | Cave Bear | BearBrownRace | medium | 2 | Cave Bear Liver | 450-450 | 16-16 | 7 (7) |
-| 13 | Snow Bear | BearSnowRace | medium | 2 | Snow Bear Paw Pad | 550-550 | 20-20 | 7 (4) |
-| 14 | Sabre Cat | SabreCatRace | medium | 2 | Sabre Cat Fang Root | 150-150 | 6-6 | 8 (6) |
-| 15 | Snowy Sabre Cat | SabreCatSnowyRace | medium | 2 | Snowy Sabre Cat Whisker Gland | 275-275 | 11-11 | 8 (6) |
-| 16 | Vale Sabre Cat | DLC1SabreCatGlowRace | medium | 2 | Vale Sabre Cat Glowing Gland | 150-150 | 6-6 | 8 (6) |
-| 17 | Death Hound | DLC1DeathHoundRace | medium | 2 | Death Hound Fang | 121-121 | 5-5 | 6 (6) |
-| 18 | Boar | DLC2BoarRace | medium | 2 | Boar Shoulder | - | - | 6 (3) |
-| 19 | Skeever | SkeeverRace | small | 3 | Skeever Tail Tip | 15-15 | 1-1 | 6 (6) |
-| 20 | Chicken | ChickenRace | small | 3 | Chicken Wing | 25-25 | 1-1 | 0 (0) |
-| 21 | Ash Hopper | DLC2AshHopperRace | small | 3 | Ash Hopper Foreleg | 155-160 | 4-4 | 10 (5) |
-| 22 | Mudcrab | MudcrabRace | small | 3 | Mudcrab Claw Meat | 5-55 | 1-3 | 6 (4) |
-| 23 | Albino Spider | DLC2ExpSpiderBaseRace | small | 3 | Albino Spider Gland | 1-41 | 5-1000 | 7 (5) |
-| 24 | Chaurus | ChaurusRace | medium | 4 | Chaurus Egg Sac | 253-253 | 12-12 | 12 (10) |
-| 25 | Troll | TrollRace | large_cave_ok | 4 | Troll Fat | 280-280 | 14-14 | 17 (7) |
-| 26 | Frost Troll | TrollFrostRace | large_cave_ok | 4 | Frost Troll Sinew | 460-460 | 22-22 | 17 (10) |
-| 27 | Horse | HorseRace | medium | 4 | Horse Flank | 289-289 | 4-4 | 2 (0) |
-| 28 | Horker | HorkerRace | large_cave_ok | 5 | Horker Blubber | 192-192 | 3-3 | 6 (1) |
-| 29 | Mammoth | MammothRace | outdoor_only | 5 | Mammoth Snout Flesh | 931-931 | 38-38 | 6 (4) |
-| 30 | Giant | GiantRace | outdoor_only | 5 | Giant Marrow | 591-591 | 32-32 | 7 (3) |
+| 12 | Cave Bear | BearBrownRace | medium | 2 | Cave Bear Heart | 450-450 | 16-16 | 7 (7) |
+| 13 | Snow Bear | BearSnowRace | medium | 2 | Snow Bear Heart | 550-550 | 20-20 | 7 (4) |
+| 14 | Sabre Cat | SabreCatRace | medium | 2 | Sabre Cat Heart | 150-150 | 6-6 | 8 (6) |
+| 15 | Snowy Sabre Cat | SabreCatSnowyRace | medium | 2 | Snowy Sabre Cat Heart | 275-275 | 11-11 | 8 (6) |
+| 16 | Vale Sabre Cat | DLC1SabreCatGlowRace | medium | 2 | Vale Sabre Cat Heart | 150-150 | 6-6 | 8 (6) |
+| 17 | Death Hound | DLC1DeathHoundRace | medium | 2 | Death Hound Heart | 121-121 | 5-5 | 6 (6) |
+| 18 | Boar | DLC2BoarRace | medium | 2 | Boar Heart | - | - | 6 (3) |
+| 19 | Skeever | SkeeverRace | small | 3 | Skeever Heart | 15-15 | 1-1 | 6 (6) |
+| 20 | Chicken | ChickenRace | small | 3 | Chicken Heart | 25-25 | 1-1 | 0 (0) |
+| 21 | Ash Hopper | DLC2AshHopperRace | small | 3 | Ash Hopper Heart | 155-160 | 4-4 | 10 (5) |
+| 22 | Mudcrab | MudcrabRace | small | 3 | Mudcrab Heart | 5-55 | 1-3 | 6 (4) |
+| 23 | Albino Spider | DLC2ExpSpiderBaseRace | small | 3 | Albino Spider Heart | 1-41 | 5-1000 | 7 (5) |
+| 24 | Chaurus | ChaurusRace | medium | 4 | Chaurus Heart | 253-253 | 12-12 | 12 (10) |
+| 25 | Troll | TrollRace | large_cave_ok | 4 | Troll Heart | 280-280 | 14-14 | 17 (7) |
+| 26 | Frost Troll | TrollFrostRace | large_cave_ok | 4 | Frost Troll Heart | 460-460 | 22-22 | 17 (10) |
+| 27 | Horse | HorseRace | medium | 4 | Horse Heart | 289-289 | 4-4 | 2 (0) |
+| 28 | Horker | HorkerRace | large_cave_ok | 5 | Horker Heart | 192-192 | 3-3 | 6 (1) |
+| 29 | Mammoth | MammothRace | outdoor_only | 5 | Mammoth Heart | 931-931 | 38-38 | 6 (4) |
+| 30 | Giant | GiantRace | outdoor_only | 5 | Giant Heart | 591-591 | 32-32 | 7 (3) |
 | 31 | Werewolf | WerewolfBeastRace | medium | 6 | Werewolf Heart | 100-100 | 1-1 | 15 (6) |
 | 32 | Werebear | DLC2WerebearBeastRace | medium | 6 | Werebear Heart | 740-740 | 25-25 | 15 (6) |
-| 33 | Slaughterfish | SlaughterfishRace | small | 7 | Slaughterfish Fin | 360-360 | 1-1 | 4 (0) |
-| 34 | Chaurus Hunter | DLC1ChaurusHunterRace | medium | 8 | Chaurus Hunter Wing Membrane | 636-636 | 32-32 | 4 (4) |
-| 35 | Chaurus Hunter Fledgling | DLC1ChaurusHunterRace | medium | 8 | Fledgling Wing Bud | 375-375 | 16-16 | 4 (4) |
+| 33 | Slaughterfish | SlaughterfishRace | small | 7 | Slaughterfish Heart | 360-360 | 1-1 | 4 (0) |
+| 34 | Chaurus Hunter | DLC1ChaurusHunterRace | medium | 8 | Chaurus Hunter Heart | 636-636 | 32-32 | 4 (4) |
+| 35 | Chaurus Hunter Fledgling | DLC1ChaurusHunterRace | medium | 8 | Chaurus Hunter Fledgling Heart | 375-375 | 16-16 | 4 (4) |
 
 ## Special attacks (power attacks, bashes, spell attacks) per creature
 
