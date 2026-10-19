@@ -30,6 +30,9 @@ namespace protean
 
 		[[nodiscard]] RE::SpellItem* Starter() const { return _starter; }
 		[[nodiscard]] RE::SpellItem* Revert() const { return _revert; }
+		[[nodiscard]] RE::TESFaction* BeastFaction() const { return _beast; }
+		[[nodiscard]] RE::TESFaction* WitnessFaction() const { return _witness; }
+		[[nodiscard]] const std::vector<RE::BGSKeyword*>& OpenInteriorKeywords() const { return _openKeywords; }
 		[[nodiscard]] const Creature* ByPower(RE::FormID a_id) const;
 		[[nodiscard]] const Creature* ByHeart(RE::FormID a_id) const;
 		[[nodiscard]] const Creature* ByRace(const RE::TESRace* a_race) const;
@@ -39,6 +42,9 @@ namespace protean
 	private:
 		RE::SpellItem*        _starter{ nullptr };
 		RE::SpellItem*        _revert{ nullptr };
+		RE::TESFaction*       _beast{ nullptr };
+		RE::TESFaction*       _witness{ nullptr };
+		std::vector<RE::BGSKeyword*> _openKeywords;
 		std::vector<Creature> _creatures;
 	};
 }

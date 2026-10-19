@@ -51,6 +51,18 @@ namespace protean
 		}
 		_starter = dh->LookupForm<RE::SpellItem>(j.at("starter").get<RE::FormID>(), plugin);
 		_revert = dh->LookupForm<RE::SpellItem>(j.at("revert").get<RE::FormID>(), plugin);
+		_beast = dh->LookupForm<RE::TESFaction>(j.value("beastFaction", 0u), plugin);
+		_witness = dh->LookupForm<RE::TESFaction>(j.value("witnessFaction", 0u), plugin);
+		if (!_beast || !_witness) {
+			logger::warn("beast/witness factions missing: witnesses will not keep their hostility");
+		}
+		_openKeywords.clear();
+		for (const auto& k : j.value("openInteriorKeywords", nlohmann::json::array())) {
+			if (auto* kw = dh->LookupForm<RE::BGSKeyword>(k.at("id").get<RE::FormID>(), k.at("file").get<std::string>())) {
+				_openKeywords.push_back(kw);
+			}
+		}
+		logger::info("registry: {} cave-like location keyword(s)", _openKeywords.size());
 		if (!_starter || !_revert) {
 			logger::critical("starter/revert spell missing from {}", plugin);
 			return false;

@@ -26,6 +26,7 @@ add_commonlibsse_plugin(
 	SOURCES
 		src/main.cpp
 		src/Camera.cpp
+		src/Dev.cpp
 		src/Hooks.cpp
 		src/Registry.cpp
 		src/State.cpp

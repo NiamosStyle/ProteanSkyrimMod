@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 1;
+		constexpr std::uint32_t kVersion = 2;
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -81,6 +81,10 @@ namespace protean
 			for (auto f : s.witnesses) {
 				PutForm(a, f);
 			}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.hostileWitnesses.size()));
+			for (auto f : s.hostileWitnesses) {
+				PutForm(a, f);
+			}
 			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.looted.size()));
 			for (auto f : s.looted) {
 				PutForm(a, f);
@@ -131,7 +135,7 @@ namespace protean
 				s.leftHand = GetForm(a);
 				s.rightHand = GetForm(a);
 				s.power = GetForm(a);
-				for (auto* list : { &s.addedFactions, &s.witnesses }) {
+				for (auto* list : { &s.addedFactions, &s.witnesses, &s.hostileWitnesses }) {
 					if (!Get(a, n) || n > 100000) {
 						return;
 					}

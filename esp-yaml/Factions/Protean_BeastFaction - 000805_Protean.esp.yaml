@@ -1,0 +1,10 @@
+FormKey: 000805:Protean.esp
+EditorID: Protean_BeastFaction
+Name:
+  TargetLanguage: English
+Relations:
+- Target: 000806:Protean.esp
+  Reaction: Enemy
+Flags:
+- HiddenFromPC
+VendorValues: {}

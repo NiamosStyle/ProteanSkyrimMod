@@ -4,6 +4,105 @@
  "starter": 2049,
  "revert": 2050,
  "tome": 2051,
+ "beastFaction": 2053,
+ "witnessFaction": 2054,
+ "openInteriorKeywords": [
+  {
+   "file": "Skyrim.esm",
+   "id": 103071,
+   "name": "LocTypeShipwreck"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 102129,
+   "name": "LocTypeMine"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78062,
+   "name": "LocTypeForswornCamp"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78061,
+   "name": "LocTypeWerewolfLair"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78060,
+   "name": "LocTypeWarlockLair"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78059,
+   "name": "LocTypeVampireLair"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78058,
+   "name": "LocTypeSprigganGrove"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78055,
+   "name": "LocTypeMilitaryFort"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78054,
+   "name": "LocTypeHagravenNest"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78053,
+   "name": "LocTypeGiantCamp"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78052,
+   "name": "LocTypeFalmerHive"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78051,
+   "name": "LocTypeDwarvenAutomatons"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78050,
+   "name": "LocTypeDraugrCrypt"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78049,
+   "name": "LocTypeDragonPriestLair"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78048,
+   "name": "LocTypeDragonLair"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78047,
+   "name": "LocTypeBanditCamp"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78046,
+   "name": "LocTypeAnimalDen"
+  },
+  {
+   "file": "Skyrim.esm",
+   "id": 78043,
+   "name": "LocTypeDungeon"
+  },
+  {
+   "file": "Dragonborn.esm",
+   "id": 182634,
+   "name": "LocTypeWerebearLair"
+  }
+ ],
  "creatures": [
   {
    "id": "wolf",

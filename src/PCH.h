@@ -12,7 +12,9 @@
 #include <fstream>
 #include <optional>
 #include <set>
+#include <sstream>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>

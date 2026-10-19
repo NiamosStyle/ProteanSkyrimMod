@@ -1,6 +1,8 @@
 #include "Hooks.h"
 
 #include "Camera.h"
+#include "Dev.h"
+#include "Shift.h"
 
 namespace protean::Hooks
 {
@@ -12,6 +14,8 @@ namespace protean::Hooks
 			{
 				func(a_this, a_delta);
 				Camera::OnFrame(a_this);
+				Shift::OnFrame();
+				Dev::Poll();
 			}
 			static inline REL::Relocation<decltype(thunk)> func;
 			static constexpr std::size_t                   idx = 0xAD;  // Actor::Update, SE/AE

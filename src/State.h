@@ -26,6 +26,7 @@ namespace protean
 		RE::FormID                power{ 0 };      // equipped shout or power
 		std::vector<RE::FormID>   addedFactions;   // factions the player joined (not ones they were already in)
 		std::vector<RE::FormID>   witnesses;       // who saw the transformation
+		std::vector<RE::FormID>   hostileWitnesses;  // the witnesses that were hostile, now in Protean_WitnessFaction
 
 		// Corpses that already had their heart added, so a taken heart is not added again.
 		std::set<RE::FormID> looted;
