@@ -153,7 +153,18 @@ namespace protean::Dev
 		public:
 			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
 			{
-				if (!a_event || !a_event->cause || !a_event->cause->IsPlayerRef() || !a_event->target) {
+				if (!a_event || !a_event->cause || !a_event->target) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				if (!a_event->cause->IsPlayerRef()) {
+					// a wild animal Protean knows: its bites are the yardstick for the player's damage
+					auto* animal = a_event->cause->As<RE::Actor>();
+					auto* target = a_event->target->As<RE::Actor>();
+					if (animal && target && Registry::Get().ByRace(animal->GetRace())) {
+						logger::info("wild hit: '{}' bit '{}'{}, health now {:.1f}", animal->GetName(), target->GetName(),
+							a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) ? " (power attack)" : "",
+							target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
+					}
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				auto*       target = a_event->target->As<RE::Actor>();
