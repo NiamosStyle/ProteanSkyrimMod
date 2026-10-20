@@ -596,12 +596,42 @@ namespace protean::Shift
 		}
 	}
 
+	namespace
+	{
+		// The player's own wish to change back is refused once when it would kill them; casting again within
+		// kConfirmFor goes ahead. (Forced reverts - death, loading, dev - never ask.)
+		constexpr auto kConfirmFor = std::chrono::seconds(10);
+		std::chrono::steady_clock::time_point g_warnedAt{};
+
+		bool ConfirmRevert()
+		{
+			auto*       p = Player();
+			auto*       av = p->AsActorValueOwner();
+			const auto& s = State::Get();
+			// health after the revert: less the bonus, and less whatever the animal's race adds to the maximum
+			// (the werewolf's +50); any other permanent bonus is counted as lost too, which can only warn early
+			const float raceExtra = av->GetPermanentActorValue(RE::ActorValue::kHealth) - av->GetBaseActorValue(RE::ActorValue::kHealth);
+			const float hp = av->GetActorValue(RE::ActorValue::kHealth) - s.healthBonus - std::max(raceExtra, 0.0f);
+			const auto  now = std::chrono::steady_clock::now();
+			if (hp > 0.0f || now - g_warnedAt < kConfirmFor) {
+				g_warnedAt = {};
+				return true;
+			}
+			g_warnedAt = now;
+			logger::info("revert refused once: health would be {:.1f}", hp);
+			Notify("Your wounds are too deep to survive changing back. Cast again to change back anyway.");
+			return false;
+		}
+	}
+
 	void OnPowerCast(RE::SpellItem* a_spell)
 	{
 		auto& reg = Registry::Get();
 		auto& s = State::Get();
 		if (a_spell == reg.Revert()) {
-			Revert("revert power");
+			if (ConfirmRevert()) {
+				Revert("revert power");
+			}
 			return;
 		}
 		if (a_spell == reg.FacePower()) {
@@ -624,7 +654,9 @@ namespace protean::Shift
 		}
 		if (const auto* c = reg.ByPower(a_spell->GetFormID())) {
 			if (s.active == c->id) {
-				Revert("same power again");
+				if (ConfirmRevert()) {
+					Revert("same power again");
+				}
 			} else {
 				Transform(*c);
 			}
