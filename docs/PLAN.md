@@ -118,5 +118,16 @@ co-save still reads the old 'moves' block so older saves load.
 - Seen change back (a person detects the player within ~57 m): the bounty stays and those people attack.
 - Only people count as seeing either change (horses, dogs, wolves do not). An animal that was already hostile and saw
   the change stays hostile (Witness faction), by design.
-- Open: wolf attacks are hard to land as the player (user feedback). Look at how the game aims creature attacks
-  (attack angle / reach / magnetism) before Phase 3.
+- Melee as an animal (measured live 2026-10-20):
+  - Sending only the attack event played the move, but the engine applied no attack data: lunges counted as
+    plain bites, no damage multiplier, no on-hit disease. Protean now sets `high->attackData` itself after
+    the event is accepted. The engine's own attack action (PerformAction with ActionRightAttack) was tried and
+    is refused for the player.
+  - Vanilla wolf reach 64 and 35° strike cone made bites very hard to land. Per-creature `reach` /
+    `strike_angle` in the creature table (wolf 120 / 50, werewolf-like). The cone comes from private copies of
+    the attack data (player only). The reach is the race's shared value, raised only for 1.5 s after each
+    player attack; the hit log showed every hit landed inside that window.
+  - A player-only race copy was rejected: ~15 vanilla/DLC records name WolfRace (skins and their ARMAs,
+    kill moves, idles, camera, sounds), so each animal would need many overrides.
+  - Damage is in line with a wild wolf on the same kind of bandit (~4-7 per hit). Bites land about half the
+    time in a scrappy fight; the user calls that normal Skyrim melee. An aim nudge is parked unless it bothers.
