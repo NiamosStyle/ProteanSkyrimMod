@@ -1,4 +1,4 @@
-﻿#include "Face.h"
+#include "Face.h"
 
 #include "Registry.h"
 #include "Shift.h"
@@ -30,6 +30,7 @@ namespace protean::Face
 		std::atomic<RE::FormID> g_offerId{ 0 };
 		int                    g_wait{ 0 };
 		bool                   g_shown{ false };
+		std::atomic<bool>      g_queued{ false };
 		RE::FormID             g_bypass{ 0 };  // corpse we are opening ourselves for looting: do not offer again
 
 		// What was in the player's base record before we borrowed the corpse's look. These are runtime
@@ -257,6 +258,28 @@ namespace protean::Face
 			return (npc->GetFormID() >> 24) != 0xFF;  // a generated NPC could not be found again after a load
 		}
 
+		void ShowChoice();
+
+		// The game is paused while the loot window is open, so the per-frame hook never runs then: watch for the
+		// menu opening instead.
+		class MenuSink : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
+		{
+		public:
+			static MenuSink* Get()
+			{
+				static MenuSink m;
+				return &m;
+			}
+
+			RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
+			{
+				if (a_event && a_event->opening && a_event->menuName == RE::ContainerMenu::MENU_NAME && g_offerId && !g_shown && !g_queued.exchange(true)) {
+					SKSE::GetTaskInterface()->AddTask([]() { ShowChoice(); });
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+
 		// ---- the choice window (render thread) ----------------------------------------------------------
 
 		void CloseOffer()
@@ -264,9 +287,22 @@ namespace protean::Face
 			g_offerId = 0;
 			g_wait = 0;
 			g_shown = false;
+			g_queued = false;
 			if (g_window) {
 				g_window->IsOpen = false;
 			}
+		}
+
+		void ShowChoice()
+		{
+			// the game opened the loot window; ours replaces it
+			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::ContainerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
+			if (g_window) {
+				g_window->IsOpen = true;
+			}
+			g_shown = true;
+			g_queued = false;
+			logger::info("face offer: loot window replaced by the choice window");
 		}
 
 		void __stdcall RenderWindow()
@@ -324,6 +360,9 @@ namespace protean::Face
 	void Install()
 	{
 		LoadIni();
+		if (auto* ui = RE::UI::GetSingleton()) {
+			ui->AddEventSink<RE::MenuOpenCloseEvent>(MenuSink::Get());
+		}
 		logger::info("face stealing {} (CopyHeadData {}, WitnessRange {:.0f})", g_enabled ? "on" : "off", g_copyHeadData, g_range);
 	}
 
@@ -384,6 +423,9 @@ namespace protean::Face
 		const bool sameRace = p->GetRace() == race;
 		ApplyLook(a_source);
 		JoinFactions(a_source);
+		if (auto* fp = Registry::Get().FacePower(); fp && !p->HasSpell(fp)) {
+			p->AddSpell(fp);
+		}
 		s.bankedNpc = a_source->GetFormID();
 		s.disguised = true;
 		p->SwitchRace(race, true);
@@ -451,15 +493,7 @@ namespace protean::Face
 			return;
 		}
 		if (!g_shown) {
-			auto* ui = RE::UI::GetSingleton();
-			if (ui && ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME)) {
-				// the game opened the loot window; ours replaces it
-				RE::UIMessageQueue::GetSingleton()->AddMessage(RE::ContainerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
-				if (g_window) {
-					g_window->IsOpen = true;
-				}
-				g_shown = true;
-			} else if (--g_wait <= 0) {
+			if (--g_wait <= 0) {
 				logger::info("face offer: the loot window never opened; dropping the offer");
 				CloseOffer();
 			}
