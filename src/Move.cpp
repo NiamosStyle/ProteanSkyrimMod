@@ -88,29 +88,16 @@ namespace protean::Move
 			}
 		}
 
-		// diagnostics while steering: what the game did to the heading and the camera offset during its update
-		struct Probe
-		{
-			float heading{ 0.0f };
-			float free{ 0.0f };
-			float lookX{ 0.0f };
-		};
-		Probe g_before;
-		int   g_probeFrames{ 0 };
 
 		// While steering, the game drops the mouse (measured: the look input arrives, the heading ignores it), so the
-		// camera is turned here. How far one unit of look input turns is measured from plain Skyrim movement (W
-		// alone, the game turning the player with the mouse, as a person or an animal: one mouse setting for every body),
-		// so it follows the player's own sensitivity setting.
-		float g_turnPerLook{ 0.01f };  // radians per unit of look input; starting guess until measured
-		int   g_samples{ 0 };
-		struct Calibrate
+		// camera is turned here, by the game's own mouse setting: radians per unit of look input. 0.01 felt slightly
+		// slow next to a person's turning with the setting at 0.0125.
+		float TurnPerLook()
 		{
-			bool  valid{ false };
-			float heading{ 0.0f };
-			float lookX{ 0.0f };
-		};
-		Calibrate g_cal;
+			auto* prefs = RE::INIPrefSettingCollection::GetSingleton();
+			auto* s = prefs ? prefs->GetSetting("fMouseHeadingSensitivity:Controls") : nullptr;
+			return s ? s->GetFloat() : 0.0125f;
+		}
 	}
 
 	void Install()
@@ -126,13 +113,8 @@ namespace protean::Move
 		auto* tps = Tps();
 		auto* ui = RE::UI::GetSingleton();
 		g_steering = false;
-		g_cal.valid = false;
 		const auto  in = Input();
 		const float lookX = RE::PlayerControls::GetSingleton()->data.lookInputVec.x;
-		if (tps && in.y > 0.1f && std::abs(in.x) < 0.1f && !tps->freeRotationEnabled && std::abs(lookX) > 0.05f) {
-			// running straight ahead, in any body: the game turns the player with the mouse. AfterUpdate measures how far.
-			g_cal = { true, a_player->GetAngleZ(), lookX };
-		}
 		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused())) {
 			StopOverriding();
 			return;
@@ -156,7 +138,7 @@ namespace protean::Move
 		}
 		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
 		const float heading = a_player->GetAngleZ();
-		const float camYaw = heading + tps->freeRotation.x + lookX * g_turnPerLook;
+		const float camYaw = heading + tps->freeRotation.x + lookX * TurnPerLook();
 		const float want = camYaw + std::atan2(in.x, in.y);
 		const float step = std::clamp(Wrap(want - heading), -kTurnRate * a_delta, kTurnRate * a_delta);
 		const float now = heading + step;
@@ -166,28 +148,14 @@ namespace protean::Move
 		g_overriding = true;
 		g_steering = true;
 		g_wantHeading = now;
-		g_before = { now, tps->freeRotation.x, RE::PlayerControls::GetSingleton()->data.lookInputVec.x };
 	}
 
 	void AfterUpdate(RE::PlayerCharacter* a_player)
 	{
 		// mode 1: the game turns a moving player back toward the camera during its update; put our turn back
 		auto* tps = Tps();
-		if (g_cal.valid && tps && !tps->freeRotationEnabled) {
-			const float sample = Wrap(a_player->GetAngleZ() - g_cal.heading) / g_cal.lookX;
-			if (std::abs(sample) > 0.0005f && std::abs(sample) < 0.2f) {  // either sign: whichever way the game turns
-				g_turnPerLook = g_samples == 0 ? sample : 0.9f * g_turnPerLook + 0.1f * sample;
-				if (g_samples++ % 50 == 0) {
-					logger::info("move: mouse turn measured {:.5f} rad per unit (sample {:.5f}, {} samples)", g_turnPerLook, sample, g_samples);
-				}
-			}
-		}
 		if (!g_steering || !tps) {
 			return;
-		}
-		if (g_probeFrames < 600 && g_probeFrames++ % 10 == 0) {
-			logger::info("move: heading {:.3f} -> {:.3f}, camera offset {:.3f} -> {:.3f} (enabled {}), mouse x {:.3f}",
-				g_before.heading, a_player->GetAngleZ(), g_before.free, tps->freeRotation.x, tps->freeRotationEnabled, g_before.lookX);
 		}
 		// where the camera points now, including any mouse turn the game applied to the player this frame
 		const float camNow = a_player->GetAngleZ() + tps->freeRotation.x;
