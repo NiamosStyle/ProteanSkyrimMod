@@ -87,3 +87,7 @@ vampire feeding: they go hostile and stay in Protean_ExposedFaction (enemy of th
 Wolf accepts Attack1/2, ForwardPower, ForwardPowerShort, StandingPower, SkeeverLunge*; refuses AttackLeft/Right 1/2.
 Deer accepts only Attack1 and Attack2. Skeever accepts everything in its list. Refused events are listed in BLOCKED in tools/build_plugin.py.
 Every Phase 3 animal gets the same probe (animtest script: transform, send each event with `anim`, read "accepted by the graph").
+
+## Design preference (user, 2026-10-19)
+Each animal needs just three moves: a LMB attack, a RMB attack and a power attack. A long move list is not wanted unless the moves
+are really different (so pruning refused/duplicate events is the goal; the Beast Moves window stays for the few animals with real variety).
