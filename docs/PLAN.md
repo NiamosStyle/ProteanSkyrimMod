@@ -91,3 +91,8 @@ Every Phase 3 animal gets the same probe (animtest script: transform, send each 
 ## Design preference (user, 2026-10-19)
 Each animal needs just three moves: a LMB attack, a RMB attack and a power attack. A long move list is not wanted unless the moves
 are really different (so pruning refused/duplicate events is the goal; the Beast Moves window stays for the few animals with real variety).
+
+## Beast Moves menu removed (user, 2026-10-19)
+The window / HUD strip / number keys were dropped ("don't like the look of it, not necessary"). Fixed defaults instead (Attacks.cpp Pick):
+LMB = first normal attack, RMB = second normal attack (or the first if only one), hold = first power attack (second on RMB).
+co-save still reads the old 'moves' block so older saves load.

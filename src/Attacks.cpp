@@ -1,6 +1,5 @@
 #include "Attacks.h"
 
-#include "Moves.h"
 #include "Registry.h"
 #include "Shift.h"
 
@@ -21,8 +20,7 @@ namespace protean::Attacks
 			std::chrono::steady_clock::time_point since{};
 		};
 		Press g_press;
-		int   g_rotor{ 0 };  // round-robin through the animal's attacks so they vary
-
+		
 		void LoadIni()
 		{
 			std::ifstream in(kIni);
@@ -37,33 +35,22 @@ namespace protean::Attacks
 			}
 		}
 
-		bool Contains(const std::string& a_hay, std::string_view a_needle)
+		// Each animal has three moves: LMB = its first normal attack, RMB = its second (or the first when it has
+		// only one), hold = its first power attack (second on RMB). Order comes from the animal's attack list.
+		const Attack* Pick(const Creature& a_c, bool a_power, bool a_rmb)
 		{
-			return a_hay.find(a_needle) != std::string::npos;
-		}
-
-		// Choose an event for this press from the animal's own attack list.
-		const Attack* Pick(const Creature& a_c, bool a_power, bool a_left)
-		{
-			std::vector<const Attack*> all;
-			std::vector<const Attack*> sided;
+			std::vector<const Attack*> normal, power;
 			for (const auto& a : a_c.attacks) {
 				if (a.bash || a.event.empty()) {
 					continue;
 				}
-				if (a.power != a_power) {
-					continue;
-				}
-				all.push_back(&a);
-				if (Contains(a.event, a_left ? "Left" : "Right")) {
-					sided.push_back(&a);
-				}
+				(a.power ? power : normal).push_back(&a);
 			}
-			const auto& pool = sided.empty() ? all : sided;
+			const auto& pool = (a_power && !power.empty()) ? power : normal;
 			if (pool.empty()) {
 				return nullptr;
 			}
-			return pool[static_cast<std::size_t>(g_rotor++) % pool.size()];
+			return pool[(a_rmb && pool.size() > 1) ? 1 : 0];
 		}
 
 		void Fire(bool a_power)
@@ -73,14 +60,8 @@ namespace protean::Attacks
 			if (!c || !p) {
 				return;
 			}
-			// a tap uses the move assigned to that mouse button (Beast Moves menu); a hold is always a power attack
-			const Attack* a = a_power ? nullptr : Moves::Assigned(*c, g_press.left ? Moves::Slot::kRmb : Moves::Slot::kLmb);
-			if (!a) {
-				a = Pick(*c, a_power, g_press.left);
-			}
-			if (!a && a_power) {
-				a = Pick(*c, false, g_press.left);  // no power attack in the list: fall back to a normal one
-			}
+			// g_press.left is the game's "Left Attack/Block" action, i.e. the right mouse button
+			const Attack* a = Pick(*c, a_power, g_press.left);
 			if (!a) {
 				logger::info("attack: '{}' has no usable {} attack", c->id, a_power ? "power" : "normal");
 				return;
@@ -103,7 +84,7 @@ namespace protean::Attacks
 
 			RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*) override
 			{
-				if (!g_enabled || !a_event || !Shift::ActiveCreature() || Moves::WindowOpen()) {
+				if (!g_enabled || !a_event || !Shift::ActiveCreature()) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto* ue = RE::UserEvents::GetSingleton();

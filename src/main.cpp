@@ -3,7 +3,6 @@
 #include "Dev.h"
 #include "Face.h"
 #include "Hooks.h"
-#include "Moves.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -71,7 +70,6 @@ namespace
 		switch (a_msg->type) {
 		case SKSE::MessagingInterface::kPostLoad:
 			protean::Face::Register();
-			protean::Moves::Register();  // every plugin is loaded now, including SKSEMenuFramework.dll
 			break;
 		case SKSE::MessagingInterface::kDataLoaded:
 			if (protean::Registry::Get().Load()) {
@@ -81,7 +79,6 @@ namespace
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
 				protean::Dev::Init();
 				protean::Attacks::Install();
-				protean::Moves::Install();
 				protean::Face::Install();
 				protean::Hooks::Install();
 				g_ready = true;
