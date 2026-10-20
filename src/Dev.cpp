@@ -113,6 +113,10 @@ namespace protean::Dev
 				}
 			} else if (a_cmd == "movemode" && !a_arg.empty()) {
 				Move::SetMode(std::atoi(a_arg.c_str()));
+			} else if (a_cmd == "turnscale" && !a_arg.empty()) {
+				Move::SetTurnScale(static_cast<float>(std::atof(a_arg.c_str())));
+			} else if (a_cmd == "movelog") {
+				Move::SetLog(a_arg != "0");
 			} else if (a_cmd == "attack") {
 				// attack [lmb|rmb|power|rpower]: what that button would do
 				Attacks::TestFire(a_arg.find("power") != std::string::npos, a_arg.starts_with("r"));

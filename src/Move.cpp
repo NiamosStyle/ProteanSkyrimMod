@@ -92,8 +92,19 @@ namespace protean::Move
 		// While steering, the game drops the mouse (measured: the look input arrives, the heading ignores it), so the
 		// camera is turned here, by the game's own mouse setting: radians per unit of look input. 0.01 felt slightly
 		// slow next to a person's turning with the setting at 0.0125.
+		float g_turnScale{ 0.0f };  // dev: overrides the game setting when above zero
+		bool  g_log{ false };       // dev: log the mouse and the camera every frame, to measure a person's turn
+
+		float CamYaw(RE::PlayerCharacter* a_player, RE::ThirdPersonState* a_tps)
+		{
+			return a_player->GetAngleZ() + (a_tps && a_tps->freeRotationEnabled ? a_tps->freeRotation.x : 0.0f);
+		}
+
 		float TurnPerLook()
 		{
+			if (g_turnScale > 0.0f) {
+				return g_turnScale;
+			}
 			auto* prefs = RE::INIPrefSettingCollection::GetSingleton();
 			auto* s = prefs ? prefs->GetSetting("fMouseHeadingSensitivity:Controls") : nullptr;
 			return s ? s->GetFloat() : 0.0125f;
@@ -115,6 +126,10 @@ namespace protean::Move
 		g_steering = false;
 		const auto  in = Input();
 		const float lookX = RE::PlayerControls::GetSingleton()->data.lookInputVec.x;
+		if (g_log) {
+			logger::info("movelog before look={:.3f} cam={:.4f} dt={:.4f} keys=({:.0f},{:.0f}) shifted={}", lookX,
+				CamYaw(a_player, tps), a_delta, in.x, in.y, Shift::ActiveCreature() != nullptr);
+		}
 		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused())) {
 			StopOverriding();
 			return;
@@ -154,6 +169,9 @@ namespace protean::Move
 	{
 		// mode 1: the game turns a moving player back toward the camera during its update; put our turn back
 		auto* tps = Tps();
+		if (g_log) {
+			logger::info("movelog after cam={:.4f} steering={}", CamYaw(a_player, tps), g_steering);
+		}
 		if (!g_steering || !tps) {
 			return;
 		}
@@ -169,6 +187,17 @@ namespace protean::Move
 		Reset();
 		g_mode = a_mode;
 		logger::info("move: steering mode {}", g_mode);
+	}
+
+	void SetTurnScale(float a_scale)
+	{
+		g_turnScale = a_scale;
+		logger::info("move: turn per look {}", TurnPerLook());
+	}
+
+	void SetLog(bool a_on)
+	{
+		g_log = a_on;
 	}
 
 	void FaceCamera(RE::PlayerCharacter* a_player)
