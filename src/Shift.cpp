@@ -29,24 +29,27 @@ namespace protean::Shift
 		}
 
 		// The Esc key ("Pause") belongs to the same control group as the inventory and magic menus. Move it into a
-		// group we never lock, so the game menu (save, load, quit) still opens while transformed.
+		// group we never lock, so the game menu (save, load, quit) opens and closes while transformed.
 		void KeepPauseMenu(bool a_locked)
 		{
 			auto* cm = RE::ControlMap::GetSingleton();
 			if (!cm) {
 				return;
 			}
-			auto* ctx = cm->controlMap[RE::UserEvents::INPUT_CONTEXT_ID::kGameplay];
-			if (!ctx) {
-				return;
-			}
-			for (auto& list : ctx->deviceMappings) {
-				for (auto& m : list) {
-					if (m.eventID == "Pause") {
-						if (a_locked && m.userEventGroupFlag.all(Flag::kMenu)) {
-							m.userEventGroupFlag = Flag::kVATS;
-						} else if (!a_locked && m.userEventGroupFlag.all(Flag::kVATS)) {
-							m.userEventGroupFlag = Flag::kMenu;
+			using Ctx = RE::UserEvents::INPUT_CONTEXT_ID;
+			for (auto id : { Ctx::kGameplay, Ctx::kMenuMode }) {
+				auto* ctx = cm->controlMap[id];
+				if (!ctx) {
+					continue;
+				}
+				for (auto& list : ctx->deviceMappings) {
+					for (auto& m : list) {
+						if (m.eventID == "Pause" || m.eventID == "Cancel") {
+							if (a_locked && m.userEventGroupFlag.all(Flag::kMenu)) {
+								m.userEventGroupFlag = Flag::kVATS;
+							} else if (!a_locked && m.userEventGroupFlag.all(Flag::kVATS)) {
+								m.userEventGroupFlag = Flag::kMenu;
+							}
 						}
 					}
 				}
