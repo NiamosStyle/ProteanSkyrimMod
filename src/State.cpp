@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 5;  // 3 and 4 are still read
+		constexpr std::uint32_t kVersion = 6;  // 3 to 5 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -48,6 +48,85 @@ namespace protean
 				return 0;
 			}
 			return a->ResolveFormID(raw, out) ? out : 0;
+		}
+
+		void PutLook(SKSE::SerializationInterface* a, const State::Look& l)
+		{
+			Put<std::uint8_t>(a, l.valid ? 1 : 0);
+			PutForm(a, l.race);
+			Put<std::uint8_t>(a, l.female ? 1 : 0);
+			Put(a, l.height);
+			Put(a, l.weight);
+			a->WriteRecordData(l.body, 3);
+			PutForm(a, l.hairColor);
+			PutForm(a, l.faceDetails);
+			PutForm(a, l.skin);
+			PutForm(a, l.faceNpc);
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(l.headParts.size()));
+			for (auto f : l.headParts) {
+				PutForm(a, f);
+			}
+			Put(a, l.morphs);
+			Put(a, l.presets);
+			Put<std::uint8_t>(a, l.hasFaceData ? 1 : 0);
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(l.tints.size()));
+			for (const auto& t : l.tints) {
+				Put(a, t.type);
+				Put(a, t.index);
+				a->WriteRecordData(t.rgba, 4);
+				Put(a, t.alpha);
+				PutStr(a, t.texture);
+			}
+		}
+
+		bool GetLook(SKSE::SerializationInterface* a, State::Look& l)
+		{
+			std::uint8_t b = 0;
+			std::uint32_t n = 0;
+			if (!Get(a, b)) {
+				return false;
+			}
+			l.valid = b != 0;
+			l.race = GetForm(a);
+			Get(a, b);
+			l.female = b != 0;
+			Get(a, l.height);
+			Get(a, l.weight);
+			a->ReadRecordData(l.body, 3);
+			l.hairColor = GetForm(a);
+			l.faceDetails = GetForm(a);
+			l.skin = GetForm(a);
+			l.faceNpc = GetForm(a);
+			if (!Get(a, n) || n > 64) {
+				return false;
+			}
+			for (std::uint32_t i = 0; i < n; ++i) {
+				if (auto f = GetForm(a)) {
+					l.headParts.push_back(f);
+				}
+			}
+			Get(a, l.morphs);
+			Get(a, l.presets);
+			Get(a, b);
+			l.hasFaceData = b != 0;
+			if (!Get(a, n) || n > 256) {
+				return false;
+			}
+			for (std::uint32_t i = 0; i < n; ++i) {
+				State::Tint t;
+				Get(a, t.type);
+				Get(a, t.index);
+				a->ReadRecordData(t.rgba, 4);
+				Get(a, t.alpha);
+				if (!GetStr(a, t.texture)) {
+					return false;
+				}
+				l.tints.push_back(std::move(t));
+			}
+			if (l.valid && !l.race) {
+				l.valid = false;  // its plugin is gone
+			}
+			return true;
 		}
 
 		void OnSave(SKSE::SerializationInterface* a)
@@ -115,6 +194,8 @@ namespace protean
 				Put(a, c.violent);
 				Put(a, c.nonViolent);
 			}
+			PutLook(a, s.own);
+			PutLook(a, s.bank);
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -220,6 +301,9 @@ namespace protean
 								s.crime.push_back(c);
 							}
 						}
+					}
+					if (version >= 6 && !(GetLook(a, s.own) && GetLook(a, s.bank))) {
+						logger::warn("co-save: the saved looks could not be read");
 					}
 				}
 			}

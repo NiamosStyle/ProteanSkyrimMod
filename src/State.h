@@ -57,6 +57,37 @@ namespace protean
 		std::vector<RE::FormID> disguiseFactions;  // factions joined with the stolen face
 		std::vector<RE::FormID> exposed;           // who saw the theft; now in Protean_ExposedFaction
 
+		// A full appearance: everything the game needs to build a face and body. Kept for the stolen face (bank) and
+		// for the player's own look while a stolen one is worn, so neither needs the original NPC after a load.
+		struct Tint
+		{
+			std::uint8_t type{ 0 };   // RE::TintMask::Type
+			std::uint8_t index{ 0 };  // nth mask of that type
+			std::uint8_t rgba[4]{ 0, 0, 0, 0 };
+			float        alpha{ 0.0f };
+			std::string  texture;     // mask texture path, matched first
+		};
+		struct Look
+		{
+			bool                         valid{ false };
+			RE::FormID                   race{ 0 };
+			bool                         female{ false };
+			float                        height{ 1.0f };
+			float                        weight{ 0.0f };
+			std::uint8_t                 body[3]{ 0, 0, 0 };  // body tint colour
+			RE::FormID                   hairColor{ 0 };
+			RE::FormID                   faceDetails{ 0 };
+			RE::FormID                   skin{ 0 };     // NPC skin (0 = the race's)
+			RE::FormID                   faceNpc{ 0 };  // use this NPC's finished face files (0 = build the face from the data)
+			std::vector<RE::FormID>      headParts;
+			std::array<float, 19>        morphs{};
+			std::array<std::int32_t, 4>  presets{};
+			bool                         hasFaceData{ false };
+			std::vector<Tint>            tints;
+		};
+		Look own;   // the player's own look, valid while disguised
+		Look bank;  // the stolen look
+
 		static State& Get();
 		void          Reset();
 	};

@@ -14,7 +14,6 @@ namespace protean::Face
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 		constexpr int  kOfferFrames = 120;  // how long to wait for the loot window to open before giving up
 
-		bool  g_copyHeadData{ false };    // [Face] CopyHeadData: also share the corpse's head-part / face-data / tint pointers
 		bool  g_joinFactions{ true };    // [Face] JoinFactions: take on the corpse's factions (test switch)
 		float g_range{ 3000.0f };        // [Face] WitnessRange, game units
 		bool  g_enabled{ true };         // [Face] Enabled
@@ -28,25 +27,6 @@ namespace protean::Face
 		std::atomic<bool>      g_queued{ false };
 		RE::FormID             g_bypass{ 0 };  // corpse we are opening ourselves for looting: do not offer again
 
-		// What was in the player's base record before we borrowed the corpse's look. These are runtime
-		// pointers, so they are not saved; they are handed back before any game load (BeforeLoad), because
-		// loading a save can write into those structures.
-		struct Borrowed
-		{
-			bool                         on{ false };
-			RE::TESNPC*                  faceNpc{ nullptr };
-			RE::BGSHeadPart**            headParts{ nullptr };
-			std::int8_t                  numHeadParts{ 0 };
-			RE::TESNPC::HeadRelatedData* headRelated{ nullptr };
-			RE::TESNPC::FaceData*        faceData{ nullptr };
-			decltype(RE::TESNPC::tintLayers) tintLayers{ nullptr };
-			RE::TintMask*                skinMask{ nullptr };  // the player's own skin-tone tint, whose colour is swapped
-			RE::Color                    skinColor{};
-			RE::BGSColorForm*            hairColor{ nullptr };  // the player's own hair colour, swapped in place
-			bool                         hairSwapped{ false };
-		};
-		Borrowed g_orig;
-
 		RE::PlayerCharacter* Player() { return RE::PlayerCharacter::GetSingleton(); }
 
 		void LoadIni()
@@ -59,8 +39,6 @@ namespace protean::Face
 					inSection = line.starts_with("[Face]");
 				} else if (inSection && line.starts_with("Enabled=")) {
 					g_enabled = line.size() > 8 && line[8] == '1';
-				} else if (inSection && line.starts_with("CopyHeadData=")) {
-					g_copyHeadData = line.size() > 13 && line[13] == '1';
 				} else if (inSection && line.starts_with("JoinFactions=")) {
 					g_joinFactions = line.size() > 13 && line[13] == '1';
 				} else if (inSection && line.starts_with("WitnessRange=")) {
@@ -73,15 +51,39 @@ namespace protean::Face
 		}
 
 		// ---- the look ---------------------------------------------------------------------------------
+		//
+		// The player's head is always built by the game from the player's own record: head parts, face sliders,
+		// hair colour and the colour layers ("tint masks") it paints into the face texture. A stolen face is put on
+		// by writing the corpse's values into those, then asking the game to redraw (the same calls RaceMenu uses).
+		// NPCs that ship finished face files (most named NPCs) use those files instead, which are exact.
 
-		// The player's skin-tone tint, asked of the game itself and checked before use. The access is guarded so a
-		// bad pointer is reported instead of crashing the game.
-		RE::TintMask* FindSkinMask(RE::PlayerCharacter* a_p)
+		using Look = State::Look;
+		using Tint = State::Tint;
+
+		constexpr std::uint32_t kTintTypes = 15;    // RE::TintMask::Type::kTotal
+		constexpr int           kRedrawDelay = 16;  // frames between putting a look on and redrawing it
+
+		std::vector<Tint> g_pendingTints;  // painted with the redraw, after any race change has rebuilt the model
+		int               g_redraw{ 0 };   // frames until the redraw (0 = none)
+
+		RE::FormID Id(const RE::TESForm* a_form) { return a_form ? a_form->GetFormID() : 0; }
+
+		bool Generated(RE::FormID a_id) { return (a_id >> 24) == 0xFF; }
+
+		std::string Lower(const char* a_s)
+		{
+			std::string s = a_s ? a_s : "";
+			std::ranges::transform(s, s.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+			return s;
+		}
+
+		// The player's tint mask of a type, asked of the game itself and checked before use.
+		RE::TintMask* Mask(RE::PlayerCharacter* a_p, std::uint32_t a_type, std::uint32_t a_index)
 		{
 			RE::TintMask* m = nullptr;
 			__try {
-				m = a_p->GetTintMask(static_cast<std::uint32_t>(RE::TintMask::Type::kSkinTone), 0);
-				if (reinterpret_cast<std::uintptr_t>(m) < 0x10000 || m->type.get() != RE::TintMask::Type::kSkinTone) {
+				m = a_p->GetTintMask(a_type, a_index);
+				if (reinterpret_cast<std::uintptr_t>(m) < 0x10000 || static_cast<std::uint32_t>(m->type.get()) != a_type) {
 					m = nullptr;
 				}
 			} __except (1) {
@@ -90,155 +92,333 @@ namespace protean::Face
 			return m;
 		}
 
-		// The skin-tone entry of an NPC's tint layers (the one that colours arms, legs and body).
-		RE::TESNPC::Layer* SkinLayer(RE::TESNPC* a_npc, RE::TESRace* a_race, bool a_female)
+		std::uint32_t MaskCount(RE::PlayerCharacter* a_p, std::uint32_t a_type)
 		{
-			if (!a_npc || !a_race || !a_npc->tintLayers) {
-				return nullptr;
+			std::uint32_t n = 0;
+			__try {
+				n = a_p->GetNumTints(a_type);
+			} __except (1) {
+				n = 0;
 			}
-			auto* related = a_race->faceRelatedData[a_female ? 1 : 0];
-			if (!related || !related->tintMasks) {
-				return nullptr;
+			return n > 64 ? 0 : n;
+		}
+
+		std::string MaskTexture(const RE::TintMask* a_m)
+		{
+			return a_m->texture ? Lower(a_m->texture->textureName.c_str()) : std::string{};
+		}
+
+		// Does the game ship finished face files (head model and face texture) for this NPC?
+		bool HasFaceFiles(const RE::TESNPC* a_npc)
+		{
+			if (!a_npc || Generated(a_npc->GetFormID())) {
+				return false;
 			}
-			for (auto* asset : *related->tintMasks) {
-				if (asset && asset->texture.skinTone.get() == RE::TESRace::FaceRelatedData::TintAsset::TintLayer::SkinTone::kSkinTone) {
-					for (auto* layer : *a_npc->tintLayers) {
-						if (layer && layer->tintIndex == asset->texture.index) {
-							return layer;
+			const auto* file = a_npc->GetFile(0);
+			if (!file) {
+				return false;
+			}
+			const bool light = file->recordFlags.all(RE::TESFile::RecordFlag::kSmallFile);
+			const auto local = a_npc->GetFormID() & (light ? 0xFFFu : 0xFFFFFFu);
+			const auto name = std::string(file->GetFilename());
+			const auto mesh = std::format("meshes\\actors\\character\\facegendata\\facegeom\\{}\\{:08x}.nif", name, local);
+			const auto tex = std::format("textures\\actors\\character\\facegendata\\facetint\\{}\\{:08x}.dds", name, local);
+			RE::BSResourceNiBinaryStream m(mesh);
+			RE::BSResourceNiBinaryStream t(tex);
+			const bool ok = m.good() && t.good();
+			logger::info("face files for {:08X}: {} ({})", a_npc->GetFormID(), ok ? "yes" : "no", mesh);
+			return ok;
+		}
+
+		// The look of an NPC, taken from the record its face really comes from (templates resolved).
+		Look LookOf(RE::TESNPC* a_npc)
+		{
+			Look l;
+			auto* root = a_npc->GetRootFaceNPC();
+			if (!root) {
+				root = a_npc;
+			}
+			auto* race = a_npc->GetRace();
+			l.valid = race != nullptr;
+			l.race = Id(race);
+			l.female = root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			l.height = root->height;
+			l.weight = root->weight;
+			l.body[0] = root->bodyTintColor.red;
+			l.body[1] = root->bodyTintColor.green;
+			l.body[2] = root->bodyTintColor.blue;
+			if (root->headRelatedData) {
+				l.hairColor = Id(root->headRelatedData->hairColor);
+				l.faceDetails = Id(root->headRelatedData->faceDetails);
+			}
+			l.skin = Id(root->skin);
+			for (int i = 0; root->headParts && i < root->numHeadParts; ++i) {
+				if (auto* hp = root->headParts[i]) {
+					l.headParts.push_back(hp->GetFormID());
+				}
+			}
+			if (root->faceData) {
+				l.hasFaceData = true;
+				std::copy_n(root->faceData->morphs, l.morphs.size(), l.morphs.begin());
+				std::copy_n(root->faceData->parts, l.presets.size(), l.presets.begin());
+			}
+			l.faceNpc = HasFaceFiles(root) ? root->GetFormID() : 0;
+
+			// colour layers: each NPC layer names one of its race's tint assets by index
+			auto* related = race ? race->faceRelatedData[l.female ? 1 : 0] : nullptr;
+			if (root->tintLayers && related && related->tintMasks) {
+				for (auto* layer : *root->tintLayers) {
+					if (!layer) {
+						continue;
+					}
+					std::uint8_t nth[kTintTypes]{};  // position of the asset among the assets of its type
+					for (auto* asset : *related->tintMasks) {
+						if (!asset) {
+							continue;
+						}
+						const auto type = static_cast<std::uint8_t>(asset->texture.skinTone.get());
+						if (asset->texture.index == layer->tintIndex) {
+							Tint t;
+							t.type = type;
+							t.index = type < kTintTypes ? nth[type] : 0;
+							t.rgba[0] = layer->tintColor.red;
+							t.rgba[1] = layer->tintColor.green;
+							t.rgba[2] = layer->tintColor.blue;
+							t.rgba[3] = layer->tintColor.alpha;
+							t.alpha = layer->GetInterpolationValue();
+							t.texture = Lower(asset->texture.file.textureName.c_str());
+							l.tints.push_back(std::move(t));
+							break;
+						}
+						if (type < kTintTypes) {
+							++nth[type];
 						}
 					}
 				}
 			}
-			return nullptr;
+			const auto skinType = static_cast<std::uint8_t>(RE::TintMask::Type::kSkinTone);
+			if (std::ranges::none_of(l.tints, [&](const Tint& t) { return t.type == skinType; })) {
+				Tint t;  // no skin layer: the body colour is the skin tone
+				t.type = skinType;
+				t.rgba[0] = l.body[0];
+				t.rgba[1] = l.body[1];
+				t.rgba[2] = l.body[2];
+				t.rgba[3] = 255;
+				t.alpha = 1.0f;
+				l.tints.push_back(std::move(t));
+			}
+			logger::info("look of {:08X} '{}' (face from {:08X}): race '{}', {} head part(s), {} colour layer(s), {}", a_npc->GetFormID(), a_npc->GetName(),
+				root->GetFormID(), race ? race->GetName() : "?", l.headParts.size(), l.tints.size(),
+				l.faceNpc ? "finished face files" : "face built from data");
+			return l;
 		}
 
-		void Capture(RE::TESNPC* a_base)
+		// The player's look as it is now.
+		Look OwnLook()
 		{
-			if (g_orig.on) {
-				return;
+			Look  l;
+			auto* p = Player();
+			auto* base = p->GetActorBase();
+			l.valid = true;
+			l.race = Id(p->GetRace());
+			l.female = base->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			l.height = base->height;
+			l.weight = base->weight;
+			l.body[0] = base->bodyTintColor.red;
+			l.body[1] = base->bodyTintColor.green;
+			l.body[2] = base->bodyTintColor.blue;
+			if (base->headRelatedData) {
+				l.hairColor = Id(base->headRelatedData->hairColor);
+				l.faceDetails = Id(base->headRelatedData->faceDetails);
 			}
-			g_orig.on = true;
-			g_orig.faceNpc = a_base->faceNPC;
-			g_orig.headParts = a_base->headParts;
-			g_orig.numHeadParts = a_base->numHeadParts;
-			g_orig.headRelated = a_base->headRelatedData;
-			g_orig.faceData = a_base->faceData;
-			g_orig.tintLayers = a_base->tintLayers;
-		}
-
-		// Put the corpse's look on the player's base record. Only memory is changed: nothing is marked as
-		// changed, so a save keeps the player's own face. The stolen one is re-applied after a load.
-		void ApplyLook(RE::TESNPC* a_src)
-		{
-			auto* base = Player()->GetActorBase();
-			auto* root = a_src->GetRootFaceNPC();
-			if (!base || !root) {
-				return;
-			}
-			Capture(base);
-			{
-				// the hair takes the colour of the new face, not the player's own; the body takes its skin tone
-				auto*           theirs = SkinLayer(root, root->GetRace(), root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale));
-				const RE::Color skin = theirs ? theirs->tintColor : root->bodyTintColor;
-				if (auto* mine = FindSkinMask(Player())) {
-					if (!g_orig.skinMask) {
-						g_orig.skinMask = mine;
-						g_orig.skinColor = mine->color;
-					}
-					logger::info("skin tone {},{},{} -> {},{},{} ({})", mine->color.red, mine->color.green, mine->color.blue, skin.red, skin.green,
-						skin.blue, theirs ? "tint layer" : "body colour");
-					mine->color = skin;
-				} else {
-					logger::info("skin tone: the player has no usable skin-tone tint");
-				}
-				if (g_orig.headRelated && root->headRelatedData && root->headRelatedData->hairColor) {
-					if (!g_orig.hairSwapped) {
-						g_orig.hairColor = g_orig.headRelated->hairColor;
-						g_orig.hairSwapped = true;
-					}
-					g_orig.headRelated->hairColor = root->headRelatedData->hairColor;
-					logger::info("hair colour -> {}", root->headRelatedData->hairColor->GetFormEditorID());
+			l.skin = Id(base->skin);
+			l.faceNpc = Id(base->faceNPC);
+			for (int i = 0; base->headParts && i < base->numHeadParts; ++i) {
+				if (auto* hp = base->headParts[i]) {
+					l.headParts.push_back(hp->GetFormID());
 				}
 			}
-			base->faceNPC = root == base ? nullptr : root;
-			if (a_src->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale)) {
-				base->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kFemale);
-			} else {
-				base->actorData.actorBaseFlags.reset(RE::ACTOR_BASE_DATA::Flag::kFemale);
+			if (base->faceData) {
+				l.hasFaceData = true;
+				std::copy_n(base->faceData->morphs, l.morphs.size(), l.morphs.begin());
+				std::copy_n(base->faceData->parts, l.presets.size(), l.presets.begin());
 			}
-			base->height = root->height;
-			base->weight = root->weight;
-			base->bodyTintColor = root->bodyTintColor;
-			if (g_copyHeadData) {
-				base->headParts = root->headParts;
-				base->numHeadParts = root->numHeadParts;
-				base->headRelatedData = root->headRelatedData;
-				base->faceData = root->faceData;
-				base->tintLayers = root->tintLayers;
+			for (std::uint32_t type = 0; type < kTintTypes; ++type) {
+				const auto n = MaskCount(p, type);
+				for (std::uint32_t i = 0; i < n; ++i) {
+					if (auto* m = Mask(p, type, i)) {
+						Tint t;
+						t.type = static_cast<std::uint8_t>(type);
+						t.index = static_cast<std::uint8_t>(i);
+						t.rgba[0] = m->color.red;
+						t.rgba[1] = m->color.green;
+						t.rgba[2] = m->color.blue;
+						t.rgba[3] = m->color.alpha;
+						t.alpha = m->alpha;
+						t.texture = MaskTexture(m);
+						l.tints.push_back(std::move(t));
+					}
+				}
 			}
+			logger::info("own look saved: {} head part(s), {} colour layer(s)", l.headParts.size(), l.tints.size());
+			return l;
 		}
 
-		void RestoreLook()
+		// Write a look into the player's record (everything but the race and the colour layers).
+		void WriteRecord(const Look& a_l)
 		{
 			auto* base = Player()->GetActorBase();
-			auto& s = State::Get();
 			if (!base) {
 				return;
 			}
-			if (g_orig.on) {
-				base->faceNPC = g_orig.faceNpc;
-				base->headParts = g_orig.headParts;
-				base->numHeadParts = g_orig.numHeadParts;
-				base->headRelatedData = g_orig.headRelated;
-				base->faceData = g_orig.faceData;
-				base->tintLayers = g_orig.tintLayers;
-				if (g_orig.skinMask) {
-					if (auto* now = FindSkinMask(Player()); now == g_orig.skinMask) {
-						now->color = g_orig.skinColor;
-					}
-					g_orig.skinMask = nullptr;
-				}
-				if (g_orig.hairSwapped && g_orig.headRelated) {
-					g_orig.headRelated->hairColor = g_orig.hairColor;
-					g_orig.hairSwapped = false;
-				}
-				g_orig.on = false;
-			}
-			if (s.ownFemale) {
+			base->faceNPC = a_l.faceNpc ? RE::TESForm::LookupByID<RE::TESNPC>(a_l.faceNpc) : nullptr;
+			if (a_l.female) {
 				base->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kFemale);
 			} else {
 				base->actorData.actorBaseFlags.reset(RE::ACTOR_BASE_DATA::Flag::kFemale);
 			}
-			base->height = s.ownHeight;
-			base->weight = s.ownWeight;
-			base->bodyTintColor.red = s.ownTint[0];
-			base->bodyTintColor.green = s.ownTint[1];
-			base->bodyTintColor.blue = s.ownTint[2];
-		}
+			base->height = a_l.height;
+			base->weight = a_l.weight;
+			base->bodyTintColor.red = a_l.body[0];
+			base->bodyTintColor.green = a_l.body[1];
+			base->bodyTintColor.blue = a_l.body[2];
+			base->skin = a_l.skin ? RE::TESForm::LookupByID<RE::TESObjectARMO>(a_l.skin) : nullptr;
+			if (!base->headRelatedData) {
+				base->headRelatedData = new RE::TESNPC::HeadRelatedData();
+			}
+			base->headRelatedData->hairColor = a_l.hairColor ? RE::TESForm::LookupByID<RE::BGSColorForm>(a_l.hairColor) : nullptr;
+			base->headRelatedData->faceDetails = a_l.faceDetails ? RE::TESForm::LookupByID<RE::BGSTextureSet>(a_l.faceDetails) : nullptr;
 
-		void RefreshModel()
-		{
-			SKSE::GetTaskInterface()->AddTask([]() {
-				if (auto* p = Player(); p && p->Is3DLoaded()) {
-					p->DoReset3D(true);
-					p->UpdateSkinColor();
-					p->UpdateHairColor();
+			// a fresh head-part list owned by the player's record, never shared with another NPC
+			std::vector<RE::BGSHeadPart*> parts;
+			for (auto id : a_l.headParts) {
+				if (auto* hp = RE::TESForm::LookupByID<RE::BGSHeadPart>(id)) {
+					parts.push_back(hp);
 				}
-			});
+			}
+			auto** list = RE::calloc<RE::BGSHeadPart*>(std::max<std::size_t>(parts.size(), 1));
+			std::ranges::copy(parts, list);
+			base->headParts = list;
+			base->numHeadParts = static_cast<std::int8_t>(parts.size());
+
+			if (!base->faceData) {
+				base->faceData = RE::calloc<RE::TESNPC::FaceData>(1);
+			}
+			if (a_l.hasFaceData) {
+				std::ranges::copy(a_l.morphs, base->faceData->morphs);
+				std::ranges::copy(a_l.presets, base->faceData->parts);
+			} else {
+				std::ranges::fill(base->faceData->morphs, 0.0f);
+				std::ranges::fill(base->faceData->parts, 0);
+			}
 		}
 
-		void SnapshotOwn(RE::TESNPC* a_base)
+		// Paint the player's colour layers: each mask takes the look's layer with the same texture (or, failing
+		// that, the same type and position); masks the look does not use are turned off.
+		void WriteTints(const std::vector<Tint>& a_tints)
+		{
+			auto*             p = Player();
+			std::vector<bool> used(a_tints.size(), false);
+			int               set = 0, off = 0;
+			for (std::uint32_t type = 0; type < kTintTypes; ++type) {
+				const auto n = MaskCount(p, type);
+				for (std::uint32_t i = 0; i < n; ++i) {
+					auto* m = Mask(p, type, i);
+					if (!m) {
+						continue;
+					}
+					const auto  tex = MaskTexture(m);
+					std::size_t pick = a_tints.size();
+					for (std::size_t k = 0; k < a_tints.size() && pick == a_tints.size(); ++k) {
+						if (!used[k] && a_tints[k].type == type && !tex.empty() && a_tints[k].texture == tex) {
+							pick = k;
+						}
+					}
+					for (std::size_t k = 0; k < a_tints.size() && pick == a_tints.size(); ++k) {
+						if (!used[k] && a_tints[k].type == type && a_tints[k].index == i) {
+							pick = k;
+						}
+					}
+					if (pick == a_tints.size()) {
+						m->alpha = 0.0f;
+						++off;
+						continue;
+					}
+					used[pick] = true;
+					const auto& t = a_tints[pick];
+					m->color.red = t.rgba[0];
+					m->color.green = t.rgba[1];
+					m->color.blue = t.rgba[2];
+					m->color.alpha = t.rgba[3];
+					m->alpha = t.alpha;
+					++set;
+				}
+			}
+			logger::info("colour layers: {} painted, {} turned off, {} of the look's not placed", set, off, std::ranges::count(used, false));
+		}
+
+		void CallGame(const char* a_fn)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			if (!vm) {
+				return;
+			}
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchStaticCall("Game", a_fn, RE::MakeFunctionArguments(), cb);
+		}
+
+		void CallPlayer(const char* a_fn)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			auto* p = Player();
+			if (!vm || !p) {
+				return;
+			}
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(p->GetFormType(), p);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchMethodCall2(handle, "Actor", a_fn, RE::MakeFunctionArguments(), cb);
+		}
+
+		// Put a look on: the record and the race now (a race change rebuilds the model), the head, colours and hair
+		// a few frames later once the model is back.
+		void Wear(const Look& a_l)
 		{
 			auto* p = Player();
-			auto& s = State::Get();
-			s.ownRace = p->GetRace() ? p->GetRace()->GetFormID() : 0;
-			s.ownFemale = a_base->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale);
-			s.ownHeight = a_base->height;
-			s.ownWeight = a_base->weight;
-			s.ownTint[0] = a_base->bodyTintColor.red;
-			s.ownTint[1] = a_base->bodyTintColor.green;
-			s.ownTint[2] = a_base->bodyTintColor.blue;
-			s.ownFaceNpc = a_base->faceNPC ? a_base->faceNPC->GetFormID() : 0;
+			WriteRecord(a_l);
+			auto* race = RE::TESForm::LookupByID<RE::TESRace>(a_l.race);
+			if (race && p->GetRace() != race) {
+				p->SwitchRace(race, true);
+			} else {
+				SKSE::GetTaskInterface()->AddTask([]() {
+					if (auto* pl = Player(); pl && pl->Is3DLoaded()) {
+						pl->DoReset3D(true);
+					}
+				});
+			}
+			g_pendingTints = a_l.tints;
+			g_redraw = kRedrawDelay;
+		}
+
+		// Every frame: the delayed half of Wear.
+		void RedrawTick()
+		{
+			if (g_redraw <= 0) {
+				return;
+			}
+			--g_redraw;
+			const bool animal = !State::Get().active.empty();  // changed into an animal meanwhile: no head to redraw
+			if (g_redraw == kRedrawDelay / 2 && !animal) {
+				CallPlayer("RegenerateHead");
+			} else if (g_redraw == 0) {
+				WriteTints(g_pendingTints);
+				g_pendingTints.clear();
+				if (!animal) {
+					CallGame("UpdateTintMaskColors");
+					CallGame("UpdateHairColor");
+					Player()->UpdateSkinColor();
+				}
+				logger::info("face redrawn");
+			}
 		}
 
 		// ---- factions and witnesses ------------------------------------------------------------------
@@ -334,7 +514,7 @@ namespace protean::Face
 			if (Registry::Get().ByRace(race)) {
 				return false;  // an animal: that is a heart, not a face
 			}
-			return (npc->GetFormID() >> 24) != 0xFF;  // a generated NPC could not be found again after a load
+			return true;
 		}
 
 		void ShowChoice();
@@ -445,7 +625,7 @@ namespace protean::Face
 		if (auto* ui = RE::UI::GetSingleton()) {
 			ui->AddEventSink<RE::MenuOpenCloseEvent>(MenuSink::Get());
 		}
-		logger::info("face stealing {} (CopyHeadData {}, WitnessRange {:.0f})", g_enabled ? "on" : "off", g_copyHeadData, g_range);
+		logger::info("face stealing {} (JoinFactions {}, WitnessRange {:.0f})", g_enabled ? "on" : "off", g_joinFactions, g_range);
 	}
 
 	bool Disguised()
@@ -496,47 +676,40 @@ namespace protean::Face
 		logger::info("=== steal face of {:08X} '{}' (race '{}', witnessed check {}) ===", a_source->GetFormID(), a_source->GetName(),
 			a_source->GetRace()->GetName(), a_witnessed);
 		if (s.disguised) {
-			// swapping one stolen face for another: keep the player's own look from the first theft
-			LeaveFactions();
+			LeaveFactions();  // swapping one stolen face for another: the own look from the first theft stays
 		} else {
-			SnapshotOwn(base);
+			s.own = OwnLook();
 		}
 		if (a_witnessed) {
 			Expose(a_corpse);
 		}
-		auto* race = a_source->GetRace();
-		ApplyLook(a_source);
+		s.bank = LookOf(a_source);
+		s.bankedNpc = a_source->GetFormID();
+		Wear(s.bank);
 		if (g_joinFactions) {
 			JoinFactions(a_source);
 		}
 		if (auto* fp = Registry::Get().FacePower(); fp && !p->HasSpell(fp)) {
 			p->AddSpell(fp);
 		}
-		s.bankedNpc = a_source->GetFormID();
 		s.disguised = true;
-		p->SwitchRace(race, true);
-		RefreshModel();
 		Shift::Notify(std::format("You have taken the face of {}.", a_source->GetName()));
 		Dump();
 	}
 
 	void TakeOff(std::string_view a_why)
 	{
-		auto* p = Player();
 		auto& s = State::Get();
 		if (!s.disguised) {
 			return;
 		}
 		logger::info("=== take off the stolen face ({}) ===", a_why);
 		LeaveFactions();
-		RestoreLook();
-		const auto* own = RE::TESForm::LookupByID<RE::TESRace>(s.ownRace);
-		if (own) {
-			p->SwitchRace(const_cast<RE::TESRace*>(own), true);
+		if (s.own.valid) {
+			Wear(s.own);
 		} else {
-			logger::error("own race {:08X} not found; staying in the stolen face's race", s.ownRace);
+			logger::error("no own look saved; cannot take the stolen face off cleanly");
 		}
-		RefreshModel();
 		s.disguised = false;
 		Shift::Notify("You wear your own face again.");
 		Dump();
@@ -553,16 +726,29 @@ namespace protean::Face
 			TakeOff("power");
 			return;
 		}
-		auto* npc = s.bankedNpc ? RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc) : nullptr;
-		if (!npc) {
-			Shift::Notify(s.bankedNpc ? "The face you kept can no longer be found." : "You have no face kept. Sneak next to a body and activate it.");
+		if (!s.bank.valid && s.bankedNpc) {
+			if (auto* npc = RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc)) {
+				s.bank = LookOf(npc);  // a face kept by an older version of Protean
+			}
+		}
+		if (!s.bank.valid) {
+			Shift::Notify("You have no face kept. Sneak next to a body and activate it.");
 			return;
 		}
-		Steal(npc, nullptr, false);
+		logger::info("=== wear the kept face ===");
+		s.own = OwnLook();
+		Wear(s.bank);
+		if (auto* npc = RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc); npc && g_joinFactions) {
+			JoinFactions(npc);
+		}
+		s.disguised = true;
+		Shift::Notify("You wear the face you kept.");
+		Dump();
 	}
 
 	void OnFrame()
 	{
+		RedrawTick();
 		const auto id = g_offerId.load();
 		if (!id) {
 			return;
@@ -586,28 +772,23 @@ namespace protean::Face
 	void OnGameLoaded()
 	{
 		auto& s = State::Get();
-		g_orig = Borrowed{};
+		g_redraw = 0;
 		if (!s.disguised) {
 			return;
 		}
-		auto* npc = s.bankedNpc ? RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc) : nullptr;
-		if (!npc) {
-			logger::warn("loaded a save made in a stolen face whose source is gone; putting the own face back");
-			s.disguised = false;
+		if (!s.bank.valid) {
+			logger::warn("loaded a save made in a stolen face that was not kept; staying as saved");
 			return;
 		}
-		logger::info("loaded a save made in the face of '{}': re-applying", npc->GetName());
-		ApplyLook(npc);
-		RefreshModel();
+		logger::info("loaded a save made in a stolen face: putting it on again");
+		Wear(s.bank);
 	}
 
 	void BeforeLoad()
 	{
 		CloseOffer();
-		if (g_orig.on) {
-			logger::info("handing the player's own face data back before loading");
-			RestoreLook();
-		}
+		g_redraw = 0;
+		g_pendingTints.clear();
 	}
 
 	void Dump()
