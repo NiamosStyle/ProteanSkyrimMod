@@ -112,3 +112,11 @@ co-save still reads the old 'moves' block so older saves load.
 - Verified: generic Orc bandit, Ulfric, Lydia (also forced through the from-data path: identical), Forsworn Shaman
   (template face): match except war paint (3 of 26 layers had no matching mask on a Redguard player). Taking off restores.
 - Save/quit/load and F5/F9 while wearing a stolen face verified live 2026-10-20 (Orc bandit, war paint kept); the Esc take-off safety is now off by default ([Face] TakeOffOnMenu=0).
+
+### Crime rules on changing back (verified live 2026-10-20)
+- Unseen change into the animal and unseen change back: the bounty gained as the animal is removed (40 gold test).
+- Seen change back (a person detects the player within ~57 m): the bounty stays and those people attack.
+- Only people count as seeing either change (horses, dogs, wolves do not). An animal that was already hostile and saw
+  the change stays hostile (Witness faction), by design.
+- Open: wolf attacks are hard to land as the player (user feedback). Look at how the game aims creature attacks
+  (attack angle / reach / magnetism) before Phase 3.
