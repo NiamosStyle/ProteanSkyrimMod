@@ -56,6 +56,12 @@ ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
            "horse,werewolf,werebear")
+# Extra factions joined while transformed. The hold crime factions count PlayerWerewolfFaction as an enemy: it is how
+# vanilla makes guards attack a player werewolf on sight (and citizens flee).
+EXTRA_FACTIONS = {
+    "werewolf": ["Skyrim.esm:091822"],  # PlayerWerewolfFaction
+    "werebear": ["Skyrim.esm:091822"],
+}
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 
@@ -244,7 +250,7 @@ def main():
             "size": c["size_class"],
             "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", []) if a["event"] not in by_race(BLOCKED, c, creatures)],
             "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
-            "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"]],
+            "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"] + EXTRA_FACTIONS.get(c["id"], [])],
             "ladder": c["health_ladder"],
             # vanilla NPC records of this creature: dead ones get a heart when looted
             "race_names": [c["race"]],

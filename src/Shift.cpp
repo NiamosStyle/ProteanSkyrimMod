@@ -618,6 +618,41 @@ namespace protean::Shift
 		}
 	}
 
+	namespace
+	{
+		// An animal cannot drink potions or cast heals, so out of combat its health tops up at kRegenShare of the
+		// maximum per second (the game's own regeneration counts towards it) until changing back is safe again.
+		// Healing directly, rather than raising HealRate, leaves nothing behind in a save.
+		constexpr float kRegenShare = 0.02f;  // a person: 0.7%; magicka 3%, stamina 5%
+
+		void Regenerate()
+		{
+			using Clock = std::chrono::steady_clock;
+			static Clock::time_point last{};
+			const auto now = Clock::now();
+			const float dt = std::min(std::chrono::duration<float>(now - last).count(), 1.0f);  // a pause is not healing time
+			last = now;
+
+			auto* p = Player();
+			if (!p || p->IsInCombat() || p->IsDead()) {
+				return;
+			}
+			auto*       av = p->AsActorValueOwner();
+			const float hp = av->GetActorValue(RE::ActorValue::kHealth);
+			const float line = RevertKillsBelow();
+			if (hp > line) {
+				return;
+			}
+			const float max = av->GetPermanentActorValue(RE::ActorValue::kHealth) +
+			                  p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth);
+			const float own = std::max(av->GetActorValue(RE::ActorValue::kHealRate), 0.0f) / 100.0f;  // percent per second
+			const float extra = std::max(kRegenShare - own, 0.0f) * max * dt;
+			if (extra > 0.0f) {
+				av->RestoreActorValue(RE::ActorValue::kHealth,std::min(extra, line + 1.0f - hp));
+			}
+		}
+	}
+
 	float RevertKillsBelow()
 	{
 		auto*       p = Player();
@@ -718,5 +753,6 @@ namespace protean::Shift
 			Notify(why + " You return to your own form.");
 			SKSE::GetTaskInterface()->AddTask([]() { Revert("too big for this place"); });
 		}
+		Regenerate();
 	}
 }
