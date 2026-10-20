@@ -74,16 +74,6 @@ namespace protean::Face
 
 		// ---- the look ---------------------------------------------------------------------------------
 
-		std::vector<RE::TintMask*> tints(RE::PlayerCharacter* a_p)
-		{
-			auto*                      list = a_p->GetTintList();
-			std::vector<RE::TintMask*> out;
-			if (list) {
-				out.assign(list->begin(), list->end());
-			}
-			return out;
-		}
-
 		// The skin-tone entry of an NPC's tint layers (the one that colours arms, legs and body).
 		RE::TESNPC::Layer* SkinLayer(RE::TESNPC* a_npc, RE::TESRace* a_race, bool a_female)
 		{
@@ -131,28 +121,7 @@ namespace protean::Face
 			}
 			Capture(base);
 			{
-				// the body and hair take the colours of the new face, not the player's own
-				auto* p = Player();
-				RE::TintMask* mine = nullptr;
-				for (auto* t : tints(p)) {
-					if (t && t->type.get() == RE::TintMask::Type::kSkinTone) {
-						mine = t;
-						break;
-					}
-				}
-				auto* theirs = SkinLayer(root, root->GetRace(), root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale));
-				const RE::Color skin = theirs ? theirs->tintColor : root->bodyTintColor;
-				if (mine) {
-					if (!g_orig.skinMask) {
-						g_orig.skinMask = mine;
-						g_orig.skinColor = mine->color;
-					}
-					logger::info("skin tone {},{},{} -> {},{},{} ({})", mine->color.red, mine->color.green, mine->color.blue, skin.red, skin.green,
-						skin.blue, theirs ? "tint layer" : "body colour");
-					mine->color = skin;
-				} else {
-					logger::info("skin tone: player has no skin-tone tint");
-				}
+				// the hair takes the colour of the new face, not the player's own
 				if (g_orig.headRelated && root->headRelatedData && root->headRelatedData->hairColor) {
 					if (!g_orig.hairSwapped) {
 						g_orig.hairColor = g_orig.headRelated->hairColor;
@@ -194,14 +163,6 @@ namespace protean::Face
 				base->headRelatedData = g_orig.headRelated;
 				base->faceData = g_orig.faceData;
 				base->tintLayers = g_orig.tintLayers;
-				if (g_orig.skinMask) {
-					for (auto* t : tints(Player())) {
-						if (t == g_orig.skinMask) {  // only if the game has not rebuilt the list since
-							t->color = g_orig.skinColor;
-						}
-					}
-					g_orig.skinMask = nullptr;
-				}
 				if (g_orig.hairSwapped && g_orig.headRelated) {
 					g_orig.headRelated->hairColor = g_orig.hairColor;
 					g_orig.hairSwapped = false;
