@@ -82,3 +82,8 @@ vampire feeding: they go hostile and stay in Protean_ExposedFaction (enemy of th
   and (INI `CopyHeadData=1`) share the corpse's head-part / face-data / tint-layer pointers. Pointers are handed back before any game load.
 - Transforming into an animal while disguised takes the face off first; the bank is kept.
 - Not done on purpose: no bounty for witnesses (they only turn hostile), no kneel animation (sneaking counts as kneeling), no vendor/recipe.
+
+## Attack-event probe results (live, 2026-10-19)
+Wolf accepts Attack1/2, ForwardPower, ForwardPowerShort, StandingPower, SkeeverLunge*; refuses AttackLeft/Right 1/2.
+Deer accepts only Attack1 and Attack2. Skeever accepts everything in its list. Refused events are listed in BLOCKED in tools/build_plugin.py.
+Every Phase 3 animal gets the same probe (animtest script: transform, send each event with `anim`, read "accepted by the graph").
