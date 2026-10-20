@@ -109,6 +109,24 @@ namespace protean::Dev
 					Face::Steal(npc, nullptr, a_cmd == "steal");
 					Face::SetIgnoreFaceFiles(false);
 				}
+			} else if (a_cmd == "reach" && !a_arg.empty()) {
+				// reach <unarmed reach> [strike angle]: change the player's current race in memory (affects every actor
+				// of that race until the game restarts) to try out how far and how wide attacks land
+				float reach = 0.0f, angle = 0.0f;
+				std::istringstream in(a_arg);
+				in >> reach >> angle;
+				if (auto* race = p->GetRace(); race && reach > 0.0f) {
+					logger::info("dev: reach: race '{}' unarmed reach {:.0f} -> {:.0f}", race->GetName(), race->data.unarmedReach, reach);
+					race->data.unarmedReach = reach;
+					if (angle > 0.0f && race->attackDataMap) {
+						for (auto& [name, data] : race->attackDataMap->attackDataMap) {
+							if (data) {
+								logger::info("  {} strike angle {:.0f} -> {:.0f}", name.c_str(), data->data.strikeAngle, angle);
+								data->data.strikeAngle = angle;
+							}
+						}
+					}
+				}
 			} else if (a_cmd == "facepower") {
 				Face::OnPower();
 			} else if (a_cmd == "takeoff") {
