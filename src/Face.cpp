@@ -74,6 +74,16 @@ namespace protean::Face
 
 		// ---- the look ---------------------------------------------------------------------------------
 
+		std::vector<RE::TintMask*> tints(RE::PlayerCharacter* a_p)
+		{
+			auto*                      list = a_p->GetTintList();
+			std::vector<RE::TintMask*> out;
+			if (list) {
+				out.assign(list->begin(), list->end());
+			}
+			return out;
+		}
+
 		// The skin-tone entry of an NPC's tint layers (the one that colours arms, legs and body).
 		RE::TESNPC::Layer* SkinLayer(RE::TESNPC* a_npc, RE::TESRace* a_race, bool a_female)
 		{
@@ -124,7 +134,7 @@ namespace protean::Face
 				// the body and hair take the colours of the new face, not the player's own
 				auto* p = Player();
 				RE::TintMask* mine = nullptr;
-				for (auto* t : p->GetRuntimeData().tintMasks) {
+				for (auto* t : tints(p)) {
 					if (t && t->type.get() == RE::TintMask::Type::kSkinTone) {
 						mine = t;
 						break;
@@ -185,7 +195,7 @@ namespace protean::Face
 				base->faceData = g_orig.faceData;
 				base->tintLayers = g_orig.tintLayers;
 				if (g_orig.skinMask) {
-					for (auto* t : Player()->GetRuntimeData().tintMasks) {
+					for (auto* t : tints(Player())) {
 						if (t == g_orig.skinMask) {  // only if the game has not rebuilt the list since
 							t->color = g_orig.skinColor;
 						}
