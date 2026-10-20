@@ -23,6 +23,7 @@ namespace protean::Face
 
 	// End the disguise (the banked face is kept). Safe to call when not disguised.
 	void TakeOff(std::string_view a_why);
+	void SetIgnoreFaceFiles(bool a_on);  // dev: build faces from the data even when finished face files exist
 
 	void OnFrame();       // every frame, main thread
 	void OnGameLoaded();  // kPostLoadGame

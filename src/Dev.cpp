@@ -95,7 +95,7 @@ namespace protean::Dev
 						logger::info("dev: spawned {:08X} '{}' (ref {:08X})", id, base->GetName(), ref->GetFormID());
 					}
 				}
-			} else if ((a_cmd == "steal" || a_cmd == "stealq") && !a_arg.empty()) {
+			} else if ((a_cmd == "steal" || a_cmd == "stealq" || a_cmd == "stealdata") && !a_arg.empty()) {
 				// steal <hex base NPC FormID>: copy that NPC's face (stealq = nobody sees it)
 				RE::FormID id = 0;
 				try {
@@ -105,7 +105,9 @@ namespace protean::Dev
 				auto* npc = id ? RE::TESForm::LookupByID<RE::TESNPC>(id) : nullptr;
 				logger::info("dev: steal {} -> {}", a_arg, npc ? npc->GetName() : "no such NPC");
 				if (npc) {
+					Face::SetIgnoreFaceFiles(a_cmd == "stealdata");  // stealdata: build the face from the data, ignoring face files
 					Face::Steal(npc, nullptr, a_cmd == "steal");
+					Face::SetIgnoreFaceFiles(false);
 				}
 			} else if (a_cmd == "facepower") {
 				Face::OnPower();

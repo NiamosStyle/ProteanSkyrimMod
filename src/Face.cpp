@@ -108,6 +108,8 @@ namespace protean::Face
 			return a_m->texture ? Lower(a_m->texture->textureName.c_str()) : std::string{};
 		}
 
+		bool g_ignoreFaceFiles{ false };  // dev: build every face from the data, to test that path
+
 		// Does the game ship finished face files (head model and face texture) for this NPC?
 		bool HasFaceFiles(const RE::TESNPC* a_npc)
 		{
@@ -162,7 +164,7 @@ namespace protean::Face
 				std::copy_n(root->faceData->morphs, l.morphs.size(), l.morphs.begin());
 				std::copy_n(root->faceData->parts, l.presets.size(), l.presets.begin());
 			}
-			l.faceNpc = HasFaceFiles(root) ? root->GetFormID() : 0;
+			l.faceNpc = !g_ignoreFaceFiles && HasFaceFiles(root) ? root->GetFormID() : 0;
 
 			// colour layers: each NPC layer names one of its race's tint assets by index
 			auto* related = race ? race->faceRelatedData[l.female ? 1 : 0] : nullptr;
@@ -696,6 +698,11 @@ namespace protean::Face
 		s.disguised = true;
 		Shift::Notify(std::format("You have taken the face of {}.", a_source->GetName()));
 		Dump();
+	}
+
+	void SetIgnoreFaceFiles(bool a_on)
+	{
+		g_ignoreFaceFiles = a_on;
 	}
 
 	void TakeOff(std::string_view a_why)
