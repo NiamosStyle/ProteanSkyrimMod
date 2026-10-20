@@ -30,11 +30,20 @@ BLOCKED = {
              "attackStart_ForwardPower", "attackStart_ForwardPowerShort", "attackStart_SkeeverLungeLong",
              "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],
     "wolf": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2"],
+    # Phase 3 batch A (2026-10-20); Ice/Pit Wolf inherit the wolf's; dog, death hound, goat, cow refuse nothing
+    "fox": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2"],
+    "elk": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2",
+            "attackStart_ForwardPower", "attackStart_ForwardPowerShort", "attackStart_SkeeverLungeLong",
+            "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],
 }
 # Melee tuning for the player in animal form (wild animals keep the vanilla values). Vanilla wolf: reach 64,
 # strike cone 35 degrees, which made bites very hard to land (measured live); werewolf: 150 / 50.
 MELEE = {
     "wolf": {"reach": 120, "strike_angle": 50},
+    # the other hunters start from the wolf's values (not measured; adjust if one feels wrong in play)
+    "fox": {"reach": 120, "strike_angle": 50},
+    "dog": {"reach": 120, "strike_angle": 50},
+    "death_hound": {"reach": 120, "strike_angle": 50},
 }
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 

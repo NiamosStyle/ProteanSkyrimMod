@@ -467,56 +467,6 @@
      "event": "attackStart_Attack2",
      "flags": [],
      "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_ForwardPower",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_ForwardPowerShort",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_SkeeverLungeLong",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_SkeeverLungeMedium",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_SkeeverLungeShort",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_StandingPower",
-     "flags": [],
-     "spell": null
     }
    ],
    "camera_height": 161,
@@ -568,26 +518,6 @@
     },
     {
      "event": "attackStart_Attack2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight2",
      "flags": [],
      "spell": null
     },
@@ -644,7 +574,9 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 534964
-   }
+   },
+   "reach": 120,
+   "strike_angle": 50
   },
   {
    "id": "dog",
@@ -713,7 +645,9 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 307913
-   }
+   },
+   "reach": 120,
+   "strike_angle": 50
   },
   {
    "id": "goat",
@@ -923,7 +857,9 @@
    "skin": {
     "file": "Dawnguard.esm",
     "id": 90062
-   }
+   },
+   "reach": 120,
+   "strike_angle": 50
   },
   {
    "id": "skeever",
