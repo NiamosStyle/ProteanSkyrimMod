@@ -219,6 +219,10 @@ namespace protean::Face
 				if (!actor || actor.get() == p || actor.get() == a_corpse || actor->IsDead() || actor->IsPlayerTeammate()) {
 					continue;
 				}
+				// only people count: a horse or a dog watching is not a witness
+				if (auto* r = actor->GetRace(); !r || !r->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead)) {
+					continue;
+				}
 				if (here.GetDistance(actor->GetPosition()) > g_range || actor->RequestDetectionLevel(p) <= 0) {
 					continue;
 				}
