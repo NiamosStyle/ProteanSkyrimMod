@@ -14,6 +14,7 @@ namespace protean::Face
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 		constexpr int  kOfferFrames = 120;  // how long to wait for the loot window to open before giving up
 
+		bool  g_menuTakeOff{ true };     // [Face] TakeOffOnMenu: the game menu (save, load, quit) takes a stolen face off
 		bool  g_joinFactions{ true };    // [Face] JoinFactions: take on the corpse's factions (test switch)
 		float g_range{ 3000.0f };        // [Face] WitnessRange, game units
 		bool  g_enabled{ true };         // [Face] Enabled
@@ -39,6 +40,8 @@ namespace protean::Face
 					inSection = line.starts_with("[Face]");
 				} else if (inSection && line.starts_with("Enabled=")) {
 					g_enabled = line.size() > 8 && line[8] == '1';
+				} else if (inSection && line.starts_with("TakeOffOnMenu=")) {
+					g_menuTakeOff = line.size() > 14 && line[14] == '1';
 				} else if (inSection && line.starts_with("JoinFactions=")) {
 					g_joinFactions = line.size() > 13 && line[13] == '1';
 				} else if (inSection && line.starts_with("WitnessRange=")) {
@@ -611,7 +614,7 @@ namespace protean::Face
 
 			RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
 			{
-				if (a_event && a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME && State::Get().disguised) {
+				if (a_event && a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME && g_menuTakeOff && State::Get().disguised) {
 					// Saving, loading and quitting with a stolen face on is not safe yet: take it off when the game menu opens
 					SKSE::GetTaskInterface()->AddTask([]() {
 						TakeOff("the game menu opened");
@@ -704,7 +707,7 @@ namespace protean::Face
 		if (auto* ui = RE::UI::GetSingleton()) {
 			ui->AddEventSink<RE::MenuOpenCloseEvent>(MenuSink::Get());
 		}
-		logger::info("face stealing {} (JoinFactions {}, WitnessRange {:.0f})", g_enabled ? "on" : "off", g_joinFactions, g_range);
+		logger::info("face stealing {} (JoinFactions {}, TakeOffOnMenu {}, WitnessRange {:.0f})", g_enabled ? "on" : "off", g_joinFactions, g_menuTakeOff, g_range);
 	}
 
 	bool Disguised()
