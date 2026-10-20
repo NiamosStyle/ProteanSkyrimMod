@@ -96,3 +96,19 @@ are really different (so pruning refused/duplicate events is the goal; the Beast
 The window / HUD strip / number keys were dropped ("don't like the look of it, not necessary"). Fixed defaults instead (Attacks.cpp Pick):
 LMB = first normal attack, RMB = second normal attack (or the first if only one), hold = first power attack (second on RMB).
 co-save still reads the old 'moves' block so older saves load.
+
+### Face stealing: how the look is copied (rewritten 2026-10-20, verified live)
+- The player's head is always built from the player's own record, and its colours come from the player's tint masks
+  (painted into the face texture by `Game.UpdateTintMaskColors`). Pointing `faceNPC` at the NPC only worked for the face
+  geometry; colours stayed the player's, and sharing the NPC's head-data pointers crashed on quit and hung loads.
+- Now: a full `Look` snapshot (race, sex, height, weight, body colour, hair colour, face details, skin, head parts,
+  face sliders, colour layers) is taken of the face record (template resolved; race from the same record) and written
+  into the player's own record with owned copies. Colour layers are painted onto the player's masks (matched by texture,
+  then type and position) BEFORE the race switch / model rebuild, because the body takes its colour at rebuild time.
+  Then `RegenerateHead`, `UpdateTintMaskColors`, `UpdateHairColor` via Papyrus dispatch, repeated over ~90 frames.
+- NPCs with finished face files (FaceGeom + FaceTint) keep `faceNPC` set for the geometry. Their colour layers are not
+  in memory (tintLayers null), so they are read from the plugin record (TINI/TINC/TINV) via TESFile.
+- The player's own look is snapshotted the same way; both looks live in the co-save (v6).
+- Verified: generic Orc bandit, Ulfric, Lydia (also forced through the from-data path: identical), Forsworn Shaman
+  (template face): match except war paint (3 of 26 layers had no matching mask on a Redguard player). Taking off restores.
+- Safety still on: opening the game menu (Esc) takes a stolen face off. Quicksave/autosave while disguised: untested.

@@ -57,3 +57,4 @@ and cross-checks the plugin against DevBench (race, health, camera).
   Have an NPC watch you do it: they should turn hostile ("You were seen!").
 - Open questions to settle live: (1) does the player's face actually change (`faceNPC` and/or the shared head-part pointers,
   `[Face] CopyHeadData=` in Protean.ini)? (2) does an Exposed relation beat a shared faction? (3) save while disguised, quit, load.
+- Dev: `stealdata <id>` builds the face from the record even when finished face files exist (tests that path).
