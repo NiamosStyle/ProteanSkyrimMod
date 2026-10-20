@@ -26,4 +26,7 @@ namespace protean::Shift
 
 	// after a game load: if the save was made transformed, put the runtime pieces back
 	void OnGameLoaded();
+
+	// before a game load or new game: give the player's record its own skin and height back
+	void BeforeLoad();
 }

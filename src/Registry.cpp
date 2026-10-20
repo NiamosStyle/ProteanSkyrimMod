@@ -80,6 +80,11 @@ namespace protean
 			cr.name = c.at("name");
 			cr.size = c.value("size", "medium");
 			cr.cameraHeight = c.value("camera_height", 60.0f);
+			if (c.contains("skin")) {
+				const auto& sk = c["skin"];
+				cr.skin = dh->LookupForm<RE::TESObjectARMO>(sk.at("id").get<RE::FormID>(), sk.at("file").get<std::string>());
+			}
+			cr.height = c.value("height", 1.0f);
 			cr.reach = c.value("reach", 0.0f);
 			cr.strikeAngle = c.value("strike_angle", 0.0f);
 			const auto& r = c.at("race");

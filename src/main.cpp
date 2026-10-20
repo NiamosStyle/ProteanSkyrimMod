@@ -87,11 +87,13 @@ namespace
 			break;
 		case SKSE::MessagingInterface::kPreLoadGame:
 			protean::Face::BeforeLoad();
+			protean::Shift::BeforeLoad();
 			protean::Camera::Reset();
 			protean::Attacks::Cancel();
 			break;
 		case SKSE::MessagingInterface::kNewGame:
 			protean::Face::BeforeLoad();
+			protean::Shift::BeforeLoad();
 			break;
 		case SKSE::MessagingInterface::kPostLoadGame:
 			if (g_ready) {

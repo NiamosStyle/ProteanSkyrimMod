@@ -193,6 +193,202 @@
    "race_names": [
     "WolfRace"
    ],
+   "height": 1.0,
+   "npc": "EncWolf",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 787195
+   },
+   "reach": 120,
+   "strike_angle": 50
+  },
+  {
+   "id": "ice_wolf",
+   "name": "Ice Wolf",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78346
+   },
+   "heart": 2066,
+   "power": 2067,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    }
+   ],
+   "camera_height": 81,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190611
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254099
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 255633
+    }
+   ],
+   "ladder": [
+    [
+     6,
+     137
+    ]
+   ],
+   "race_names": [
+    "WolfRace"
+   ],
+   "height": 1.15,
+   "npc": "EncWolfIce",
+   "reach": 120,
+   "strike_angle": 50
+  },
+  {
+   "id": "pit_wolf",
+   "name": "Pit Wolf",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78346
+   },
+   "heart": 2068,
+   "power": 2069,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    }
+   ],
+   "camera_height": 70,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 113856
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190611
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254099
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 255633
+    }
+   ],
+   "ladder": [
+    [
+     2,
+     22
+    ]
+   ],
+   "race_names": [
+    "WolfRace"
+   ],
+   "height": 1.0,
+   "npc": "EncBanditWolf",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 787195
+   },
    "reach": 120,
    "strike_angle": 50
   },
@@ -247,7 +443,487 @@
    ],
    "race_names": [
     "DeerRace"
-   ]
+   ],
+   "height": 1.0,
+   "npc": "EncDeer"
+  },
+  {
+   "id": "elk",
+   "name": "Elk",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78317
+   },
+   "heart": 2072,
+   "power": 2073,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null
+    }
+   ],
+   "camera_height": 161,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190612
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254101
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 989884
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     50
+    ]
+   ],
+   "race_names": [
+    "ElkRace"
+   ],
+   "height": 1.0,
+   "npc": "EncElk"
+  },
+  {
+   "id": "fox",
+   "name": "Fox",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 1088636
+   },
+   "heart": 2074,
+   "power": 2075,
+   "size": "small",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeMedium",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DiseaseRockjoint"
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "DiseaseRockjoint"
+    }
+   ],
+   "camera_height": 42,
+   "factions": [],
+   "ladder": [
+    [
+     2,
+     22
+    ]
+   ],
+   "race_names": [
+    "FoxRace"
+   ],
+   "height": 0.6,
+   "npc": "EncFox",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 534964
+   }
+  },
+  {
+   "id": "dog",
+   "name": "Dog",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78318
+   },
+   "heart": 2078,
+   "power": 2079,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": null
+    }
+   ],
+   "camera_height": 70,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 275862
+    }
+   ],
+   "ladder": [
+    [
+     2,
+     21
+    ]
+   ],
+   "race_names": [
+    "DogRace"
+   ],
+   "height": 1.0,
+   "npc": "EncDog",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 307913
+   }
+  },
+  {
+   "id": "goat",
+   "name": "Goat",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78330
+   },
+   "heart": 2080,
+   "power": 2081,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    }
+   ],
+   "camera_height": 70,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190612
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254101
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 275869
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     25
+    ],
+    [
+     3,
+     22
+    ]
+   ],
+   "race_names": [
+    "GoatRace"
+   ],
+   "height": 1.0,
+   "npc": "EncGoatDomestic",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 457801
+   }
+  },
+  {
+   "id": "cow",
+   "name": "Cow",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 321413
+   },
+   "heart": 2082,
+   "power": 2083,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    }
+   ],
+   "camera_height": 90,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190612
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254101
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 321609
+    }
+   ],
+   "ladder": [
+    [
+     3,
+     37
+    ]
+   ],
+   "race_names": [
+    "CowRace"
+   ],
+   "height": 1.0,
+   "npc": "EncCow",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 321412
+   }
+  },
+  {
+   "id": "death_hound",
+   "name": "Death Hound",
+   "race": {
+    "file": "Dawnguard.esm",
+    "id": 50672
+   },
+   "heart": 2096,
+   "power": 2097,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack"
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack"
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack"
+    },
+    {
+     "event": "attackStart_SkeeverLungeLong",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack"
+    },
+    {
+     "event": "attackStart_SkeeverLungeShort",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack"
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [],
+     "spell": "DLC1crDeathHoundMeleeAttack"
+    }
+   ],
+   "camera_height": 60,
+   "factions": [
+    {
+     "file": "Dawnguard.esm",
+     "id": 101455
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190611
+    }
+   ],
+   "ladder": [
+    [
+     5,
+     121
+    ]
+   ],
+   "race_names": [
+    "DLC1DeathHoundRace"
+   ],
+   "height": 1.0,
+   "npc": "DLC1encDeathHound",
+   "skin": {
+    "file": "Dawnguard.esm",
+    "id": 90062
+   }
   },
   {
    "id": "skeever",
@@ -316,7 +992,9 @@
    ],
    "race_names": [
     "SkeeverRace"
-   ]
+   ],
+   "height": 1.0,
+   "npc": "EncSkeever"
   }
  ]
 }

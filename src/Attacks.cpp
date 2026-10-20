@@ -222,6 +222,13 @@ namespace protean::Attacks
 		}
 	}
 
+	void TestFire(bool a_power, bool a_rmb)
+	{
+		g_press = Press{ false, false, a_rmb, {} };
+		Fire(a_power);
+		g_press = Press{};
+	}
+
 	void Cancel()
 	{
 		g_press = Press{};

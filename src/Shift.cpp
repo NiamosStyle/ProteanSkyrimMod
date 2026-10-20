@@ -382,6 +382,39 @@ namespace protean::Shift
 			return false;
 		}
 
+		// Variants that share a race (Ice Wolf, Pit Wolf) differ only by the skin and size on their own NPC record.
+		// The player's record gets the animal's while transformed (memory only); the player's own values are kept
+		// in the co-save, because a save made while transformed may store the animal's.
+		void WearBody(RE::PlayerCharacter* a_p, const Creature& a_c)
+		{
+			auto* base = a_p->GetActorBase();
+			auto& s = State::Get();
+			if (!base) {
+				return;
+			}
+			if (s.bodyHeight <= 0.0f) {
+				s.bodySkin = base->skin ? base->skin->GetFormID() : 0;
+				s.bodyHeight = base->height;
+			}
+			base->skin = a_c.skin;
+			base->height = a_c.height;
+			logger::info("body: skin {:08X} height {:.2f} (own skin {:08X} height {:.2f})", a_c.skin ? a_c.skin->GetFormID() : 0,
+				a_c.height, s.bodySkin, s.bodyHeight);
+		}
+
+		void TakeOffBody(RE::PlayerCharacter* a_p)
+		{
+			auto* base = a_p->GetActorBase();
+			auto& s = State::Get();
+			if (!base || s.bodyHeight <= 0.0f) {
+				return;
+			}
+			base->skin = s.bodySkin ? RE::TESForm::LookupByID<RE::TESObjectARMO>(s.bodySkin) : nullptr;
+			base->height = s.bodyHeight;
+			s.bodySkin = 0;
+			s.bodyHeight = 0.0f;
+		}
+
 		void LogVitals(const char* a_tag, RE::PlayerCharacter* a_p)
 		{
 			auto* av = a_p->AsActorValueOwner();
@@ -465,6 +498,7 @@ namespace protean::Shift
 		CollectWitnesses(p);
 		SnapshotCrime();
 		SaveAndStripGear(p);
+		WearBody(p, a_c);  // before the race switch, which rebuilds the model
 		p->SwitchRace(a_c.race, true);
 		JoinFactions(p, a_c);
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, bonus);
@@ -529,6 +563,7 @@ namespace protean::Shift
 			ForgiveAnimalCrimes(p, !seen);
 		}
 
+		TakeOffBody(p);
 		if (auto* race = RE::TESForm::LookupByID<RE::TESRace>(s.realRace)) {
 			p->SwitchRace(race, true);
 		} else {
@@ -603,13 +638,27 @@ namespace protean::Shift
 		}
 		// The save was made while transformed. Race, health and factions are already in the save;
 		// the control lock and the camera are not.
-		logger::info("loaded a save made as '{}': restoring the control lock", s.active);
+		logger::info("loaded a save made as '{}': restoring the control lock and the body", s.active);
 		SetControlsLocked(true);
 		if (const auto* c = Active()) {
+			WearBody(p, *c);
+			SKSE::GetTaskInterface()->AddTask([]() {
+				if (auto* pl = RE::PlayerCharacter::GetSingleton(); pl && pl->Is3DLoaded()) {
+					pl->DoReset3D(true);
+				}
+			});
 			Camera::Begin(c->cameraHeight);
 		}
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 			cam->ForceThirdPerson();
+		}
+	}
+
+	void BeforeLoad()
+	{
+		// hand the player's own skin and height back, so a save loaded next does not inherit the animal's
+		if (auto* p = Player()) {
+			TakeOffBody(p);
 		}
 	}
 

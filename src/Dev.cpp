@@ -1,5 +1,6 @@
 #include "Dev.h"
 
+#include "Attacks.h"
 #include "Face.h"
 #include "Registry.h"
 #include "Shift.h"
@@ -108,6 +109,26 @@ namespace protean::Dev
 					Face::SetIgnoreFaceFiles(a_cmd == "stealdata");  // stealdata: build the face from the data, ignoring face files
 					Face::Steal(npc, nullptr, a_cmd == "steal");
 					Face::SetIgnoreFaceFiles(false);
+				}
+			} else if (a_cmd == "attack") {
+				// attack [lmb|rmb|power|rpower]: what that button would do
+				Attacks::TestFire(a_arg.find("power") != std::string::npos, a_arg.starts_with("r"));
+			} else if (a_cmd == "place" && !a_arg.empty()) {
+				// place <ref hex> <distance>: put that actor in front of the player, facing the player, held in place
+				std::istringstream in(a_arg);
+				std::string         hex;
+				float               dist = 0.0f;
+				in >> hex >> dist;
+				auto* a = RE::TESForm::LookupByID<RE::Actor>(static_cast<RE::FormID>(std::stoul(hex, nullptr, 16)));
+				if (a) {
+					const float yaw = p->GetAngleZ();
+					auto pos = p->GetPosition();
+					pos.x += dist * std::sin(yaw);
+					pos.y += dist * std::cos(yaw);
+					a->SetPosition(pos, true);
+					a->SetAngle({ 0.0f, 0.0f, yaw + RE::NI_PI });
+					logger::info("dev: placed {:08X} '{}' {:.0f} in front, measured distance {:.0f}", a->GetFormID(), a->GetName(), dist,
+						p->GetPosition().GetDistance(a->GetPosition()));
 				}
 			} else if (a_cmd == "reach" && !a_arg.empty()) {
 				// reach <unarmed reach> [strike angle]: change the player's current race in memory (affects every actor

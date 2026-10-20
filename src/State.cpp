@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 6;  // 3 to 5 are still read
+		constexpr std::uint32_t kVersion = 7;  // 3 to 6 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -196,6 +196,8 @@ namespace protean
 			}
 			PutLook(a, s.own);
 			PutLook(a, s.bank);
+			PutForm(a, s.bodySkin);
+			Put(a, s.bodyHeight);
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -304,6 +306,10 @@ namespace protean
 					}
 					if (version >= 6 && !(GetLook(a, s.own) && GetLook(a, s.bank))) {
 						logger::warn("co-save: the saved looks could not be read");
+					}
+					if (version >= 7) {
+						s.bodySkin = GetForm(a);
+						Get(a, s.bodyHeight);
 					}
 				}
 			}

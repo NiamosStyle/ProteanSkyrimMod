@@ -11,5 +11,6 @@ namespace protean::Attacks
 
 	void Install();                       // kDataLoaded: input sink + INI switch
 	void OnFrame();                       // main thread, every frame (hold timing)
-	void Cancel();                        // transform / revert / load: forget a half-finished press, put back the race's reach
+	void TestFire(bool a_power, bool a_rmb);  // dev: the attack a button press would start
+	void Cancel();                       // transform / revert / load: forget a half-finished press, put back the race's reach
 }

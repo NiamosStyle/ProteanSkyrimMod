@@ -57,6 +57,43 @@ def yq(s):
     return "'" + s.replace("'", "''") + "'"
 
 
+def by_race(table, c, creatures):
+    """A per-animal setting; variants sharing a race (Ice Wolf, Pit Wolf) inherit their race-mate's."""
+    if c["id"] in table:
+        return table[c["id"]]
+    for other in creatures:
+        if other["race"] == c["race"] and other["id"] in table:
+            return table[other["id"]]
+    return type(next(iter(table.values())))()
+
+
+def body(c, npcs):
+    """Skin, size and model height of the animal's own vanilla NPC record (the one named like it, an Enc* record
+    preferred). Variants that share a race (Ice Wolf, Pit Wolf) differ only here. Skin None = the race's own."""
+    rows = []
+    for x in npcs:
+        j = x["json"]
+        if x["race"] == c["race"] and j.get("FULL - Name") == c["name"]:
+            edid = j.get("EDID - Editor ID", "")
+            bound = (j.get("OBND - Object Bounds") or {}).get("Z2", 0)
+            rows.append((not edid.startswith("Enc"), "TPLT - Template" in j, edid,
+                         j.get("WNAM - Worn Armor"), j.get("NAM6 - Height", 1.0), bound))
+    if not rows:
+        return {}
+    rows.sort()
+    _, _, edid, skin, height, bound = rows[0]
+    if not bound:  # some records leave the bounds empty; any record of the same race has the model's
+        bound = max(((x["json"].get("OBND - Object Bounds") or {}).get("Z2", 0) for x in npcs if x["race"] == c["race"]),
+                    default=0) or c.get("bound_height") or 0
+    out = {"height": round(height, 3), "npc": edid}
+    if skin:
+        f, i = skin.split(":")
+        out["skin"] = {"file": f, "id": int(i, 16)}
+    if bound:
+        out["camera_height"] = round(0.9 * bound * height)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--enable", default="wolf,deer,skeever")
@@ -148,6 +185,7 @@ def main():
           + "Value: 300\nWeight: 1\nInventoryArt: 02FBB3:Skyrim.esm\n"
           "Description:\n  TargetLanguage: English\n  Value: ''\n")
 
+    npcs = json.load(open(os.path.join(ROOT, "research", "raw", "npcs.json"), encoding="utf-8"))
     runtime = []
     for index, c in enumerate(creatures):
         if c["id"] not in enabled:
@@ -172,13 +210,14 @@ def main():
             "race": {"file": rf, "id": int(rid, 16)},
             "heart": heart, "power": pw,
             "size": c["size_class"],
-            "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", []) if a["event"] not in BLOCKED.get(c["id"], [])],
+            "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", []) if a["event"] not in by_race(BLOCKED, c, creatures)],
             "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
             "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"]],
             "ladder": c["health_ladder"],
             # vanilla NPC records of this creature: dead ones get a heart when looted
             "race_names": [c["race"]],
-            **MELEE.get(c["id"], {}),
+            **body(c, npcs),
+            **by_race(MELEE, c, creatures),
         })
 
     # Keywords that mark a location as a cave-like open interior (Troll/Horker may go there). Measured over
