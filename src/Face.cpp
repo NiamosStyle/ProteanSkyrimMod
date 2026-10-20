@@ -74,6 +74,22 @@ namespace protean::Face
 
 		// ---- the look ---------------------------------------------------------------------------------
 
+		// The player's skin-tone tint, asked of the game itself and checked before use. The access is guarded so a
+		// bad pointer is reported instead of crashing the game.
+		RE::TintMask* FindSkinMask(RE::PlayerCharacter* a_p)
+		{
+			RE::TintMask* m = nullptr;
+			__try {
+				m = a_p->GetTintMask(static_cast<std::uint32_t>(RE::TintMask::Type::kSkinTone), 0);
+				if (reinterpret_cast<std::uintptr_t>(m) < 0x10000 || m->type.get() != RE::TintMask::Type::kSkinTone) {
+					m = nullptr;
+				}
+			} __except (1) {
+				m = nullptr;
+			}
+			return m;
+		}
+
 		// The skin-tone entry of an NPC's tint layers (the one that colours arms, legs and body).
 		RE::TESNPC::Layer* SkinLayer(RE::TESNPC* a_npc, RE::TESRace* a_race, bool a_female)
 		{
@@ -121,7 +137,20 @@ namespace protean::Face
 			}
 			Capture(base);
 			{
-				// the hair takes the colour of the new face, not the player's own
+				// the hair takes the colour of the new face, not the player's own; the body takes its skin tone
+				auto*           theirs = SkinLayer(root, root->GetRace(), root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale));
+				const RE::Color skin = theirs ? theirs->tintColor : root->bodyTintColor;
+				if (auto* mine = FindSkinMask(Player())) {
+					if (!g_orig.skinMask) {
+						g_orig.skinMask = mine;
+						g_orig.skinColor = mine->color;
+					}
+					logger::info("skin tone {},{},{} -> {},{},{} ({})", mine->color.red, mine->color.green, mine->color.blue, skin.red, skin.green,
+						skin.blue, theirs ? "tint layer" : "body colour");
+					mine->color = skin;
+				} else {
+					logger::info("skin tone: the player has no usable skin-tone tint");
+				}
 				if (g_orig.headRelated && root->headRelatedData && root->headRelatedData->hairColor) {
 					if (!g_orig.hairSwapped) {
 						g_orig.hairColor = g_orig.headRelated->hairColor;
@@ -163,6 +192,12 @@ namespace protean::Face
 				base->headRelatedData = g_orig.headRelated;
 				base->faceData = g_orig.faceData;
 				base->tintLayers = g_orig.tintLayers;
+				if (g_orig.skinMask) {
+					if (auto* now = FindSkinMask(Player()); now == g_orig.skinMask) {
+						now->color = g_orig.skinColor;
+					}
+					g_orig.skinMask = nullptr;
+				}
 				if (g_orig.hairSwapped && g_orig.headRelated) {
 					g_orig.headRelated->hairColor = g_orig.hairColor;
 					g_orig.hairSwapped = false;
