@@ -61,7 +61,9 @@ namespace protean::Face
 		using Tint = State::Tint;
 
 		constexpr std::uint32_t kTintTypes = 15;    // RE::TintMask::Type::kTotal
-		constexpr int           kRedrawDelay = 16;  // frames between putting a look on and redrawing it
+		constexpr int           kRedrawDelay = 90;  // frames over which a newly worn look is redrawn
+		constexpr int           kHeadAt = 82;       // RegenerateHead
+		constexpr int           kPaintAt[] = { 74, 40, 1 };  // paint the colours (again, in case the model finished late)
 
 		std::vector<Tint> g_pendingTints;  // painted with the redraw, after any race change has rebuilt the model
 		int               g_redraw{ 0 };   // frames until the redraw (0 = none)
@@ -132,6 +134,60 @@ namespace protean::Face
 			return ok;
 		}
 
+		// One colour layer as stored in the plugin (TINI / TINC / TINV / TIAS).
+		struct RawLayer
+		{
+			std::uint16_t index{ 0 };
+			std::uint8_t  rgba[4]{ 0, 0, 0, 255 };
+			float         alpha{ 1.0f };
+		};
+
+		constexpr std::uint32_t Code(const char (&a_c)[5])
+		{
+			return static_cast<std::uint32_t>(static_cast<std::uint8_t>(a_c[0])) | (static_cast<std::uint32_t>(static_cast<std::uint8_t>(a_c[1])) << 8) |
+			       (static_cast<std::uint32_t>(static_cast<std::uint8_t>(a_c[2])) << 16) | (static_cast<std::uint32_t>(static_cast<std::uint8_t>(a_c[3])) << 24);
+		}
+
+		// The game keeps an NPC's colour layers in memory only when it has no finished face files, but they are
+		// still in the plugin: read them from the record of the file that last changed the NPC.
+		std::vector<RawLayer> ReadLayers(RE::TESNPC* a_npc)
+		{
+			std::vector<RawLayer> out;
+			auto*                 file = a_npc->GetDescriptionOwnerFile();
+			if (!file) {
+				file = a_npc->GetFile(-1);
+			}
+			if (!file || Generated(a_npc->GetFormID())) {
+				return out;
+			}
+			if (!file->OpenTES(RE::NiFile::OpenMode::kReadOnly, false)) {
+				logger::warn("colour layers: could not open {}", file->GetFilename());
+				return out;
+			}
+			if (file->SeekForm(a_npc)) {
+				while (file->SeekNextSubrecord()) {
+					const auto type = file->GetCurrentSubRecordType();
+					const auto size = file->GetCurrentSubRecordSize();
+					if (type == Code("TINI") && size >= 2) {
+						RawLayer l;
+						file->ReadData(&l.index, 2);
+						out.push_back(l);
+					} else if (type == Code("TINC") && size >= 4 && !out.empty()) {
+						file->ReadData(out.back().rgba, 4);
+					} else if (type == Code("TINV") && size >= 4 && !out.empty()) {
+						std::int32_t v = 0;
+						file->ReadData(&v, 4);
+						out.back().alpha = static_cast<float>(v) / 100.0f;
+					}
+				}
+			} else {
+				logger::warn("colour layers: {:08X} not found in {}", a_npc->GetFormID(), file->GetFilename());
+			}
+			file->CloseTES(false);
+			logger::info("  read {} colour layer(s) of {:08X} from {}", out.size(), a_npc->GetFormID(), file->GetFilename());
+			return out;
+		}
+
 		// The look of an NPC, taken from the record its face really comes from (templates resolved).
 		Look LookOf(RE::TESNPC* a_npc)
 		{
@@ -171,26 +227,37 @@ namespace protean::Face
 				fmt::ptr(root->tintLayers), root->tintLayers ? root->tintLayers->size() : 0, fmt::ptr(root->faceData));
 			// colour layers: each NPC layer names one of its race's tint assets by index
 			auto* related = race ? race->faceRelatedData[l.female ? 1 : 0] : nullptr;
-			if (root->tintLayers && related && related->tintMasks) {
+			std::vector<RawLayer> layers;
+			if (root->tintLayers) {
 				for (auto* layer : *root->tintLayers) {
-					if (!layer) {
-						continue;
+					if (layer) {
+						RawLayer r;
+						r.index = layer->tintIndex;
+						r.rgba[0] = layer->tintColor.red;
+						r.rgba[1] = layer->tintColor.green;
+						r.rgba[2] = layer->tintColor.blue;
+						r.rgba[3] = layer->tintColor.alpha;
+						r.alpha = layer->GetInterpolationValue();
+						layers.push_back(r);
 					}
+				}
+			} else {
+				layers = ReadLayers(root);
+			}
+			if (related && related->tintMasks) {
+				for (const auto& layer : layers) {
 					std::uint8_t nth[kTintTypes]{};  // position of the asset among the assets of its type
 					for (auto* asset : *related->tintMasks) {
 						if (!asset) {
 							continue;
 						}
 						const auto type = static_cast<std::uint8_t>(asset->texture.skinTone.get());
-						if (asset->texture.index == layer->tintIndex) {
+						if (asset->texture.index == layer.index) {
 							Tint t;
 							t.type = type;
 							t.index = type < kTintTypes ? nth[type] : 0;
-							t.rgba[0] = layer->tintColor.red;
-							t.rgba[1] = layer->tintColor.green;
-							t.rgba[2] = layer->tintColor.blue;
-							t.rgba[3] = layer->tintColor.alpha;
-							t.alpha = layer->GetInterpolationValue();
+							std::copy_n(layer.rgba, 4, t.rgba);
+							t.alpha = layer.alpha;
 							t.texture = Lower(asset->texture.file.textureName.c_str());
 							l.tints.push_back(std::move(t));
 							break;
@@ -405,7 +472,8 @@ namespace protean::Face
 			g_redraw = kRedrawDelay;
 		}
 
-		// Every frame: the delayed half of Wear.
+		// Every frame: the delayed half of Wear. The model may take a while to rebuild, so the face colours are
+		// painted more than once.
 		void RedrawTick()
 		{
 			if (g_redraw <= 0) {
@@ -413,16 +481,21 @@ namespace protean::Face
 			}
 			--g_redraw;
 			const bool animal = !State::Get().active.empty();  // changed into an animal meanwhile: no head to redraw
-			if (g_redraw == kRedrawDelay / 2 && !animal) {
+			if (animal) {
+				g_redraw = 0;
+				return;
+			}
+			if (g_redraw == kHeadAt) {
 				CallPlayer("RegenerateHead");
-			} else if (g_redraw == 0) {
+			}
+			if (std::ranges::find(kPaintAt, g_redraw) != std::end(kPaintAt)) {
 				WriteTints(g_pendingTints);
+				CallGame("UpdateTintMaskColors");
+				CallGame("UpdateHairColor");
+				Player()->UpdateSkinColor();
+			}
+			if (g_redraw == 0) {
 				g_pendingTints.clear();
-				if (!animal) {
-					CallGame("UpdateTintMaskColors");
-					CallGame("UpdateHairColor");
-					Player()->UpdateSkinColor();
-				}
 				logger::info("face redrawn");
 			}
 		}
