@@ -15,6 +15,11 @@ namespace protean::Move
 		std::array<Clock::time_point, 4> g_keys{};
 		RE::NiPoint2                     g_stick{};
 		bool                             g_overriding{ false };
+		int                              g_mode{ 1 };            // 1 = directional, 2 = tank (A/D turn)
+		float                            g_wantHeading{ 0.0f };  // mode 1: the heading put back after the update
+		float                            g_camYaw{ 0.0f };
+		bool                             g_steering{ false };
+		constexpr float                  kTankRate = RE::NI_PI;  // mode 2: 180 degrees per second
 
 		float Wrap(float a_angle)
 		{
@@ -99,8 +104,20 @@ namespace protean::Move
 			StopOverriding();
 			return;
 		}
-		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
+		g_steering = false;
 		const auto in = Input();
+		if (g_mode == 2) {
+			// tank: A/D turn the animal (the camera follows it), W/S as the game does
+			if (std::abs(in.x) > 0.1f) {
+				a_player->SetHeading(a_player->GetAngleZ() + in.x * kTankRate * a_delta);
+				RE::PlayerControls::GetSingleton()->data.moveInputVec = { 0.0f, in.y };
+				g_overriding = true;
+			} else {
+				StopOverriding();
+			}
+			return;
+		}
+		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
 		const float len = std::sqrt(in.x * in.x + in.y * in.y);
 		if (len < 0.1f) {
 			StopOverriding();
@@ -115,6 +132,34 @@ namespace protean::Move
 		tps->freeRotation.x = Wrap(camYaw - now);  // the camera stays where it was looking
 		RE::PlayerControls::GetSingleton()->data.moveInputVec = { 0.0f, std::min(len, 1.0f) };
 		g_overriding = true;
+		g_steering = true;
+		g_wantHeading = now;
+		g_camYaw = camYaw;
+	}
+
+	void AfterUpdate(RE::PlayerCharacter* a_player)
+	{
+		// mode 1: the game turns a moving player back toward the camera during its update; put our turn back
+		auto* tps = Tps();
+		if (!g_steering || !tps) {
+			return;
+		}
+		if (std::abs(Wrap(a_player->GetAngleZ() - g_wantHeading)) > 0.01f) {
+			static int logged = 0;
+			if (logged++ < 5) {
+				logger::info("move: the game turned the animal to {:.2f}, putting back {:.2f}", a_player->GetAngleZ(), g_wantHeading);
+			}
+		}
+		a_player->SetHeading(g_wantHeading);
+		tps->freeRotationEnabled = true;
+		tps->freeRotation.x = Wrap(g_camYaw - g_wantHeading);
+	}
+
+	void SetMode(int a_mode)
+	{
+		Reset();
+		g_mode = a_mode;
+		logger::info("move: steering mode {}", g_mode);
 	}
 
 	void FaceCamera(RE::PlayerCharacter* a_player)

@@ -18,6 +18,7 @@ namespace protean::Hooks
 			{
 				Move::BeforeUpdate(a_this, a_delta);
 				func(a_this, a_delta);
+				Move::AfterUpdate(a_this);
 				Camera::OnFrame(a_this);
 				Attacks::OnFrame();
 				Shift::OnFrame();

@@ -2,6 +2,7 @@
 
 #include "Attacks.h"
 #include "Face.h"
+#include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -110,6 +111,8 @@ namespace protean::Dev
 					Face::Steal(npc, nullptr, a_cmd == "steal");
 					Face::SetIgnoreFaceFiles(false);
 				}
+			} else if (a_cmd == "movemode" && !a_arg.empty()) {
+				Move::SetMode(std::atoi(a_arg.c_str()));
 			} else if (a_cmd == "attack") {
 				// attack [lmb|rmb|power|rpower]: what that button would do
 				Attacks::TestFire(a_arg.find("power") != std::string::npos, a_arg.starts_with("r"));
