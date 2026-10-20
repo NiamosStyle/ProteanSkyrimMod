@@ -11,5 +11,4 @@ namespace protean::Attacks
 
 	void Install();                       // kDataLoaded: input sink + INI switch
 	void OnFrame();                       // main thread, every frame (hold timing)
-	void Cancel();                        // transform / revert / load: forget a half-finished press
-}
+	void Cancel();                        // transform / revert / load: forget a half-finished press}

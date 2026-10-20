@@ -161,9 +161,14 @@ namespace protean::Dev
 				const char* kind = f.any(RE::TESHitEvent::Flag::kPowerAttack) ? "power attack" :
 				                   f.any(RE::TESHitEvent::Flag::kBashAttack)  ? "bash" :
 				                                                                "normal attack";
-				logger::info("hit: '{}' by {}{}, health now {:.1f}", a_event->target->GetName(), kind,
+				// the attack data the engine has on the player right now: decides damage multiplier and power flag
+				const char* data = "none";
+				if (auto* proc = RE::PlayerCharacter::GetSingleton()->GetActorRuntimeData().currentProcess; proc && proc->high && proc->high->attackData) {
+					data = proc->high->attackData->event.c_str();
+				}
+				logger::info("hit: '{}' by {}{}, health now {:.1f}, attack data '{}'", a_event->target->GetName(), kind,
 					f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
-					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f);
+					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f, data);
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};

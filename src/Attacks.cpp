@@ -20,7 +20,23 @@ namespace protean::Attacks
 			std::chrono::steady_clock::time_point since{};
 		};
 		Press g_press;
-		
+
+		// Sending the attack event plays the move, but the engine only applies the attack's damage multiplier,
+		// power-attack flag and on-hit spells when its attack data is set; an animal's AI sets it through the
+		// attack action, which finds nothing for the player (measured live), so it is set here.
+		void SetAttackData(RE::Actor* a_actor, const std::string& a_event)
+		{
+			auto* race = a_actor->GetRace();
+			auto* proc = a_actor->GetActorRuntimeData().currentProcess;
+			if (!race || !race->attackDataMap || !proc || !proc->high) {
+				return;
+			}
+			auto& map = race->attackDataMap->attackDataMap;
+			if (auto it = map.find(RE::BSFixedString(a_event)); it != map.end()) {
+				proc->high->attackData = it->second;
+			}
+		}
+
 		void LoadIni()
 		{
 			std::ifstream in(kIni);
@@ -70,6 +86,9 @@ namespace protean::Attacks
 				p->DrawWeaponMagicHands(true);
 			}
 			const bool ok = p->NotifyAnimationGraph(a->event);
+			if (ok) {
+				SetAttackData(p, a->event);
+			}
 			logger::info("attack: '{}' {} {} -> graph accepted: {}", c->id, a_power ? "power" : "normal", a->event, ok);
 		}
 
@@ -146,5 +165,4 @@ namespace protean::Attacks
 	void Cancel()
 	{
 		g_press = Press{};
-	}
-}
+	}}
