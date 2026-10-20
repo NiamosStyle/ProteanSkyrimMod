@@ -379,12 +379,13 @@ namespace protean::Face
 			vm->DispatchMethodCall2(handle, "Actor", a_fn, RE::MakeFunctionArguments(), cb);
 		}
 
-		// Put a look on: the record and the race now (a race change rebuilds the model), the head, colours and hair
-		// a few frames later once the model is back.
+		// Put a look on: the record, colours and race now (a race change rebuilds the model), then the head, face
+		// colours and hair are redrawn a few frames later once the model is back.
 		void Wear(const Look& a_l)
 		{
 			auto* p = Player();
 			WriteRecord(a_l);
+			WriteTints(a_l.tints);  // before the rebuild: the body takes its colour from these when the model is built
 			auto* race = RE::TESForm::LookupByID<RE::TESRace>(a_l.race);
 			if (race && p->GetRace() != race) {
 				p->SwitchRace(race, true);
