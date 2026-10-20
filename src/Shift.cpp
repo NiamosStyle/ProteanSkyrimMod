@@ -507,12 +507,20 @@ namespace protean::Shift
 		LeaveFactions(p);
 		{
 			// who can see the change back? (the earlier witnesses of the change into the animal also count)
-			bool seen = !s.witnesses.empty();
+			// a person who saw the change into the animal knows; animals that saw it do not count
+			bool seen = std::ranges::any_of(s.witnesses, [](RE::FormID id) {
+				auto* a = RE::TESForm::LookupByID<RE::Actor>(id);
+				auto* r = a ? a->GetRace() : nullptr;
+				return r && r->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead);
+			});
 			if (auto* pl = RE::ProcessLists::GetSingleton(); pl && !seen) {
 				for (auto& handle : pl->highActorHandles) {
 					auto actor = handle.get();
-					if (actor && actor.get() != p && !actor->IsDead() && !actor->IsPlayerTeammate() &&
+					auto* race = actor ? actor->GetRace() : nullptr;  // only people count: a horse or dog watching is not a witness
+					if (actor && actor.get() != p && !actor->IsDead() && !actor->IsPlayerTeammate() && race &&
+						race->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) &&
 						p->GetPosition().GetDistance(actor->GetPosition()) <= kWitnessRange && actor->RequestDetectionLevel(p) > 0) {
+						logger::info("  {:08X} '{}' sees the change back", actor->GetFormID(), actor->GetName());
 						seen = true;
 						break;
 					}
