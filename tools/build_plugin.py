@@ -32,6 +32,7 @@ BLOCKED = {
     "wolf": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2"],
     # Phase 3 batch A (2026-10-20); Ice/Pit Wolf inherit the wolf's; dog, death hound, goat, cow refuse nothing
     "fox": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2"],
+    "horker": ["attackStart_Attack2"],  # seen refused in play 2026-10-20
     "elk": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2",
             "attackStart_ForwardPower", "attackStart_ForwardPowerShort", "attackStart_SkeeverLungeLong",
             "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],

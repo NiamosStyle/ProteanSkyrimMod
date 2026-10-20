@@ -227,12 +227,14 @@ namespace protean::Dev
 			static HitSink hits;
 			RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&hits);
 			// ignore whatever is already in the file: only lines written after this start count
+			// line by line: the file starts with a comment, which stopped a plain `f >> seq` loop at once and
+			// replayed every old command on the next load (seen 2026-10-20)
 			std::ifstream f(kCmd);
-			long          seq = 0;
-			while (f >> seq) {
-				g_lastSeq = std::max(g_lastSeq, seq);
-				std::string rest;
-				std::getline(f, rest);
+			for (std::string l; std::getline(f, l);) {
+				std::istringstream ls(l);
+				if (long seq = 0; ls >> seq) {
+					g_lastSeq = std::max(g_lastSeq, seq);
+				}
 			}
 		}
 	}

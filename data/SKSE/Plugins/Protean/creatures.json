@@ -2168,11 +2168,6 @@
    "size": "large_cave_ok",
    "attacks": [
     {
-     "event": "attackStart_Attack2",
-     "flags": [],
-     "spell": null
-    },
-    {
      "event": "attackStart_AttackLeft1",
      "flags": [],
      "spell": null
