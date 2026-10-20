@@ -44,7 +44,14 @@ MELEE = {
     "fox": {"reach": 120, "strike_angle": 50},
     "dog": {"reach": 120, "strike_angle": 50},
     "death_hound": {"reach": 120, "strike_angle": 50},
+    # batches B-D: the same floor for every fighter (a race with a longer reach keeps its own)
+    **{c: {"reach": 120, "strike_angle": 50} for c in (
+        "bear", "cave_bear", "snow_bear", "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat",
+        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker")},
 }
+ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
+           "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
+           "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker")
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 
@@ -66,6 +73,12 @@ def yq(s):
     return "'" + s.replace("'", "''") + "'"
 
 
+# The vanilla NPC record whose skin and size the player gets, where the automatic choice is wrong.
+NPC_PICK = {
+    "mudcrab": "EncMudcrabMedium",  # Small/Medium/Large/Giant all exist; medium is size 1.0
+}
+
+
 def by_race(table, c, creatures):
     """A per-animal setting; variants sharing a race (Ice Wolf, Pit Wolf) inherit their race-mate's."""
     if c["id"] in table:
@@ -79,18 +92,24 @@ def by_race(table, c, creatures):
 def body(c, npcs):
     """Skin, size and model height of the animal's own vanilla NPC record (the one named like it, an Enc* record
     preferred). Variants that share a race (Ice Wolf, Pit Wolf) differ only here. Skin None = the race's own."""
-    rows = []
-    for x in npcs:
-        j = x["json"]
-        if x["race"] == c["race"] and j.get("FULL - Name") == c["name"]:
-            edid = j.get("EDID - Editor ID", "")
-            bound = (j.get("OBND - Object Bounds") or {}).get("Z2", 0)
-            rows.append((not edid.startswith("Enc"), "TPLT - Template" in j, edid,
-                         j.get("WNAM - Worn Armor"), j.get("NAM6 - Height", 1.0), bound))
+    def pick(named):
+        rows = []
+        for x in npcs:
+            j = x["json"]
+            if x["race"] == c["race"] and (not named or j.get("FULL - Name") == c["name"]):
+                edid = j.get("EDID - Editor ID", "")
+                bound = (j.get("OBND - Object Bounds") or {}).get("Z2", 0)
+                # the plain Enc record first: EncMudcrab, not EncMudcrabGiant (twice the size)
+                rows.append((not edid.startswith("Enc"), "TPLT - Template" in j, len(edid), edid,
+                             j.get("WNAM - Worn Armor"), j.get("NAM6 - Height", 1.0), bound))
+        return sorted(rows)
+
+    rows = pick(True) or pick(False)  # the game calls hares "Rabbit"
+    if c["id"] in NPC_PICK:
+        rows = [r for r in rows if r[3] == NPC_PICK[c["id"]]] or rows
     if not rows:
         return {}
-    rows.sort()
-    _, _, edid, skin, height, bound = rows[0]
+    _, _, _, edid, skin, height, bound = rows[0]
     if not bound:  # some records leave the bounds empty; any record of the same race has the model's
         bound = max(((x["json"].get("OBND - Object Bounds") or {}).get("Z2", 0) for x in npcs if x["race"] == c["race"]),
                     default=0) or c.get("bound_height") or 0
@@ -105,7 +124,7 @@ def body(c, npcs):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--enable", default="wolf,deer,skeever")
+    ap.add_argument("--enable", default=ENABLED)
     ap.add_argument("--no-esp", action="store_true")
     a = ap.parse_args()
     table = json.load(open(os.path.join(ROOT, "data", "creatures.json"), encoding="utf-8"))
