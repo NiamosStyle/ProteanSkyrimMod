@@ -71,8 +71,9 @@ namespace protean::Hud
 			return t;
 		}
 
-		// a_line = the danger line as a share of the full bar (0 = hide everything); a_danger = health is below it
-		void Draw(double a_line, bool a_danger)
+		// a_line = the danger line as a share of the full bar (0 = hide everything); a_danger = health is below it;
+		// a_hurt = health is below its maximum
+		void Draw(double a_line, bool a_danger, bool a_hurt)
 		{
 			auto* ui = RE::UI::GetSingleton();
 			auto  hud = ui ? ui->GetMenu<RE::HUDMenu>() : nullptr;
@@ -80,6 +81,14 @@ namespace protean::Hud
 			RE::GFxValue meter;
 			if (!movie || !movie->GetVariable(&meter, kMeter) || !meter.IsDisplayObject() || !Measure(movie, meter)) {
 				return;
+			}
+
+			// The game fades the bar out once health reaches the maximum without the animal's bonus (measured: the
+			// bar vanished part-filled), hiding how far there is to heal. Keep fading it in, as the game does on a
+			// health change (HUDMenu.RunMeterAnim).
+			RE::GFxValue anim;
+			if (a_hurt && movie->GetVariable(&anim, "_root.HUDMovieBaseInstance.Health") && anim.IsDisplayObject()) {
+				anim.Invoke("PlayForward", std::array<RE::GFxValue, 1>{ RE::GFxValue(Num(anim, "_currentframe")) });
 			}
 
 			RE::GFxValue fill;
@@ -120,6 +129,7 @@ namespace protean::Hud
 
 		double line = 0.0;
 		bool   danger = false;
+		bool   hurt = false;
 		if (Shift::ActiveCreature()) {
 			auto*       av = a_player->AsActorValueOwner();
 			const float max = av->GetPermanentActorValue(RE::ActorValue::kHealth) +
@@ -127,13 +137,15 @@ namespace protean::Hud
 			const float deadly = Shift::RevertKillsBelow();
 			if (max > 0.0f && deadly > 0.0f) {
 				line = std::clamp(static_cast<double>(deadly / max), 0.001, 1.0);
-				danger = av->GetActorValue(RE::ActorValue::kHealth) <= deadly;
+				const float hp = av->GetActorValue(RE::ActorValue::kHealth);
+				danger = hp <= deadly;
+				hurt = hp < max - 0.5f;
 			}
 		}
 		if (line == 0.0 && !g_shown) {
 			return;
 		}
 		g_shown = line > 0.0;
-		SKSE::GetTaskInterface()->AddUITask([line, danger] { Draw(line, danger); });
+		SKSE::GetTaskInterface()->AddUITask([line, danger, hurt] { Draw(line, danger, hurt); });
 	}
 }
