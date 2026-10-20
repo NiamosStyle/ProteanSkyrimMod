@@ -40,8 +40,10 @@ namespace protean::Face
 			RE::TESNPC::HeadRelatedData* headRelated{ nullptr };
 			RE::TESNPC::FaceData*        faceData{ nullptr };
 			decltype(RE::TESNPC::tintLayers) tintLayers{ nullptr };
-			RE::TESNPC::Layer*           skinLayer{ nullptr };  // the player's own skin-tone layer, whose colour is swapped
+			RE::TintMask*                skinMask{ nullptr };  // the player's own skin-tone tint, whose colour is swapped
 			RE::Color                    skinColor{};
+			RE::BGSColorForm*            hairColor{ nullptr };  // the player's own hair colour, swapped in place
+			bool                         hairSwapped{ false };
 		};
 		Borrowed g_orig;
 
@@ -119,21 +121,35 @@ namespace protean::Face
 			}
 			Capture(base);
 			{
-				// the body takes the skin tone of the new face, not the player's own
-				auto& st = State::Get();
-				auto* ownRace = RE::TESForm::LookupByID<RE::TESRace>(st.ownRace);
-				auto* mine = SkinLayer(base, ownRace, st.ownFemale);
-				auto* theirs = SkinLayer(root, root->GetRace(), root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale));
-				if (mine && theirs && mine != theirs) {
-					if (!g_orig.skinLayer) {
-						g_orig.skinLayer = mine;
-						g_orig.skinColor = mine->tintColor;
+				// the body and hair take the colours of the new face, not the player's own
+				auto* p = Player();
+				RE::TintMask* mine = nullptr;
+				for (auto* t : p->GetRuntimeData().tintMasks) {
+					if (t && t->type.get() == RE::TintMask::Type::kSkinTone) {
+						mine = t;
+						break;
 					}
-					mine->tintColor = theirs->tintColor;
-					logger::info("skin tone {},{},{} -> {},{},{}", g_orig.skinColor.red, g_orig.skinColor.green, g_orig.skinColor.blue,
-						theirs->tintColor.red, theirs->tintColor.green, theirs->tintColor.blue);
+				}
+				auto* theirs = SkinLayer(root, root->GetRace(), root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale));
+				const RE::Color skin = theirs ? theirs->tintColor : root->bodyTintColor;
+				if (mine) {
+					if (!g_orig.skinMask) {
+						g_orig.skinMask = mine;
+						g_orig.skinColor = mine->color;
+					}
+					logger::info("skin tone {},{},{} -> {},{},{} ({})", mine->color.red, mine->color.green, mine->color.blue, skin.red, skin.green,
+						skin.blue, theirs ? "tint layer" : "body colour");
+					mine->color = skin;
 				} else {
-					logger::info("skin tone: no swap (own layer {}, their layer {})", mine != nullptr, theirs != nullptr);
+					logger::info("skin tone: player has no skin-tone tint");
+				}
+				if (g_orig.headRelated && root->headRelatedData && root->headRelatedData->hairColor) {
+					if (!g_orig.hairSwapped) {
+						g_orig.hairColor = g_orig.headRelated->hairColor;
+						g_orig.hairSwapped = true;
+					}
+					g_orig.headRelated->hairColor = root->headRelatedData->hairColor;
+					logger::info("hair colour -> {}", root->headRelatedData->hairColor->GetFormEditorID());
 				}
 			}
 			base->faceNPC = root == base ? nullptr : root;
@@ -168,9 +184,17 @@ namespace protean::Face
 				base->headRelatedData = g_orig.headRelated;
 				base->faceData = g_orig.faceData;
 				base->tintLayers = g_orig.tintLayers;
-				if (g_orig.skinLayer) {
-					g_orig.skinLayer->tintColor = g_orig.skinColor;
-					g_orig.skinLayer = nullptr;
+				if (g_orig.skinMask) {
+					for (auto* t : Player()->GetRuntimeData().tintMasks) {
+						if (t == g_orig.skinMask) {  // only if the game has not rebuilt the list since
+							t->color = g_orig.skinColor;
+						}
+					}
+					g_orig.skinMask = nullptr;
+				}
+				if (g_orig.hairSwapped && g_orig.headRelated) {
+					g_orig.headRelated->hairColor = g_orig.hairColor;
+					g_orig.hairSwapped = false;
 				}
 				g_orig.on = false;
 			}
