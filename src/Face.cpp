@@ -4,8 +4,6 @@
 #include "Shift.h"
 #include "State.h"
 
-#include <SKSEMenuFramework.h>
-
 #include <atomic>
 #include <mutex>
 
@@ -13,16 +11,12 @@ namespace protean::Face
 {
 	namespace
 	{
-		namespace ui = ImGuiMCP;
-
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 		constexpr int  kOfferFrames = 120;  // how long to wait for the loot window to open before giving up
 
 		bool  g_copyHeadData{ true };    // [Face] CopyHeadData: also share the corpse's head-part / face-data / tint pointers
 		float g_range{ 3000.0f };        // [Face] WitnessRange, game units
 		bool  g_enabled{ true };         // [Face] Enabled
-
-		SKSEMenuFramework::Model::WindowInterface* g_window{ nullptr };
 
 		// The choice currently on offer.
 		std::mutex             g_lock;
@@ -288,74 +282,70 @@ namespace protean::Face
 			g_wait = 0;
 			g_shown = false;
 			g_queued = false;
-			if (g_window) {
-				g_window->IsOpen = false;
-			}
 		}
+
+		// The game's own message box: Loot / Copy appearance / Cancel.
+		class Choice : public RE::IMessageBoxCallback
+		{
+		public:
+			explicit Choice(RE::FormID a_id) :
+				_id(a_id) {}
+
+			void Run(std::uint8_t a_button) override
+			{
+				const auto id = _id;
+				SKSE::GetTaskInterface()->AddTask([id, a_button]() {
+					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
+						if (a_button == 0) {
+							g_bypass = id;
+							a->ActivateRef(Player(), 0, nullptr, 1, false);
+						} else if (a_button == 1) {
+							Steal(a->GetActorBase(), a, true);
+						}
+					}
+					CloseOffer();
+				});
+			}
+
+		private:
+			RE::FormID _id;
+		};
 
 		void ShowChoice()
 		{
-			// the game opened the loot window; ours replaces it
+			// the game opened the loot window; close it and ask instead
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::ContainerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
-			if (g_window) {
-				g_window->IsOpen = true;
-			}
-			g_shown = true;
-			g_queued = false;
-			logger::info("face offer: loot window replaced by the choice window");
-		}
-
-		void __stdcall RenderWindow()
-		{
 			const auto id = g_offerId.load();
-			if (!id) {
-				ui::Text("%s", "Nothing here.");
-				return;
-			}
-			std::string name;
-			{
-				std::scoped_lock lk(g_lock);
-				name = g_offerName;
-			}
-			ui::Text("%s", name.c_str());
-			ui::TextDisabled("You kneel beside the body.");
-			ui::Separator();
-			if (ui::Button("Loot")) {
-				SKSE::GetTaskInterface()->AddTask([id]() {
-					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
-						g_bypass = id;
-						a->ActivateRef(Player(), 0, nullptr, 1, false);
-					}
+			SKSE::GetTaskInterface()->AddTask([id]() {
+				std::string name;
+				{
+					std::scoped_lock lk(g_lock);
+					name = g_offerName;
+				}
+				auto* box = RE::UIMessageDataFactory::Create<RE::MessageBoxData>();
+				if (!box) {
+					logger::error("face offer: could not create the message box");
 					CloseOffer();
-				});
-			}
-			ui::SameLine();
-			if (ui::Button("Copy appearance")) {
-				SKSE::GetTaskInterface()->AddTask([id]() {
-					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
-						Steal(a->GetActorBase(), a, true);
-					}
-					CloseOffer();
-				});
-			}
-			ui::SameLine();
-			if (ui::Button("Cancel")) {
-				SKSE::GetTaskInterface()->AddTask([]() { CloseOffer(); });
-			}
+					return;
+				}
+				box->bodyText = name.c_str();
+				box->buttonText.push_back(RE::BSString("Loot"));
+				box->buttonText.push_back(RE::BSString("Copy appearance"));
+				box->buttonText.push_back(RE::BSString("Cancel"));
+				box->cancelButtonIndex = 2;
+				box->isCancellable = true;
+				box->callback = RE::BSTSmartPointer<RE::IMessageBoxCallback>(new Choice(id));
+				RE::MessageBoxMenu::QueueMessage(box);
+				g_shown = true;
+				g_queued = false;
+				logger::info("face offer: loot window replaced by the choice box");
+			});
 		}
 	}
 
 	// ---- public --------------------------------------------------------------------------------------
 
-	void Register()
-	{
-		if (!SKSEMenuFramework::IsInstalled()) {
-			logger::warn("SKSE Menu Framework not installed: corpses can only be looted (no face stealing choice)");
-			return;
-		}
-		g_window = SKSEMenuFramework::AddWindow(RenderWindow, false);
-		logger::info("face stealing window registered");
-	}
+	void Register() {}  // the choice is the game's own message box: nothing to register
 
 	void Install()
 	{
@@ -375,7 +365,7 @@ namespace protean::Face
 	{
 		auto* p = Player();
 		auto& s = State::Get();
-		if (!g_enabled || !g_window || !a_corpse || !p) {
+		if (!g_enabled || !a_corpse || !p) {
 			return false;
 		}
 		if (g_bypass == a_corpse->GetFormID()) {
@@ -392,6 +382,9 @@ namespace protean::Face
 		g_offerId = a_corpse->GetFormID();
 		g_wait = kOfferFrames;
 		g_shown = false;
+		if (auto* ui = RE::UI::GetSingleton(); ui && ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME) && !g_queued.exchange(true)) {
+			ShowChoice();  // the loot window beat us to it
+		}
 		logger::info("face offer started for {:08X} '{}'", a_corpse->GetFormID(), a_corpse->GetName());
 		return true;
 	}
@@ -499,9 +492,7 @@ namespace protean::Face
 			}
 			return;
 		}
-		if (!g_window || !g_window->IsOpen || p->GetPosition().GetDistance(corpse->GetPosition()) > 400.0f) {
-			CloseOffer();
-		}
+		// the box is open: the callback ends the offer
 	}
 
 	void OnGameLoaded()
