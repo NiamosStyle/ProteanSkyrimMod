@@ -36,6 +36,8 @@ BLOCKED = {
     "elk": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2",
             "attackStart_ForwardPower", "attackStart_ForwardPowerShort", "attackStart_SkeeverLungeLong",
             "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],
+    # Phase 4 step 1 (2026-10-20): horse refuses nothing; the sprint moves need a sprint, the howl is a shout
+    "werewolf": ["AttackStartDualSprinting", "AttackStartHowlExplode", "AttackStartLeftSprinting", "AttackStartRightSprinting"],
 }
 # Melee tuning for the player in animal form (wild animals keep the vanilla values). Vanilla wolf: reach 64,
 # strike cone 35 degrees, which made bites very hard to land (measured live); werewolf: 150 / 50.

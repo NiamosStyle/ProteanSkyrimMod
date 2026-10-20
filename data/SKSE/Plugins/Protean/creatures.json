@@ -2306,16 +2306,6 @@
      "spell": null
     },
     {
-     "event": "AttackStartDualSprinting",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "AttackStartHowlExplode",
-     "flags": [],
-     "spell": null
-    },
-    {
      "event": "attackStartLeft",
      "flags": [],
      "spell": null
@@ -2340,11 +2330,6 @@
      "spell": null
     },
     {
-     "event": "AttackStartLeftSprinting",
-     "flags": [],
-     "spell": null
-    },
-    {
      "event": "attackStartRight",
      "flags": [],
      "spell": null
@@ -2365,11 +2350,6 @@
     },
     {
      "event": "AttackStartRightSide",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "AttackStartRightSprinting",
      "flags": [],
      "spell": null
     }
