@@ -140,7 +140,8 @@ namespace protean::Face
 			if (!root) {
 				root = a_npc;
 			}
-			auto* race = a_npc->GetRace();
+			// race, sex and body come from the same record as the face (a template's, for templated NPCs)
+			auto* race = root->GetRace() ? root->GetRace() : a_npc->GetRace();
 			l.valid = race != nullptr;
 			l.race = Id(race);
 			l.female = root->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale);
@@ -166,6 +167,8 @@ namespace protean::Face
 			}
 			l.faceNpc = !g_ignoreFaceFiles && HasFaceFiles(root) ? root->GetFormID() : 0;
 
+			logger::info("  face record {:08X}: race '{}', tint layer list {} ({} entr(ies)), face data {}", root->GetFormID(), race ? race->GetName() : "?",
+				fmt::ptr(root->tintLayers), root->tintLayers ? root->tintLayers->size() : 0, fmt::ptr(root->faceData));
 			// colour layers: each NPC layer names one of its race's tint assets by index
 			auto* related = race ? race->faceRelatedData[l.female ? 1 : 0] : nullptr;
 			if (root->tintLayers && related && related->tintMasks) {
