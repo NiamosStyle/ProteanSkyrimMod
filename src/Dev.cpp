@@ -145,6 +145,30 @@ namespace protean::Dev
 		}
 	}
 
+	namespace
+	{
+		// test-only: one log line per hit the player lands, so attacks can be matched to hits
+		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
+			{
+				if (!a_event || !a_event->cause || !a_event->cause->IsPlayerRef() || !a_event->target) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				auto*       target = a_event->target->As<RE::Actor>();
+				const auto  f = a_event->flags;
+				const char* kind = f.any(RE::TESHitEvent::Flag::kPowerAttack) ? "power attack" :
+				                   f.any(RE::TESHitEvent::Flag::kBashAttack)  ? "bash" :
+				                                                                "normal attack";
+				logger::info("hit: '{}' by {}{}, health now {:.1f}", a_event->target->GetName(), kind,
+					f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
+					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f);
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+	}
+
 	void Init()
 	{
 		std::ifstream in(kIni);
@@ -159,6 +183,8 @@ namespace protean::Dev
 		}
 		if (g_enabled) {
 			logger::warn("dev command channel is ENABLED (Protean.ini [Dev] Commands=1); watching {}", kCmd);
+			static HitSink hits;
+			RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&hits);
 			// ignore whatever is already in the file: only lines written after this start count
 			std::ifstream f(kCmd);
 			long          seq = 0;
@@ -188,7 +214,7 @@ namespace protean::Dev
 			if (!(ls >> seq >> cmd) || seq <= g_lastSeq) {
 				continue;
 			}
-			ls >> arg;
+			std::getline(ls >> std::ws, arg);  // the rest of the line: some commands take more than one word
 			todo.emplace_back(seq, cmd, arg);
 		}
 		for (auto& [seq, cmd, arg] : todo) {
