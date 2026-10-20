@@ -111,4 +111,4 @@ co-save still reads the old 'moves' block so older saves load.
 - The player's own look is snapshotted the same way; both looks live in the co-save (v6).
 - Verified: generic Orc bandit, Ulfric, Lydia (also forced through the from-data path: identical), Forsworn Shaman
   (template face): match except war paint (3 of 26 layers had no matching mask on a Redguard player). Taking off restores.
-- Safety still on: opening the game menu (Esc) takes a stolen face off. Quicksave/autosave while disguised: untested.
+- Save/quit/load and F5/F9 while wearing a stolen face verified live 2026-10-20 (Orc bandit, war paint kept); the Esc take-off safety is now off by default ([Face] TakeOffOnMenu=0).

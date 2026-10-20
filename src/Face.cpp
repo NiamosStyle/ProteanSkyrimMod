@@ -14,7 +14,7 @@ namespace protean::Face
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 		constexpr int  kOfferFrames = 120;  // how long to wait for the loot window to open before giving up
 
-		bool  g_menuTakeOff{ true };     // [Face] TakeOffOnMenu: the game menu (save, load, quit) takes a stolen face off
+		bool  g_menuTakeOff{ false };     // [Face] TakeOffOnMenu: the game menu (save, load, quit) takes a stolen face off
 		bool  g_joinFactions{ true };    // [Face] JoinFactions: take on the corpse's factions (test switch)
 		float g_range{ 3000.0f };        // [Face] WitnessRange, game units
 		bool  g_enabled{ true };         // [Face] Enabled
