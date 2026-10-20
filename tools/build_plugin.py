@@ -48,11 +48,12 @@ MELEE = {
     # batches B-D: the same floor for every fighter (a race with a longer reach keeps its own)
     **{c: {"reach": 120, "strike_angle": 50} for c in (
         "bear", "cave_bear", "snow_bear", "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat",
-        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker")},
+        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse")},
 }
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
-           "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker")
+           "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
+           "horse,werewolf,werebear")
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 

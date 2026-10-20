@@ -2157,6 +2157,57 @@
    "strike_angle": 50
   },
   {
+   "id": "horse",
+   "name": "Horse",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78333
+   },
+   "heart": 2116,
+   "power": 2117,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    }
+   ],
+   "camera_height": 152,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 190612
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 254101
+    }
+   ],
+   "ladder": [
+    [
+     4,
+     289
+    ]
+   ],
+   "race_names": [
+    "HorseRace"
+   ],
+   "height": 1.0,
+   "npc": "EncHorseGrey",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 550159
+   },
+   "reach": 120,
+   "strike_angle": 50
+  },
+  {
    "id": "horker",
    "name": "Horker",
    "race": {
@@ -2223,6 +2274,250 @@
    "npc": "EncHorker",
    "reach": 120,
    "strike_angle": 50
+  },
+  {
+   "id": "werewolf",
+   "name": "Werewolf",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 843140
+   },
+   "heart": 2124,
+   "power": 2125,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "AttackStartBackHand",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell"
+    },
+    {
+     "event": "AttackStartDual",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStartDualRunning",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartDualSprinting",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartHowlExplode",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStartLeft",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartLeftPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStartLeftRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell"
+    },
+    {
+     "event": "AttackStartLeftSide",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartLeftSprinting",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStartRight",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStartRightRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell"
+    },
+    {
+     "event": "AttackStartRightSide",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartRightSprinting",
+     "flags": [],
+     "spell": null
+    }
+   ],
+   "camera_height": 115,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 275860
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     100
+    ]
+   ],
+   "race_names": [
+    "WerewolfBeastRace"
+   ],
+   "height": 1.0,
+   "npc": "EncWerewolf01"
+  },
+  {
+   "id": "werebear",
+   "name": "Werebear",
+   "race": {
+    "file": "Dragonborn.esm",
+    "id": 123259
+   },
+   "heart": 2126,
+   "power": 2127,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "AttackStartBackHand",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell"
+    },
+    {
+     "event": "AttackStartDual",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStartDualRunning",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartDualSprinting",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartHowlExplode",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStartLeft",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartLeftPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStartLeftRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell"
+    },
+    {
+     "event": "AttackStartLeftSide",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartLeftSprinting",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStartRight",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStartRightPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStartRightRunningPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "werewolfKnockbackSpell"
+    },
+    {
+     "event": "AttackStartRightSide",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStartRightSprinting",
+     "flags": [],
+     "spell": null
+    }
+   ],
+   "camera_height": 60,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 275860
+    }
+   ],
+   "ladder": [
+    [
+     25,
+     740
+    ]
+   ],
+   "race_names": [
+    "DLC2WerebearBeastRace"
+   ],
+   "height": 1.0,
+   "npc": "DLC2EncWerebear"
   }
  ]
 }
