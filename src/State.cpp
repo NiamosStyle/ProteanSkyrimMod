@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 4;  // 3 (before face stealing) is still read
+		constexpr std::uint32_t kVersion = 5;  // 3 and 4 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -109,6 +109,12 @@ namespace protean
 					PutForm(a, f);
 				}
 			}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.crime.size()));
+			for (const auto& c : s.crime) {
+				PutForm(a, c.faction);
+				Put(a, c.violent);
+				Put(a, c.nonViolent);
+			}
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -201,6 +207,17 @@ namespace protean
 						for (std::uint32_t i = 0; i < n; ++i) {
 							if (auto f = GetForm(a)) {
 								list->push_back(f);
+							}
+						}
+					}
+					if (version >= 5 && Get(a, n) && n <= 100000) {
+						for (std::uint32_t i = 0; i < n; ++i) {
+							State::CrimeSnap c;
+							c.faction = GetForm(a);
+							Get(a, c.violent);
+							Get(a, c.nonViolent);
+							if (c.faction) {
+								s.crime.push_back(c);
 							}
 						}
 					}

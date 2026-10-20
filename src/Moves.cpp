@@ -233,9 +233,7 @@ namespace protean::Moves
 	std::string Label(const Attack& a_attack)
 	{
 		std::string s = Pretty(a_attack.event);
-		if (a_attack.hasSpell) {
-			s += " (spell)";
-		} else if (a_attack.bash) {
+		if (a_attack.bash) {
 			s += " (bash)";
 		} else if (a_attack.power) {
 			s += " (power)";

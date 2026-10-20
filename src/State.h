@@ -34,6 +34,16 @@ namespace protean
 		// Corpses that already had their heart added, so a taken heart is not added again.
 		std::set<RE::FormID> looted;
 
+		// Crime gold (per crime faction) when the player turned into an animal; anything gained as the animal is
+		// forgiven on turning back if nobody saw the change.
+		struct CrimeSnap
+		{
+			RE::FormID   faction{ 0 };
+			std::int32_t violent{ 0 };
+			std::int32_t nonViolent{ 0 };
+		};
+		std::vector<CrimeSnap> crime;
+
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and
 		// taken off with the Stolen Face power. The player's own look is kept here while a stolen one is worn.
 		RE::FormID              bankedNpc{ 0 };  // base NPC of the banked face, 0 = none

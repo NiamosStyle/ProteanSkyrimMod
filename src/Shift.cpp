@@ -208,6 +208,71 @@ namespace protean::Shift
 			s.hostileWitnesses.clear();
 		}
 
+		// ---- crime committed as the animal --------------------------------------------------------------
+
+		void SnapshotCrime()
+		{
+			auto& s = State::Get();
+			s.crime.clear();
+			for (auto* f : RE::TESDataHandler::GetSingleton()->GetFormArray<RE::TESFaction>()) {
+				if (f && f->TracksCrimes()) {
+					const auto v = f->GetCrimeGoldViolent(), nv = f->GetCrimeGoldNonViolent();
+					if (v || nv) {
+						s.crime.push_back({ f->GetFormID(), v, nv });
+					}
+				}
+			}
+		}
+
+		// Nobody saw the person change into the animal, so what the animal did is not held against the person:
+		// bounties gained since the change are removed and anyone fighting the player stands down.
+		void ForgiveAnimalCrimes(RE::PlayerCharacter* a_p)
+		{
+			auto& s = State::Get();
+			int   forgiven = 0;
+			for (auto* f : RE::TESDataHandler::GetSingleton()->GetFormArray<RE::TESFaction>()) {
+				if (!f || !f->TracksCrimes()) {
+					continue;
+				}
+				std::int32_t sv = 0, snv = 0;
+				for (const auto& c : s.crime) {
+					if (c.faction == f->GetFormID()) {
+						sv = c.violent;
+						snv = c.nonViolent;
+					}
+				}
+				const auto v = f->GetCrimeGoldViolent(), nv = f->GetCrimeGoldNonViolent();
+				if (v > sv) {
+					f->ModCrimeGold(-(v - sv), true);
+					forgiven += v - sv;
+				}
+				if (nv > snv) {
+					f->ModCrimeGold(-(nv - snv), false);
+					forgiven += nv - snv;
+				}
+			}
+			int calmed = 0;
+			if (auto* pl = RE::ProcessLists::GetSingleton()) {
+				for (auto& handle : pl->highActorHandles) {
+					auto actor = handle.get();
+					if (!actor || actor.get() == a_p || actor->IsDead()) {
+						continue;
+					}
+					auto target = actor->GetActorRuntimeData().currentCombatTarget.get();
+					if (target && target.get() == a_p) {
+						actor->StopCombat();
+						actor->StopAlarmOnActor();
+						++calmed;
+					}
+				}
+			}
+			s.crime.clear();
+			logger::info("nobody saw the change: forgave {} gold of bounty, calmed {} actor(s)", forgiven, calmed);
+			if (forgiven || calmed) {
+				Notify("Nobody connects you with what the beast did.");
+			}
+		}
+
 		void JoinFactions(RE::PlayerCharacter* a_p, const Creature& a_c)
 		{
 			auto& s = State::Get();
@@ -349,6 +414,7 @@ namespace protean::Shift
 		s.active = a_c.id;
 
 		CollectWitnesses(p);
+		SnapshotCrime();
 		SaveAndStripGear(p);
 		p->SwitchRace(a_c.race, true);
 		JoinFactions(p, a_c);
@@ -390,6 +456,9 @@ namespace protean::Shift
 		SetControlsLocked(false);
 		Camera::End();
 		LeaveFactions(p);
+		if (s.witnesses.empty()) {
+			ForgiveAnimalCrimes(p);
+		}
 
 		if (auto* race = RE::TESForm::LookupByID<RE::TESRace>(s.realRace)) {
 			p->SwitchRace(race, true);

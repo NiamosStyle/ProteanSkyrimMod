@@ -48,7 +48,7 @@ namespace protean::Attacks
 			std::vector<const Attack*> all;
 			std::vector<const Attack*> sided;
 			for (const auto& a : a_c.attacks) {
-				if (a.bash || a.hasSpell || a.event.empty()) {
+				if (a.bash || a.event.empty()) {
 					continue;
 				}
 				if (a.power != a_power) {
