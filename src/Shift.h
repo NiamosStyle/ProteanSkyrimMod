@@ -20,6 +20,7 @@ namespace protean::Shift
 
 	void Transform(const Creature& a_creature);
 	void Revert(std::string_view a_why);
+	float RevertKillsBelow();  // health at or below which changing back kills (0 = not transformed)
 
 	// every 30th frame (main thread): auto-revert when the animal no longer fits where the player is
 	void OnFrame();

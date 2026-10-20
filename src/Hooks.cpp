@@ -5,6 +5,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Dev.h"
+#include "Hud.h"
 #include "Move.h"
 #include "Shift.h"
 
@@ -23,6 +24,7 @@ namespace protean::Hooks
 				Attacks::OnFrame();
 				Shift::OnFrame();
 				Face::OnFrame();
+				Hud::OnFrame(a_this);
 				Dev::Poll();
 			}
 			static inline REL::Relocation<decltype(thunk)> func;

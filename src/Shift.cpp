@@ -605,13 +605,7 @@ namespace protean::Shift
 
 		bool ConfirmRevert()
 		{
-			auto*       p = Player();
-			auto*       av = p->AsActorValueOwner();
-			const auto& s = State::Get();
-			// health after the revert: less the bonus, and less whatever the animal's race adds to the maximum
-			// (the werewolf's +50); any other permanent bonus is counted as lost too, which can only warn early
-			const float raceExtra = av->GetPermanentActorValue(RE::ActorValue::kHealth) - av->GetBaseActorValue(RE::ActorValue::kHealth);
-			const float hp = av->GetActorValue(RE::ActorValue::kHealth) - s.healthBonus - std::max(raceExtra, 0.0f);
+			const float hp = Player()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) - RevertKillsBelow();
 			const auto  now = std::chrono::steady_clock::now();
 			if (hp > 0.0f || now - g_warnedAt < kConfirmFor) {
 				g_warnedAt = {};
@@ -622,6 +616,20 @@ namespace protean::Shift
 			Notify("Your wounds are too deep to survive changing back. Cast again to change back anyway.");
 			return false;
 		}
+	}
+
+	float RevertKillsBelow()
+	{
+		auto*       p = Player();
+		const auto& s = State::Get();
+		if (s.active.empty() || !p) {
+			return 0.0f;
+		}
+		// changing back takes away the bonus and whatever the animal's race adds to the maximum (the werewolf's
+		// +50); any other permanent bonus is counted as lost too, which can only warn early
+		auto*       av = p->AsActorValueOwner();
+		const float raceExtra = av->GetPermanentActorValue(RE::ActorValue::kHealth) - av->GetBaseActorValue(RE::ActorValue::kHealth);
+		return s.healthBonus + std::max(raceExtra, 0.0f);
 	}
 
 	void OnPowerCast(RE::SpellItem* a_spell)
