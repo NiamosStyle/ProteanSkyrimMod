@@ -226,7 +226,7 @@ namespace protean::Shift
 
 		// Nobody saw the person change into the animal, so what the animal did is not held against the person:
 		// bounties gained since the change are removed and anyone fighting the player stands down.
-		void ForgiveAnimalCrimes(RE::PlayerCharacter* a_p)
+		void ForgiveAnimalCrimes(RE::PlayerCharacter* a_p, bool a_forgive)
 		{
 			auto& s = State::Get();
 			int   forgiven = 0;
@@ -243,15 +243,35 @@ namespace protean::Shift
 				}
 				const auto v = f->GetCrimeGoldViolent(), nv = f->GetCrimeGoldNonViolent();
 				if (v > sv) {
-					f->ModCrimeGold(-(v - sv), true);
+					if (a_forgive) {
+						f->ModCrimeGold(-(v - sv), true);
+					}
 					forgiven += v - sv;
 				}
 				if (nv > snv) {
-					f->ModCrimeGold(-(nv - snv), false);
+					if (a_forgive) {
+						f->ModCrimeGold(-(nv - snv), false);
+					}
 					forgiven += nv - snv;
 				}
 			}
 			int calmed = 0;
+			if (!a_forgive) {
+				// seen changing back: whoever saw it holds the animal's crimes against the player
+				if (forgiven > 0) {
+					if (auto* pl = RE::ProcessLists::GetSingleton()) {
+						for (auto& handle : pl->highActorHandles) {
+							auto actor = handle.get();
+							if (actor && actor.get() != a_p && !actor->IsDead() && !actor->IsPlayerTeammate() &&
+								a_p->GetPosition().GetDistance(actor->GetPosition()) <= kWitnessRange && actor->RequestDetectionLevel(a_p) > 0) {
+								actor->StartCombat(a_p);
+							}
+						}
+					}
+					logger::info("seen changing back: {} gold of bounty stays, witnesses turn on the player", forgiven);
+				}
+				return;
+			}
 			if (auto* pl = RE::ProcessLists::GetSingleton()) {
 				for (auto& handle : pl->highActorHandles) {
 					auto actor = handle.get();
@@ -456,8 +476,20 @@ namespace protean::Shift
 		SetControlsLocked(false);
 		Camera::End();
 		LeaveFactions(p);
-		if (s.witnesses.empty()) {
-			ForgiveAnimalCrimes(p);
+		{
+			// who can see the change back? (the earlier witnesses of the change into the animal also count)
+			bool seen = !s.witnesses.empty();
+			if (auto* pl = RE::ProcessLists::GetSingleton(); pl && !seen) {
+				for (auto& handle : pl->highActorHandles) {
+					auto actor = handle.get();
+					if (actor && actor.get() != p && !actor->IsDead() && !actor->IsPlayerTeammate() &&
+						p->GetPosition().GetDistance(actor->GetPosition()) <= kWitnessRange && actor->RequestDetectionLevel(p) > 0) {
+						seen = true;
+						break;
+					}
+				}
+			}
+			ForgiveAnimalCrimes(p, !seen);
 		}
 
 		if (auto* race = RE::TESForm::LookupByID<RE::TESRace>(s.realRace)) {
@@ -480,6 +512,7 @@ namespace protean::Shift
 		s.active.clear();
 		s.healthBonus = 0.0f;
 		s.witnesses.clear();
+		s.crime.clear();
 		LogVitals("after", p);
 
 		if (hp <= 0.0f) {
