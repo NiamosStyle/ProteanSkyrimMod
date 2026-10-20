@@ -78,13 +78,25 @@ namespace protean::Move
 			return { held(kRight) - held(kLeft), held(kForward) - held(kBack) };
 		}
 
-		void StopOverriding()
+		// hand movement back to the game with the keys as they are now: zeroing it while W is still held would stop
+		// the animal until the next key event
+		void StopOverriding(RE::NiPoint2 a_keys = {})
 		{
 			if (g_overriding) {
-				RE::PlayerControls::GetSingleton()->data.moveInputVec = { 0.0f, 0.0f };
+				RE::PlayerControls::GetSingleton()->data.moveInputVec = a_keys;
 				g_overriding = false;
 			}
 		}
+
+		// diagnostics while steering: what the game did to the heading and the camera offset during its update
+		struct Probe
+		{
+			float heading{ 0.0f };
+			float free{ 0.0f };
+			float lookX{ 0.0f };
+		};
+		Probe g_before;
+		int   g_probeFrames{ 0 };
 	}
 
 	void Install()
@@ -116,12 +128,13 @@ namespace protean::Move
 			}
 			return;
 		}
-		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
 		const float len = std::sqrt(in.x * in.x + in.y * in.y);
-		if (len < 0.1f) {
-			StopOverriding();
+		if (std::abs(in.x) < 0.1f && in.y > -0.1f) {
+			// standing, or straight ahead: plain Skyrim, the mouse turns the animal as it turns a person
+			StopOverriding(in);
 			return;
 		}
+		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
 		const float heading = a_player->GetAngleZ();
 		const float camYaw = heading + tps->freeRotation.x;
 		const float want = camYaw + std::atan2(in.x, in.y);
@@ -133,6 +146,7 @@ namespace protean::Move
 		g_overriding = true;
 		g_steering = true;
 		g_wantHeading = now;
+		g_before = { now, tps->freeRotation.x, RE::PlayerControls::GetSingleton()->data.lookInputVec.x };
 	}
 
 	void AfterUpdate(RE::PlayerCharacter* a_player)
@@ -142,11 +156,9 @@ namespace protean::Move
 		if (!g_steering || !tps) {
 			return;
 		}
-		if (std::abs(Wrap(a_player->GetAngleZ() - g_wantHeading)) > 0.01f) {
-			static int logged = 0;
-			if (logged++ < 5) {
-				logger::info("move: the game turned the animal to {:.2f}, putting back {:.2f}", a_player->GetAngleZ(), g_wantHeading);
-			}
+		if (g_probeFrames < 600 && g_probeFrames++ % 10 == 0) {
+			logger::info("move: heading {:.3f} -> {:.3f}, camera offset {:.3f} -> {:.3f} (enabled {}), mouse x {:.3f}",
+				g_before.heading, a_player->GetAngleZ(), g_before.free, tps->freeRotation.x, tps->freeRotationEnabled, g_before.lookX);
 		}
 		// where the camera points now, including any mouse turn the game applied to the player this frame
 		const float camNow = a_player->GetAngleZ() + tps->freeRotation.x;
