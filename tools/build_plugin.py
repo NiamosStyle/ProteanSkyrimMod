@@ -24,6 +24,13 @@ PLUGIN = "Protean.esp"
 EFFECT, STARTER, REVERT, TOME, HEART_EFFECT = 0x800, 0x801, 0x802, 0x803, 0x804
 BEAST_FACTION, WITNESS_FACTION = 0x805, 0x806
 FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stealing
+# Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
+BLOCKED = {
+    "deer": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2",
+             "attackStart_ForwardPower", "attackStart_ForwardPowerShort", "attackStart_SkeeverLungeLong",
+             "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],
+    "wolf": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2"],
+}
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 
@@ -160,7 +167,7 @@ def main():
             "race": {"file": rf, "id": int(rid, 16)},
             "heart": heart, "power": pw,
             "size": c["size_class"],
-            "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", [])],
+            "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", []) if a["event"] not in BLOCKED.get(c["id"], [])],
             "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
             "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"]],
             "ladder": c["health_ladder"],

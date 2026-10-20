@@ -129,26 +129,6 @@
      "spell": null
     },
     {
-     "event": "attackStart_AttackLeft1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight2",
-     "flags": [],
-     "spell": null
-    },
-    {
      "event": "attackStart_ForwardPower",
      "flags": [
       "Power Attack"
@@ -235,56 +215,6 @@
      "flags": [
       "Power Attack"
      ],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackLeft2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight1",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_AttackRight2",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_ForwardPower",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_ForwardPowerShort",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_SkeeverLungeLong",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_SkeeverLungeMedium",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_SkeeverLungeShort",
-     "flags": [],
-     "spell": null
-    },
-    {
-     "event": "attackStart_StandingPower",
-     "flags": [],
      "spell": null
     }
    ],
