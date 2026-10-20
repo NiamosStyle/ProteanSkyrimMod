@@ -31,6 +31,11 @@ BLOCKED = {
              "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],
     "wolf": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2"],
 }
+# Melee tuning for the player in animal form (wild animals keep the vanilla values). Vanilla wolf: reach 64,
+# strike cone 35 degrees, which made bites very hard to land (measured live); werewolf: 150 / 50.
+MELEE = {
+    "wolf": {"reach": 120, "strike_angle": 50},
+}
 FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
 
 
@@ -173,6 +178,7 @@ def main():
             "ladder": c["health_ladder"],
             # vanilla NPC records of this creature: dead ones get a heart when looted
             "race_names": [c["race"]],
+            **MELEE.get(c["id"], {}),
         })
 
     # Keywords that mark a location as a cave-like open interior (Troll/Horker may go there). Measured over

@@ -24,7 +24,29 @@ namespace protean::Attacks
 		// Sending the attack event plays the move, but the engine only applies the attack's damage multiplier,
 		// power-attack flag and on-hit spells when its attack data is set; an animal's AI sets it through the
 		// attack action, which finds nothing for the player (measured live), so it is set here.
-		void SetAttackData(RE::Actor* a_actor, const std::string& a_event)
+		// The player's own copies of an animal's attack data, with a wider hit cone. Wild animals of the same
+		// race keep using the originals.
+		std::unordered_map<RE::BGSAttackData*, RE::NiPointer<RE::BGSAttackData>> g_copies;
+
+		RE::BGSAttackData* PlayerCopy(RE::BGSAttackData* a_data, float a_strikeAngle)
+		{
+			if (a_strikeAngle <= a_data->data.strikeAngle) {
+				return a_data;
+			}
+			auto& copy = g_copies[a_data];
+			if (!copy) {
+				copy.reset(RE::BGSAttackData::Create());
+				if (!copy) {
+					return a_data;
+				}
+				copy->event = a_data->event;
+				copy->data = a_data->data;
+				copy->data.strikeAngle = a_strikeAngle;
+			}
+			return copy.get();
+		}
+
+		void SetAttackData(RE::Actor* a_actor, const std::string& a_event, float a_strikeAngle)
 		{
 			auto* race = a_actor->GetRace();
 			auto* proc = a_actor->GetActorRuntimeData().currentProcess;
@@ -32,9 +54,43 @@ namespace protean::Attacks
 				return;
 			}
 			auto& map = race->attackDataMap->attackDataMap;
-			if (auto it = map.find(RE::BSFixedString(a_event)); it != map.end()) {
-				proc->high->attackData = it->second;
+			if (auto it = map.find(RE::BSFixedString(a_event)); it != map.end() && it->second) {
+				proc->high->attackData.reset(PlayerCopy(it->second.get(), a_strikeAngle));
 			}
+		}
+
+		// The race's reach is shared with every wild animal of that race and the engine reads no per-actor
+		// value, so it is raised only while the player's attack plays and put back afterwards.
+		constexpr float kReachSeconds = 1.5f;  // longest measured start-to-impact: 0.76 s (wolf lunge)
+
+		struct Reach
+		{
+			RE::TESRace*                          race{ nullptr };
+			float                                 original{ 0.0f };
+			std::chrono::steady_clock::time_point until{};
+		};
+		Reach g_reach;
+
+		void RestoreReach()
+		{
+			if (g_reach.race) {
+				g_reach.race->data.unarmedReach = g_reach.original;
+				g_reach = Reach{};
+			}
+		}
+
+		void RaiseReach(RE::TESRace* a_race, float a_reach)
+		{
+			if (!a_race || a_reach <= 0.0f) {
+				return;
+			}
+			if (g_reach.race != a_race) {
+				RestoreReach();
+				g_reach.race = a_race;
+				g_reach.original = a_race->data.unarmedReach;
+			}
+			a_race->data.unarmedReach = std::max(a_reach, g_reach.original);
+			g_reach.until = std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(kReachSeconds * 1000));
 		}
 
 		void LoadIni()
@@ -87,7 +143,8 @@ namespace protean::Attacks
 			}
 			const bool ok = p->NotifyAnimationGraph(a->event);
 			if (ok) {
-				SetAttackData(p, a->event);
+				SetAttackData(p, a->event, c->strikeAngle);
+				RaiseReach(p->GetRace(), c->reach);
 			}
 			logger::info("attack: '{}' {} {} -> graph accepted: {}", c->id, a_power ? "power" : "normal", a->event, ok);
 		}
@@ -152,6 +209,9 @@ namespace protean::Attacks
 
 	void OnFrame()
 	{
+		if (g_reach.race && std::chrono::steady_clock::now() >= g_reach.until) {
+			RestoreReach();
+		}
 		if (!g_press.down || g_press.fired) {
 			return;
 		}
@@ -165,4 +225,5 @@ namespace protean::Attacks
 	void Cancel()
 	{
 		g_press = Press{};
+		RestoreReach();
 	}}

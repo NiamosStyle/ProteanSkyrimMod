@@ -27,6 +27,8 @@ namespace protean
 		std::vector<RE::TESFaction*>      factions;  // the factions this animal's own records share
 		std::vector<std::pair<int, int>>  ladder;    // (level, health) rungs from the vanilla NPC records
 		std::vector<Attack>               attacks;   // the animal's attack events (race record)
+		float                             reach{ 0.0f };        // player's melee reach in this form; 0 = the race's own
+		float                             strikeAngle{ 0.0f };  // player's hit cone (degrees); 0 = each attack's own
 
 		// Health this animal has at the given player level: the highest rung at or below the level,
 		// or the lowest rung when the player is below all of them.

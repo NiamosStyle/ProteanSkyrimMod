@@ -162,13 +162,17 @@ namespace protean::Dev
 				                   f.any(RE::TESHitEvent::Flag::kBashAttack)  ? "bash" :
 				                                                                "normal attack";
 				// the attack data the engine has on the player right now: decides damage multiplier and power flag
+				auto*       p = RE::PlayerCharacter::GetSingleton();
 				const char* data = "none";
-				if (auto* proc = RE::PlayerCharacter::GetSingleton()->GetActorRuntimeData().currentProcess; proc && proc->high && proc->high->attackData) {
+				float       cone = 0.0f;
+				if (auto* proc = p->GetActorRuntimeData().currentProcess; proc && proc->high && proc->high->attackData) {
 					data = proc->high->attackData->event.c_str();
+					cone = proc->high->attackData->data.strikeAngle;
 				}
-				logger::info("hit: '{}' by {}{}, health now {:.1f}, attack data '{}'", a_event->target->GetName(), kind,
-					f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
-					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f, data);
+				logger::info("hit: '{}' by {}{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
+					a_event->target->GetName(), kind, f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
+					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f, data, cone,
+					p->GetRace() ? p->GetRace()->data.unarmedReach : 0.0f, p->GetPosition().GetDistance(a_event->target->GetPosition()));
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};

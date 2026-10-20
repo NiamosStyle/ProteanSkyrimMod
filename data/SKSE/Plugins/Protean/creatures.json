@@ -192,7 +192,9 @@
    ],
    "race_names": [
     "WolfRace"
-   ]
+   ],
+   "reach": 120,
+   "strike_angle": 50
   },
   {
    "id": "deer",
