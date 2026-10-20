@@ -1,5 +1,6 @@
 #include "Attacks.h"
 
+#include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
 
@@ -124,6 +125,14 @@ namespace protean::Attacks
 			if (pool.empty()) {
 				return nullptr;
 			}
+			// Skyrim's left mouse button is the right hand: with both paws in the list (sabre cat, troll, horker),
+			// the left button takes the first right-side swipe and the right button the first left-side one
+			auto side = [&](std::string_view a_side) {
+				return std::ranges::find_if(pool, [&](const Attack* x) { return x->event.find(a_side) != std::string::npos; });
+			};
+			if (auto r = side("Right"), l = side("Left"); r != pool.end() && l != pool.end()) {
+				return a_rmb ? *l : *r;
+			}
 			return pool[(a_rmb && pool.size() > 1) ? 1 : 0];
 		}
 
@@ -143,6 +152,7 @@ namespace protean::Attacks
 			if (auto* st = p->AsActorState(); st && !st->IsWeaponDrawn()) {
 				p->DrawWeaponMagicHands(true);
 			}
+			Move::FaceCamera(p);  // the mouse turns only the camera, so turn to it before striking
 			const bool ok = p->NotifyAnimationGraph(a->event);
 			if (ok) {
 				SetAttackData(p, a->event, c->strikeAngle);

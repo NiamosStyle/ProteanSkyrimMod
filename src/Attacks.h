@@ -5,7 +5,7 @@ namespace protean::Attacks
 	// While transformed, the attack buttons are translated into the animal's own attack events.
 	// An animal's animation graph does not understand the player's generic "attackStart"; it only
 	// accepts its own (attackStart_Attack1, attackStart_ForwardPower, ...), listed in its race record.
-	//   tap  -> a normal attack      (left button prefers the animal's left-side attacks, right the right)
+	//   tap  -> a normal attack      (left button = a right-side swipe, right button = a left-side one, as Skyrim's hands)
 	//   hold -> a power attack        (after kHoldSeconds)
 	// Off unless Protean.ini [Attacks] Translate=1 (default 1).
 

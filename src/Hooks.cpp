@@ -5,6 +5,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Dev.h"
+#include "Move.h"
 #include "Shift.h"
 
 namespace protean::Hooks
@@ -15,6 +16,7 @@ namespace protean::Hooks
 		{
 			static void thunk(RE::PlayerCharacter* a_this, float a_delta)
 			{
+				Move::BeforeUpdate(a_this, a_delta);
 				func(a_this, a_delta);
 				Camera::OnFrame(a_this);
 				Attacks::OnFrame();

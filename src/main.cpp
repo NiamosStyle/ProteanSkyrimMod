@@ -3,6 +3,7 @@
 #include "Dev.h"
 #include "Face.h"
 #include "Hooks.h"
+#include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -79,6 +80,7 @@ namespace
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
 				protean::Dev::Init();
 				protean::Attacks::Install();
+				protean::Move::Install();
 				protean::Face::Install();
 				protean::Hooks::Install();
 				g_ready = true;
@@ -90,6 +92,7 @@ namespace
 			protean::Shift::BeforeLoad();
 			protean::Camera::Reset();
 			protean::Attacks::Cancel();
+			protean::Move::Reset();
 			break;
 		case SKSE::MessagingInterface::kNewGame:
 			protean::Face::BeforeLoad();

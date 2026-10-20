@@ -3,6 +3,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Face.h"
+#include "Move.h"
 #include "State.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
@@ -537,6 +538,7 @@ namespace protean::Shift
 		LogVitals("before", p);
 
 		SetControlsLocked(false);
+		Move::Reset();
 		Camera::End();
 		LeaveFactions(p);
 		{

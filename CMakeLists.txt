@@ -30,6 +30,7 @@ add_commonlibsse_plugin(
 		src/Dev.cpp
 		src/Face.cpp
 		src/Hooks.cpp
+		src/Move.cpp
 		src/Registry.cpp
 		src/State.cpp
 		src/Shift.cpp
