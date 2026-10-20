@@ -97,6 +97,19 @@ namespace protean::Move
 		};
 		Probe g_before;
 		int   g_probeFrames{ 0 };
+
+		// While steering, the game drops the mouse (measured: the look input arrives, the heading ignores it), so the
+		// camera is turned here. How far one unit of look input turns is measured from plain Skyrim movement (W
+		// alone, the game turning the animal with the mouse), so it follows the player's own sensitivity setting.
+		float g_turnPerLook{ 0.01f };  // radians per unit of look input; starting guess until measured
+		int   g_samples{ 0 };
+		struct Calibrate
+		{
+			bool  valid{ false };
+			float heading{ 0.0f };
+			float lookX{ 0.0f };
+		};
+		Calibrate g_cal;
 	}
 
 	void Install()
@@ -116,7 +129,9 @@ namespace protean::Move
 			return;
 		}
 		g_steering = false;
+		g_cal.valid = false;
 		const auto in = Input();
+		const float lookX = RE::PlayerControls::GetSingleton()->data.lookInputVec.x;
 		if (g_mode == 2) {
 			// tank: A/D turn the animal (the camera follows it), W/S as the game does
 			if (std::abs(in.x) > 0.1f) {
@@ -132,11 +147,14 @@ namespace protean::Move
 		if (std::abs(in.x) < 0.1f && in.y > -0.1f) {
 			// standing, or straight ahead: plain Skyrim, the mouse turns the animal as it turns a person
 			StopOverriding(in);
+			if (in.y > 0.1f && !tps->freeRotationEnabled && std::abs(lookX) > 0.05f) {
+				g_cal = { true, a_player->GetAngleZ(), lookX };  // AfterUpdate sees how far the game turned for it
+			}
 			return;
 		}
 		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
 		const float heading = a_player->GetAngleZ();
-		const float camYaw = heading + tps->freeRotation.x;
+		const float camYaw = heading + tps->freeRotation.x + lookX * g_turnPerLook;
 		const float want = camYaw + std::atan2(in.x, in.y);
 		const float step = std::clamp(Wrap(want - heading), -kTurnRate * a_delta, kTurnRate * a_delta);
 		const float now = heading + step;
@@ -153,6 +171,15 @@ namespace protean::Move
 	{
 		// mode 1: the game turns a moving player back toward the camera during its update; put our turn back
 		auto* tps = Tps();
+		if (g_cal.valid && tps && !tps->freeRotationEnabled) {
+			const float sample = Wrap(a_player->GetAngleZ() - g_cal.heading) / g_cal.lookX;
+			if (std::abs(sample) > 0.0005f && std::abs(sample) < 0.2f) {  // either sign: whichever way the game turns
+				g_turnPerLook = g_samples == 0 ? sample : 0.9f * g_turnPerLook + 0.1f * sample;
+				if (g_samples++ % 50 == 0) {
+					logger::info("move: mouse turn measured {:.5f} rad per unit (sample {:.5f}, {} samples)", g_turnPerLook, sample, g_samples);
+				}
+			}
+		}
 		if (!g_steering || !tps) {
 			return;
 		}
