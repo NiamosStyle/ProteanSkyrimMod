@@ -90,8 +90,10 @@ namespace protean::Move
 
 
 		// While steering, the game drops the mouse (measured: the look input arrives, the heading ignores it), so the
-		// camera is turned here, by the game's own mouse setting: radians per unit of look input. 0.01 felt slightly
-		// slow next to a person's turning with the setting at 0.0125.
+		// camera is turned here at a person's rate. Measured (movelog, a person holding D or W): 0.051 radians per unit
+		// of look input with fMouseHeadingSensitivity at 0.0125, so about 4x the setting; scaling the setting keeps
+		// it right if the player changes their mouse speed.
+		constexpr float kPersonPerSetting = 0.051f / 0.0125f;
 		float g_turnScale{ 0.0f };  // dev: overrides the game setting when above zero
 		bool  g_log{ false };       // dev: log the mouse and the camera every frame, to measure a person's turn
 
@@ -107,7 +109,7 @@ namespace protean::Move
 			}
 			auto* prefs = RE::INIPrefSettingCollection::GetSingleton();
 			auto* s = prefs ? prefs->GetSetting("fMouseHeadingSensitivity:Controls") : nullptr;
-			return s ? s->GetFloat() : 0.0125f;
+			return kPersonPerSetting * (s ? s->GetFloat() : 0.0125f);
 		}
 	}
 
