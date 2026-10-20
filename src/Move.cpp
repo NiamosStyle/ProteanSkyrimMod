@@ -100,7 +100,8 @@ namespace protean::Move
 
 		// While steering, the game drops the mouse (measured: the look input arrives, the heading ignores it), so the
 		// camera is turned here. How far one unit of look input turns is measured from plain Skyrim movement (W
-		// alone, the game turning the animal with the mouse), so it follows the player's own sensitivity setting.
+		// alone, the game turning the player with the mouse, as a person or an animal: one mouse setting for every body),
+	// so it follows the player's own sensitivity setting.
 		float g_turnPerLook{ 0.01f };  // radians per unit of look input; starting guess until measured
 		int   g_samples{ 0 };
 		struct Calibrate
@@ -124,14 +125,18 @@ namespace protean::Move
 	{
 		auto* tps = Tps();
 		auto* ui = RE::UI::GetSingleton();
+		g_steering = false;
+		g_cal.valid = false;
+		const auto  in = Input();
+		const float lookX = RE::PlayerControls::GetSingleton()->data.lookInputVec.x;
+		if (tps && in.y > 0.1f && std::abs(in.x) < 0.1f && !tps->freeRotationEnabled && std::abs(lookX) > 0.05f) {
+			// running straight ahead, in any body: the game turns the player with the mouse. AfterUpdate measures how far.
+			g_cal = { true, a_player->GetAngleZ(), lookX };
+		}
 		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused())) {
 			StopOverriding();
 			return;
 		}
-		g_steering = false;
-		g_cal.valid = false;
-		const auto in = Input();
-		const float lookX = RE::PlayerControls::GetSingleton()->data.lookInputVec.x;
 		if (g_mode == 2) {
 			// tank: A/D turn the animal (the camera follows it), W/S as the game does
 			if (std::abs(in.x) > 0.1f) {
@@ -147,9 +152,6 @@ namespace protean::Move
 		if (std::abs(in.x) < 0.1f && in.y > -0.1f) {
 			// standing, or straight ahead: plain Skyrim, the mouse turns the animal as it turns a person
 			StopOverriding(in);
-			if (in.y > 0.1f && !tps->freeRotationEnabled && std::abs(lookX) > 0.05f) {
-				g_cal = { true, a_player->GetAngleZ(), lookX };  // AfterUpdate sees how far the game turned for it
-			}
 			return;
 		}
 		tps->freeRotationEnabled = true;  // the mouse turns the camera; the animal turns to where it is steered
