@@ -11,7 +11,7 @@ namespace protean::Hud
 		constexpr auto        kEvery = std::chrono::milliseconds(100);
 		constexpr const char* kMeter = "_root.HUDMovieBaseInstance.Health.HealthMeter_mc";
 		constexpr std::int32_t kTickDepth = 16000;  // above the bar's own clips
-		constexpr std::uint32_t kTickColour = 0xFFFFFF;
+		constexpr std::uint32_t kTickColour = 0x000000;
 
 		Clock::time_point g_next{};
 		bool              g_shown{ false };  // ticks or tint are on the bar now
@@ -64,7 +64,7 @@ namespace protean::Hud
 				return t;
 			}
 			a_holder.CreateEmptyMovieClip(&t, a_name);
-			const double pad = 2.0;
+			const double pad = 0.0;  // the bar's own height
 			t.Invoke("lineStyle", std::array<RE::GFxValue, 3>{ RE::GFxValue(2.0), RE::GFxValue(static_cast<double>(kTickColour)), RE::GFxValue(100.0) });
 			t.Invoke("moveTo", std::array<RE::GFxValue, 2>{ RE::GFxValue(0.0), RE::GFxValue(g_bar.top - pad) });
 			t.Invoke("lineTo", std::array<RE::GFxValue, 2>{ RE::GFxValue(0.0), RE::GFxValue(g_bar.bottom + pad) });
