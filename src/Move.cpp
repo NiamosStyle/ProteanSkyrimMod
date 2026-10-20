@@ -17,7 +17,6 @@ namespace protean::Move
 		bool                             g_overriding{ false };
 		int                              g_mode{ 1 };            // 1 = directional, 2 = tank (A/D turn)
 		float                            g_wantHeading{ 0.0f };  // mode 1: the heading put back after the update
-		float                            g_camYaw{ 0.0f };
 		bool                             g_steering{ false };
 		constexpr float                  kTankRate = RE::NI_PI;  // mode 2: 180 degrees per second
 
@@ -134,7 +133,6 @@ namespace protean::Move
 		g_overriding = true;
 		g_steering = true;
 		g_wantHeading = now;
-		g_camYaw = camYaw;
 	}
 
 	void AfterUpdate(RE::PlayerCharacter* a_player)
@@ -150,9 +148,11 @@ namespace protean::Move
 				logger::info("move: the game turned the animal to {:.2f}, putting back {:.2f}", a_player->GetAngleZ(), g_wantHeading);
 			}
 		}
+		// where the camera points now, including any mouse turn the game applied to the player this frame
+		const float camNow = a_player->GetAngleZ() + tps->freeRotation.x;
 		a_player->SetHeading(g_wantHeading);
 		tps->freeRotationEnabled = true;
-		tps->freeRotation.x = Wrap(g_camYaw - g_wantHeading);
+		tps->freeRotation.x = Wrap(camNow - g_wantHeading);
 	}
 
 	void SetMode(int a_mode)
