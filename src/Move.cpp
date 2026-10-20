@@ -101,7 +101,7 @@ namespace protean::Move
 		// While steering, the game drops the mouse (measured: the look input arrives, the heading ignores it), so the
 		// camera is turned here. How far one unit of look input turns is measured from plain Skyrim movement (W
 		// alone, the game turning the player with the mouse, as a person or an animal: one mouse setting for every body),
-	// so it follows the player's own sensitivity setting.
+		// so it follows the player's own sensitivity setting.
 		float g_turnPerLook{ 0.01f };  // radians per unit of look input; starting guess until measured
 		int   g_samples{ 0 };
 		struct Calibrate
