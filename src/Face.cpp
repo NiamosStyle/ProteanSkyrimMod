@@ -352,6 +352,13 @@ namespace protean::Face
 
 			RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
 			{
+				if (a_event && a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME && State::Get().disguised) {
+					// Saving, loading and quitting with a stolen face on is not safe yet: take it off when the game menu opens
+					SKSE::GetTaskInterface()->AddTask([]() {
+						TakeOff("the game menu opened");
+						Shift::Notify("Your stolen face came off. Use Stolen Face to wear it again.");
+					});
+				}
 				if (a_event && a_event->opening && a_event->menuName == RE::ContainerMenu::MENU_NAME && g_offerId && !g_shown && !g_queued.exchange(true)) {
 					SKSE::GetTaskInterface()->AddTask([]() { ShowChoice(); });
 				}
