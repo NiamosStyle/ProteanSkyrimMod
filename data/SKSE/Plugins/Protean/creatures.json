@@ -2350,7 +2350,9 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 365139
-   }
+   },
+   "reach": 400,
+   "strike_angle": 90
   },
   {
    "id": "giant",
