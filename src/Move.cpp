@@ -215,6 +215,11 @@ namespace protean::Move
 		tps->freeRotation.x = 0.0f;
 	}
 
+	RE::NiPoint2 Keys()
+	{
+		return Input();
+	}
+
 	void Reset()
 	{
 		StopOverriding();

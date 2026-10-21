@@ -5,6 +5,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Dev.h"
+#include "Fly.h"
 #include "Hud.h"
 #include "Move.h"
 #include "Shift.h"
@@ -20,6 +21,7 @@ namespace protean::Hooks
 				Move::BeforeUpdate(a_this, a_delta);
 				func(a_this, a_delta);
 				Move::AfterUpdate(a_this);
+				Fly::AfterUpdate(a_this, a_delta);
 				Camera::OnFrame(a_this);
 				Attacks::OnFrame();
 				Shift::OnFrame();

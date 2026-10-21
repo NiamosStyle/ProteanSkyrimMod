@@ -33,6 +33,7 @@ namespace protean
 		float                             strikeAngle{ 0.0f };  // player's hit cone (degrees); 0 = each attack's own
 		std::string                       stance;               // graph event for its fighting stance (giant: it walks
 		                                                        // and attacks only from there); empty = none needed
+		bool                              flies{ false };       // Jump takes off into real flight (Fly.cpp)
 		std::int32_t                      stanceState{ 0 };     // the graph's iState kept while in the stance (giant: 1,
 		                                                        // its combat walk); 0 = left to the game
 		bool                              swims{ false };       // a water animal: breathes water (on land the game suffocates it;

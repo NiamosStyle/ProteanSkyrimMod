@@ -13,5 +13,6 @@ namespace protean::Move
 	void SetTurnScale(float a_scale);                             // dev: mouse turn while steering (0 = the game's setting)
 	void SetLog(bool a_on);                                       // dev: log the mouse and camera every frame
 	void FaceCamera(RE::PlayerCharacter* a_player);               // an attack goes where the camera looks
+	RE::NiPoint2 Keys();                                          // movement keys or stick: x = right, y = forward
 	void Reset();                                                 // revert / load: hand movement back to the game
 }

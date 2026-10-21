@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Dev.h"
 #include "Face.h"
+#include "Fly.h"
 #include "Hooks.h"
 #include "Move.h"
 #include "Registry.h"
@@ -81,6 +82,7 @@ namespace
 				protean::Dev::Init();
 				protean::Attacks::Install();
 				protean::Move::Install();
+				protean::Fly::Install();
 				protean::Face::Install();
 				protean::Hooks::Install();
 				g_ready = true;

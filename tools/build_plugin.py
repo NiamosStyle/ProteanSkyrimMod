@@ -54,6 +54,9 @@ MELEE = {
     # breathes water; on land the game itself suffocates it (measured). User decision: no shoreline wall, and it
     # may change on land and slither into the water
     "slaughterfish": {"reach": 120, "strike_angle": 50, "swims": True},
+    # vanilla floats them at a fixed height over the ground; Jump takes off into real flight (Fly.cpp)
+    "chaurus_hunter": {"reach": 120, "strike_angle": 50, "flies": True},
+    "chaurus_hunter_fledgling": {"reach": 120, "strike_angle": 50, "flies": True},
     # the mammoth race's reach is 128 (measured: hits landed only on people almost under it); its tusks reach
     # well past that, and the giant's race has 512
     "mammoth": {"reach": 400, "strike_angle": 90},
@@ -65,7 +68,7 @@ MELEE = {
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
-           "horse,werewolf,werebear,mammoth,giant,slaughterfish")
+           "horse,werewolf,werebear,mammoth,giant,slaughterfish,chaurus_hunter,chaurus_hunter_fledgling")
 # Extra factions joined while transformed. The hold crime factions count PlayerWerewolfFaction as an enemy: it is how
 # vanilla makes guards attack a player werewolf on sight (and citizens flee).
 EXTRA_FACTIONS = {

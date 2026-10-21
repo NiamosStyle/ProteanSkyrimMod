@@ -2,6 +2,7 @@
 
 #include "Attacks.h"
 #include "Face.h"
+#include "Fly.h"
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
@@ -200,6 +201,18 @@ namespace protean::Dev
 				Face::TakeOff("dev command");
 			} else if (a_cmd == "facedump") {
 				Face::Dump();
+			} else if (a_cmd == "fly") {
+				// fly [mode] [speed]: tune, then take off (mode 1 = in-air state, 2 = flying state); "fly 0" lands
+				std::istringstream in(a_arg);
+				int                mode = -1;
+				float              speed = 0.0f;
+				in >> mode >> speed;
+				if (mode == 0) {
+					Fly::Stop("dev command");
+				} else {
+					Fly::SetTuning(mode, speed);
+					Fly::TakeOff();
+				}
 			} else if (a_cmd == "draw") {
 				p->DrawWeaponMagicHands(true);
 				logger::info("dev: draw requested");

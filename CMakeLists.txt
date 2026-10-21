@@ -29,6 +29,7 @@ add_commonlibsse_plugin(
 		src/Camera.cpp
 		src/Dev.cpp
 		src/Face.cpp
+		src/Fly.cpp
 		src/Hooks.cpp
 		src/Hud.cpp
 		src/Move.cpp
