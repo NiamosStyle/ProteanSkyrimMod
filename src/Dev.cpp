@@ -57,6 +57,45 @@ namespace protean::Dev
 				// send an animation-graph event to the player; the result says whether the graph accepted it
 				const bool ok = p->NotifyAnimationGraph(a_arg);
 				logger::info("dev: anim '{}' accepted by the graph: {}", a_arg, ok);
+			} else if (a_cmd == "graph") {
+				// graph [filter]: the event and variable names the player's behaviour graph knows (case-insensitive filter)
+				RE::BSTSmartPointer<RE::BSAnimationGraphManager> mgr;
+				if (!p->GetAnimationGraphManager(mgr) || !mgr || mgr->graphs.empty() || !mgr->graphs[0]) {
+					logger::info("dev: graph: no animation graph");
+					return;
+				}
+				auto* bg = mgr->graphs[0]->behaviorGraph;
+				auto* sd = bg && bg->data ? bg->data->stringData.get() : nullptr;
+				if (!sd) {
+					logger::info("dev: graph: no string data");
+					return;
+				}
+				auto lower = [](std::string s) {
+					std::ranges::transform(s, s.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+					return s;
+				};
+				const auto want = lower(a_arg);
+				std::string events, vars;
+				for (auto& e : sd->eventNames) {
+					if (const char* n = e.data(); n && lower(n).find(want) != std::string::npos) {
+						events += std::string(events.empty() ? "" : ", ") + n;
+					}
+				}
+				for (auto& v : sd->variableNames) {
+					const char* n = v.data();
+					if (!n || lower(n).find(want) == std::string::npos) {
+						continue;
+					}
+					bool  b = false;
+					int   i = 0;
+					float f = 0.0f;
+					p->GetGraphVariableBool(n, b);
+					p->GetGraphVariableInt(n, i);
+					p->GetGraphVariableFloat(n, f);
+					vars += std::format("{}{}=b{} i{} f{:.2f}", vars.empty() ? "" : ", ", n, b, i, f);
+				}
+				logger::info("dev: graph '{}' events: {}", a_arg, events);
+				logger::info("dev: graph '{}' variables: {}", a_arg, vars);
 			} else if (a_cmd == "scan") {
 				// how does everyone nearby feel about the player right now?
 				auto* pl = RE::ProcessLists::GetSingleton();
