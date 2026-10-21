@@ -1,0 +1,24 @@
+FormKey: 0008C6:Protean.esp
+EditorID: Protean_FormEffect_hare
+Name:
+  TargetLanguage: English
+  Value: 'Hare Form'
+Flags:
+- NoDuration
+- NoMagnitude
+- NoArea
+- HideInUI
+- Painless
+- NoHitEffect
+BaseCost: 0
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: Script
+SkillUsageMultiplier: 1
+DualCastScale: 1
+Description:
+  TargetLanguage: English
+  Value: ''
+Keywords:
+- 00080A:Protean.esp
+- 000886:Protean.esp

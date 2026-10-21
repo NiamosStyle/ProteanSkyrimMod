@@ -213,6 +213,16 @@ namespace protean::Dev
 					Fly::SetTuning(mode, speed);
 					Fly::TakeOff();
 				}
+			} else if (a_cmd == "dial" && !a_arg.empty()) {
+				// dial <global name> [value]: read or set one of Protean's dials (docs/INTEGRATION.md)
+				std::istringstream in(a_arg);
+				std::string        name;
+				float              value = 0.0f;
+				in >> name;
+				if (in >> value) {
+					reg.SetGlobal(name, value);
+				}
+				logger::info("dev: dial {} = {}", name, reg.Dial(name, -1.0f));
 			} else if (a_cmd == "sound" && !a_arg.empty()) {
 				// sound <SNDR editor ID>: play it on the player (to audition sounds)
 				RE::BSSoundHandle h;

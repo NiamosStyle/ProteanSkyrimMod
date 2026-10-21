@@ -24,7 +24,26 @@ PLUGIN = "Protean.esp"
 EFFECT, STARTER, REVERT, TOME, HEART_EFFECT = 0x800, 0x801, 0x802, 0x803, 0x804
 BEAST_FACTION, WITNESS_FACTION = 0x805, 0x806
 FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stealing
-TEST_PERK = 0x80F  # TEMPORARY: perk-reach test (remove before release)
+# Integration markers (docs/INTEGRATION.md). Per form, by its index in data/creatures.json (stable):
+# keyword Protean_Form_<id> = FORM_KEYWORD + index, its effect FORM_EFFECT + index, the hidden ability FORM_ABILITY + index.
+KW_TRANSFORMED = 0x80A
+FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
+# Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
+GLOBALS = {
+    "Protean_ActiveForm":          (0x940, 0,    "Short", "0 = human; otherwise the form's index + 1 (set by Protean, read-only)"),
+    "Protean_HealthBonusMult":     (0x941, 0.5,  "Float", "bonus health = this x the animal's health at the player's level"),
+    "Protean_RegenPerSec":         (0x942, 0.02, "Float", "out-of-combat healing towards the safe-to-revert line, share of max health per second"),
+    "Protean_SprintMult":          (0x943, 1.0,  "Float", "multiplies every animal's sprint boost"),
+    "Protean_SprintStaminaPerSec": (0x944, 7.0,  "Float", "stamina drained per second of sprinting"),
+    "Protean_LeapMult":            (0x945, 1.0,  "Float", "multiplies leap distance"),
+    "Protean_LeapHeightMult":      (0x946, 1.0,  "Float", "multiplies leap height"),
+    "Protean_FlySpeed":            (0x947, 600,  "Float", "flight speed, game units per second"),
+    "Protean_SpitCostMult":        (0x948, 0.5,  "Float", "spit stamina cost as a share of a power attack's"),
+    "Protean_ReachMult":           (0x949, 1.0,  "Float", "multiplies the forms' melee reach"),
+    "Protean_StrikeAngleMult":     (0x94A, 1.0,  "Float", "multiplies the forms' strike cone"),
+    "Protean_DamageMult":          (0x94B, 1.0,  "Float", "multiplies all damage the player deals while transformed"),
+    "Protean_ArmorBonus":          (0x94C, 0,    "Float", "armor rating added while transformed"),
+}
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
     "deer": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2",
@@ -217,15 +236,18 @@ def main():
           "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
           "Description:\n  TargetLanguage: English\n  Value: ''\n")
 
-    # TEMPORARY (2026-10-21): a plain +25% attack damage perk with no conditions, to check that ordinary
-    # damage perks reach the animal forms' attacks. Remove before release.
-    write(os.path.join(y, "Perks", "Protean_TestDamagePerk - %s_%s.yaml" % (fid(TEST_PERK), PLUGIN)),
-          "FormKey: %s:%s\nEditorID: Protean_TestDamagePerk\n" % (fid(TEST_PERK), PLUGIN)
-          + name_block("Protean Test Damage")
-          + "Description:\n  TargetLanguage: English\n  Value: 'Test: +25% attack damage.'\n"
-          "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
-          "- MutagenObjectType: PerkEntryPointModifyValue\n  EntryPoint: ModAttackDamage\n"
-          "  PerkConditionTabCount: 3\n  Modification: Multiply\n  Value: 1.25\n")
+    # ---- integration markers and dials (for a larger mod built on Protean; see docs/INTEGRATION.md) ----
+    def keyword(local, editor_id):
+        write(os.path.join(y, "Keywords", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id))
+
+    keyword(KW_TRANSFORMED, "Protean_Transformed")
+    for name, (local, value, kind, _) in GLOBALS.items():
+        write(os.path.join(y, "Globals", "%s - %s_%s.yaml" % (name, fid(local), PLUGIN)),
+              "MutagenObjectType: Global%s\nFormKey: %s:%s\nEditorID: %s\nData: %s\n" % (kind, fid(local), PLUGIN, name, value))
+
+    # (perk-reach test, 2026-10-21: a plain +25% ModAttackDamage perk raised an elk's kick 5 -> 6.25, so
+    # ordinary damage perks reach the animal forms; the test perk is gone)
 
     # Witnesses. While transformed the player is in Protean_BeastFaction (plus the animal's own factions).
     # Anyone who was hostile to the player when the change happened is put in Protean_WitnessFaction, and
@@ -290,11 +312,30 @@ def main():
         power(pw, "Protean_Power_%s" % c["id"], "Shapeshift: %s" % c["name"],
               "Become a %s. Cast again, or use Revert Form, to return." % c["name"].lower())
 
+        # The marker the player carries while in this form: a hidden ability whose effect has the keywords
+        # Protean_Transformed and Protean_Form_<id> (conditions: HasMagicEffectKeyword).
+        kw, fx, ab = FORM_KEYWORD + index, FORM_EFFECT + index, FORM_ABILITY + index
+        keyword(kw, "Protean_Form_%s" % c["id"])
+        write(os.path.join(y, "MagicEffects", "Protean_FormEffect_%s - %s_%s.yaml" % (c["id"], fid(fx), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_FormEffect_%s\n" % (fid(fx), PLUGIN, c["id"])
+              + name_block("%s Form" % c["name"])
+              + "Flags:\n- NoDuration\n- NoMagnitude\n- NoArea\n- HideInUI\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
+              "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\n"
+              "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
+              "Description:\n  TargetLanguage: English\n  Value: ''\n"
+              "Keywords:\n- %s:%s\n- %s:%s\n" % (fid(KW_TRANSFORMED), PLUGIN, fid(kw), PLUGIN))
+        write(os.path.join(y, "Spells", "Protean_FormAbility_%s - %s_%s.yaml" % (c["id"], fid(ab), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_FormAbility_%s\n" % (fid(ab), PLUGIN, c["id"])
+              + name_block("%s Form" % c["name"])
+              + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+              "Flags:\n- ManualCostCalc\nType: Ability\nChargeTime: 0.5\n"
+              "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(fx), PLUGIN))
+
         rf, rid = c["race_form"].split(":")
         runtime.append({
-            "id": c["id"], "name": c["name"],
+            "id": c["id"], "name": c["name"], "index": index,
             "race": {"file": rf, "id": int(rid, 16)},
-            "heart": heart, "power": pw,
+            "heart": heart, "power": pw, "ability": ab,
             "size": c["size_class"],
             "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", []) if a["event"] not in by_race(BLOCKED, c, creatures)],
             "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
@@ -328,6 +369,7 @@ def main():
     write(out, json.dumps({"plugin": PLUGIN, "effect": EFFECT, "starter": STARTER, "revert": REVERT,
                            "tome": TOME, "beastFaction": BEAST_FACTION, "witnessFaction": WITNESS_FACTION,
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
+                           "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))
 

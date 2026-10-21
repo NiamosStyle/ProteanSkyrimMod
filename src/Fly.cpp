@@ -1,6 +1,7 @@
 #include "Fly.h"
 
 #include "Move.h"
+#include "Registry.h"
 #include "Shift.h"
 
 namespace protean::Fly
@@ -17,7 +18,12 @@ namespace protean::Fly
 		Clock::time_point g_since{};
 		float             g_gravity{ 1.0f };     // the controller's own, put back on landing
 		int               g_mode{ 1 };           // 1 = keep the controller in its in-air state, 2 = its flying state
-		float             g_speed{ 600.0f };     // game units per second
+		float             g_speed{ 0.0f };       // dev override, game units per second; 0 = the Protean_FlySpeed dial
+
+		float FlySpeed()
+		{
+			return g_speed > 0.0f ? g_speed : Registry::Get().Dial("Protean_FlySpeed", 600.0f);
+		}
 		float             g_logIn{ 0.0f };
 		RE::NiPoint3      g_lastPos{};
 
@@ -112,13 +118,15 @@ namespace protean::Fly
 				return;
 			}
 			Move::FaceCamera(p);
-			const float h = std::max(c->leapHeight * g_leapHScale, 10.0f);
+			const auto& reg = Registry::Get();
+			const float h = std::max(c->leapHeight * g_leapHScale * reg.Dial("Protean_LeapHeightMult", 1.0f), 10.0f);
+			const float dist = c->leap * g_leapScale * reg.Dial("Protean_LeapMult", 1.0f);
 			const float vz0 = std::sqrt(2.0f * kLeapGravity * h);
 			const float airtime = 2.0f * vz0 / kLeapGravity;
 			const float yaw = p->GetAngleZ();
-			g_leap = { true, Clock::now(), { std::sin(yaw), std::cos(yaw), 0.0f }, c->leap * g_leapScale / airtime, vz0, p->GetPositionZ(),
+			g_leap = { true, Clock::now(), { std::sin(yaw), std::cos(yaw), 0.0f }, dist / airtime, vz0, p->GetPositionZ(),
 				cc->gravity, p->GetPosition(), airtime };
-			logger::info("leap: {:.0f} units, {:.0f} high: {:.0f} u/s ahead, {:.0f} u/s up, {:.2f} s", c->leap * g_leapScale, h, g_leap.speed, vz0, airtime);
+			logger::info("leap: {:.0f} units, {:.0f} high: {:.0f} u/s ahead, {:.0f} u/s up, {:.2f} s", dist, h, g_leap.speed, vz0, airtime);
 		}
 
 		void EndLeap(RE::PlayerCharacter* a_p, const char* a_why)
@@ -227,7 +235,7 @@ namespace protean::Fly
 		g_gravity = cc->gravity;
 		g_lastPos = p->GetPosition();
 		g_logIn = 0.0f;
-		logger::info("fly: take off (mode {}, speed {:.0f}, controller gravity {:.2f})", g_mode, g_speed, g_gravity);
+		logger::info("fly: take off (mode {}, speed {:.0f}, controller gravity {:.2f})", g_mode, FlySpeed(), g_gravity);
 	}
 
 	void Stop(const char* a_why)
@@ -284,7 +292,7 @@ namespace protean::Fly
 		if (const float l = v.Length(); l > 1.0f) {
 			v /= l;
 		}
-		v *= g_speed;
+		v *= FlySpeed();
 		if (t < kTakeOffSeconds) {
 			v.z = std::max(v.z, kTakeOffSpeed);
 		}
@@ -326,6 +334,6 @@ namespace protean::Fly
 		if (a_speed > 0.0f) {
 			g_speed = a_speed;
 		}
-		logger::info("fly: mode {} speed {:.0f}", g_mode, g_speed);
+		logger::info("fly: mode {} speed {:.0f}", g_mode, FlySpeed());
 	}
 }

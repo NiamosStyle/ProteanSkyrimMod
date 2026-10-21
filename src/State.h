@@ -30,6 +30,8 @@ namespace protean
 		RE::FormID                bodySkin{ 0 };     // the player's own record skin and height while an animal's are worn
 		float                     bodyHeight{ 0.0f };  // 0 = the animal's body is not on
 		float                     sprintBoost{ 0.0f };  // SpeedMult the sprint has added now (taken off again on load)
+		float                     armorBonus{ 0.0f };   // DamageResist added at the change (Protean_ArmorBonus then)
+		float                     damageBonus{ 0.0f };  // AttackDamageMult added at the change (Protean_DamageMult - 1)
 
 		// Phase 2: the move on each mouse button, per animal: creature id -> (LMB event, RMB event); empty = default attacks.
 		std::map<std::string, std::pair<std::string, std::string>> moves;

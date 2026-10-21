@@ -21,6 +21,19 @@ namespace protean
 		return best;
 	}
 
+	float Registry::Dial(std::string_view a_name, float a_fallback) const
+	{
+		const auto it = _globals.find(std::string(a_name));
+		return it != _globals.end() ? it->second->value : a_fallback;
+	}
+
+	void Registry::SetGlobal(std::string_view a_name, float a_value) const
+	{
+		if (const auto it = _globals.find(std::string(a_name)); it != _globals.end()) {
+			it->second->value = a_value;
+		}
+	}
+
 	Registry& Registry::Get()
 	{
 		static Registry r;
@@ -62,6 +75,13 @@ namespace protean
 		if (!_facePower || !_disguise || !_exposed) {
 			logger::warn("face stealing records missing from {}: regenerate the plugin", plugin);
 		}
+		_globals.clear();
+		for (const auto& [name, local] : j.value("globals", nlohmann::json::object()).items()) {
+			if (auto* g = dh->LookupForm<RE::TESGlobal>(local.get<RE::FormID>(), plugin)) {
+				_globals[name] = g;
+			}
+		}
+		logger::info("registry: {} global setting(s)", _globals.size());
 		_openKeywords.clear();
 		for (const auto& k : j.value("openInteriorKeywords", nlohmann::json::array())) {
 			if (auto* kw = dh->LookupForm<RE::BGSKeyword>(k.at("id").get<RE::FormID>(), k.at("file").get<std::string>())) {
@@ -110,6 +130,8 @@ namespace protean
 			cr.race = dh->LookupForm<RE::TESRace>(r.at("id").get<RE::FormID>(), r.at("file").get<std::string>());
 			cr.heart = dh->LookupForm<RE::AlchemyItem>(c.at("heart").get<RE::FormID>(), plugin);
 			cr.power = dh->LookupForm<RE::SpellItem>(c.at("power").get<RE::FormID>(), plugin);
+			cr.index = c.value("index", -1);
+			cr.ability = dh->LookupForm<RE::SpellItem>(c.value("ability", 0u), plugin);
 			if (!cr.race || !cr.heart || !cr.power) {
 				logger::error("creature '{}' skipped: race {} heart {} power {}", cr.id, static_cast<bool>(cr.race),
 					static_cast<bool>(cr.heart), static_cast<bool>(cr.power));

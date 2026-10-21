@@ -454,6 +454,58 @@ namespace protean::Shift
 		RE::SendHUDMessage::ShowHUDMessage(a_text.c_str());
 	}
 
+	namespace
+	{
+		// ---- integration (docs/INTEGRATION.md) ---------------------------------------------------------
+		// Another mod learns what happened from SKSE mod events (Papyrus: RegisterForModEvent), sees what the
+		// player is from the form's hidden ability (keywords) and Protean_ActiveForm, and turns Protean's dials.
+
+		void SendModEvent(const char* a_name, const std::string& a_form, float a_number)
+		{
+			SKSE::ModCallbackEvent ev{ a_name, RE::BSFixedString(a_form), a_number, Player() };
+			if (auto* src = SKSE::GetModCallbackEventSource()) {
+				src->SendEvent(&ev);
+			}
+		}
+
+		void PutOnMarkers(RE::PlayerCharacter* a_p, const Creature& a_c)
+		{
+			if (a_c.ability && !a_p->HasSpell(a_c.ability)) {
+				a_p->AddSpell(a_c.ability);
+			}
+			Registry::Get().SetGlobal("Protean_ActiveForm", static_cast<float>(a_c.index + 1));
+		}
+
+		// armour and damage dials, as the player changes: what was added is kept in the co-save and taken off
+		// on changing back, so a dial changed meanwhile cannot leave anything behind
+		void AddDialStats(RE::PlayerCharacter* a_p)
+		{
+			auto&       reg = Registry::Get();
+			auto&       s = State::Get();
+			auto*       av = a_p->AsActorValueOwner();
+			s.armorBonus = reg.Dial("Protean_ArmorBonus", 0.0f);
+			s.damageBonus = reg.Dial("Protean_DamageMult", 1.0f) - 1.0f;
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kDamageResist, s.armorBonus);
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kAttackDamageMult, s.damageBonus);
+		}
+
+		void TakeOffMarkers(RE::PlayerCharacter* a_p)
+		{
+			auto& s = State::Get();
+			for (const auto& c : Registry::Get().All()) {
+				if (c.ability && a_p->HasSpell(c.ability)) {
+					a_p->RemoveSpell(c.ability);
+				}
+			}
+			Registry::Get().SetGlobal("Protean_ActiveForm", 0.0f);
+			auto* av = a_p->AsActorValueOwner();
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kDamageResist, -s.armorBonus);
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kAttackDamageMult, -s.damageBonus);
+			s.armorBonus = 0.0f;
+			s.damageBonus = 0.0f;
+		}
+	}
+
 	void Learn(const Creature& a_c)
 	{
 		auto* p = Player();
@@ -465,6 +517,7 @@ namespace protean::Shift
 		p->AddSpell(a_c.power);
 		Notify(std::format("You have learned the form of the {}.", a_c.name));
 		logger::info("learned '{}'", a_c.id);
+		SendModEvent("Protean_Learned", a_c.id, static_cast<float>(a_c.index + 1));
 	}
 
 	void OnCorpseActivated(RE::Actor* a_corpse)
@@ -510,7 +563,7 @@ namespace protean::Shift
 		logger::info("=== transform into '{}' ===", a_c.id);
 		LogVitals("before", p);
 
-		const float bonus = std::floor(a_c.HealthAtLevel(p->GetLevel()) * 0.5f);
+		const float bonus = std::floor(a_c.HealthAtLevel(p->GetLevel()) * Registry::Get().Dial("Protean_HealthBonusMult", 0.5f));
 		s.realRace = p->GetRace() ? p->GetRace()->GetFormID() : 0;
 		s.healthBonus = bonus;
 		s.active = a_c.id;
@@ -523,6 +576,8 @@ namespace protean::Shift
 		StandUp(p);
 		JoinFactions(p, a_c);
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, bonus);
+		PutOnMarkers(p, a_c);
+		AddDialStats(p);
 		if (a_c.swims) {
 			// the fish drowned underwater without it (measured); the same value an Argonian or a potion raises
 			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, 1.0f);
@@ -549,6 +604,7 @@ namespace protean::Shift
 		}
 		LogVitals("after", p);
 		logger::info("health bonus {:.0f} (creature {:.0f} at level {})", bonus, a_c.HealthAtLevel(p->GetLevel()), p->GetLevel());
+		SendModEvent("Protean_Transformed", a_c.id, static_cast<float>(a_c.index + 1));
 	}
 
 	void Revert(std::string_view a_why)
@@ -610,12 +666,16 @@ namespace protean::Shift
 		const float hp = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
 
 		RestoreGear(p);
+		TakeOffMarkers(p);
 
+		const std::string was = s.active;
+		const float       wasNumber = Active() ? static_cast<float>(Active()->index + 1) : 0.0f;
 		s.active.clear();
 		s.healthBonus = 0.0f;
 		s.witnesses.clear();
 		s.crime.clear();
 		LogVitals("after", p);
+		SendModEvent("Protean_Reverted", was, wasNumber);
 
 		if (hp <= 0.0f) {
 			logger::info("health {:.1f} after reverting: the damage taken exceeds the real maximum, killing the player", hp);
@@ -679,7 +739,8 @@ namespace protean::Shift
 			const float max = av->GetPermanentActorValue(RE::ActorValue::kHealth) +
 			                  p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth);
 			const float own = std::max(av->GetActorValue(RE::ActorValue::kHealRate), 0.0f) / 100.0f;  // percent per second
-			const float extra = std::max(kRegenShare - own, 0.0f) * max * dt;
+			const float share = Registry::Get().Dial("Protean_RegenPerSec", kRegenShare);
+			const float extra = std::max(share - own, 0.0f) * max * dt;
 			if (extra > 0.0f) {
 				av->RestoreActorValue(RE::ActorValue::kHealth,std::min(extra, line + 1.0f - hp));
 			}
@@ -886,7 +947,11 @@ namespace protean::Shift
 			}
 		}
 		if (s.active.empty()) {
+			TakeOffMarkers(p);  // nothing of a form may linger in a human (a save from before the markers, a crash)
 			return;
+		}
+		if (const auto* c = Active()) {
+			PutOnMarkers(p, *c);  // a save from before the markers existed has none on
 		}
 		// The save was made while transformed. Race, health and factions are already in the save;
 		// the control lock and the camera are not.

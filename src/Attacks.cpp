@@ -29,9 +29,11 @@ namespace protean::Attacks
 		// race keep using the originals.
 		std::unordered_map<RE::BGSAttackData*, RE::NiPointer<RE::BGSAttackData>> g_copies;
 
-		RE::BGSAttackData* PlayerCopy(RE::BGSAttackData* a_data, float a_strikeAngle)
+		// a_strikeAngle: Protean's cone for this form (0 = the attack's own), then times the Protean_StrikeAngleMult dial
+		RE::BGSAttackData* PlayerCopy(RE::BGSAttackData* a_data, float a_strikeAngle, float a_mult)
 		{
-			if (a_strikeAngle <= a_data->data.strikeAngle) {
+			const float angle = (a_strikeAngle > a_data->data.strikeAngle ? a_strikeAngle : a_data->data.strikeAngle) * a_mult;
+			if (angle == a_data->data.strikeAngle) {
 				return a_data;
 			}
 			auto& copy = g_copies[a_data];
@@ -42,12 +44,12 @@ namespace protean::Attacks
 				}
 				copy->event = a_data->event;
 				copy->data = a_data->data;
-				copy->data.strikeAngle = a_strikeAngle;
 			}
+			copy->data.strikeAngle = angle;  // the dial may have changed since the copy was made
 			return copy.get();
 		}
 
-		void SetAttackData(RE::Actor* a_actor, const std::string& a_event, float a_strikeAngle)
+		void SetAttackData(RE::Actor* a_actor, const std::string& a_event, float a_strikeAngle, float a_mult)
 		{
 			auto* race = a_actor->GetRace();
 			auto* proc = a_actor->GetActorRuntimeData().currentProcess;
@@ -56,7 +58,7 @@ namespace protean::Attacks
 			}
 			auto& map = race->attackDataMap->attackDataMap;
 			if (auto it = map.find(RE::BSFixedString(a_event)); it != map.end() && it->second) {
-				proc->high->attackData.reset(PlayerCopy(it->second.get(), a_strikeAngle));
+				proc->high->attackData.reset(PlayerCopy(it->second.get(), a_strikeAngle, a_mult));
 			}
 		}
 
@@ -174,7 +176,7 @@ namespace protean::Attacks
 			auto*       av = a_p->AsActorValueOwner();
 			auto*       gs = RE::GameSettingCollection::GetSingleton();
 			auto*       pen = gs ? gs->GetSetting("fPowerAttackStaminaPenalty") : nullptr;
-			const float cost = 0.5f * 40.0f * (pen ? pen->GetFloat() : 2.0f);
+			const float cost = Registry::Get().Dial("Protean_SpitCostMult", 0.5f) * 40.0f * (pen ? pen->GetFloat() : 2.0f);
 			if (av->GetActorValue(RE::ActorValue::kStamina) < cost) {
 				logger::info("attack: '{}' spell needs {:.0f} stamina, has {:.0f}", a_c.id, cost, av->GetActorValue(RE::ActorValue::kStamina));
 				RE::HUDMenu::FlashMeter(RE::ActorValue::kStamina);
@@ -241,8 +243,14 @@ namespace protean::Attacks
 				     (p->NotifyAnimationGraph("moveStop") && p->NotifyAnimationGraph(c->stance) && p->NotifyAnimationGraph(a->event));
 			}
 			if (ok) {
-				SetAttackData(p, a->event, c->strikeAngle);
-				RaiseReach(p->GetRace(), c->reach);
+				// the dials scale Protean's tuning; a form left at its race's own values scales from those
+				const auto& reg = Registry::Get();
+				const float angleMult = reg.Dial("Protean_StrikeAngleMult", 1.0f);
+				const float reachMult = reg.Dial("Protean_ReachMult", 1.0f);
+				auto*       race = p->GetRace();
+				const float baseReach = c->reach > 0.0f ? c->reach : (race ? (g_reach.race == race ? g_reach.original : race->data.unarmedReach) : 0.0f);
+				SetAttackData(p, a->event, c->strikeAngle, angleMult);
+				RaiseReach(race, baseReach * reachMult);
 			}
 			logger::info("attack: '{}' {} {} -> graph accepted: {}", c->id, a_power ? "power" : "normal", a->event, ok);
 		}

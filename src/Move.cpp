@@ -1,6 +1,7 @@
 #include "Move.h"
 
 #include "Fly.h"
+#include "Registry.h"
 #include "Shift.h"
 #include "State.h"
 
@@ -140,9 +141,10 @@ namespace protean::Move
 				SetBoost(a_player, 0.0f);
 				return;
 			}
-			SetBoost(a_player, want ? c->sprint : 0.0f);
+			const auto& reg = Registry::Get();
+			SetBoost(a_player, want ? c->sprint * reg.Dial("Protean_SprintMult", 1.0f) : 0.0f);
 			if (want) {
-				av->DamageActorValue(RE::ActorValue::kStamina, kSprintDrain * a_delta);
+				av->DamageActorValue(RE::ActorValue::kStamina, reg.Dial("Protean_SprintStaminaPerSec", kSprintDrain) * a_delta);
 			}
 		}
 

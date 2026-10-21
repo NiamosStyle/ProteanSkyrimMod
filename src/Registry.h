@@ -22,6 +22,9 @@ namespace protean
 		RE::TESRace*                      race{ nullptr };
 		RE::AlchemyItem*                  heart{ nullptr };
 		RE::SpellItem*                    power{ nullptr };
+		RE::SpellItem*                    ability{ nullptr };   // hidden marker carried while in this form (keywords
+		                                                        // Protean_Transformed + Protean_Form_<id>)
+		int                               index{ -1 };          // stable number of the form (Protean_ActiveForm = index + 1)
 		std::string                       size;      // small | medium | large_cave_ok | outdoor_only
 		float                             cameraHeight{ 60.0f };  // game units above the root, for the third-person camera
 		std::vector<RE::TESFaction*>      factions;  // the factions this animal's own records share
@@ -77,7 +80,13 @@ namespace protean
 		[[nodiscard]] const Creature* ById(std::string_view a_id) const;
 		[[nodiscard]] const std::vector<Creature>& All() const { return _creatures; }
 
+		// A dial in the plugin (Global, e.g. "Protean_SprintMult"), read live so another mod's perks or scripts
+		// can change it; the fallback when it is missing. See docs/INTEGRATION.md.
+		[[nodiscard]] float Dial(std::string_view a_name, float a_fallback) const;
+		void                SetGlobal(std::string_view a_name, float a_value) const;
+
 	private:
+		std::map<std::string, RE::TESGlobal*> _globals;
 		RE::SpellItem*        _starter{ nullptr };
 		RE::SpellItem*        _revert{ nullptr };
 		RE::TESFaction*       _beast{ nullptr };
