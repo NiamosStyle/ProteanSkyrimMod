@@ -201,8 +201,15 @@ namespace protean::Attacks
 						}
 						continue;
 					}
-					const bool isLeft = b->userEvent == ue->leftAttack;
-					const bool isRight = b->userEvent == ue->rightAttack;
+					// With the game's attack controls taken (the giant), the button no longer carries its action name:
+					// recognise it by the key it is bound to instead.
+					auto bound = [&](const RE::BSFixedString& a_action) {
+						auto* cm = RE::ControlMap::GetSingleton();
+						return b->userEvent == a_action ||
+						       (cm && b->GetIDCode() == cm->GetMappedKey(a_action, b->GetDevice()) && b->GetIDCode() != 0xFF);
+					};
+					const bool isLeft = bound(ue->leftAttack);
+					const bool isRight = bound(ue->rightAttack);
 					if (!isLeft && !isRight) {
 						continue;
 					}

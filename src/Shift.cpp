@@ -767,14 +767,26 @@ namespace protean::Shift
 		const auto* c = Active();
 		static bool        deathLogged = false;
 		static const void* stanceFor = nullptr;  // the form whose fighting stance has been entered
+		static int         settle = 0;
 		if (!c) {
 			deathLogged = false;
 			stanceFor = nullptr;
+			settle = 0;
 			return;
 		}
+		// The giant walks only in its fighting stance with its (empty) hands readied, as the AI keeps wild ones.
+		// Measured: the stance alone, sent as the body loads, did not stick; readying, resetting the graph to its
+		// default state and then the stance did. Done once the body has settled (every 30 frames here).
 		if (!c->stance.empty() && stanceFor != c) {
-			if (Player()->NotifyAnimationGraph(c->stance)) {
+			auto* p = Player();
+			auto* st = p->AsActorState();
+			if (++settle < 3) {
+				// let the new body load
+			} else if (st && !st->IsWeaponDrawn()) {
+				p->DrawWeaponMagicHands(true);
+			} else if (p->NotifyAnimationGraph("IdleForceDefaultState") && p->NotifyAnimationGraph(c->stance)) {
 				stanceFor = c;
+				settle = 0;
 				logger::info("'{}' in its fighting stance ({})", c->id, c->stance);
 			}
 		}
