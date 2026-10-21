@@ -68,7 +68,7 @@ MELEE = {
                          "spell_events": ["spitStanceStart", "MLH_SpellRelease_event"]},
     # the mammoth race's reach is 128 (measured: hits landed only on people almost under it); its tusks reach
     # well past that, and the giant's race has 512
-    "mammoth": {"reach": 400, "strike_angle": 90},
+    "mammoth": {"reach": 400, "strike_angle": 90, "taps": ["attackStart_Attack1", "attackStart_Attack2"]},
     # the giant's graph walks and attacks only from its combat stance, which the AI puts wild giants in (measured:
     # no movement after transforming, and every attack refused, until combatIdleStart)
     # and walks properly only with the graph's iState at 1, its combat walk (measured: 0 = no walk or a split-legged one)

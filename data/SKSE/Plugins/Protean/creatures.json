@@ -2436,7 +2436,11 @@
     "id": 365139
    },
    "reach": 400,
-   "strike_angle": 90
+   "strike_angle": 90,
+   "taps": [
+    "attackStart_Attack1",
+    "attackStart_Attack2"
+   ]
   },
   {
    "id": "giant",
