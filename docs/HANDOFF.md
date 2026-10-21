@@ -57,4 +57,4 @@ What exists, what was decided and why, and what is known and accepted. Read the 
 ## Ideas not done
 
 - Watching the mod events arrive (needs a listening script in the larger mod).
-- Albino spider, boar/albino health from junk data (boar fixed via the Bristleback NPC).
+- The user's own MO2 install still has the dev channel on (`[Dev] Commands=1`); the release zip has it off.
