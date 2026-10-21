@@ -2433,7 +2433,8 @@
     "file": "Skyrim.esm",
     "id": 298384
    },
-   "stance": "combatIdleStart"
+   "stance": "combatIdleStart",
+   "stance_state": 1
   },
   {
    "id": "werewolf",

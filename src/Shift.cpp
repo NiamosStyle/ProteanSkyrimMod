@@ -801,6 +801,15 @@ namespace protean::Shift
 				logger::info("'{}' in its fighting stance ({})", c->id, c->stance);
 			}
 		}
+		// The giant's graph picks its walk by iState, which the AI sets for wild ones: 0 (its default) gave a
+		// broken split-legged walk or none, 1 its combat walk (measured live). Kept there while transformed.
+		if (c->stanceState > 0 && stanceFor == c) {
+			auto* p = Player();
+			if (std::int32_t now = 0; p->GetGraphVariableInt("iState", now) && now != c->stanceState) {
+				p->SetGraphVariableInt("iState", c->stanceState);
+				logger::info("'{}' graph iState {} -> {}", c->id, now, c->stanceState);
+			}
+		}
 		if (auto* p = Player(); p && p->IsDead()) {
 			if (!deathLogged) {
 				deathLogged = true;
