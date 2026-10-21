@@ -132,7 +132,7 @@ namespace protean::Move
 			logger::info("movelog before look={:.3f} cam={:.4f} dt={:.4f} keys=({:.0f},{:.0f}) shifted={}", lookX,
 				CamYaw(a_player, tps), a_delta, in.x, in.y, Shift::ActiveCreature() != nullptr);
 		}
-		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused())) {
+		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused()) || a_player->IsDead()) {
 			StopOverriding();
 			return;
 		}
@@ -171,6 +171,9 @@ namespace protean::Move
 	{
 		// mode 1: the game turns a moving player back toward the camera during its update; put our turn back
 		auto* tps = Tps();
+		if (a_player->IsDead()) {
+			g_steering = false;  // a dead body is the ragdoll's: never turn it
+		}
 		if (g_log) {
 			logger::info("movelog after cam={:.4f} steering={}", CamYaw(a_player, tps), g_steering);
 		}

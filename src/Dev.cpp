@@ -184,6 +184,15 @@ namespace protean::Dev
 				if (!a_event || !a_event->cause || !a_event->target) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
+				if (a_event->target->IsPlayerRef() && Shift::ActiveCreature()) {
+					// the player in animal form being hit: how much each blow takes
+					auto* source = RE::TESForm::LookupByID(a_event->source);
+					logger::info("player hit by '{}' with '{}'{}{}, health now {:.1f}", a_event->cause->GetName(),
+						source ? source->GetName() : "?", a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) ? " (power attack)" : "",
+						a_event->flags.any(RE::TESHitEvent::Flag::kSneakAttack) ? " (sneak attack)" : "",
+						RE::PlayerCharacter::GetSingleton()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
+					return RE::BSEventNotifyControl::kContinue;
+				}
 				if (!a_event->cause->IsPlayerRef()) {
 					// a wild animal Protean knows: its bites are the yardstick for the player's damage
 					auto* animal = a_event->cause->As<RE::Actor>();

@@ -760,7 +760,17 @@ namespace protean::Shift
 			return;
 		}
 		const auto* c = Active();
+		static bool deathLogged = false;
 		if (!c) {
+			deathLogged = false;
+			return;
+		}
+		if (auto* p = Player(); p && p->IsDead()) {
+			if (!deathLogged) {
+				deathLogged = true;
+				logger::info("player died as '{}' at z {:.1f}, knock state {}, in midair {}", c->id, p->GetPositionZ(),
+					std::to_underlying(p->AsActorState()->GetKnockState()), p->IsInMidair());
+			}
 			return;
 		}
 		if (std::string why; !PlaceAllows(*c, &why)) {
