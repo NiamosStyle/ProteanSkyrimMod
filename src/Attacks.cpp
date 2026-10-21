@@ -161,13 +161,13 @@ namespace protean::Attacks
 
 		void StartSpit(const Creature& a_c, RE::PlayerCharacter* a_p)
 		{
-			// costs what a power attack costs (user decision; the spell's own 3 magicka was nothing). Measured: the
-			// spider's power bite took ~80 of 100 stamina = 40 (UESP's unarmed base) x fPowerAttackStaminaPenalty
-			// (2) x the attack's stamina mult (1)
+			// costs half a power attack (user decision: it does about half the power bite's damage; the spell's own
+			// 3 magicka was nothing). Measured: the spider's power bite took ~80 of 100 stamina = 40 (UESP's
+			// unarmed base) x fPowerAttackStaminaPenalty (2) x the attack's stamina mult (1)
 			auto*       av = a_p->AsActorValueOwner();
 			auto*       gs = RE::GameSettingCollection::GetSingleton();
 			auto*       pen = gs ? gs->GetSetting("fPowerAttackStaminaPenalty") : nullptr;
-			const float cost = 40.0f * (pen ? pen->GetFloat() : 2.0f);
+			const float cost = 0.5f * 40.0f * (pen ? pen->GetFloat() : 2.0f);
 			if (av->GetActorValue(RE::ActorValue::kStamina) < cost) {
 				logger::info("attack: '{}' spell needs {:.0f} stamina, has {:.0f}", a_c.id, cost, av->GetActorValue(RE::ActorValue::kStamina));
 				RE::HUDMenu::FlashMeter(RE::ActorValue::kStamina);
