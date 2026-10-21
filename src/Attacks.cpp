@@ -171,6 +171,22 @@ namespace protean::Attacks
 			logger::info("attack: '{}' {} {} -> graph accepted: {}", c->id, a_power ? "power" : "normal", a->event, ok);
 		}
 
+		// The game's own attack on a stance creature (the giant) plays an empty-handed wave that leaves the graph busy
+		// and refusing Protean's attack. Keep the attack buttons from the game's attack handler while one is active;
+		// Protean's own sink still sees them. (Taking the fighting controls instead also stopped walking and Z.)
+		struct AttackCanProcess
+		{
+			static bool thunk(RE::AttackBlockHandler* a_this, RE::InputEvent* a_event)
+			{
+				if (const auto* c = Shift::ActiveCreature(); g_enabled && c && !c->stance.empty()) {
+					return false;
+				}
+				return func(a_this, a_event);
+			}
+			static inline REL::Relocation<decltype(thunk)> func;
+			static constexpr std::size_t                   idx = 0x1;
+		};
+
 		class Sink : public RE::BSTEventSink<RE::InputEvent*>
 		{
 		public:
@@ -233,6 +249,8 @@ namespace protean::Attacks
 		if (auto* idm = RE::BSInputDeviceManager::GetSingleton()) {
 			idm->AddEventSink<RE::InputEvent*>(Sink::Get());
 		}
+		REL::Relocation<std::uintptr_t> vtbl{ RE::VTABLE_AttackBlockHandler[0] };
+		AttackCanProcess::func = vtbl.write_vfunc(AttackCanProcess::idx, AttackCanProcess::thunk);
 		logger::info("attack translation {}", g_enabled ? "on" : "off");
 	}
 
