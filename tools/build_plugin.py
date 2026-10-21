@@ -83,6 +83,8 @@ MELEE = {
     # and walks properly only with the graph's iState at 1, its combat walk (measured: 0 = no walk or a split-legged one)
     "giant": {"stance": "combatIdleStart", "stance_state": 1},
 }
+# Protean's sprint boost (SpeedMult added while Sprint is held); everyone else gets the horse's gallop, +33% (user)
+SPRINT = {"elk": 40, "fox": 40, "hare": 40, "mammoth": 0, "horker": 0}
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
@@ -288,6 +290,7 @@ def main():
             "race_names": [c["race"]],
             **body(c, npcs),
             **by_race(MELEE, c, creatures),
+            **({"sprint": SPRINT[c["id"]]} if c["id"] in SPRINT else {}),
         })
 
     # Keywords that mark a location as a cave-like open interior (Troll/Horker may go there). Measured over

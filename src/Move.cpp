@@ -108,7 +108,7 @@ namespace protean::Move
 		// No animal race but the horse and the were-forms has sprint speeds or animations (checked: every race's
 		// movement data), so holding Sprint raises SpeedMult instead; Skyrim plays the run faster with it. Costs
 		// stamina at a person's sprint rate and stops when it runs out (user decision).
-		constexpr float kSprintBoost = 40.0f;     // SpeedMult points (user: +50 a little fast; horse gallop is +33%, a person +35%)
+		// how much: per animal (Creature::sprint), by default the horse's gallop, +33% (a person's is +35%; user)
 		constexpr float kSprintDrain = 7.0f;      // stamina per second (UESP: sprinting)
 
 		void SetBoost(RE::PlayerCharacter* a_player, float a_boost)
@@ -132,7 +132,7 @@ namespace protean::Move
 				g_sprintSpent = false;
 			}
 			auto*      av = a_player->AsActorValueOwner();
-			const bool want = c && !c->ownSprint && !c->swims && !Fly::Flying() && g_sprintHeld && a_moving && !g_sprintSpent &&
+			const bool want = c && !c->ownSprint && c->sprint > 0.0f && !c->swims && !Fly::Flying() && g_sprintHeld && a_moving && !g_sprintSpent &&
 			                  !a_player->IsDead();
 			if (want && av->GetActorValue(RE::ActorValue::kStamina) <= 0.0f) {
 				g_sprintSpent = true;
@@ -140,7 +140,7 @@ namespace protean::Move
 				SetBoost(a_player, 0.0f);
 				return;
 			}
-			SetBoost(a_player, want ? kSprintBoost : 0.0f);
+			SetBoost(a_player, want ? c->sprint : 0.0f);
 			if (want) {
 				av->DamageActorValue(RE::ActorValue::kStamina, kSprintDrain * a_delta);
 			}

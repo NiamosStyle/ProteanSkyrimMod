@@ -498,7 +498,8 @@
     "ElkRace"
    ],
    "height": 1.0,
-   "npc": "EncElk"
+   "npc": "EncElk",
+   "sprint": 40
   },
   {
    "id": "fox",
@@ -576,7 +577,8 @@
     "id": 534964
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "sprint": 40
   },
   {
    "id": "hare",
@@ -620,7 +622,8 @@
     "id": 449691
    },
    "leap": 500,
-   "leap_height": 140
+   "leap_height": 140,
+   "sprint": 40
   },
   {
    "id": "dog",
@@ -2362,7 +2365,8 @@
    "height": 1.0,
    "npc": "EncHorker",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "sprint": 0
   },
   {
    "id": "mammoth",
@@ -2445,7 +2449,8 @@
    "taps": [
     "attackStart_Attack1",
     "attackStart_Attack2"
-   ]
+   ],
+   "sprint": 0
   },
   {
    "id": "giant",
