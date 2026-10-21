@@ -2276,6 +2276,163 @@
    "strike_angle": 50
   },
   {
+   "id": "mammoth",
+   "name": "Mammoth",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78335
+   },
+   "heart": 2120,
+   "power": 2121,
+   "size": "outdoor_only",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_Attack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [
+      "Rotating Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    }
+   ],
+   "camera_height": 349,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 275867
+    }
+   ],
+   "ladder": [
+    [
+     38,
+     931
+    ]
+   ],
+   "race_names": [
+    "MammothRace"
+   ],
+   "height": 1.0,
+   "npc": "EncMammothWild",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 365139
+   }
+  },
+  {
+   "id": "giant",
+   "name": "Giant",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78329
+   },
+   "heart": 2122,
+   "power": 2123,
+   "size": "outdoor_only",
+   "attacks": [
+    {
+     "event": "attackPowerStart_ForwardPowerAttack",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crGiantClubSlam"
+    },
+    {
+     "event": "attackPowerStart_Stomp",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crGiantStomp"
+    },
+    {
+     "event": "attackStart_BackAttack",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ClubAttack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ClubAttack2",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_HandSwipeAttack",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null
+    }
+   ],
+   "camera_height": 241,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 275866
+    }
+   ],
+   "ladder": [
+    [
+     32,
+     591
+    ]
+   ],
+   "race_names": [
+    "GiantRace"
+   ],
+   "height": 1.0,
+   "npc": "EncGiant01",
+   "skin": {
+    "file": "Skyrim.esm",
+    "id": 298384
+   }
+  },
+  {
    "id": "werewolf",
    "name": "Werewolf",
    "race": {

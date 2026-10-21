@@ -55,7 +55,7 @@ MELEE = {
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
-           "horse,werewolf,werebear")
+           "horse,werewolf,werebear,mammoth,giant")
 # Extra factions joined while transformed. The hold crime factions count PlayerWerewolfFaction as an enemy: it is how
 # vanilla makes guards attack a player werewolf on sight (and citizens flee).
 EXTRA_FACTIONS = {

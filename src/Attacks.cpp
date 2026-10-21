@@ -119,8 +119,13 @@ namespace protean::Attacks
 				}
 				(a.power ? power : normal).push_back(&a);
 			}
-			// a held attack should go at the enemy: the troll's list starts with a leap backwards
-			std::ranges::stable_partition(power, [](const Attack* a) { return a->event.find("Backward") == std::string::npos; });
+			// an attack should go at the enemy: the troll's power list starts with a leap backwards, the giant's
+			// normal list with a swing behind it
+			auto forwards = [](const Attack* a) {
+				return a->event.find("Backward") == std::string::npos && a->event.find("BackAttack") == std::string::npos;
+			};
+			std::ranges::stable_partition(normal, forwards);
+			std::ranges::stable_partition(power, forwards);
 			const auto& pool = (a_power && !power.empty()) ? power : normal;
 			if (pool.empty()) {
 				return nullptr;

@@ -1,0 +1,23 @@
+FormKey: 000844:Protean.esp
+EditorID: Protean_Heart_horse
+ObjectBounds:
+  First: -3, -6, -3
+  Second: 3, 6, 3
+Name:
+  TargetLanguage: English
+  Value: 'Horse Heart'
+Keywords:
+- 08CDEA:Skyrim.esm
+Model:
+  File: "Clutter\\Ingredients\\HumanHeart.nif"
+PickUpSound: 03EDBD:Skyrim.esm
+PutDownSound: 03EDC0:Skyrim.esm
+Weight: 0.5
+Value: 5
+Flags:
+- NoAutoCalc
+- FoodItem
+ConsumeSound: 0B6435:Skyrim.esm
+Effects:
+- BaseEffect: 000804:Protean.esp
+  Data: {}
