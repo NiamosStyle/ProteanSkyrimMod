@@ -213,6 +213,18 @@ namespace protean::Dev
 					Fly::SetTuning(mode, speed);
 					Fly::TakeOff();
 				}
+			} else if (a_cmd == "sound" && !a_arg.empty()) {
+				// sound <SNDR editor ID>: play it on the player (to audition sounds)
+				RE::BSSoundHandle h;
+				if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+					audio->GetSoundHandleByName(h, a_arg.c_str(), 0x1A);
+				}
+				const bool ok = h.IsValid();
+				if (ok) {
+					h.SetObjectToFollow(p->Get3D());
+					h.Play();
+				}
+				logger::info("dev: sound '{}' playing: {}", a_arg, ok);
 			} else if (a_cmd == "leap") {
 				// leap [distance x] [height x]: tune (multipliers of the table's values), then leap
 				std::istringstream in(a_arg);
