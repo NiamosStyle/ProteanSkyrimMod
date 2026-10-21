@@ -722,11 +722,13 @@ namespace protean::Shift
 
 	namespace
 	{
-		// A change the player asks for plays a skin shimmer, then a transformation sound, and the body switches
-		// kChangeDelay in (user decisions, previewed live: WerewolfTrans02FXS, the "B" effect; the Vampire Lord's
-		// transformation sound, a second after the shimmer starts). Forced changes (death, loading, too big, dev)
-		// stay instant.
+		// A change the player asks for (user decisions, each previewed live): the Become Ethereal shout sound with
+		// a skin shimmer (WerewolfTrans02FXS, the "B" effect), the Vampire Lord's transformation sound a second
+		// in, and at kChangeDelay the Vampire Lord's blood burst as the body switches; the burst hides the swap.
+		// Forced changes (death, loading, too big, dev) stay instant.
+		constexpr auto       kStartSound = "VOCShoutFXBecomeEtherealIn2D";        // Skyrim.esm SNDR (editor ID)
 		constexpr auto       kChangeSound = "NPCVampireLordTransformation022D";  // Dawnguard SNDR (editor ID)
+		constexpr RE::FormID kBurst = 0x015373;                                  // DLC1VampChangeExplosion (Dawnguard.esm)
 		constexpr RE::FormID kChangeShader = 0x0EBECD;                          // WerewolfTrans02FXS (Skyrim.esm)
 		constexpr float      kShaderSeconds = 4.0f;
 		constexpr auto       kSoundDelay = std::chrono::milliseconds(1000);
@@ -744,17 +746,25 @@ namespace protean::Shift
 		std::optional<Pending> g_pending;
 
 		// At the player's spot, not following the body: the switch replaces the body, which cut the sound off.
-		void PlayChangeSound(RE::PlayerCharacter* a_p)
+		void PlayChangeSound(RE::PlayerCharacter* a_p, const char* a_sound)
 		{
 			RE::BSSoundHandle h;
 			if (auto* audio = RE::BSAudioManager::GetSingleton()) {
-				audio->GetSoundHandleByName(h, kChangeSound, 0x1A);
+				audio->GetSoundHandleByName(h, a_sound, 0x1A);
 			}
 			if (h.IsValid()) {
 				h.SetPosition(a_p->GetPosition());
 				h.Play();
 			} else {
-				logger::warn("change: no sound '{}'", kChangeSound);
+				logger::warn("change: no sound '{}'", a_sound);
+			}
+		}
+
+		void PlayBurst(RE::PlayerCharacter* a_p)
+		{
+			auto* dh = RE::TESDataHandler::GetSingleton();
+			if (auto* burst = dh ? dh->LookupForm<RE::BGSExplosion>(kBurst, "Dawnguard.esm") : nullptr) {
+				a_p->PlaceObjectAtMe(burst, false);
 			}
 		}
 
@@ -771,6 +781,7 @@ namespace protean::Shift
 				return;  // one change at a time
 			}
 			PlayChangeShader(Player());
+			PlayChangeSound(Player(), kStartSound);
 			const auto now = std::chrono::steady_clock::now();
 			a_change.at = now + kChangeDelay;
 			a_change.soundAt = now + kSoundDelay;
@@ -786,7 +797,7 @@ namespace protean::Shift
 			if (!g_pending->soundPlayed && now >= g_pending->soundAt) {
 				g_pending->soundPlayed = true;
 				if (auto* p = Player()) {
-					PlayChangeSound(p);
+					PlayChangeSound(p, kChangeSound);
 				}
 			}
 			if (now < g_pending->at) {
@@ -794,9 +805,11 @@ namespace protean::Shift
 			}
 			const auto change = std::move(*g_pending);
 			g_pending.reset();
-			if (auto* p = Player(); !p || p->IsDead()) {
+			auto* p = Player();
+			if (!p || p->IsDead()) {
 				return;
 			}
+			PlayBurst(p);
 			if (change.revert) {
 				Revert(change.why);
 			} else if (change.into) {

@@ -59,7 +59,7 @@ MELEE = {
     # Jump leaps far (user: "leap great distances"); its own lunges are refused for the player. ~14 m, ~3.5 m up
     "ash_hopper": {"reach": 120, "strike_angle": 50, "taps": ["attackStart_Attack1", "attackStart_Attack2"],
                    "leap": 1000, "leap_height": 250},
-    "hare": {"leap": 1000, "leap_height": 250},  # the same leap (user)
+    "hare": {"leap": 500, "leap_height": 250},  # the same leap at half the distance (user: 1000 was way too far)
     # breathes water; on land the game itself suffocates it (measured). User decision: no shoreline wall, and it
     # may change on land and slither into the water
     "slaughterfish": {"reach": 120, "strike_angle": 50, "swims": True},
