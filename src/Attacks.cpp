@@ -279,6 +279,10 @@ namespace protean::Attacks
 						return b->userEvent == a_action ||
 						       (cm && b->GetIDCode() == cm->GetMappedKey(a_action, b->GetDevice()) && b->GetIDCode() != 0xFF);
 					};
+					if (b->IsDown() && bound(ue->shout)) {
+						SKSE::GetTaskInterface()->AddTask([] { Shift::OnPowerKey(); });
+						continue;
+					}
 					const bool isLeft = bound(ue->leftAttack);
 					const bool isRight = bound(ue->rightAttack);
 					if (!isLeft && !isRight) {

@@ -685,6 +685,18 @@ namespace protean::Shift
 		}
 	}
 
+	// The power itself is cast again only ~3 s after the warning (measured: the second Z press waited for it),
+	// so a press of the key inside the warning's window confirms at once.
+	void OnPowerKey()
+	{
+		if (State::Get().active.empty() || g_warnedAt == std::chrono::steady_clock::time_point{} ||
+			std::chrono::steady_clock::now() - g_warnedAt >= kConfirmFor) {
+			return;
+		}
+		g_warnedAt = {};
+		Revert("confirmed with the power key");
+	}
+
 	float RevertKillsBelow()
 	{
 		auto*       p = Player();

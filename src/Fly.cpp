@@ -25,6 +25,8 @@ namespace protean::Fly
 		// loop it while flying.
 		constexpr auto    kWings = "NPCChaurusInsectIdleWingsLP";  // Dawnguard's looping wing sound (editor ID)
 		RE::BSSoundHandle g_wings;
+		bool              g_wingsStarted{ false };  // once per flight: a just-started sound is not "playing" yet,
+		                                            // and restarting it every frame stacked dozens of copies (heard)
 
 		void Wings(RE::PlayerCharacter* a_player, bool a_on)
 		{
@@ -33,11 +35,13 @@ namespace protean::Fly
 					g_wings.FadeOutAndRelease(300);
 				}
 				g_wings = {};
+				g_wingsStarted = false;
 				return;
 			}
-			if (g_wings.IsValid() && g_wings.IsPlaying()) {
+			if (g_wingsStarted) {
 				return;
 			}
+			g_wingsStarted = true;
 			auto* audio = RE::BSAudioManager::GetSingleton();
 			if (!audio) {
 				return;
