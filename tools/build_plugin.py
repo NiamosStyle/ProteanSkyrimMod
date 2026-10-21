@@ -50,7 +50,7 @@ MELEE = {
     # batches B-D: the same floor for every fighter (a race with a longer reach keeps its own)
     **{c: {"reach": 120, "strike_angle": 50} for c in (
         "bear", "cave_bear", "snow_bear", "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat",
-        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse")},
+        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse", "slaughterfish")},
     # the mammoth race's reach is 128 (measured: hits landed only on people almost under it); its tusks reach
     # well past that, and the giant's race has 512
     "mammoth": {"reach": 400, "strike_angle": 90},
@@ -61,7 +61,7 @@ MELEE = {
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
-           "horse,werewolf,werebear,mammoth,giant")
+           "horse,werewolf,werebear,mammoth,giant,slaughterfish")
 # Extra factions joined while transformed. The hold crime factions count PlayerWerewolfFaction as an enemy: it is how
 # vanilla makes guards attack a player werewolf on sight (and citizens flee).
 EXTRA_FACTIONS = {

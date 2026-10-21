@@ -2666,6 +2666,63 @@
    ],
    "height": 1.0,
    "npc": "DLC2EncWerebear"
+  },
+  {
+   "id": "slaughterfish",
+   "name": "Slaughterfish",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78339
+   },
+   "heart": 2128,
+   "power": 2129,
+   "size": "small",
+   "attacks": [
+    {
+     "event": "AttackStart_LCross",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStart_LSlash",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStart_RCorss",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStart_RUppercut",
+     "flags": [],
+     "spell": null
+    }
+   ],
+   "camera_height": 60,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 268522
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     360
+    ]
+   ],
+   "race_names": [
+    "SlaughterfishRace"
+   ],
+   "height": 1.0,
+   "npc": "EncSlaughterfish",
+   "reach": 120,
+   "strike_angle": 50
   }
  ]
 }
