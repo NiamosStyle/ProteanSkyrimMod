@@ -91,6 +91,15 @@ namespace protean
 			cr.swims = c.value("swims", false);
 			cr.stanceState = c.value("stance_state", 0);
 			cr.flies = c.value("flies", false);
+			if (c.contains("rmb_spell")) {
+				const auto& sp = c["rmb_spell"];
+				cr.rmbSpell = dh->LookupForm<RE::SpellItem>(sp.at("id").get<RE::FormID>(), sp.at("file").get<std::string>());
+				if (!cr.rmbSpell) {
+					logger::warn("creature '{}': its RMB spell was not found", cr.id);
+				}
+			}
+			cr.spellEvents = c.value("spell_events", std::vector<std::string>{});
+			cr.spellDelay = c.value("spell_delay", 0.35f);
 			const auto& r = c.at("race");
 			cr.race = dh->LookupForm<RE::TESRace>(r.at("id").get<RE::FormID>(), r.at("file").get<std::string>());
 			cr.heart = dh->LookupForm<RE::AlchemyItem>(c.at("heart").get<RE::FormID>(), plugin);

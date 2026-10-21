@@ -141,11 +141,51 @@ namespace protean::Attacks
 			return pool[(a_rmb && pool.size() > 1) ? 1 : 0];
 		}
 
+		// A spell attack (the spider's spit): the wild animal's AI casts it as a spell; here its animation is
+		// played and the spell cast from the player when the animation releases it.
+		struct Spit
+		{
+			RE::SpellItem*                        spell{ nullptr };
+			std::chrono::steady_clock::time_point at{};
+		};
+		Spit g_spit;
+
+		void StartSpit(const Creature& a_c, RE::PlayerCharacter* a_p)
+		{
+			Move::FaceCamera(a_p);
+			std::string played = "none";
+			for (const auto& e : a_c.spellEvents) {
+				if (a_p->NotifyAnimationGraph(e)) {
+					played = e;
+					break;
+				}
+			}
+			g_spit = { a_c.rmbSpell, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(a_c.spellDelay * 1000)) };
+			logger::info("attack: '{}' spell {:08X}, animation {}", a_c.id, a_c.rmbSpell->GetFormID(), played);
+		}
+
+		void CastSpit()
+		{
+			auto* p = RE::PlayerCharacter::GetSingleton();
+			auto* caster = p ? p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) : nullptr;
+			if (caster && g_spit.spell && !p->IsDead()) {
+				Move::FaceCamera(p);
+				caster->CastSpellImmediate(g_spit.spell, false, nullptr, 1.0f, false, 0.0f, p);
+			}
+			g_spit = {};
+		}
+
 		void Fire(bool a_power)
 		{
 			const auto* c = Shift::ActiveCreature();
 			auto*       p = RE::PlayerCharacter::GetSingleton();
 			if (!c || !p) {
+				return;
+			}
+			if (a_power && g_press.left && c->rmbSpell) {
+				if (!g_spit.spell) {
+					StartSpit(*c, p);
+				}
 				return;
 			}
 			// g_press.left is the game's "Left Attack/Block" action, i.e. the right mouse button
@@ -259,6 +299,9 @@ namespace protean::Attacks
 		if (g_reach.race && std::chrono::steady_clock::now() >= g_reach.until) {
 			RestoreReach();
 		}
+		if (g_spit.spell && std::chrono::steady_clock::now() >= g_spit.at) {
+			CastSpit();
+		}
 		if (!g_press.down || g_press.fired) {
 			return;
 		}
@@ -279,5 +322,6 @@ namespace protean::Attacks
 	void Cancel()
 	{
 		g_press = Press{};
+		g_spit = {};
 		RestoreReach();
 	}}

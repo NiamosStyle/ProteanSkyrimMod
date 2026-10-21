@@ -2950,7 +2950,17 @@
    "height": 1.0,
    "npc": "EncFrostbiteSpider",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "rmb_spell": {
+    "file": "Skyrim.esm",
+    "id": 275677
+   },
+   "spell_events": [
+    "BeginCastLeft",
+    "SpitAttack",
+    "attackStart_Spit",
+    "BeginCastRight"
+   ]
   }
  ]
 }
