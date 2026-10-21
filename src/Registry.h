@@ -33,7 +33,8 @@ namespace protean
 		float                             strikeAngle{ 0.0f };  // player's hit cone (degrees); 0 = each attack's own
 		std::string                       stance;               // graph event for its fighting stance (giant: it walks
 		                                                        // and attacks only from there); empty = none needed
-		bool                              swims{ false };       // a water animal: transforms only while swimming, breathes water
+		bool                              swims{ false };       // a water animal: breathes water (on land the game suffocates it;
+		                                                        // it may change on land and slither in, by user decision)
 
 		// Health this animal has at the given player level: the highest rung at or below the level,
 		// or the lowest rung when the player is below all of them.

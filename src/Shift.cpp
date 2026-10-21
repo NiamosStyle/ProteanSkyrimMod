@@ -505,13 +505,6 @@ namespace protean::Shift
 			logger::info("transform into '{}' refused: {}", a_c.id, why);
 			return;
 		}
-		// a water animal starts in water; once changed it may flop onto land, where the game suffocates it
-		// (measured; kept by user decision)
-		if (auto* st = p->AsActorState(); a_c.swims && !(st && st->IsSwimming())) {
-			Notify(std::format("You must be swimming to become the {}.", a_c.name));
-			logger::info("transform into '{}' refused: not swimming", a_c.id);
-			return;
-		}
 		Face::TakeOff("transforming");  // a stolen face does not carry over into an animal; the banked face is kept
 		logger::info("=== transform into '{}' ===", a_c.id);
 		LogVitals("before", p);

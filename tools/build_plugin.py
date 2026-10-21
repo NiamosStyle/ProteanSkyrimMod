@@ -51,8 +51,8 @@ MELEE = {
     **{c: {"reach": 120, "strike_angle": 50} for c in (
         "bear", "cave_bear", "snow_bear", "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat",
         "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse")},
-    # transforms only while swimming; breathes water (on land the game itself suffocates it, measured: kept by
-    # user decision, no shoreline wall)
+    # breathes water; on land the game itself suffocates it (measured). User decision: no shoreline wall, and it
+    # may change on land and slither into the water
     "slaughterfish": {"reach": 120, "strike_angle": 50, "swims": True},
     # the mammoth race's reach is 128 (measured: hits landed only on people almost under it); its tusks reach
     # well past that, and the giant's race has 512
