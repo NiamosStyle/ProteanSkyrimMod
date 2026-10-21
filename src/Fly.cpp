@@ -206,6 +206,11 @@ namespace protean::Fly
 		return g_flying;
 	}
 
+	bool Leaping()
+	{
+		return g_leap.on;
+	}
+
 	void TakeOff()
 	{
 		auto* p = RE::PlayerCharacter::GetSingleton();

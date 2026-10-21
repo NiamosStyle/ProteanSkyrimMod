@@ -1,5 +1,6 @@
 #include "Move.h"
 
+#include "Fly.h"
 #include "Shift.h"
 
 namespace protean::Move
@@ -134,6 +135,12 @@ namespace protean::Move
 		}
 		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused()) || a_player->IsDead()) {
 			StopOverriding();
+			return;
+		}
+		if (Fly::Leaping()) {
+			// mid-leap the arc carries the animal; no movement input, so its legs stop running in the air (user)
+			RE::PlayerControls::GetSingleton()->data.moveInputVec = {};
+			g_overriding = true;
 			return;
 		}
 		if (g_mode == 2) {

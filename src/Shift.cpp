@@ -722,12 +722,14 @@ namespace protean::Shift
 
 	namespace
 	{
-		// A change the player asks for plays the vanilla werewolf transformation sound and skin shimmer, and the
-		// body switches kChangeDelay in (user decision, previewed live: WerewolfTrans02FXS, the "B" effect).
-		// Forced changes (death, loading, too big, dev) stay instant.
-		constexpr RE::FormID kChangeSound = 0x051936;   // NPCWerewolfTransformationSD (Skyrim.esm)
-		constexpr RE::FormID kChangeShader = 0x0EBECD;  // WerewolfTrans02FXS (Skyrim.esm)
+		// A change the player asks for plays a skin shimmer, then a transformation sound, and the body switches
+		// kChangeDelay in (user decisions, previewed live: WerewolfTrans02FXS, the "B" effect; the Vampire Lord's
+		// transformation sound, a second after the shimmer starts). Forced changes (death, loading, too big, dev)
+		// stay instant.
+		constexpr auto       kChangeSound = "NPCVampireLordTransformation022D";  // Dawnguard SNDR (editor ID)
+		constexpr RE::FormID kChangeShader = 0x0EBECD;                          // WerewolfTrans02FXS (Skyrim.esm)
 		constexpr float      kShaderSeconds = 4.0f;
+		constexpr auto       kSoundDelay = std::chrono::milliseconds(1000);
 		constexpr auto       kChangeDelay = std::chrono::milliseconds(1500);
 
 		struct Pending
@@ -736,18 +738,28 @@ namespace protean::Shift
 			bool                                  revert{ false };
 			std::string                           why;
 			std::chrono::steady_clock::time_point at{};
+			std::chrono::steady_clock::time_point soundAt{};
+			bool                                  soundPlayed{ false };
 		};
 		std::optional<Pending> g_pending;
 
-		void PlayChangeEffects(RE::PlayerCharacter* a_p)
+		// At the player's spot, not following the body: the switch replaces the body, which cut the sound off.
+		void PlayChangeSound(RE::PlayerCharacter* a_p)
 		{
-			if (auto* sd = RE::TESForm::LookupByID<RE::BGSSoundDescriptorForm>(kChangeSound)) {
-				RE::BSSoundHandle h;
-				if (auto* audio = RE::BSAudioManager::GetSingleton(); audio && audio->GetSoundHandle(h, sd)) {
-					h.SetObjectToFollow(a_p->Get3D());
-					h.Play();
-				}
+			RE::BSSoundHandle h;
+			if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+				audio->GetSoundHandleByName(h, kChangeSound, 0x1A);
 			}
+			if (h.IsValid()) {
+				h.SetPosition(a_p->GetPosition());
+				h.Play();
+			} else {
+				logger::warn("change: no sound '{}'", kChangeSound);
+			}
+		}
+
+		void PlayChangeShader(RE::PlayerCharacter* a_p)
+		{
 			if (auto* fx = RE::TESForm::LookupByID<RE::TESEffectShader>(kChangeShader)) {
 				a_p->ApplyEffectShader(fx, kShaderSeconds);
 			}
@@ -758,14 +770,26 @@ namespace protean::Shift
 			if (g_pending) {
 				return;  // one change at a time
 			}
-			PlayChangeEffects(Player());
-			a_change.at = std::chrono::steady_clock::now() + kChangeDelay;
+			PlayChangeShader(Player());
+			const auto now = std::chrono::steady_clock::now();
+			a_change.at = now + kChangeDelay;
+			a_change.soundAt = now + kSoundDelay;
 			g_pending = std::move(a_change);
 		}
 
 		void FinishChange()
 		{
-			if (!g_pending || std::chrono::steady_clock::now() < g_pending->at) {
+			if (!g_pending) {
+				return;
+			}
+			const auto now = std::chrono::steady_clock::now();
+			if (!g_pending->soundPlayed && now >= g_pending->soundAt) {
+				g_pending->soundPlayed = true;
+				if (auto* p = Player()) {
+					PlayChangeSound(p);
+				}
+			}
+			if (now < g_pending->at) {
 				return;
 			}
 			const auto change = std::move(*g_pending);

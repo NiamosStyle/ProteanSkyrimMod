@@ -221,7 +221,7 @@ namespace protean::Dev
 				}
 				const bool ok = h.IsValid();
 				if (ok) {
-					h.SetObjectToFollow(p->Get3D());
+					h.SetPosition(p->GetPosition());
 					h.Play();
 				}
 				logger::info("dev: sound '{}' playing: {}", a_arg, ok);
