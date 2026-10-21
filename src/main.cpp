@@ -117,7 +117,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 	SKSE::Init(a_skse, { .logName = "Protean" });  // -> Documents/My Games/<game>/SKSE/Protean.log
 	spdlog::set_level(spdlog::level::info);
 	spdlog::flush_on(spdlog::level::info);
-	logger::info("Protean {} on runtime {}", "0.1.0", REL::Module::get().version().string());
+	logger::info("Protean {} on runtime {}", "1.0.0", REL::Module::get().version().string());
 
 	protean::Persist::Install();
 	if (!SKSE::GetMessagingInterface()->RegisterListener(OnMessage)) {
