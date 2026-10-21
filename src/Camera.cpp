@@ -7,7 +7,33 @@ namespace protean::Camera
 		constexpr auto kNodeName = "ProteanCam"sv;
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 		constexpr float kBigRadius = 180.0f;  // model radius above which the camera moves back (horse 143, giant 156)
-		constexpr float kBigBack = 2.5f;      // per unit of radius above that (1.0 left the mammoth's too close)
+		// The engine ignores the camera node's forward/back position (measured: moving it 1259 units back left the
+		// camera where it was), so a big body gets a longer camera distance instead: the game's maximum distance is
+		// raised while transformed. 4.9 per unit of radius takes the mammoth (363) from 600 to 1500, chosen live.
+		constexpr float kBigMaxPerRadius = 4.9f;
+		constexpr auto  kMaxDist = "fVanityModeMaxDist:Camera";
+		float           g_maxDistOriginal{ -1.0f };  // the game's value while ours is set
+
+		RE::Setting* MaxDist()
+		{
+			auto* ini = RE::INISettingCollection::GetSingleton();
+			auto* s = ini ? ini->GetSetting(kMaxDist) : nullptr;
+			if (!s) {
+				auto* prefs = RE::INIPrefSettingCollection::GetSingleton();
+				s = prefs ? prefs->GetSetting(kMaxDist) : nullptr;
+			}
+			return s;
+		}
+
+		void RestoreMaxDist()
+		{
+			if (g_maxDistOriginal >= 0.0f) {
+				if (auto* s = MaxDist()) {
+					s->data.f = g_maxDistOriginal;
+				}
+				g_maxDistOriginal = -1.0f;
+			}
+		}
 
 		// Tuning, re-read from Protean.ini at every transform so it can be adjusted without restarting.
 		struct Tuning
@@ -100,11 +126,13 @@ namespace protean::Camera
 		g_restoreIn = -1;
 		g_frames = 0;
 		g_node.reset();
+		RestoreMaxDist();
 	}
 
 	void Begin(float a_height)
 	{
 		LoadTuning();
+		RestoreMaxDist();  // straight from a big animal to another
 		g_active = true;
 		g_height = a_height;  // the table's value: used until (or unless) the model can be measured
 		g_frames = 0;
@@ -115,6 +143,7 @@ namespace protean::Camera
 	{
 		g_active = false;
 		g_restoreIn = 20;  // give the engine time to reload the human 3D first
+		RestoreMaxDist();
 	}
 
 	void OnFrame(RE::PlayerCharacter* a_p)
@@ -165,13 +194,16 @@ namespace protean::Camera
 					root->worldBound.center.z - root->world.translate.z, root->worldBound.radius, base, g_height);
 			}
 		}
-		// A big body (the mammoth, radius ~370) hides the view at the usual distance: move the camera back by
-		// how much the model is bigger than a horse-sized one.
-		float back = g_tune.backOffset;
-		if (g_tune.autoHeight && g_frames >= 20 && root->worldBound.radius > kBigRadius) {
-			back -= (root->worldBound.radius - kBigRadius) * kBigBack;
+		// A big body (the mammoth, radius ~363) hides the view at the usual distance: allow a longer one, by how
+		// much the model is bigger than a horse-sized one
+		if (g_frames == 20 && root->worldBound.radius > kBigRadius) {
+			if (auto* s = MaxDist(); s && g_maxDistOriginal < 0.0f) {
+				g_maxDistOriginal = s->GetFloat();
+				s->data.f = g_maxDistOriginal + (root->worldBound.radius - kBigRadius) * kBigMaxPerRadius;
+				logger::info("[camera] big body: maximum distance {:.0f} -> {:.0f}", g_maxDistOriginal, s->data.f);
+			}
 		}
-		const RE::NiPoint3 where{ g_tune.sideOffset, back, base * g_tune.heightScale };
+		const RE::NiPoint3 where{ g_tune.sideOffset, g_tune.backOffset, base * g_tune.heightScale };
 		RE::NiAVObject*    found = rootNode->GetObjectByName(kNodeName);
 		if (!found) {
 			auto* n = RE::NiNode::Create(0);
