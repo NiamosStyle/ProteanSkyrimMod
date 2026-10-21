@@ -416,6 +416,18 @@ namespace protean::Shift
 			s.bodyHeight = 0.0f;
 		}
 
+		// A race switch rebuilds the body standing up, but the game's sneak flag survives it: the player then walks at
+		// sneak speed upright and counts as sneaking (seen after changing back from the dog: the face offer took the
+		// loot window). Drop the flag so it matches the new body.
+		void StandUp(RE::PlayerCharacter* a_p)
+		{
+			if (auto* st = a_p->AsActorState(); st && st->IsSneaking()) {
+				st->actorState1.sneaking = 0;
+				a_p->NotifyAnimationGraph("SneakStop");
+				logger::info("sneak flag cleared after the race switch");
+			}
+		}
+
 		void LogVitals(const char* a_tag, RE::PlayerCharacter* a_p)
 		{
 			auto* av = a_p->AsActorValueOwner();
@@ -501,6 +513,7 @@ namespace protean::Shift
 		SaveAndStripGear(p);
 		WearBody(p, a_c);  // before the race switch, which rebuilds the model
 		p->SwitchRace(a_c.race, true);
+		StandUp(p);
 		JoinFactions(p, a_c);
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, bonus);
 
@@ -568,6 +581,7 @@ namespace protean::Shift
 		TakeOffBody(p);
 		if (auto* race = RE::TESForm::LookupByID<RE::TESRace>(s.realRace)) {
 			p->SwitchRace(race, true);
+			StandUp(p);
 		} else {
 			logger::error("real race {:08X} not found; staying in the animal's race", s.realRace);
 		}

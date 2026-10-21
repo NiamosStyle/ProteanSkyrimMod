@@ -739,7 +739,7 @@ namespace protean::Face
 		if (auto* ui = RE::UI::GetSingleton(); ui && ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME) && !g_queued.exchange(true)) {
 			ShowChoice();  // the loot window beat us to it
 		}
-		logger::info("face offer started for {:08X} '{}'", a_corpse->GetFormID(), a_corpse->GetName());
+		logger::info("face offer started for {:08X} '{}' (sneaking)", a_corpse->GetFormID(), a_corpse->GetName());
 		return true;
 	}
 
