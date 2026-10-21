@@ -686,6 +686,11 @@ namespace protean::Shift
 		}
 	}
 
+	namespace
+	{
+		void BeginRevertChange(const char* a_why);  // below, with the change effects
+	}
+
 	// The power itself is cast again only ~3 s after the warning (measured: the second Z press waited for it),
 	// so a press of the key inside the warning's window confirms at once.
 	void OnPowerKey()
@@ -695,7 +700,7 @@ namespace protean::Shift
 			return;
 		}
 		g_warnedAt = {};
-		Revert("confirmed with the power key");
+		BeginRevertChange("confirmed with the power key");
 		// that press still casts, ~a second later, whatever power is in the slot by then: the animal's own,
 		// put back by the revert, which changed the player straight back (seen). Ignore it.
 		g_ignoreCastsUntil = std::chrono::steady_clock::now() + std::chrono::seconds(4);
@@ -715,6 +720,72 @@ namespace protean::Shift
 		return s.healthBonus + std::max(raceExtra, 0.0f);
 	}
 
+	namespace
+	{
+		// A change the player asks for plays the vanilla werewolf transformation sound and skin shimmer, and the
+		// body switches kChangeDelay in (user decision, previewed live: WerewolfTrans02FXS, the "B" effect).
+		// Forced changes (death, loading, too big, dev) stay instant.
+		constexpr RE::FormID kChangeSound = 0x051936;   // NPCWerewolfTransformationSD (Skyrim.esm)
+		constexpr RE::FormID kChangeShader = 0x0EBECD;  // WerewolfTrans02FXS (Skyrim.esm)
+		constexpr float      kShaderSeconds = 4.0f;
+		constexpr auto       kChangeDelay = std::chrono::milliseconds(1500);
+
+		struct Pending
+		{
+			const Creature*                       into{ nullptr };  // null with revert set: changing back
+			bool                                  revert{ false };
+			std::string                           why;
+			std::chrono::steady_clock::time_point at{};
+		};
+		std::optional<Pending> g_pending;
+
+		void PlayChangeEffects(RE::PlayerCharacter* a_p)
+		{
+			if (auto* sd = RE::TESForm::LookupByID<RE::BGSSoundDescriptorForm>(kChangeSound)) {
+				RE::BSSoundHandle h;
+				if (auto* audio = RE::BSAudioManager::GetSingleton(); audio && audio->GetSoundHandle(h, sd)) {
+					h.SetObjectToFollow(a_p->Get3D());
+					h.Play();
+				}
+			}
+			if (auto* fx = RE::TESForm::LookupByID<RE::TESEffectShader>(kChangeShader)) {
+				a_p->ApplyEffectShader(fx, kShaderSeconds);
+			}
+		}
+
+		void BeginChange(Pending a_change)
+		{
+			if (g_pending) {
+				return;  // one change at a time
+			}
+			PlayChangeEffects(Player());
+			a_change.at = std::chrono::steady_clock::now() + kChangeDelay;
+			g_pending = std::move(a_change);
+		}
+
+		void FinishChange()
+		{
+			if (!g_pending || std::chrono::steady_clock::now() < g_pending->at) {
+				return;
+			}
+			const auto change = std::move(*g_pending);
+			g_pending.reset();
+			if (auto* p = Player(); !p || p->IsDead()) {
+				return;
+			}
+			if (change.revert) {
+				Revert(change.why);
+			} else if (change.into) {
+				Transform(*change.into);
+			}
+		}
+
+		void BeginRevertChange(const char* a_why)
+		{
+			BeginChange({ nullptr, true, a_why });
+		}
+	}
+
 	void OnPowerCast(RE::SpellItem* a_spell)
 	{
 		auto& reg = Registry::Get();
@@ -726,7 +797,7 @@ namespace protean::Shift
 		}
 		if (a_spell == reg.Revert()) {
 			if (ConfirmRevert()) {
-				Revert("revert power");
+				BeginChange({ nullptr, true, "revert power" });
 			}
 			return;
 		}
@@ -751,10 +822,12 @@ namespace protean::Shift
 		if (const auto* c = reg.ByPower(a_spell->GetFormID())) {
 			if (s.active == c->id) {
 				if (ConfirmRevert()) {
-					Revert("same power again");
+					BeginChange({ nullptr, true, "same power again" });
 				}
+			} else if (!s.active.empty() || !PlaceAllows(*c)) {
+				Transform(*c);  // refused: it says why, with no effects first
 			} else {
-				Transform(*c);
+				BeginChange({ c, false, {} });
 			}
 		}
 	}
@@ -800,6 +873,7 @@ namespace protean::Shift
 
 	void BeforeLoad()
 	{
+		g_pending.reset();  // a change still on its way belongs to the game being left
 		// hand the player's own skin and height back, so a save loaded next does not inherit the animal's
 		if (auto* p = Player()) {
 			TakeOffBody(p);
@@ -808,6 +882,7 @@ namespace protean::Shift
 
 	void OnFrame()
 	{
+		FinishChange();  // every frame: the change lands on time
 		static int frames = 0;
 		if (++frames % 30 != 0) {
 			return;
