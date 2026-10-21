@@ -38,6 +38,8 @@ BLOCKED = {
             "attackStart_SkeeverLungeMedium", "attackStart_SkeeverLungeShort", "attackStart_StandingPower"],
     # Phase 4 step 1 (2026-10-20): horse refuses nothing; the sprint moves need a sprint, the howl is a shout
     "werewolf": ["AttackStartDualSprinting", "AttackStartHowlExplode", "AttackStartLeftSprinting", "AttackStartRightSprinting"],
+    # 2026-10-21: refused every time in play and by probe; LMB falls to its straight bite (Attack1, accepted)
+    "boar": ["attackStart_AttackRight1"],
 }
 # Melee tuning for the player in animal form (wild animals keep the vanilla values). Vanilla wolf: reach 64,
 # strike cone 35 degrees, which made bites very hard to land (measured live); werewolf: 150 / 50.

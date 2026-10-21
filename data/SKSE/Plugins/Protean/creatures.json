@@ -1490,11 +1490,6 @@
      "spell": null
     },
     {
-     "event": "attackStart_AttackRight1",
-     "flags": [],
-     "spell": null
-    },
-    {
      "event": "attackStart_ForwardPowerLarge",
      "flags": [
       "Power Attack"
