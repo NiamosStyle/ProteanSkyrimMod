@@ -15,4 +15,5 @@ namespace protean::Move
 	void FaceCamera(RE::PlayerCharacter* a_player);               // an attack goes where the camera looks
 	RE::NiPoint2 Keys();                                          // movement keys or stick: x = right, y = forward
 	void Reset();                                                 // revert / load: hand movement back to the game
+	void ClearSprint();                                           // take the sprint's speed off (also after a load)
 }

@@ -34,6 +34,7 @@ namespace protean
 		std::string                       stance;               // graph event for its fighting stance (giant: it walks
 		                                                        // and attacks only from there); empty = none needed
 		bool                              flies{ false };       // Jump takes off into real flight (Fly.cpp)
+		bool                              ownSprint{ false };   // the race sprints by itself (horse, were-forms): no boost
 		float                             leap{ 0.0f };         // Jump leaps this far (game units) in an arc; 0 = no leap
 		float                             leapHeight{ 0.0f };   // the arc's highest point above the start
 		std::vector<std::string>          taps;                 // LMB / RMB tap events, overriding the side-swipe pick

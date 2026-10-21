@@ -2293,7 +2293,8 @@
     "id": 550159
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "own_sprint": true
   },
   {
    "id": "horker",
@@ -2632,7 +2633,8 @@
     "WerewolfBeastRace"
    ],
    "height": 1.0,
-   "npc": "EncWerewolf01"
+   "npc": "EncWerewolf01",
+   "own_sprint": true
   },
   {
    "id": "werebear",
@@ -2758,7 +2760,8 @@
     "DLC2WerebearBeastRace"
    ],
    "height": 1.0,
-   "npc": "DLC2EncWerebear"
+   "npc": "DLC2EncWerebear",
+   "own_sprint": true
   },
   {
    "id": "slaughterfish",

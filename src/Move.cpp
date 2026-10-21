@@ -2,6 +2,7 @@
 
 #include "Fly.h"
 #include "Shift.h"
+#include "State.h"
 
 namespace protean::Move
 {
@@ -19,6 +20,8 @@ namespace protean::Move
 		int                              g_mode{ 1 };            // 1 = directional, 2 = tank (A/D turn)
 		float                            g_wantHeading{ 0.0f };  // mode 1: the heading put back after the update
 		bool                             g_steering{ false };
+		bool                             g_sprintHeld{ false };
+		bool                             g_sprintSpent{ false };  // ran out: wait for the key to be let go
 		constexpr float                  kTankRate = RE::NI_PI;  // mode 2: 180 degrees per second
 
 		float Wrap(float a_angle)
@@ -57,6 +60,9 @@ namespace protean::Move
 						                  ev == ue->strafeLeft ? kLeft : ev == ue->strafeRight ? kRight : -1;
 						if (dir >= 0) {
 							g_keys[dir] = b->IsPressed() ? Clock::now() : Clock::time_point{};
+						}
+						if (ev == ue->sprint) {
+							g_sprintHeld = b->IsPressed();
 						}
 					} else if (e->GetEventType() == RE::INPUT_EVENT_TYPE::kThumbstick) {
 						auto* t = static_cast<RE::ThumbstickEvent*>(e);
@@ -98,6 +104,48 @@ namespace protean::Move
 		float g_turnScale{ 0.0f };  // dev: overrides the game setting when above zero
 		bool  g_log{ false };       // dev: log the mouse and the camera every frame, to measure a person's turn
 
+		// ---- sprint ------------------------------------------------------------------------------
+		// No animal race but the horse and the were-forms has sprint speeds or animations (checked: every race's
+		// movement data), so holding Sprint raises SpeedMult instead; Skyrim plays the run faster with it. Costs
+		// stamina at a person's sprint rate and stops when it runs out (user decision).
+		constexpr float kSprintBoost = 50.0f;     // SpeedMult points (+50%)
+		constexpr float kSprintDrain = 7.0f;      // stamina per second (UESP: sprinting)
+
+		void SetBoost(RE::PlayerCharacter* a_player, float a_boost)
+		{
+			auto& s = State::Get();
+			if (s.sprintBoost == a_boost) {
+				return;
+			}
+			auto* av = a_player->AsActorValueOwner();
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kSpeedMult, a_boost - s.sprintBoost);
+			s.sprintBoost = a_boost;
+			// the engine takes a new speed only when something makes it recompute movement: the usual nudge
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kCarryWeight, 0.1f);
+			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kCarryWeight, -0.1f);
+		}
+
+		void UpdateSprint(RE::PlayerCharacter* a_player, float a_delta, bool a_moving)
+		{
+			const auto* c = Shift::ActiveCreature();
+			if (!g_sprintHeld) {
+				g_sprintSpent = false;
+			}
+			auto*      av = a_player->AsActorValueOwner();
+			const bool want = c && !c->ownSprint && !c->swims && !Fly::Flying() && g_sprintHeld && a_moving && !g_sprintSpent &&
+			                  !a_player->IsDead();
+			if (want && av->GetActorValue(RE::ActorValue::kStamina) <= 0.0f) {
+				g_sprintSpent = true;
+				RE::HUDMenu::FlashMeter(RE::ActorValue::kStamina);
+				SetBoost(a_player, 0.0f);
+				return;
+			}
+			SetBoost(a_player, want ? kSprintBoost : 0.0f);
+			if (want) {
+				av->DamageActorValue(RE::ActorValue::kStamina, kSprintDrain * a_delta);
+			}
+		}
+
 		float CamYaw(RE::PlayerCharacter* a_player, RE::ThirdPersonState* a_tps)
 		{
 			return a_player->GetAngleZ() + (a_tps && a_tps->freeRotationEnabled ? a_tps->freeRotation.x : 0.0f);
@@ -132,6 +180,9 @@ namespace protean::Move
 		if (g_log) {
 			logger::info("movelog before look={:.3f} cam={:.4f} dt={:.4f} keys=({:.0f},{:.0f}) shifted={}", lookX,
 				CamYaw(a_player, tps), a_delta, in.x, in.y, Shift::ActiveCreature() != nullptr);
+		}
+		if (!(ui && ui->GameIsPaused())) {
+			UpdateSprint(a_player, a_delta, in.x * in.x + in.y * in.y > 0.01f);
 		}
 		if (!Shift::ActiveCreature() || !tps || (ui && ui->GameIsPaused()) || a_player->IsDead()) {
 			StopOverriding();
@@ -227,8 +278,18 @@ namespace protean::Move
 		return Input();
 	}
 
+	void ClearSprint()
+	{
+		if (auto* p = RE::PlayerCharacter::GetSingleton()) {
+			SetBoost(p, 0.0f);
+		}
+		g_sprintHeld = false;
+		g_sprintSpent = false;
+	}
+
 	void Reset()
 	{
+		ClearSprint();
 		StopOverriding();
 		g_keys = {};
 		g_stick = {};

@@ -876,6 +876,7 @@ namespace protean::Shift
 		if (!p) {
 			return;
 		}
+		Move::ClearSprint();  // a save made mid-sprint holds the sprint's speed; the co-save says how much
 		// Every form learned has its power (seen 2026-10-21: a save without powers the player had been given;
 		// the co-save's list of learned forms is the record that counts).
 		for (const auto& id : s.known) {
