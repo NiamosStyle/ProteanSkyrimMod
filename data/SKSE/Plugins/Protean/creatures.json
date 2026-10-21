@@ -2865,6 +2865,92 @@
    "reach": 120,
    "strike_angle": 50,
    "flies": true
+  },
+  {
+   "id": "frostbite_spider",
+   "name": "Frostbite Spider",
+   "race": {
+    "file": "Skyrim.esm",
+    "id": 78328
+   },
+   "heart": 2134,
+   "power": 2135,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "AttackStartLungeBite",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": "crSpider01PoisonBite"
+    },
+    {
+     "event": "attackStart_Bite1",
+     "flags": [],
+     "spell": "crSpider01PoisonBite"
+    },
+    {
+     "event": "attackStart_Bite2",
+     "flags": [],
+     "spell": "crSpider01PoisonBite"
+    },
+    {
+     "event": "AttackStart_ComboChop",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "AttackStart_LeftChop",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "AttackStart_RightChop",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "bashStart",
+     "flags": [
+      "Bash Attack"
+     ],
+     "spell": null
+    }
+   ],
+   "camera_height": 80,
+   "factions": [
+    {
+     "file": "Skyrim.esm",
+     "id": 19
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 170367
+    },
+    {
+     "file": "Skyrim.esm",
+     "id": 190611
+    }
+   ],
+   "ladder": [
+    [
+     1,
+     15
+    ],
+    [
+     3,
+     35
+    ]
+   ],
+   "race_names": [
+    "FrostbiteSpiderRace"
+   ],
+   "height": 1.0,
+   "npc": "EncFrostbiteSpider",
+   "reach": 120,
+   "strike_angle": 50
   }
  ]
 }

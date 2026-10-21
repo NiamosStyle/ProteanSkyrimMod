@@ -57,6 +57,8 @@ CREATURES = [
     ("slaughterfish", "Slaughterfish", "SlaughterfishRace", ["Slaughterfish"], "small", 7, "Slaughterfish Fin", "Swim-only: real swimming/diving, cannot leave water."),
     ("chaurus_hunter", "Chaurus Hunter", "DLC1ChaurusHunterRace", ["Chaurus Hunter"], "medium", 8, "Chaurus Hunter Wing Membrane", "Dawnguard. Needs real flight (vanilla race has no Flies flag)."),
     ("chaurus_hunter_fledgling", "Chaurus Hunter Fledgling", "DLC1ChaurusHunterRace", ["Chaurus Hunter Fledgling"], "medium", 8, "Fledgling Wing Bud", "Dawnguard. Same race as Chaurus Hunter."),
+    # added 2026-10-21 (user): appended last so no earlier creature's FormIDs move
+    ("frostbite_spider", "Frostbite Spider", "FrostbiteSpiderRace", ["Frostbite Spider"], "medium", 3, "Frostbite Spider Heart", "The regular one; the Large and Giant ones have their own races."),
 ]
 
 races = json.load(open(os.path.join(RAW, "races.json"), encoding="utf-8"))

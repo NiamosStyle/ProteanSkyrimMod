@@ -21,6 +21,40 @@ namespace protean::Fly
 		float             g_logIn{ 0.0f };
 		RE::NiPoint3      g_lastPos{};
 
+		// The wild hunter's wing buzz plays only from its idle animation, so a flying player was nearly silent:
+		// loop it while flying.
+		constexpr auto    kWings = "NPCChaurusInsectIdleWingsLP";  // Dawnguard's looping wing sound (editor ID)
+		RE::BSSoundHandle g_wings;
+
+		void Wings(RE::PlayerCharacter* a_player, bool a_on)
+		{
+			if (!a_on) {
+				if (g_wings.IsValid()) {
+					g_wings.FadeOutAndRelease(300);
+				}
+				g_wings = {};
+				return;
+			}
+			if (g_wings.IsValid() && g_wings.IsPlaying()) {
+				return;
+			}
+			auto* audio = RE::BSAudioManager::GetSingleton();
+			if (!audio) {
+				return;
+			}
+			audio->GetSoundHandleByName(g_wings, kWings, 0x1A);
+			if (!g_wings.IsValid()) {
+				static bool warned = false;
+				if (!warned) {
+					warned = true;
+					logger::warn("fly: no sound '{}'", kWings);
+				}
+				return;
+			}
+			g_wings.SetObjectToFollow(a_player->Get3D());
+			g_wings.Play();
+		}
+
 		bool Flies()
 		{
 			const auto* c = Shift::ActiveCreature();
@@ -98,6 +132,7 @@ namespace protean::Fly
 		}
 		g_flying = false;
 		auto* p = RE::PlayerCharacter::GetSingleton();
+		Wings(p, false);
 		if (auto* cc = p ? p->GetCharController() : nullptr) {
 			cc->gravity = g_gravity;
 			cc->fallStartHeight = p->GetPositionZ();  // fall damage counts from here, not from the highest point
@@ -126,6 +161,7 @@ namespace protean::Fly
 			return;
 		}
 
+		Wings(a_player, true);
 		cc->gravity = 0.0f;
 		cc->context.currentState = g_mode == 2 ? RE::hkpCharacterStateType::kFlying : RE::hkpCharacterStateType::kInAir;
 		cc->fallStartHeight = a_player->GetPositionZ();  // no fall damage while flying

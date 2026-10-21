@@ -50,7 +50,7 @@ MELEE = {
     # batches B-D: the same floor for every fighter (a race with a longer reach keeps its own)
     **{c: {"reach": 120, "strike_angle": 50} for c in (
         "bear", "cave_bear", "snow_bear", "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat",
-        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse")},
+        "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse", "frostbite_spider")},
     # breathes water; on land the game itself suffocates it (measured). User decision: no shoreline wall, and it
     # may change on land and slither into the water
     "slaughterfish": {"reach": 120, "strike_angle": 50, "swims": True},
@@ -68,7 +68,8 @@ MELEE = {
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
-           "horse,werewolf,werebear,mammoth,giant,slaughterfish,chaurus_hunter,chaurus_hunter_fledgling")
+           "horse,werewolf,werebear,mammoth,giant,slaughterfish,chaurus_hunter,chaurus_hunter_fledgling,"
+           "frostbite_spider")
 # Extra factions joined while transformed. The hold crime factions count PlayerWerewolfFaction as an enemy: it is how
 # vanilla makes guards attack a player werewolf on sight (and citizens flee).
 EXTRA_FACTIONS = {

@@ -41,6 +41,7 @@ Health: the race value is only a base. Real health is measured live in Phase 1.
 | 33 | Slaughterfish | SlaughterfishRace | small | 7 | Slaughterfish Heart | 360-360 | 1-1 | 4 (0) |
 | 34 | Chaurus Hunter | DLC1ChaurusHunterRace | medium | 8 | Chaurus Hunter Heart | 636-636 | 32-32 | 4 (4) |
 | 35 | Chaurus Hunter Fledgling | DLC1ChaurusHunterRace | medium | 8 | Chaurus Hunter Fledgling Heart | 375-375 | 16-16 | 4 (4) |
+| 36 | Frostbite Spider | FrostbiteSpiderRace | medium | 3 | Frostbite Spider Heart | 15-35 | 1-3 | 7 (5) |
 
 ## Special attacks (power attacks, bashes, spell attacks) per creature
 
@@ -79,3 +80,4 @@ Health: the race value is only a base. Real health is measured live in Phase 1.
 - **Slaughterfish**: none beyond normal attacks
 - **Chaurus Hunter**: attackPowerStart_GroundDive [Power Attack]; attackPowerStart_PowerAttack [Power Attack,spell:DLC1crChaurusPoisonBite03]; AttackLtoR [spell:DiseaseRattles]; AttackRtoL [spell:DiseaseRattles]
 - **Chaurus Hunter Fledgling**: attackPowerStart_GroundDive [Power Attack]; attackPowerStart_PowerAttack [Power Attack,spell:DLC1crChaurusPoisonBite03]; AttackLtoR [spell:DiseaseRattles]; AttackRtoL [spell:DiseaseRattles]
+- **Frostbite Spider**: AttackStartLungeBite [Power Attack,spell:crSpider01PoisonBite]; Bite1 [spell:crSpider01PoisonBite]; Bite2 [spell:crSpider01PoisonBite]; AttackStart_ComboChop [Power Attack]; bashStart [Bash Attack]

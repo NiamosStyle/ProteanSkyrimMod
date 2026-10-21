@@ -3,6 +3,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Face.h"
+#include "Fly.h"
 #include "Move.h"
 #include "State.h"
 
@@ -625,8 +626,9 @@ namespace protean::Shift
 
 	namespace
 	{
-		// The player's own wish to change back is refused once when it would kill them; casting again within
-		// kConfirmFor goes ahead. (Forced reverts - death, loading, dev - never ask.)
+		// The player's own wish to change back is refused once when it would kill them, or drop them out of the
+		// sky (user decision); casting again within kConfirmFor goes ahead. (Forced reverts - death, loading,
+		// dev - never ask.)
 		constexpr auto kConfirmFor = std::chrono::seconds(10);
 		std::chrono::steady_clock::time_point g_warnedAt{};
 
@@ -634,13 +636,16 @@ namespace protean::Shift
 		{
 			const float hp = Player()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) - RevertKillsBelow();
 			const auto  now = std::chrono::steady_clock::now();
-			if (hp > 0.0f || now - g_warnedAt < kConfirmFor) {
+			const char* why = hp <= 0.0f ? "Your wounds are too deep to survive changing back." :
+			                  Fly::Flying()  ? "You are flying: changing back now means a fall." :
+			                                   nullptr;
+			if (!why || now - g_warnedAt < kConfirmFor) {
 				g_warnedAt = {};
 				return true;
 			}
 			g_warnedAt = now;
-			logger::info("revert refused once: health would be {:.1f}", hp);
-			Notify("Your wounds are too deep to survive changing back. Cast again to change back anyway.");
+			logger::info("revert refused once: health would be {:.1f}, flying {}", hp, Fly::Flying());
+			Notify(std::string(why) + " Cast again to change back anyway.");
 			return false;
 		}
 	}
