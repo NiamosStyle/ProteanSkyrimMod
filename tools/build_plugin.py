@@ -57,10 +57,10 @@ MELEE = {
     # vanilla floats them at a fixed height over the ground; Jump takes off into real flight (Fly.cpp)
     "chaurus_hunter": {"reach": 120, "strike_angle": 50, "flies": True},
     "chaurus_hunter_fledgling": {"reach": 120, "strike_angle": 50, "flies": True},
-    # RMB power attack = its poison spit (user decision), crSpider01PoisonSpit; the animation events are candidates
-    # until probed live
+    # RMB power attack = its poison spit (user decision), crSpider01PoisonSpit. Probed live: the stance rears it up,
+    # the release event plays the spit (its BeginCastLeft is refused for the player)
     "frostbite_spider": {"reach": 120, "strike_angle": 50, "rmb_spell": {"file": "Skyrim.esm", "id": 0x0434DD},
-                         "spell_events": ["BeginCastLeft", "SpitAttack", "attackStart_Spit", "BeginCastRight"]},
+                         "spell_events": ["spitStanceStart", "MLH_SpellRelease_event"]},
     # the mammoth race's reach is 128 (measured: hits landed only on people almost under it); its tusks reach
     # well past that, and the giant's race has 512
     "mammoth": {"reach": 400, "strike_angle": 90},

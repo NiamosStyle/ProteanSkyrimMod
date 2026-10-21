@@ -2956,10 +2956,8 @@
     "id": 275677
    },
    "spell_events": [
-    "BeginCastLeft",
-    "SpitAttack",
-    "attackStart_Spit",
-    "BeginCastRight"
+    "spitStanceStart",
+    "MLH_SpellRelease_event"
    ]
   }
  ]

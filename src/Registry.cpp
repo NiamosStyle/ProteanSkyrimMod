@@ -99,7 +99,8 @@ namespace protean
 				}
 			}
 			cr.spellEvents = c.value("spell_events", std::vector<std::string>{});
-			cr.spellDelay = c.value("spell_delay", 0.35f);
+			cr.spellStanceDelay = c.value("spell_stance_delay", 0.5f);
+			cr.spellDelay = c.value("spell_delay", 0.3f);
 			const auto& r = c.at("race");
 			cr.race = dh->LookupForm<RE::TESRace>(r.at("id").get<RE::FormID>(), r.at("file").get<std::string>());
 			cr.heart = dh->LookupForm<RE::AlchemyItem>(c.at("heart").get<RE::FormID>(), plugin);

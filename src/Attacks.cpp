@@ -142,35 +142,50 @@ namespace protean::Attacks
 		}
 
 		// A spell attack (the spider's spit): the wild animal's AI casts it as a spell; here its animation is
-		// played and the spell cast from the player when the animation releases it.
+		// played and the spell cast from the player. Measured on the spider (hands readied): "spitStanceStart"
+		// rears it up, "MLH_SpellRelease_event" a moment later plays the spit and drops it back to its normal
+		// stance; its own cast event is refused for the player. So the events in spellEvents are sent in turn,
+		// spellStanceDelay apart, and the spell is cast spellDelay after the last.
 		struct Spit
 		{
-			RE::SpellItem*                        spell{ nullptr };
+			const Creature*                       c{ nullptr };
+			std::size_t                           next{ 0 };  // the next event to send; past the end: cast
 			std::chrono::steady_clock::time_point at{};
 		};
 		Spit g_spit;
 
-		void StartSpit(const Creature& a_c, RE::PlayerCharacter* a_p)
+		auto After(float a_seconds)
 		{
-			Move::FaceCamera(a_p);
-			std::string played = "none";
-			for (const auto& e : a_c.spellEvents) {
-				if (a_p->NotifyAnimationGraph(e)) {
-					played = e;
-					break;
-				}
-			}
-			g_spit = { a_c.rmbSpell, std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(a_c.spellDelay * 1000)) };
-			logger::info("attack: '{}' spell {:08X}, animation {}", a_c.id, a_c.rmbSpell->GetFormID(), played);
+			return std::chrono::steady_clock::now() + std::chrono::milliseconds(static_cast<int>(a_seconds * 1000));
 		}
 
-		void CastSpit()
+		void StartSpit(const Creature& a_c, RE::PlayerCharacter* a_p)
+		{
+			if (auto* st = a_p->AsActorState(); st && !st->IsWeaponDrawn()) {
+				a_p->DrawWeaponMagicHands(true);
+			}
+			g_spit = { &a_c, 0, std::chrono::steady_clock::now() };
+		}
+
+		void StepSpit()
 		{
 			auto* p = RE::PlayerCharacter::GetSingleton();
-			auto* caster = p ? p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) : nullptr;
-			if (caster && g_spit.spell && !p->IsDead()) {
-				Move::FaceCamera(p);
-				caster->CastSpellImmediate(g_spit.spell, false, nullptr, 1.0f, false, 0.0f, p);
+			const auto* c = g_spit.c;
+			if (!p || p->IsDead() || c != Shift::ActiveCreature()) {
+				g_spit = {};
+				return;
+			}
+			Move::FaceCamera(p);
+			if (g_spit.next < c->spellEvents.size()) {
+				const auto& e = c->spellEvents[g_spit.next++];
+				const bool  ok = p->NotifyAnimationGraph(e);
+				logger::info("attack: '{}' spell step {} -> graph accepted: {}", c->id, e, ok);
+				g_spit.at = After(g_spit.next < c->spellEvents.size() ? c->spellStanceDelay : c->spellDelay);
+				return;
+			}
+			if (auto* caster = p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+				caster->CastSpellImmediate(c->rmbSpell, false, nullptr, 1.0f, false, 0.0f, p);
+				logger::info("attack: '{}' cast {:08X}", c->id, c->rmbSpell->GetFormID());
 			}
 			g_spit = {};
 		}
@@ -183,7 +198,7 @@ namespace protean::Attacks
 				return;
 			}
 			if (a_power && g_press.left && c->rmbSpell) {
-				if (!g_spit.spell) {
+				if (!g_spit.c) {
 					StartSpit(*c, p);
 				}
 				return;
@@ -299,8 +314,8 @@ namespace protean::Attacks
 		if (g_reach.race && std::chrono::steady_clock::now() >= g_reach.until) {
 			RestoreReach();
 		}
-		if (g_spit.spell && std::chrono::steady_clock::now() >= g_spit.at) {
-			CastSpit();
+		if (g_spit.c && std::chrono::steady_clock::now() >= g_spit.at) {
+			StepSpit();
 		}
 		if (!g_press.down || g_press.fired) {
 			return;

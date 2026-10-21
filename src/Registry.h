@@ -35,8 +35,9 @@ namespace protean
 		                                                        // and attacks only from there); empty = none needed
 		bool                              flies{ false };       // Jump takes off into real flight (Fly.cpp)
 		RE::SpellItem*                    rmbSpell{ nullptr };  // RMB power attack casts this instead (spider spit)
-		std::vector<std::string>          spellEvents;          // graph events tried in order to play its animation
-		float                             spellDelay{ 0.35f };  // seconds from the animation's start to the cast
+		std::vector<std::string>          spellEvents;          // graph events sent in turn to play its animation
+		float                             spellStanceDelay{ 0.5f };  // seconds between those events
+		float                             spellDelay{ 0.3f };   // seconds from the last event to the cast
 		std::int32_t                      stanceState{ 0 };     // the graph's iState kept while in the stance (giant: 1,
 		                                                        // its combat walk); 0 = left to the game
 		bool                              swims{ false };       // a water animal: breathes water (on land the game suffocates it;
