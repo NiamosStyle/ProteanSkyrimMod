@@ -159,9 +159,10 @@ namespace protean::Attacks
 			}
 			Move::FaceCamera(p);  // the mouse turns only the camera, so turn to it before striking
 			bool ok = p->NotifyAnimationGraph(a->event);
-			if (!ok && p->NotifyAnimationGraph("combatIdleStart")) {
-				// some graphs (the giant's) attack only from their combat stance, which the AI puts wild ones in
-				ok = p->NotifyAnimationGraph(a->event);
+			if (!ok && !c->stance.empty()) {
+				// the giant attacks only from its combat stance; from a walk, stop first (wild giants stand to strike)
+				ok = (p->NotifyAnimationGraph(c->stance) && p->NotifyAnimationGraph(a->event)) ||
+				     (p->NotifyAnimationGraph("moveStop") && p->NotifyAnimationGraph(c->stance) && p->NotifyAnimationGraph(a->event));
 			}
 			if (ok) {
 				SetAttackData(p, a->event, c->strikeAngle);

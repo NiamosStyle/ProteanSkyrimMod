@@ -87,6 +87,7 @@ namespace protean
 			cr.height = c.value("height", 1.0f);
 			cr.reach = c.value("reach", 0.0f);
 			cr.strikeAngle = c.value("strike_angle", 0.0f);
+			cr.stance = c.value("stance", std::string{});
 			const auto& r = c.at("race");
 			cr.race = dh->LookupForm<RE::TESRace>(r.at("id").get<RE::FormID>(), r.at("file").get<std::string>());
 			cr.heart = dh->LookupForm<RE::AlchemyItem>(c.at("heart").get<RE::FormID>(), plugin);

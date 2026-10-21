@@ -31,6 +31,8 @@ namespace protean
 		float                             height{ 1.0f };       // the vanilla animal's size (Fox 0.6, Ice Wolf 1.15)
 		float                             reach{ 0.0f };        // player's melee reach in this form; 0 = the race's own
 		float                             strikeAngle{ 0.0f };  // player's hit cone (degrees); 0 = each attack's own
+		std::string                       stance;               // graph event for its fighting stance (giant: it walks
+		                                                        // and attacks only from there); empty = none needed
 
 		// Health this animal has at the given player level: the highest rung at or below the level,
 		// or the lowest rung when the player is below all of them.

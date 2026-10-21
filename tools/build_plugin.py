@@ -54,6 +54,9 @@ MELEE = {
     # the mammoth race's reach is 128 (measured: hits landed only on people almost under it); its tusks reach
     # well past that, and the giant's race has 512
     "mammoth": {"reach": 400, "strike_angle": 90},
+    # the giant's graph walks and attacks only from its combat stance, which the AI puts wild giants in (measured:
+    # no movement after transforming, and every attack refused, until combatIdleStart)
+    "giant": {"stance": "combatIdleStart"},
 }
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"

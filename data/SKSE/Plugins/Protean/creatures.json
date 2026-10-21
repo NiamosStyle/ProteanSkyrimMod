@@ -2432,7 +2432,8 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 298384
-   }
+   },
+   "stance": "combatIdleStart"
   },
   {
    "id": "werewolf",

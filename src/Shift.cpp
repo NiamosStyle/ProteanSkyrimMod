@@ -760,10 +760,18 @@ namespace protean::Shift
 			return;
 		}
 		const auto* c = Active();
-		static bool deathLogged = false;
+		static bool        deathLogged = false;
+		static const void* stanceFor = nullptr;  // the form whose fighting stance has been entered
 		if (!c) {
 			deathLogged = false;
+			stanceFor = nullptr;
 			return;
+		}
+		if (!c->stance.empty() && stanceFor != c) {
+			if (Player()->NotifyAnimationGraph(c->stance)) {
+				stanceFor = c;
+				logger::info("'{}' in its fighting stance ({})", c->id, c->stance);
+			}
 		}
 		if (auto* p = Player(); p && p->IsDead()) {
 			if (!deathLogged) {
