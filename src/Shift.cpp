@@ -631,6 +631,7 @@ namespace protean::Shift
 		// dev - never ask.)
 		constexpr auto kConfirmFor = std::chrono::seconds(10);
 		std::chrono::steady_clock::time_point g_warnedAt{};
+		std::chrono::steady_clock::time_point g_ignoreCastsUntil{};  // see OnPowerKey
 
 		bool ConfirmRevert()
 		{
@@ -695,6 +696,9 @@ namespace protean::Shift
 		}
 		g_warnedAt = {};
 		Revert("confirmed with the power key");
+		// that press still casts, ~a second later, whatever power is in the slot by then: the animal's own,
+		// put back by the revert, which changed the player straight back (seen). Ignore it.
+		g_ignoreCastsUntil = std::chrono::steady_clock::now() + std::chrono::seconds(4);
 	}
 
 	float RevertKillsBelow()
@@ -715,6 +719,11 @@ namespace protean::Shift
 	{
 		auto& reg = Registry::Get();
 		auto& s = State::Get();
+		if (std::chrono::steady_clock::now() < g_ignoreCastsUntil) {
+			g_ignoreCastsUntil = {};
+			logger::info("power {:08X} ignored: the key press that already changed the player back", a_spell->GetFormID());
+			return;
+		}
 		if (a_spell == reg.Revert()) {
 			if (ConfirmRevert()) {
 				Revert("revert power");

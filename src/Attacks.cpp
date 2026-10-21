@@ -161,6 +161,16 @@ namespace protean::Attacks
 
 		void StartSpit(const Creature& a_c, RE::PlayerCharacter* a_p)
 		{
+			// costs stamina what the wild animal's spell costs in magicka (user decision); too tired = no spit
+			auto*       av = a_p->AsActorValueOwner();
+			const float cost = a_c.rmbSpell->CalculateMagickaCost(nullptr);
+			if (av->GetActorValue(RE::ActorValue::kStamina) < cost) {
+				logger::info("attack: '{}' spell needs {:.0f} stamina, has {:.0f}", a_c.id, cost, av->GetActorValue(RE::ActorValue::kStamina));
+				RE::HUDMenu::FlashMeter(RE::ActorValue::kStamina);
+				return;
+			}
+			av->DamageActorValue(RE::ActorValue::kStamina, cost);
+			logger::info("attack: '{}' spell costs {:.0f} stamina", a_c.id, cost);
 			if (auto* st = a_p->AsActorState(); st && !st->IsWeaponDrawn()) {
 				a_p->DrawWeaponMagicHands(true);
 			}
