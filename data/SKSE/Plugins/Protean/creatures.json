@@ -918,7 +918,11 @@
    "height": 1.0,
    "npc": "EncBear",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "taps": [
+    "attackStart_Attack1",
+    "attackStart_Attack2"
+   ]
   },
   {
    "id": "cave_bear",
@@ -1008,7 +1012,11 @@
    "height": 1.0,
    "npc": "EncBearCave",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "taps": [
+    "attackStart_Attack1",
+    "attackStart_Attack2"
+   ]
   },
   {
    "id": "snow_bear",
@@ -1096,7 +1104,11 @@
    "height": 1.0,
    "npc": "EncBearSnow",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "taps": [
+    "attackStart_Attack1",
+    "attackStart_Attack2"
+   ]
   },
   {
    "id": "sabre_cat",
@@ -1732,7 +1744,11 @@
    "height": 1.0,
    "npc": "DLC2EncAshHopper",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "taps": [
+    "attackStart_Attack1",
+    "attackStart_Attack2"
+   ]
   },
   {
    "id": "mudcrab",

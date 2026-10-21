@@ -53,6 +53,9 @@ MELEE = {
     **{c: {"reach": 120, "strike_angle": 50} for c in (
         "bear", "cave_bear", "snow_bear", "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat",
         "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse", "boar")},
+    # taps go straight ahead (user: they swiped left/right); their side swipes stay unused
+    **{c: {"reach": 120, "strike_angle": 50, "taps": ["attackStart_Attack1", "attackStart_Attack2"]} for c in (
+        "bear", "cave_bear", "snow_bear", "ash_hopper")},
     # breathes water; on land the game itself suffocates it (measured). User decision: no shoreline wall, and it
     # may change on land and slither into the water
     "slaughterfish": {"reach": 120, "strike_angle": 50, "swims": True},

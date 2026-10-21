@@ -112,6 +112,13 @@ namespace protean::Attacks
 		// only one), hold = its first power attack (second on RMB). Order comes from the animal's attack list.
 		const Attack* Pick(const Creature& a_c, bool a_power, bool a_rmb)
 		{
+			// straight-ahead taps where the side-swipe rule below picks wrongly (bears: user)
+			if (!a_power && !a_c.taps.empty()) {
+				const auto& want = a_c.taps[a_rmb && a_c.taps.size() > 1 ? 1 : 0];
+				if (auto it = std::ranges::find(a_c.attacks, want, &Attack::event); it != a_c.attacks.end()) {
+					return &*it;
+				}
+			}
 			std::vector<const Attack*> normal, power;
 			for (const auto& a : a_c.attacks) {
 				if (a.bash || a.event.empty()) {

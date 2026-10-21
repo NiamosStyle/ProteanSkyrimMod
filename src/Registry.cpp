@@ -99,6 +99,7 @@ namespace protean
 				}
 			}
 			cr.spellEvents = c.value("spell_events", std::vector<std::string>{});
+			cr.taps = c.value("taps", std::vector<std::string>{});
 			cr.spellStanceDelay = c.value("spell_stance_delay", 0.5f);
 			cr.spellDelay = c.value("spell_delay", 0.3f);
 			const auto& r = c.at("race");
