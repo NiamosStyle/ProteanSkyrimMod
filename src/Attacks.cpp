@@ -158,7 +158,11 @@ namespace protean::Attacks
 				p->DrawWeaponMagicHands(true);
 			}
 			Move::FaceCamera(p);  // the mouse turns only the camera, so turn to it before striking
-			const bool ok = p->NotifyAnimationGraph(a->event);
+			bool ok = p->NotifyAnimationGraph(a->event);
+			if (!ok && p->NotifyAnimationGraph("combatIdleStart")) {
+				// some graphs (the giant's) attack only from their combat stance, which the AI puts wild ones in
+				ok = p->NotifyAnimationGraph(a->event);
+			}
 			if (ok) {
 				SetAttackData(p, a->event, c->strikeAngle);
 				RaiseReach(p->GetRace(), c->reach);
