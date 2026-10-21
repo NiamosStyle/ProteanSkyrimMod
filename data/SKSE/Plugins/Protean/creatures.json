@@ -2722,7 +2722,8 @@
    "height": 1.0,
    "npc": "EncSlaughterfish",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "swims": true
   }
  ]
 }

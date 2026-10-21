@@ -505,6 +505,13 @@ namespace protean::Shift
 			logger::info("transform into '{}' refused: {}", a_c.id, why);
 			return;
 		}
+		// a water animal starts in water; once changed it may flop onto land, where the game suffocates it
+		// (measured; kept by user decision)
+		if (auto* st = p->AsActorState(); a_c.swims && !(st && st->IsSwimming())) {
+			Notify(std::format("You must be swimming to become the {}.", a_c.name));
+			logger::info("transform into '{}' refused: not swimming", a_c.id);
+			return;
+		}
 		Face::TakeOff("transforming");  // a stolen face does not carry over into an animal; the banked face is kept
 		logger::info("=== transform into '{}' ===", a_c.id);
 		LogVitals("before", p);
@@ -522,6 +529,10 @@ namespace protean::Shift
 		StandUp(p);
 		JoinFactions(p, a_c);
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, bonus);
+		if (a_c.swims) {
+			// the fish drowned underwater without it (measured); the same value an Argonian or a potion raises
+			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, 1.0f);
+		}
 
 		// the way back: the revert power in the voice slot
 		auto& reg = Registry::Get();
@@ -599,6 +610,9 @@ namespace protean::Shift
 		// Removing the bonus does not kill by itself: the engine leaves health at or below zero without
 		// noticing. Check it ourselves, the way damage taken beyond the real maximum must be fatal.
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, -s.healthBonus);
+		if (const auto* c = Active(); c && c->swims) {
+			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, -1.0f);
+		}
 		const float hp = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
 
 		RestoreGear(p);
