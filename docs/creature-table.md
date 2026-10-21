@@ -23,7 +23,7 @@ Health: the race value is only a base. Real health is measured live in Phase 1.
 | 15 | Snowy Sabre Cat | SabreCatSnowyRace | medium | 2 | Snowy Sabre Cat Heart | 275-275 | 11-11 | 8 (6) |
 | 16 | Vale Sabre Cat | DLC1SabreCatGlowRace | medium | 2 | Vale Sabre Cat Heart | 150-150 | 6-6 | 8 (6) |
 | 17 | Death Hound | DLC1DeathHoundRace | medium | 2 | Death Hound Heart | 121-121 | 5-5 | 6 (6) |
-| 18 | Boar | DLC2BoarRace | medium | 2 | Boar Heart | - | - | 6 (3) |
+| 18 | Boar | DLC2BoarRace | medium | 2 | Boar Heart | 260-260 | 7-7 | 6 (3) |
 | 19 | Skeever | SkeeverRace | small | 3 | Skeever Heart | 15-15 | 1-1 | 6 (6) |
 | 20 | Chicken | ChickenRace | small | 3 | Chicken Heart | 25-25 | 1-1 | 0 (0) |
 | 21 | Ash Hopper | DLC2AshHopperRace | small | 3 | Ash Hopper Heart | 155-160 | 4-4 | 10 (5) |

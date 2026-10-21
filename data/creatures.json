@@ -2467,12 +2467,25 @@
     "Uses Head Track Anims"
    ],
    "skeleton": "Actors/DLC02/BoarRiekling/Character Assets/SkeletonBoar.nif",
-   "vanilla_npc_records": 0,
-   "vanilla_level_range": null,
-   "vanilla_health_range": null,
-   "bound_height": null,
-   "health_ladder": [],
-   "factions": [],
+   "vanilla_npc_records": 1,
+   "vanilla_level_range": [
+    7,
+    7
+   ],
+   "vanilla_health_range": [
+    260,
+    260
+   ],
+   "bound_height": 141,
+   "health_ladder": [
+    [
+     7,
+     260
+    ]
+   ],
+   "factions": [
+    "Dragonborn.esm:01D9C9"
+   ],
    "attacks": [
     {
      "event": "attackStart_Attack1",

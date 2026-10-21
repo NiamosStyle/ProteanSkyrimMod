@@ -39,7 +39,8 @@ CREATURES = [
     ("snowy_sabre_cat", "Snowy Sabre Cat", "SabreCatSnowyRace", ["Snowy Sabre Cat"], "medium", 2, "Snowy Sabre Cat Whisker Gland", ""),
     ("vale_sabre_cat", "Vale Sabre Cat", "DLC1SabreCatGlowRace", ["Vale Sabre Cat"], "medium", 2, "Vale Sabre Cat Glowing Gland", "Dawnguard."),
     ("death_hound", "Death Hound", "DLC1DeathHoundRace", ["Death Hound"], "medium", 2, "Death Hound Fang", "Dawnguard."),
-    ("boar", "Boar", "DLC2BoarRace", ["Boar"], "medium", 2, "Boar Shoulder", "Dragonborn. Added at the user's request."),
+    # the wild boar NPC is named "Bristleback" (no NPC is named "Boar", which left it without health data)
+    ("boar", "Boar", "DLC2BoarRace", ["Bristleback"], "medium", 2, "Boar Shoulder", "Dragonborn. Added at the user's request."),
     ("skeever", "Skeever", "SkeeverRace", [], "small", 3, "Skeever Tail Tip", "Tiny: camera check."),
     ("chicken", "Chicken", "ChickenRace", [], "small", 3, "Chicken Wing", "Tiny: camera check. Has no attacks at all."),
     ("ash_hopper", "Ash Hopper", "DLC2AshHopperRace", ["Ash Hopper"], "small", 3, "Ash Hopper Foreleg", "Dragonborn. Tiny: camera check."),

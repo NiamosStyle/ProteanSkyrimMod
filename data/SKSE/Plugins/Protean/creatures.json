@@ -1469,6 +1469,79 @@
    "strike_angle": 50
   },
   {
+   "id": "boar",
+   "name": "Boar",
+   "race": {
+    "file": "Dragonborn.esm",
+    "id": 147512
+   },
+   "heart": 2098,
+   "power": 2099,
+   "size": "medium",
+   "attacks": [
+    {
+     "event": "attackStart_Attack1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackLeft1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_AttackRight1",
+     "flags": [],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPowerLarge",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_ForwardPowerShort",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    },
+    {
+     "event": "attackStart_StandingPower",
+     "flags": [
+      "Power Attack"
+     ],
+     "spell": null
+    }
+   ],
+   "camera_height": 127,
+   "factions": [
+    {
+     "file": "Dragonborn.esm",
+     "id": 121289
+    }
+   ],
+   "ladder": [
+    [
+     7,
+     260
+    ]
+   ],
+   "race_names": [
+    "DLC2BoarRace"
+   ],
+   "height": 1.0,
+   "npc": "DLC2EncBoar01",
+   "skin": {
+    "file": "Dragonborn.esm",
+    "id": 147513
+   },
+   "reach": 120,
+   "strike_angle": 50
+  },
+  {
    "id": "skeever",
    "name": "Skeever",
    "race": {
