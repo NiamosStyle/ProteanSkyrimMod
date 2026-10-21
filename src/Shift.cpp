@@ -754,7 +754,18 @@ namespace protean::Shift
 	{
 		auto& s = State::Get();
 		auto* p = Player();
-		if (s.active.empty() || !p) {
+		if (!p) {
+			return;
+		}
+		// Every form learned has its power (seen 2026-10-21: a save without powers the player had been given;
+		// the co-save's list of learned forms is the record that counts).
+		for (const auto& id : s.known) {
+			if (const auto* c = Registry::Get().ById(id); c && !p->HasSpell(c->power)) {
+				p->AddSpell(c->power);
+				logger::info("load: power for '{}' was missing; added back", id);
+			}
+		}
+		if (s.active.empty()) {
 			return;
 		}
 		// The save was made while transformed. Race, health and factions are already in the save;
