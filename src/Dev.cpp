@@ -213,6 +213,12 @@ namespace protean::Dev
 					Fly::SetTuning(mode, speed);
 					Fly::TakeOff();
 				}
+			} else if (a_cmd == "leap") {
+				// leap [distance x] [height x]: tune (multipliers of the table's values), then leap
+				std::istringstream in(a_arg);
+				float              dist = 0.0f, height = 0.0f;
+				in >> dist >> height;
+				Fly::SetLeapTuning(dist, height);
 			} else if (a_cmd == "cc") {
 				// the player's collision capsule against the model's size (the fox clipped through a wall)
 				auto* cc = p->GetCharController();

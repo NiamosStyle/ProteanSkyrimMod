@@ -81,18 +81,110 @@ namespace protean::Fly
 			return { r.entry[0][1], r.entry[1][1], r.entry[2][1] };
 		}
 
+		// ---- leaping (the ash hopper: user decision) ----------------------------------------------
+		// Its own leaping lunges are refused for the player (probed: standing, running, bSkeeverLunge on), so
+		// Jump throws it along an arc: the velocity is set every frame from our own gravity, as in flight,
+		// until it lands. The engine's in-air steering would otherwise damp the run (Portal Spheres).
+		constexpr float kLeapGravity = 1000.0f;  // game units / s^2: snappier than falling, a hopper's spring
+
+		struct Leap
+		{
+			bool                  on{ false };
+			Clock::time_point     since{};
+			RE::NiPoint3          dir{};      // horizontal, unit
+			float                 speed{ 0.0f };
+			float                 vz0{ 0.0f };
+			float                 apex{ 0.0f };  // highest z: a fall past the landing hurts from there
+			float                 gravity{ 1.0f };
+			RE::NiPoint3          lastPos{};
+		};
+		Leap  g_leap;
+		float g_leapScale{ 1.0f };   // dev: multiplies distance
+		float g_leapHScale{ 1.0f };  // dev: multiplies height
+
+		void StartLeap()
+		{
+			auto*       p = RE::PlayerCharacter::GetSingleton();
+			const auto* c = Shift::ActiveCreature();
+			auto*       cc = p ? p->GetCharController() : nullptr;
+			if (g_leap.on || !c || c->leap <= 0.0f || !cc || p->IsDead() || !cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {
+				return;
+			}
+			Move::FaceCamera(p);
+			const float h = std::max(c->leapHeight * g_leapHScale, 10.0f);
+			const float vz0 = std::sqrt(2.0f * kLeapGravity * h);
+			const float airtime = 2.0f * vz0 / kLeapGravity;
+			const float yaw = p->GetAngleZ();
+			g_leap = { true, Clock::now(), { std::sin(yaw), std::cos(yaw), 0.0f }, c->leap * g_leapScale / airtime, vz0, p->GetPositionZ(),
+				cc->gravity, p->GetPosition() };
+			logger::info("leap: {:.0f} units, {:.0f} high: {:.0f} u/s ahead, {:.0f} u/s up, {:.2f} s", c->leap * g_leapScale, h, g_leap.speed, vz0, airtime);
+		}
+
+		void EndLeap(RE::PlayerCharacter* a_p, const char* a_why)
+		{
+			if (auto* cc = a_p->GetCharController()) {
+				cc->gravity = g_leap.gravity;
+				cc->fallStartHeight = g_leap.apex;
+			}
+			logger::info("leap: {} after {:.2f} s", a_why, std::chrono::duration<float>(Clock::now() - g_leap.since).count());
+			g_leap = {};
+		}
+
+		void UpdateLeap(RE::PlayerCharacter* a_p, float a_delta)
+		{
+			if (!g_leap.on) {
+				return;
+			}
+			auto* cc = a_p->GetCharController();
+			if (!cc || a_p->IsDead() || !Shift::ActiveCreature()) {
+				g_leap = {};
+				return;
+			}
+			const float t = std::chrono::duration<float>(Clock::now() - g_leap.since).count();
+			const auto  pos = a_p->GetPosition();
+			g_leap.apex = std::max(g_leap.apex, pos.z);
+			if (t > 0.2f && cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {
+				EndLeap(a_p, "landed");
+				return;
+			}
+			if (t > 6.0f) {
+				EndLeap(a_p, "still falling: left to the game");
+				return;
+			}
+			// a wall: the run stops, the fall goes on
+			if (t > 0.15f && a_delta > 0.0001f && g_leap.speed > 0.0f) {
+				const auto  step = (pos - g_leap.lastPos) / a_delta;
+				const float ahead = step.x * g_leap.dir.x + step.y * g_leap.dir.y;
+				if (ahead < 0.3f * g_leap.speed) {
+					logger::info("leap: blocked ({:.0f} of {:.0f} u/s)", ahead, g_leap.speed);
+					g_leap.speed = 0.0f;
+				}
+			}
+			g_leap.lastPos = pos;
+			cc->gravity = 0.0f;
+			cc->context.currentState = RE::hkpCharacterStateType::kInAir;
+			const float vz = g_leap.vz0 - kLeapGravity * t;
+			const float s = RE::bhkWorld::GetWorldScale();
+			cc->SetLinearVelocityImpl(RE::hkVector4(g_leap.dir.x * g_leap.speed * s, g_leap.dir.y * g_leap.speed * s, vz * s, 0.0f));
+		}
+
 		class Sink : public RE::BSTEventSink<RE::InputEvent*>
 		{
 		public:
 			RE::BSEventNotifyControl ProcessEvent(RE::InputEvent* const* a_event, RE::BSTEventSource<RE::InputEvent*>*) override
 			{
-				if (!a_event || g_flying || !Flies()) {
+				const auto* c = a_event ? Shift::ActiveCreature() : nullptr;
+				if (!c || g_flying || (!c->flies && c->leap <= 0.0f)) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const auto* ue = RE::UserEvents::GetSingleton();
 				for (auto* e = *a_event; e; e = e->next) {
 					if (auto* b = e->AsButtonEvent(); b && b->userEvent == ue->jump && b->IsDown()) {
-						SKSE::GetTaskInterface()->AddTask([] { TakeOff(); });
+						if (c->flies) {
+							SKSE::GetTaskInterface()->AddTask([] { TakeOff(); });
+						} else {
+							SKSE::GetTaskInterface()->AddTask([] { StartLeap(); });
+						}
 						break;
 					}
 				}
@@ -148,6 +240,7 @@ namespace protean::Fly
 
 	void AfterUpdate(RE::PlayerCharacter* a_player, float a_delta)
 	{
+		UpdateLeap(a_player, a_delta);
 		if (!g_flying) {
 			return;
 		}
@@ -202,6 +295,18 @@ namespace protean::Fly
 				cc->flags.all(RE::CHARACTER_FLAGS::kSupport), pos.z);
 		}
 		g_lastPos = pos;
+	}
+
+	void SetLeapTuning(float a_distance, float a_height)
+	{
+		if (a_distance > 0.0f) {
+			g_leapScale = a_distance;
+		}
+		if (a_height > 0.0f) {
+			g_leapHScale = a_height;
+		}
+		logger::info("leap: distance x{:.2f} height x{:.2f}", g_leapScale, g_leapHScale);
+		StartLeap();
 	}
 
 	void SetTuning(int a_mode, float a_speed)

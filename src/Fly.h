@@ -12,4 +12,5 @@ namespace protean::Fly
 	void Stop(const char* a_why);
 	void SetTuning(int a_mode, float a_speed);                       // dev: 1 = in-air state, 2 = flying state
 	void TakeOff();                                                  // dev: as if Jump were pressed
+	void SetLeapTuning(float a_distance, float a_height);            // dev: multipliers, then leap
 }

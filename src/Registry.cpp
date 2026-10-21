@@ -91,6 +91,8 @@ namespace protean
 			cr.swims = c.value("swims", false);
 			cr.stanceState = c.value("stance_state", 0);
 			cr.flies = c.value("flies", false);
+			cr.leap = c.value("leap", 0.0f);
+			cr.leapHeight = c.value("leap_height", 0.0f);
 			if (c.contains("rmb_spell")) {
 				const auto& sp = c["rmb_spell"];
 				cr.rmbSpell = dh->LookupForm<RE::SpellItem>(sp.at("id").get<RE::FormID>(), sp.at("file").get<std::string>());

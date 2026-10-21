@@ -1748,7 +1748,9 @@
    "taps": [
     "attackStart_Attack1",
     "attackStart_Attack2"
-   ]
+   ],
+   "leap": 1000,
+   "leap_height": 250
   },
   {
    "id": "mudcrab",
