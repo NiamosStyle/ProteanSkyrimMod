@@ -1660,7 +1660,8 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 692636
-   }
+   },
+   "sprint": 0
   },
   {
    "id": "ash_hopper",
@@ -1755,7 +1756,8 @@
     "attackStart_Attack2"
    ],
    "leap": 1000,
-   "leap_height": 250
+   "leap_height": 250,
+   "sprint": 0
   },
   {
    "id": "mudcrab",
@@ -1842,7 +1844,8 @@
     "id": 934074
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "sprint": 0
   },
   {
    "id": "chaurus",
@@ -1959,7 +1962,8 @@
     "id": 364074
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "sprint": 0
   },
   {
    "id": "troll",
@@ -2099,7 +2103,8 @@
     "id": 93924
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "sprint": 0
   },
   {
    "id": "frost_troll",
@@ -2245,7 +2250,8 @@
     "id": 93924
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "sprint": 0
   },
   {
    "id": "horse",
@@ -2532,7 +2538,8 @@
     "id": 298384
    },
    "stance": "combatIdleStart",
-   "stance_state": 1
+   "stance_state": 1,
+   "sprint": 0
   },
   {
    "id": "werewolf",
@@ -2824,7 +2831,8 @@
    "npc": "EncSlaughterfish",
    "reach": 120,
    "strike_angle": 50,
-   "swims": true
+   "swims": true,
+   "sprint": 0
   },
   {
    "id": "chaurus_hunter",
@@ -2894,7 +2902,8 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "flies": true
+   "flies": true,
+   "sprint": 0
   },
   {
    "id": "chaurus_hunter_fledgling",
@@ -2964,7 +2973,8 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "flies": true
+   "flies": true,
+   "sprint": 0
   },
   {
    "id": "frostbite_spider",
@@ -3058,7 +3068,8 @@
    "spell_events": [
     "spitStanceStart",
     "MLH_SpellRelease_event"
-   ]
+   ],
+   "sprint": 0
   }
  ]
 }

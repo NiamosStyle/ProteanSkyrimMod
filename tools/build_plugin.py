@@ -84,7 +84,10 @@ MELEE = {
     "giant": {"stance": "combatIdleStart", "stance_state": 1},
 }
 # Protean's sprint boost (SpeedMult added while Sprint is held); everyone else gets the horse's gallop, +33% (user)
-SPRINT = {"elk": 40, "fox": 40, "hare": 40, "mammoth": 0, "horker": 0}
+# Only four-legged animals sprint (user): none for two legs or more than four
+SPRINT = {"elk": 40, "fox": 40, "hare": 40, "mammoth": 0, "horker": 0,
+          **{c: 0 for c in ("troll", "frost_troll", "giant", "chicken", "frostbite_spider", "chaurus", "chaurus_hunter",
+                            "chaurus_hunter_fledgling", "mudcrab", "ash_hopper", "slaughterfish")}}
 ENABLED = ("wolf,deer,skeever,ice_wolf,pit_wolf,fox,dog,death_hound,elk,goat,cow,"
            "bear,cave_bear,snow_bear,sabre_cat,snowy_sabre_cat,vale_sabre_cat,"
            "hare,chicken,mudcrab,ash_hopper,chaurus,troll,frost_troll,horker,"
