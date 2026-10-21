@@ -618,7 +618,9 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 449691
-   }
+   },
+   "leap": 1000,
+   "leap_height": 250
   },
   {
    "id": "dog",
