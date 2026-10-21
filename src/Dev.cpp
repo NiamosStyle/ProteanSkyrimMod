@@ -213,6 +213,16 @@ namespace protean::Dev
 					Fly::SetTuning(mode, speed);
 					Fly::TakeOff();
 				}
+			} else if (a_cmd == "cc") {
+				// the player's collision capsule against the model's size (the fox clipped through a wall)
+				auto* cc = p->GetCharController();
+				auto* root = p->Get3D(false);
+				if (cc) {
+					logger::info("dev: cc radius {:.3f} height {:.3f} scale {:.3f} actorHeight {:.3f} (havok units); model radius {:.1f} "
+					             "refr scale {:.2f} npc height {:.2f}",
+						cc->radius, cc->height, cc->scale, cc->actorHeight, root ? root->worldBound.radius : 0.0f, p->GetScale(),
+						p->GetActorBase() ? p->GetActorBase()->GetHeight() : 0.0f);
+				}
 			} else if (a_cmd == "draw") {
 				p->DrawWeaponMagicHands(true);
 				logger::info("dev: draw requested");
