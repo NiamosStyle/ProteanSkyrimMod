@@ -57,11 +57,16 @@ namespace protean::Shift
 			}
 		}
 
-		void SetControlsLocked(bool a_locked)
+		// a_fighting: also take the attack buttons from the game. Protean reads them first either way; a graph that
+		// takes the game's own attack (the giant's: an empty-handed wave) would otherwise be busy and refuse ours.
+		void SetControlsLocked(bool a_locked, bool a_fighting = false)
 		{
 			if (auto* cm = RE::ControlMap::GetSingleton()) {
 				KeepPauseMenu(a_locked);
 				cm->ToggleControls(kLocked, !a_locked, false);
+				if (a_fighting || !a_locked) {
+					cm->ToggleControls(Flag::kFighting, !a_locked, false);
+				}
 			}
 		}
 
@@ -524,7 +529,7 @@ namespace protean::Shift
 		}
 		RE::ActorEquipManager::GetSingleton()->EquipSpell(p, reg.Revert());
 
-		SetControlsLocked(true);
+		SetControlsLocked(true, !a_c.stance.empty());
 		Attacks::Cancel();
 		Camera::Begin(a_c.cameraHeight);
 		if (auto* cam = RE::PlayerCamera::GetSingleton()) {
@@ -730,7 +735,7 @@ namespace protean::Shift
 		// The save was made while transformed. Race, health and factions are already in the save;
 		// the control lock and the camera are not.
 		logger::info("loaded a save made as '{}': restoring the control lock and the body", s.active);
-		SetControlsLocked(true);
+		SetControlsLocked(true, Active() && !Active()->stance.empty());
 		if (const auto* c = Active()) {
 			WearBody(p, *c);
 			SKSE::GetTaskInterface()->AddTask([]() {

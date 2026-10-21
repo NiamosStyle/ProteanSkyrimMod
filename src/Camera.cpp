@@ -7,6 +7,7 @@ namespace protean::Camera
 		constexpr auto kNodeName = "ProteanCam"sv;
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
 		constexpr float kBigRadius = 180.0f;  // model radius above which the camera moves back (horse 143, giant 156)
+		constexpr float kBigBack = 2.5f;      // per unit of radius above that (1.0 left the mammoth's too close)
 
 		// Tuning, re-read from Protean.ini at every transform so it can be adjusted without restarting.
 		struct Tuning
@@ -168,7 +169,7 @@ namespace protean::Camera
 		// how much the model is bigger than a horse-sized one.
 		float back = g_tune.backOffset;
 		if (g_tune.autoHeight && g_frames >= 20 && root->worldBound.radius > kBigRadius) {
-			back -= root->worldBound.radius - kBigRadius;
+			back -= (root->worldBound.radius - kBigRadius) * kBigBack;
 		}
 		const RE::NiPoint3 where{ g_tune.sideOffset, back, base * g_tune.heightScale };
 		RE::NiAVObject*    found = rootNode->GetObjectByName(kNodeName);
