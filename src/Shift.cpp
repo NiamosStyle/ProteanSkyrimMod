@@ -802,10 +802,12 @@ namespace protean::Shift
 			}
 		}
 		// The giant's graph picks its walk by iState, which the AI sets for wild ones: 0 (its default) gave a
-		// broken split-legged walk or none, 1 its combat walk (measured live). Kept there while transformed.
+		// broken split-legged walk or none, 1 its combat walk (measured live). Only 0 is corrected: the game sets 2,
+		// its combat run, while the player runs, and forcing that back to 1 made the legs split (measured: 57 runs
+		// put back in one fight).
 		if (c->stanceState > 0 && stanceFor == c) {
 			auto* p = Player();
-			if (std::int32_t now = 0; p->GetGraphVariableInt("iState", now) && now != c->stanceState) {
+			if (std::int32_t now = 0; p->GetGraphVariableInt("iState", now) && now == 0) {
 				p->SetGraphVariableInt("iState", c->stanceState);
 				logger::info("'{}' graph iState {} -> {}", c->id, now, c->stanceState);
 			}
