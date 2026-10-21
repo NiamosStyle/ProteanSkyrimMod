@@ -1,0 +1,17 @@
+FormKey: 00080F:Protean.esp
+EditorID: Protean_TestDamagePerk
+Name:
+  TargetLanguage: English
+  Value: 'Protean Test Damage'
+Description:
+  TargetLanguage: English
+  Value: 'Test: +25% attack damage.'
+NumRanks: 1
+Playable: False
+Hidden: True
+Effects:
+- MutagenObjectType: PerkEntryPointModifyValue
+  EntryPoint: ModAttackDamage
+  PerkConditionTabCount: 3
+  Modification: Multiply
+  Value: 1.25

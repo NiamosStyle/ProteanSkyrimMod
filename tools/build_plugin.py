@@ -24,6 +24,7 @@ PLUGIN = "Protean.esp"
 EFFECT, STARTER, REVERT, TOME, HEART_EFFECT = 0x800, 0x801, 0x802, 0x803, 0x804
 BEAST_FACTION, WITNESS_FACTION = 0x805, 0x806
 FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stealing
+TEST_PERK = 0x80F  # TEMPORARY: perk-reach test (remove before release)
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
     "deer": ["attackStart_AttackLeft1", "attackStart_AttackLeft2", "attackStart_AttackRight1", "attackStart_AttackRight2",
@@ -215,6 +216,16 @@ def main():
           "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: FireAndForget\n"
           "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
           "Description:\n  TargetLanguage: English\n  Value: ''\n")
+
+    # TEMPORARY (2026-10-21): a plain +25% attack damage perk with no conditions, to check that ordinary
+    # damage perks reach the animal forms' attacks. Remove before release.
+    write(os.path.join(y, "Perks", "Protean_TestDamagePerk - %s_%s.yaml" % (fid(TEST_PERK), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_TestDamagePerk\n" % (fid(TEST_PERK), PLUGIN)
+          + name_block("Protean Test Damage")
+          + "Description:\n  TargetLanguage: English\n  Value: 'Test: +25% attack damage.'\n"
+          "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
+          "- MutagenObjectType: PerkEntryPointModifyValue\n  EntryPoint: ModAttackDamage\n"
+          "  PerkConditionTabCount: 3\n  Modification: Multiply\n  Value: 1.25\n")
 
     # Witnesses. While transformed the player is in Protean_BeastFaction (plus the animal's own factions).
     # Anyone who was hostile to the player when the change happened is put in Protean_WitnessFaction, and
