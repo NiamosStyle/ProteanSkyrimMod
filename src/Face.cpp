@@ -27,6 +27,9 @@ namespace protean::Face
 		bool                   g_shown{ false };
 		std::atomic<bool>      g_queued{ false };
 		RE::FormID             g_bypass{ 0 };  // corpse we are opening ourselves for looting: do not offer again
+		int                    g_boxFrames{ 0 };  // frames since the choice box was queued
+		bool                   g_boxSeen{ false };
+		constexpr int          kBoxFrames = 90;   // ~1.5 s for the box to appear before falling back to the loot window
 
 		RE::PlayerCharacter* Player() { return RE::PlayerCharacter::GetSingleton(); }
 
@@ -636,6 +639,8 @@ namespace protean::Face
 			g_wait = 0;
 			g_shown = false;
 			g_queued = false;
+			g_boxFrames = 0;
+			g_boxSeen = false;
 		}
 
 		// The game's own message box: Loot / Copy appearance / Cancel.
@@ -853,7 +858,16 @@ namespace protean::Face
 			}
 			return;
 		}
-		// the box is open: the callback ends the offer
+		// the box is open: the callback ends the offer. Seen once: a search did nothing, the box queued but never
+		// on screen (the game slowed until Tab). If it does not appear in time, open the loot window after all.
+		if (auto* ui = RE::UI::GetSingleton(); ui && ui->IsMenuOpen(RE::MessageBoxMenu::MENU_NAME)) {
+			g_boxSeen = true;
+		} else if (!g_boxSeen && ++g_boxFrames > kBoxFrames) {
+			logger::info("face offer: the choice box never appeared; opening the loot window instead");
+			CloseOffer();
+			g_bypass = id;
+			corpse->ActivateRef(p, 0, nullptr, 1, false);
+		}
 	}
 
 	void OnGameLoaded()
