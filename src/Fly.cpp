@@ -97,6 +97,7 @@ namespace protean::Fly
 			float                 apex{ 0.0f };  // highest z: a fall past the landing hurts from there
 			float                 gravity{ 1.0f };
 			RE::NiPoint3          lastPos{};
+			float                 airtime{ 0.0f };  // seconds to land back at the starting height
 		};
 		Leap  g_leap;
 		float g_leapScale{ 1.0f };   // dev: multiplies distance
@@ -116,7 +117,7 @@ namespace protean::Fly
 			const float airtime = 2.0f * vz0 / kLeapGravity;
 			const float yaw = p->GetAngleZ();
 			g_leap = { true, Clock::now(), { std::sin(yaw), std::cos(yaw), 0.0f }, c->leap * g_leapScale / airtime, vz0, p->GetPositionZ(),
-				cc->gravity, p->GetPosition() };
+				cc->gravity, p->GetPosition(), airtime };
 			logger::info("leap: {:.0f} units, {:.0f} high: {:.0f} u/s ahead, {:.0f} u/s up, {:.2f} s", c->leap * g_leapScale, h, g_leap.speed, vz0, airtime);
 		}
 
@@ -206,9 +207,12 @@ namespace protean::Fly
 		return g_flying;
 	}
 
+	// The legs hold still only until just before touching down: stopping them until landing made the animal
+	// stand still a moment before it could run on (user).
 	bool Leaping()
 	{
-		return g_leap.on;
+		constexpr float kLegsBefore = 0.3f;  // seconds before the arc's landing that the run picks up again
+		return g_leap.on && std::chrono::duration<float>(Clock::now() - g_leap.since).count() < g_leap.airtime - kLegsBefore;
 	}
 
 	void TakeOff()
