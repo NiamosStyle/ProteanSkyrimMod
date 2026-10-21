@@ -63,7 +63,8 @@ MELEE = {
     "horse": {"reach": 120, "strike_angle": 50, "own_sprint": True},
     "werewolf": {"own_sprint": True},
     "werebear": {"own_sprint": True},
-    "hare": {"leap": 500, "leap_height": 250},  # the same leap at half the distance (user: 1000 was way too far)
+    # the same leap at half the distance and ~2 m up (user: 1000 was way too far, 250 too high)
+    "hare": {"leap": 500, "leap_height": 140},
     # breathes water; on land the game itself suffocates it (measured). User decision: no shoreline wall, and it
     # may change on land and slither into the water
     "slaughterfish": {"reach": 120, "strike_angle": 50, "swims": True},

@@ -108,7 +108,7 @@ namespace protean::Move
 		// No animal race but the horse and the were-forms has sprint speeds or animations (checked: every race's
 		// movement data), so holding Sprint raises SpeedMult instead; Skyrim plays the run faster with it. Costs
 		// stamina at a person's sprint rate and stops when it runs out (user decision).
-		constexpr float kSprintBoost = 50.0f;     // SpeedMult points (+50%)
+		constexpr float kSprintBoost = 40.0f;     // SpeedMult points (user: +50 a little fast; horse gallop is +33%, a person +35%)
 		constexpr float kSprintDrain = 7.0f;      // stamina per second (UESP: sprinting)
 
 		void SetBoost(RE::PlayerCharacter* a_player, float a_boost)
