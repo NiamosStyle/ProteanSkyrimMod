@@ -524,19 +524,23 @@ namespace protean::Shift
 			return max > 0.0f ? std::clamp(a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) / max, 0.0f, 1.0f) : 1.0f;
 		}
 
-		void SetHealthShare(RE::PlayerCharacter* a_p, float a_share)
+		void SetHealth(RE::PlayerCharacter* a_p, float a_value)
 		{
-			if (a_p->IsDead() || a_share <= 0.0f) {
-				return;  // a forced change at death: leave the dying alone
-			}
 			auto*       av = a_p->AsActorValueOwner();
-			const float want = std::max(a_share, 0.01f) * MaxHealth(a_p);
-			const float delta = want - av->GetActorValue(RE::ActorValue::kHealth);
+			const float delta = a_value - av->GetActorValue(RE::ActorValue::kHealth);
 			if (delta > 0.0f) {
 				av->RestoreActorValue(RE::ActorValue::kHealth, delta);
 			} else if (delta < 0.0f) {
 				av->DamageActorValue(RE::ActorValue::kHealth, -delta);
 			}
+		}
+
+		void SetHealthShare(RE::PlayerCharacter* a_p, float a_share)
+		{
+			if (a_p->IsDead() || a_share <= 0.0f) {
+				return;  // a forced change at death: leave the dying alone
+			}
+			SetHealth(a_p, std::max(a_share, 0.01f) * MaxHealth(a_p));
 		}
 	}
 
@@ -658,6 +662,14 @@ namespace protean::Shift
 		logger::info("=== revert ({}) ===", a_why);
 		LogVitals("before", p);
 		const float share = HealthShare(p);
+		if (!p->IsDead() && share > 0.0f) {
+			// Losing the maximum drops current health by the same amount, and below zero the engine kills (seen in a
+			// fight, 2026-10-22). So set health first to what it will be after the loss: the final share plus the loss.
+			auto*       av = p->AsActorValueOwner();
+			const float raceExtra = std::max(av->GetPermanentActorValue(RE::ActorValue::kHealth) - av->GetBaseActorValue(RE::ActorValue::kHealth), 0.0f);
+			const float loss = s.healthBonus + raceExtra;
+			SetHealth(p, std::max(share, 0.01f) * (MaxHealth(p) - loss) + loss);
+		}
 
 		SetControlsLocked(false);
 		Move::Reset();
