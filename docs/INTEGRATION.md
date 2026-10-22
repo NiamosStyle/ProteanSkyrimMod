@@ -42,8 +42,8 @@ script or the console can change them at any time.
 | Global | ID | Type | Default | Effect |
 |---|---|---|---|---|
 | `Protean_ActiveForm` | xx940 | Short | 0 | 0 = human; otherwise the form's index + 1 (set by Protean, read-only) |
-| `Protean_HealthBonusMult` | xx941 | Float | 0.5 | bonus health = this x the animal's health at the player's level |
-| `Protean_RegenPerSec` | xx942 | Float | 0.02 | out-of-combat healing towards the safe-to-revert line, share of max health per second |
+| `Protean_HealthBonusPct` | xx941 | Float | 0.25 | bonus health = this x the player's normal max health ... |
+| `Protean_HealthGapShare` | xx942 | Float | 0.25 | ... plus this x how far the animal's health (at the player's level) exceeds the player's; 0 if it does not |
 | `Protean_SprintMult` | xx943 | Float | 1.0 | multiplies every animal's sprint boost |
 | `Protean_SprintStaminaPerSec` | xx944 | Float | 7.0 | stamina drained per second of sprinting |
 | `Protean_LeapMult` | xx945 | Float | 1.0 | multiplies leap distance |
@@ -56,6 +56,8 @@ script or the console can change them at any time.
 | `Protean_ArmorBonus` | xx94C | Float | 0 | armor rating added while transformed |
 
 Notes:
+- **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
+  percentage of the maximum across a change, both ways.
 - **Armor and damage** are applied when the player changes and taken off when they change back, so a
   new value takes effect at the next change. Everything else applies at once.
 - **Damage:** ordinary perks with the `Mod Attack Damage` entry point already reach every form's
@@ -128,7 +130,7 @@ not contiguous.
 
 - Protean owns the player's race, gear, voice slot and camera while transformed. Do not change them
   from outside during a form; listen for `Protean_Reverted` first.
-- The player's health gains a bonus while transformed. Changing back removes it, and can kill a player
-  whose damage taken exceeds their own maximum. Protean warns before letting the player do that.
+- The player's maximum health gains a bonus while transformed. Health keeps its percentage of the maximum
+  when changing in and out (never below 1%), so changing back cannot kill.
 - The player's collision body stays human-sized in every form (a vanilla limitation, accepted).
 - The co-save (`Protean`) keeps the state; Protean leaves nothing in the save proper once human again.

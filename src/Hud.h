@@ -2,10 +2,10 @@
 
 namespace protean::Hud
 {
-	// While transformed, the player's health bar shows the revert danger line: two tick marks where the bar's ends
-	// will be when changing back would kill, and the whole bar turns a warning colour once health is below it.
-	// Drawn into the game's own HUD movie (_root.HUDMovieBaseInstance.Health.HealthMeter_mc); a HUD replacer that
-	// renames those clips simply gets no marks.
+	// While transformed, keeps the player's health bar visible whenever health is below its maximum: the game fades
+	// the bar out once health reaches the maximum without the animal's bonus, hiding how far there is to heal.
+	// Drawn into the game's own HUD movie (_root.HUDMovieBaseInstance.Health); a HUD replacer that renames those
+	// clips simply gets no change.
 
 	void OnFrame(RE::PlayerCharacter* a_player);  // main thread, every frame
 }

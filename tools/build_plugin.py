@@ -31,8 +31,8 @@ FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
     "Protean_ActiveForm":          (0x940, 0,    "Short", "0 = human; otherwise the form's index + 1 (set by Protean, read-only)"),
-    "Protean_HealthBonusMult":     (0x941, 0.5,  "Float", "bonus health = this x the animal's health at the player's level"),
-    "Protean_RegenPerSec":         (0x942, 0.02, "Float", "out-of-combat healing towards the safe-to-revert line, share of max health per second"),
+    "Protean_HealthBonusPct":      (0x941, 0.25, "Float", "bonus health = this x the player's normal max health (plus the gap share)"),
+    "Protean_HealthGapShare":      (0x942, 0.25, "Float", "bonus health also = this x how far the animal's health (at the player's level) exceeds the player's"),
     "Protean_SprintMult":          (0x943, 1.0,  "Float", "multiplies every animal's sprint boost"),
     "Protean_SprintStaminaPerSec": (0x944, 7.0,  "Float", "stamina drained per second of sprinting"),
     "Protean_LeapMult":            (0x945, 1.0,  "Float", "multiplies leap distance"),

@@ -506,6 +506,38 @@ namespace protean::Shift
 		}
 	}
 
+	namespace
+	{
+		// Health keeps its share of the maximum across a change, both ways (never below 1%, so changing back
+		// cannot kill). Maximum = permanent value + temporary modifier; the damage taken sits on top of it.
+		float MaxHealth(RE::PlayerCharacter* a_p)
+		{
+			return a_p->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth) +
+			       a_p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth);
+		}
+
+		float HealthShare(RE::PlayerCharacter* a_p)
+		{
+			const float max = MaxHealth(a_p);
+			return max > 0.0f ? std::clamp(a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) / max, 0.0f, 1.0f) : 1.0f;
+		}
+
+		void SetHealthShare(RE::PlayerCharacter* a_p, float a_share)
+		{
+			if (a_p->IsDead() || a_share <= 0.0f) {
+				return;  // a forced change at death: leave the dying alone
+			}
+			auto*       av = a_p->AsActorValueOwner();
+			const float want = std::max(a_share, 0.01f) * MaxHealth(a_p);
+			const float delta = want - av->GetActorValue(RE::ActorValue::kHealth);
+			if (delta > 0.0f) {
+				av->RestoreActorValue(RE::ActorValue::kHealth, delta);
+			} else if (delta < 0.0f) {
+				av->DamageActorValue(RE::ActorValue::kHealth, -delta);
+			}
+		}
+	}
+
 	void Learn(const Creature& a_c)
 	{
 		auto* p = Player();
@@ -563,7 +595,12 @@ namespace protean::Shift
 		logger::info("=== transform into '{}' ===", a_c.id);
 		LogVitals("before", p);
 
-		const float bonus = std::floor(a_c.HealthAtLevel(p->GetLevel()) * Registry::Get().Dial("Protean_HealthBonusMult", 0.5f));
+		const float share = HealthShare(p);
+		const float own = MaxHealth(p);
+		const float animal = a_c.HealthAtLevel(p->GetLevel());
+		auto&       reg0 = Registry::Get();
+		const float bonus = std::floor(own * reg0.Dial("Protean_HealthBonusPct", 0.25f) +
+		                               std::max(animal - own, 0.0f) * reg0.Dial("Protean_HealthGapShare", 0.25f));
 		s.realRace = p->GetRace() ? p->GetRace()->GetFormID() : 0;
 		s.healthBonus = bonus;
 		s.active = a_c.id;
@@ -582,6 +619,7 @@ namespace protean::Shift
 			// the fish drowned underwater without it (measured); the same value an Argonian or a potion raises
 			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, 1.0f);
 		}
+		SetHealthShare(p, share);
 
 		// the way back: the revert power in the voice slot
 		auto& reg = Registry::Get();
@@ -603,7 +641,8 @@ namespace protean::Shift
 			}
 		}
 		LogVitals("after", p);
-		logger::info("health bonus {:.0f} (creature {:.0f} at level {})", bonus, a_c.HealthAtLevel(p->GetLevel()), p->GetLevel());
+		logger::info("health bonus {:.0f} (own {:.0f}, creature {:.0f} at level {}); kept {:.1f}% of maximum", bonus, own, animal, p->GetLevel(),
+			share * 100.0f);
 		SendModEvent("Protean_Transformed", a_c.id, static_cast<float>(a_c.index + 1));
 	}
 
@@ -616,6 +655,7 @@ namespace protean::Shift
 		}
 		logger::info("=== revert ({}) ===", a_why);
 		LogVitals("before", p);
+		const float share = HealthShare(p);
 
 		SetControlsLocked(false);
 		Move::Reset();
@@ -657,13 +697,11 @@ namespace protean::Shift
 		p->DeselectSpell(reg.Revert());
 		p->RemoveSpell(reg.Revert());
 
-		// Removing the bonus does not kill by itself: the engine leaves health at or below zero without
-		// noticing. Check it ourselves, the way damage taken beyond the real maximum must be fatal.
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, -s.healthBonus);
 		if (const auto* c = Active(); c && c->swims) {
 			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, -1.0f);
 		}
-		const float hp = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
+		SetHealthShare(p, share);
 
 		RestoreGear(p);
 		TakeOffMarkers(p);
@@ -676,79 +714,29 @@ namespace protean::Shift
 		s.crime.clear();
 		LogVitals("after", p);
 		SendModEvent("Protean_Reverted", was, wasNumber);
-
-		if (hp <= 0.0f) {
-			logger::info("health {:.1f} after reverting: the damage taken exceeds the real maximum, killing the player", hp);
-			Notify("The wounds of the beast follow you home.");
-			p->KillImpl(nullptr, 0.0f, true, false);  // the normal death (sound, animation, death camera); KillImmediate is silent
-		}
 	}
 
 	namespace
 	{
-		// The player's own wish to change back is refused once when it would kill them, or drop them out of the
-		// sky (user decision); casting again within kConfirmFor goes ahead. (Forced reverts - death, loading,
-		// dev - never ask.)
+		// The player's own wish to change back while flying is refused once, since it means a fall (user decision);
+		// casting again within kConfirmFor goes ahead. (Forced reverts - death, loading, dev - never ask.)
 		constexpr auto kConfirmFor = std::chrono::seconds(10);
 		std::chrono::steady_clock::time_point g_warnedAt{};
 		std::chrono::steady_clock::time_point g_ignoreCastsUntil{};  // see OnPowerKey
 
 		bool ConfirmRevert()
 		{
-			const float hp = Player()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) - RevertKillsBelow();
-			const auto  now = std::chrono::steady_clock::now();
-			const char* why = hp <= 0.0f ? "Your wounds are too deep to survive changing back." :
-			                  Fly::Flying()  ? "You are flying: changing back now means a fall." :
-			                                   nullptr;
-			if (!why || now - g_warnedAt < kConfirmFor) {
+			const auto now = std::chrono::steady_clock::now();
+			if (!Fly::Flying() || now - g_warnedAt < kConfirmFor) {
 				g_warnedAt = {};
 				return true;
 			}
 			g_warnedAt = now;
-			logger::info("revert refused once: health would be {:.1f}, flying {}", hp, Fly::Flying());
-			Notify(std::string(why) + " Cast again to change back anyway.");
+			logger::info("revert refused once: flying");
+			Notify("You are flying: changing back now means a fall. Cast again to change back anyway.");
 			return false;
 		}
-	}
 
-	namespace
-	{
-		// An animal cannot drink potions or cast heals, so out of combat its health tops up at kRegenShare of the
-		// maximum per second (the game's own regeneration counts towards it) until changing back is safe again.
-		// Healing directly, rather than raising HealRate, leaves nothing behind in a save.
-		constexpr float kRegenShare = 0.02f;  // a person: 0.7%; magicka 3%, stamina 5%
-
-		void Regenerate()
-		{
-			using Clock = std::chrono::steady_clock;
-			static Clock::time_point last{};
-			const auto now = Clock::now();
-			const float dt = std::min(std::chrono::duration<float>(now - last).count(), 1.0f);  // a pause is not healing time
-			last = now;
-
-			auto* p = Player();
-			if (!p || p->IsInCombat() || p->IsDead()) {
-				return;
-			}
-			auto*       av = p->AsActorValueOwner();
-			const float hp = av->GetActorValue(RE::ActorValue::kHealth);
-			const float line = RevertKillsBelow();
-			if (hp > line) {
-				return;
-			}
-			const float max = av->GetPermanentActorValue(RE::ActorValue::kHealth) +
-			                  p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth);
-			const float own = std::max(av->GetActorValue(RE::ActorValue::kHealRate), 0.0f) / 100.0f;  // percent per second
-			const float share = Registry::Get().Dial("Protean_RegenPerSec", kRegenShare);
-			const float extra = std::max(share - own, 0.0f) * max * dt;
-			if (extra > 0.0f) {
-				av->RestoreActorValue(RE::ActorValue::kHealth,std::min(extra, line + 1.0f - hp));
-			}
-		}
-	}
-
-	namespace
-	{
 		void BeginRevertChange(const char* a_why);  // below, with the change effects
 	}
 
@@ -765,20 +753,6 @@ namespace protean::Shift
 		// that press still casts, ~a second later, whatever power is in the slot by then: the animal's own,
 		// put back by the revert, which changed the player straight back (seen). Ignore it.
 		g_ignoreCastsUntil = std::chrono::steady_clock::now() + std::chrono::seconds(4);
-	}
-
-	float RevertKillsBelow()
-	{
-		auto*       p = Player();
-		const auto& s = State::Get();
-		if (s.active.empty() || !p) {
-			return 0.0f;
-		}
-		// changing back takes away the bonus and whatever the animal's race adds to the maximum (the werewolf's
-		// +50); any other permanent bonus is counted as lost too, which can only warn early
-		auto*       av = p->AsActorValueOwner();
-		const float raceExtra = av->GetPermanentActorValue(RE::ActorValue::kHealth) - av->GetBaseActorValue(RE::ActorValue::kHealth);
-		return s.healthBonus + std::max(raceExtra, 0.0f);
 	}
 
 	namespace
@@ -1039,6 +1013,5 @@ namespace protean::Shift
 			Notify(why + " You return to your own form.");
 			SKSE::GetTaskInterface()->AddTask([]() { Revert("too big for this place"); });
 		}
-		Regenerate();
 	}
 }

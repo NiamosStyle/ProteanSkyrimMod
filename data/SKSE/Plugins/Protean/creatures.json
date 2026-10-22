@@ -11,8 +11,8 @@
  "exposedFaction": 2057,
  "globals": {
   "Protean_ActiveForm": 2368,
-  "Protean_HealthBonusMult": 2369,
-  "Protean_RegenPerSec": 2370,
+  "Protean_HealthBonusPct": 2369,
+  "Protean_HealthGapShare": 2370,
   "Protean_SprintMult": 2371,
   "Protean_SprintStaminaPerSec": 2372,
   "Protean_LeapMult": 2373,

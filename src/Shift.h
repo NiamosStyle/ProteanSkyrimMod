@@ -20,8 +20,7 @@ namespace protean::Shift
 
 	void Transform(const Creature& a_creature);
 	void Revert(std::string_view a_why);
-	float RevertKillsBelow();  // health at or below which changing back kills (0 = not transformed)
-	void  OnPowerKey();        // the power key went down: confirms a change back the player was just warned about
+	void  OnPowerKey();        // the power key went down: confirms a change back the player was just warned about (flying)
 
 	// every 30th frame (main thread): auto-revert when the animal no longer fits where the player is
 	void OnFrame();
