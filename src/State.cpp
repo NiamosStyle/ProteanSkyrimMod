@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 9;  // 3 to 8 are still read
+		constexpr std::uint32_t kVersion = 10;  // 3 to 9 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -201,6 +201,21 @@ namespace protean
 			Put(a, s.sprintBoost);
 			Put(a, s.armorBonus);
 			Put(a, s.damageBonus);
+			Put(a, s.evoTotal);
+			Put(a, s.facePoints);
+			for (auto* m : { &s.feeds, &s.perks }) {
+				Put<std::uint32_t>(a, static_cast<std::uint32_t>(m->size()));
+				for (const auto& [id, n] : *m) {
+					PutStr(a, id);
+					Put(a, n);
+				}
+			}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.boosts.size()));
+			for (float t : s.boosts) {
+				Put(a, t);
+			}
+			Put(a, s.boostApplied);
+			Put(a, s.diseaseApplied);
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -320,6 +335,33 @@ namespace protean
 					if (version >= 9) {
 						Get(a, s.armorBonus);
 						Get(a, s.damageBonus);
+					}
+					if (version >= 10) {
+						Get(a, s.evoTotal);
+						Get(a, s.facePoints);
+						for (auto* m : { &s.feeds, &s.perks }) {
+							if (!Get(a, n) || n > 10000) {
+								return;
+							}
+							for (std::uint32_t i = 0; i < n; ++i) {
+								std::string  id;
+								std::uint32_t v = 0;
+								if (!GetStr(a, id) || !Get(a, v)) {
+									return;
+								}
+								(*m)[id] = v;
+							}
+						}
+						if (!Get(a, n) || n > 10000) {
+							return;
+						}
+						for (std::uint32_t i = 0; i < n; ++i) {
+							float t = 0.0f;
+							Get(a, t);
+							s.boosts.push_back(t);
+						}
+						Get(a, s.boostApplied);
+						Get(a, s.diseaseApplied);
 					}
 				}
 			}

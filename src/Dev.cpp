@@ -1,6 +1,7 @@
 #include "Dev.h"
 
 #include "Attacks.h"
+#include "Evolve.h"
 #include "Face.h"
 #include "Fly.h"
 #include "Move.h"
@@ -254,6 +255,23 @@ namespace protean::Dev
 			} else if (a_cmd == "draw") {
 				p->DrawWeaponMagicHands(true);
 				logger::info("dev: draw requested");
+			} else if (a_cmd == "evo") {
+				// evo [n]: n feedings; no number just prints the state
+				const int n = a_arg.empty() ? 0 : std::atoi(a_arg.c_str());
+				if (n > 0) {
+					Evolve::Add(static_cast<std::uint32_t>(n), "dev command");
+				}
+				Evolve::Dump();
+			} else if (a_cmd == "faceperk") {
+				Evolve::AddFacePoint("dev command");
+			} else if (a_cmd == "buyperk" && !a_arg.empty()) {
+				Evolve::Buy(a_arg);
+				Evolve::Dump();
+			} else if (a_cmd == "feed" && c) {
+				Evolve::Feed(*c);  // as if one of its hearts was eaten (the form is not learned)
+			} else if (a_cmd == "killboost") {
+				Evolve::OnKill();  // as if the player had killed something
+				Evolve::Dump();
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");

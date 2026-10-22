@@ -22,7 +22,11 @@
   "Protean_ReachMult": 2377,
   "Protean_StrikeAngleMult": 2378,
   "Protean_DamageMult": 2379,
-  "Protean_ArmorBonus": 2380
+  "Protean_ArmorBonus": 2380,
+  "Protean_ChangeStaminaCost": 2381,
+  "Protean_KillBoostSeconds": 2382,
+  "Protean_KillBoostPct": 2383,
+  "Protean_KillBoostMax": 2384
  },
  "openInteriorKeywords": [
   {

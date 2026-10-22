@@ -1,6 +1,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Dev.h"
+#include "Evolve.h"
 #include "Face.h"
 #include "Fly.h"
 #include "Hooks.h"
@@ -15,7 +16,8 @@ namespace
 	// work runs on the main thread through SKSE's task interface.
 	class Sink : public RE::BSTEventSink<RE::TESEquipEvent>,
 	             public RE::BSTEventSink<RE::TESSpellCastEvent>,
-	             public RE::BSTEventSink<RE::TESActivateEvent>
+	             public RE::BSTEventSink<RE::TESActivateEvent>,
+             public RE::BSTEventSink<RE::TESDeathEvent>
 	{
 	public:
 		static Sink* Get()
@@ -44,6 +46,16 @@ namespace
 				if (spell && (spell == reg.Revert() || spell == reg.Starter() || spell == reg.FacePower() || reg.ByPower(spell->GetFormID()))) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Shift::OnPowerCast(spell); });
 				}
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// a kill by the player: a stack of the Unbound Form boost
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESDeathEvent* a_event, RE::BSTEventSource<RE::TESDeathEvent>*) override
+		{
+			if (a_event && a_event->dead && a_event->actorKiller && a_event->actorKiller->IsPlayerRef() && a_event->actorDying &&
+				!a_event->actorDying->IsPlayerRef()) {
+				SKSE::GetTaskInterface()->AddTask([]() { protean::Evolve::OnKill(); });
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
@@ -79,6 +91,7 @@ namespace
 				events->AddEventSink<RE::TESEquipEvent>(Sink::Get());
 				events->AddEventSink<RE::TESSpellCastEvent>(Sink::Get());
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
+				events->AddEventSink<RE::TESDeathEvent>(Sink::Get());
 				protean::Dev::Init();
 				protean::Attacks::Install();
 				protean::Move::Install();

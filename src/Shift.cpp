@@ -6,6 +6,7 @@
 #include "Fly.h"
 #include "Move.h"
 #include "State.h"
+#include "Evolve.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
 
@@ -549,13 +550,15 @@ namespace protean::Shift
 		auto* p = Player();
 		auto& s = State::Get();
 		if (s.known.contains(a_c.id)) {
-			return;  // eating a known heart does nothing for now (bonus feature planned for later)
+			Evolve::Feed(a_c);  // a known form again: counts towards the milestones
+			return;
 		}
 		s.known.insert(a_c.id);
 		p->AddSpell(a_c.power);
 		Notify(std::format("You have learned the form of the {}.", a_c.name));
 		logger::info("learned '{}'", a_c.id);
 		SendModEvent("Protean_Learned", a_c.id, static_cast<float>(a_c.index + 1));
+		Evolve::Feed(a_c);
 	}
 
 	void OnCorpseActivated(RE::Actor* a_corpse)
@@ -576,7 +579,8 @@ namespace protean::Shift
 			return;
 		}
 		auto& s = State::Get();
-		if (s.known.contains(c->id) || s.looted.contains(a_corpse->GetFormID())) {
+		// a form already known keeps dropping its heart once Unbound Form is bought: repeat feedings are worth points
+		if ((s.known.contains(c->id) && !Evolve::Has("unbound_form")) || s.looted.contains(a_corpse->GetFormID())) {
 			return;
 		}
 		s.looted.insert(a_corpse->GetFormID());
@@ -915,6 +919,17 @@ namespace protean::Shift
 			} else if (!s.active.empty() || !PlaceAllows(*c)) {
 				Transform(*c);  // refused: it says why, with no effects first
 			} else {
+				// changing form costs stamina (a dial); forced changes are free
+				const float cost = reg.Dial("Protean_ChangeStaminaCost", 15.0f);
+				auto*       av = Player()->AsActorValueOwner();
+				if (cost > 0.0f && av->GetActorValue(RE::ActorValue::kStamina) < cost) {
+					Notify("You are too tired to change form.");
+					logger::info("change into '{}' refused: stamina {:.0f} < {:.0f}", c->id, av->GetActorValue(RE::ActorValue::kStamina), cost);
+					return;
+				}
+				if (cost > 0.0f) {
+					av->DamageActorValue(RE::ActorValue::kStamina, cost);
+				}
 				BeginChange({ c, false, {} });
 			}
 		}
@@ -922,6 +937,7 @@ namespace protean::Shift
 
 	void OnGameLoaded()
 	{
+		Evolve::OnGameLoaded();
 		auto& s = State::Get();
 		auto* p = Player();
 		if (!p) {
