@@ -43,6 +43,7 @@ namespace protean::Claws
 		constexpr auto kFolder = "Protean\\Claws\\"sv;
 
 		std::string g_folder{ kFolder };  // the models in use (dev 'clawstyle' points it at a style's own folder)
+		float       g_rewear{ 0.0f };     // seconds until the claw pieces go back on after a style change
 
 		// the blades now hanging in a 1st-person body
 		std::vector<RE::NiAVObject*> Hung(RE::NiAVObject* a_root, char a_side)
@@ -165,12 +166,16 @@ namespace protean::Claws
 		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, false, "left");
 		Hang(p, false, false);
 		Hang(p, true, false);
-		SKSE::GetTaskInterface()->AddTask([]() { Sync(); });
+		// back on a moment later: put straight back on, the 3rd-person body keeps the old model (seen in game)
+		g_rewear = 0.5f;
 		logger::info("claws: models now from {}", g_folder);
 	}
 
 	void OnFrame(float a_delta)
 	{
+		if (g_rewear > 0.0f && (g_rewear -= a_delta) <= 0.0f) {
+			Sync();
+		}
 		static float since = 0.0f;
 		if ((since += a_delta) < 0.25f) {
 			return;
