@@ -19,6 +19,18 @@
   "spell": 2441,
   "projectile": 2438
  },
+ "keen": {
+  "powers": {
+   "night": 2442,
+   "life": 2443,
+   "dead": 2444
+  },
+  "senses": {
+   "night": 2445,
+   "life": 2446,
+   "dead": 2447
+  }
+ },
  "perks": {
   "unbound_form": 2400,
   "keen": 2401,
@@ -44,6 +56,7 @@
   "subtle_carapace_2": 2421
  },
  "perksBuilt": [
+  "keen",
   "rending_claws",
   "tendril",
   "unbound_form"
@@ -80,7 +93,8 @@
   "Protean_TendrilDrain": 2396,
   "Protean_TendrilDrainPerLevel": 2397,
   "Protean_TendrilRange": 2398,
-  "Protean_TendrilPullMult": 2399
+  "Protean_TendrilPullMult": 2399,
+  "Protean_KeenDrain": 2422
  },
  "openInteriorKeywords": [
   {

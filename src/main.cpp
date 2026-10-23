@@ -58,6 +58,9 @@ namespace
 				if (spell && (spell == reg.Revert() || spell == reg.Starter() || spell == reg.FacePower() || spell == reg.Evolution() || reg.ByPower(spell->GetFormID()))) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Shift::OnPowerCast(spell); });
 				}
+				if (spell && std::ranges::find(reg.KeenPowers(), spell) != reg.KeenPowers().end()) {
+					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Keen::OnPowerCast(spell); });
+				}
 				if (spell && spell == reg.Tendril()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Tendril::OnCast(spell); });
 				}
@@ -143,6 +146,7 @@ namespace
 			protean::Camera::Reset();
 			protean::Attacks::Cancel();
 			protean::Move::Reset();
+			protean::Keen::Reset();
 			break;
 		case SKSE::MessagingInterface::kNewGame:
 			protean::Face::BeforeLoad();

@@ -1,0 +1,22 @@
+FormKey: 00098D:Protean.esp
+EditorID: Protean_KeenNight
+Name:
+  TargetLanguage: English
+  Value: 'Night Vision'
+EquipmentType: 013F44:Skyrim.esm
+Description:
+  TargetLanguage: English
+  Value: ''
+BaseCost: 0
+Flags:
+- ManualCostCalc
+- NoAbsorbOrReflect
+- AreaEffectIgnoresLOS
+Type: Spell
+ChargeTime: 0
+CastType: FireAndForget
+TargetType: Self
+Effects:
+- BaseEffect: 06B10C:Skyrim.esm
+  Data:
+    Duration: 86400

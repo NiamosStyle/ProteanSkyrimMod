@@ -71,7 +71,7 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
   of a kind and the 5th/10th/20th give points; named faces will add perk points directly. Co-save v11.
 - Perk tree via Custom Skills Framework (user installs it): `data/SKSE/Plugins/CustomSkills/Protean.json` from the
   PERKS table in `tools/build_plugin.py`; points in `Protean_PerkPoints`; the Evolution power opens it. All 18 perks
-  are placed; Unbound Form, Rending Claws and Tendril work (Unbound Form: Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
+  are placed; Unbound Form, Keen, Rending Claws and Tendril work (Unbound Form: Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
   stacking); placeholders are taken back when the menu closes. Changing form costs 15 stamina.
 - Rending Claws: done and tested in game (damage follows the stamina bar, 5 stamina a swing, werewolf hit
   sounds, claw animations in either hand via OAR). See `src/Claws.cpp`, `tools/build_claws.py`,
@@ -82,6 +82,12 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
   sound (vampire lord swipe) is played by Protean at the cast: as the projectile's sound it came late. The
   extra blood art on a hit showed nothing in game (three tried) and was left as it is. See `src/Tendril.cpp`,
   `tools/build_tendril.py`; dev `tendril`, `tendrilproj`, `tendrilthrow`, `tendrilblood`, `tendrilimpact`.
+- Keen: done and tested in game. Favorites (Q) works in animal form like the Vampire Lord's (tested: the game shows
+  the Vampire Lord list because of the race alone), listing Revert Form and the three senses. Protean wraps the menu's
+  creator and message handler, lends the animal's race and a runtime list to the `VampireRace`/`VampireSpells`
+  default objects while they run, frees the Favorites key like Esc and gives the menu controls back while it is open
+  (without that the menu froze). Detect Life/Dead glow on the creatures, not the player, so they are 2 s pulses
+  Protean repeats each second while on (a day-long cast left glows that nothing could clear). See `src/Keen.cpp`.
 
 Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
 DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the

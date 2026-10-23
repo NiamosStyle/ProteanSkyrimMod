@@ -71,6 +71,7 @@ script or the console can change them at any time.
 | `Protean_TendrilDrainPerLevel` | xx95D | Float | 0.5 | Tendril drain added per player level |
 | `Protean_TendrilRange` | xx95E | Float | 1500 | reach in game units (~21 m); the projectile record's range is set from it when the plugin is built |
 | `Protean_TendrilPullMult` | xx95F | Float | 1.0 | multiplies both pulls: the yank's force (15) and the haul's speed (2200 units/s) |
+| `Protean_KeenDrain` | xx976 | Float | 2 | stamina per second each of Keen's Detect Life and Detect Dead drains while on |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -145,6 +146,9 @@ not contiguous.
 | `Protean_TendrilSpell` (spell) | xx989 | Tendril, taught by its perk (xx967); either hand |
 | `Protean_TendrilDamageEffect` / `Protean_TendrilDrainEffect` | xx987 / xx988 | Damage Health / Absorb Stamina; Protean sets the magnitudes from the player's level |
 | `Protean_TendrilProjectile` | xx986 | The tendril itself (flame-type projectile, model `meshes/Protean/Tendril/Tendril.nif`) |
+| `Protean_KeenNightPower` / `LifePower` / `DeadPower` (lesser powers) | xx98A / xx98B / xx98C | Keen's senses; known only while an animal owns the perk (xx961) |
+| `Protean_KeenNight` / `Protean_KeenLife` / `Protean_KeenDead` (self spells) | xx98D / xx98E / xx98F | What Protean casts: the game's night eye; 2 s Detect Life / Detect Dead pulses repeated while on |
+| `Protean_KeenDetectDead*` (effects) | xx990-xx993 | The game's held Detect Undead effects as fire-and-forget ones |
 
 ## 6. Rules a larger mod should know
 
@@ -158,3 +162,7 @@ not contiguous.
   Extra Large race (trolls, bears, giants, mammoths, grounded dragons) it hauls the player to the target instead,
   with no fall damage from the haul. Nothing flying, swimming, following the player or essential is pulled
   (it is still damaged). Its hits are ordinary hostile magic: crime and aggression as for any spell.
+- Favorites in animal form works like the Vampire Lord's: it lists only Revert Form and the Keen powers the player
+  knows. While that menu is being built, Protean points the default objects `VampireRace` and `VampireSpells` at the
+  animal's race and its own list, then puts them back; a mod that reads those two during the Favorites menu sees
+  Protean's values.

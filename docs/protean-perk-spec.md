@@ -150,7 +150,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Unbound Form
 - **What it does:** While in animal form, you can switch on night vision, Detect Life, and Detect Death.
 - **Menu approach:** The Vampire Lord transformation already takes over the Favorites menu to give access to its own spells and abilities. Keen will copy this approach so the animal-form abilities appear there too.
-- **Status:** Needs research. Night vision and detection effects are standard. But Protean locks menus in animal form, and its earlier plan judged reusing the real Favorites menu fragile. We need to check how the Vampire Lord does it before committing. A simple fallback is a key press that switches the senses on and off.
+- **Status:** Done, tested in game. Favorites (Q) in animal form lists only Revert Form and the three senses, as the Vampire Lord's does: the game picks that list by race, so Protean lends the animal's race and its own list while the menu is built. Pick a sense, press the power key (Z) to switch it on or off. Night vision is free; Detect Life and Detect Dead drain 2 Stamina a second each (`Protean_KeenDrain`) and go out on an empty bar. Changing back puts every sense out.
 
 ### Survivor ×2
 - **Requires:** Keen

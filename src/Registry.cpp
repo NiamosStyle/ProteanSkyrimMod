@@ -97,6 +97,18 @@ namespace protean
 			logger::warn("Tendril records missing from {}", plugin);
 			_tendril = nullptr;
 		}
+		_keenPowers = {};
+		_keenSenses = {};
+		if (const auto& k = j.value("keen", nlohmann::json::object()); !k.empty()) {
+			const char* names[] = { "night", "life", "dead" };
+			for (std::size_t i = 0; i < 3; ++i) {
+				_keenPowers[i] = dh->LookupForm<RE::SpellItem>(k["powers"].value(names[i], 0u), plugin);
+				_keenSenses[i] = dh->LookupForm<RE::SpellItem>(k["senses"].value(names[i], 0u), plugin);
+				if (!_keenPowers[i] || !_keenSenses[i]) {
+					logger::warn("Keen records missing from {}", plugin);
+				}
+			}
+		}
 		_perks.clear();
 		for (const auto& [id, local] : j.value("perks", nlohmann::json::object()).items()) {
 			if (auto* perk = dh->LookupForm<RE::BGSPerk>(local.get<RE::FormID>(), plugin)) {

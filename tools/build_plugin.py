@@ -42,7 +42,8 @@ PERKS = {
                      "speeds your stamina's recovery for a while (the boosts stack).", 0, 0,
                      ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
     # Beast
-    "keen": (0x961, "Keen", "In animal form, switch on night vision, Detect Life and Detect Death.", 1.8, 0.8,
+    "keen": (0x961, "Keen", "In animal form, open Favorites to switch on night vision, Detect Life and Detect Dead. "
+             "The two detections cost Stamina while on.", 1.8, 0.8,
              ["survivor", "predator", "stalker"]),
     "survivor": (0x962, "Survivor", "Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter "
                  "of the difference when the animal is stronger than you.", 3.3, 1.9, ["apex"]),
@@ -94,6 +95,13 @@ CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM
 # copied). Protean sets the magnitudes, charges the stamina, keeps the cooldown and pulls (src/Tendril.cpp).
 # 0x985 was the inventory item until then; not reused.
 TENDRIL_PROJECTILE, TENDRIL_DAMAGE, TENDRIL_DRAIN, TENDRIL_SPELL = 0x986, 0x987, 0x988, 0x989
+# Keen: three powers the animal's Favorites menu offers (src/Keen.cpp builds that menu like the Vampire Lord's); casting
+# one switches its sense on or off. A sense is a self spell of the game's own effects that Protean casts and dispels:
+# night eye (the Khajiit's), Detect Life (the spell's fire-and-forget effects), Detect Dead (the game has it only as
+# a held spell, so its four effects are copied here as fire-and-forget ones).
+KEEN_POWERS = {"night": 0x98A, "life": 0x98B, "dead": 0x98C}
+KEEN_SENSES = {"night": 0x98D, "life": 0x98E, "dead": 0x98F}
+KEEN_DEAD_EFFECTS = (0x990, 0x991, 0x992, 0x993)  # enemy outdoors, enemy indoors, friend outdoors, friend indoors
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -101,7 +109,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
-BUILT = {"unbound_form", "rending_claws", "tendril"}
+BUILT = {"unbound_form", "rending_claws", "tendril", "keen"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -141,6 +149,7 @@ GLOBALS = {
     "Protean_TendrilDrainPerLevel": (0x95D, 0.5, "Float", "Tendril drain added per player level"),
     "Protean_TendrilRange":        (0x95E, 1500, "Float", "how far the Tendril reaches, game units (1500 ~ 21 m)"),
     "Protean_TendrilPullMult":     (0x95F, 1.0,  "Float", "multiplies the Tendril's pull"),
+    "Protean_KeenDrain":           (0x976, 2.0,  "Float", "stamina per second each of Keen's Detect Life and Detect Dead drains while on"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -465,6 +474,63 @@ def main():
           + "".join("- BaseEffect: %s:%s\n  Data:\n    Magnitude: %d\n" % (fid(e), PLUGIN, m)
                     for e, m in ((TENDRIL_DAMAGE, 6), (TENDRIL_DRAIN, 20))))  # Protean sets both before each throw
 
+    # ---- Keen
+    power(KEEN_POWERS["night"], "Protean_KeenNightPower", "Keen: Night Vision",
+          "In animal form, see in the dark. Cast again to stop.")
+    power(KEEN_POWERS["life"], "Protean_KeenLifePower", "Keen: Detect Life",
+          "In animal form, sense the living through walls, at a steady cost in Stamina. Cast again to stop.")
+    power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Keen: Detect Dead",
+          "In animal form, sense the dead and undead through walls, at a steady cost in Stamina. Cast again to stop.")
+    # Detect Dead as fire-and-forget: the game's held Detect Undead effects (DetectUndead*ConcSelf), same looks and
+    # target conditions, with a duration.
+    dead_kw = {"enemy": ("013797", "01397A", "0F82F4"), "friend": ("0F82F4", "013797", "01397A")}
+    for (side, indoors), local in zip((("enemy", False), ("enemy", True), ("friend", False), ("friend", True)),
+                                      KEEN_DEAD_EFFECTS):
+        place = "Interior" if indoors else "Exterior"
+        cond = ("- MutagenObjectType: ConditionFloat\n  Data:\n    MutagenObjectType: IsInInteriorConditionData\n"
+                + ("  ComparisonValue: 1\n" if indoors else ""))
+        cond += "".join("- MutagenObjectType: ConditionFloat\n  Data:\n    MutagenObjectType: HasKeywordConditionData\n"
+                        "    Keyword: %s:Skyrim.esm\n" % k for k in dead_kw[side])
+        either = [("HasKeywordConditionData", "013796")]
+        if side == "enemy":
+            either += [("HasMagicEffectKeywordConditionData", "02482B"), ("GetDeadConditionData", None)]
+        either += [("IsUndeadConditionData", None)]
+        cond += "".join("- MutagenObjectType: ConditionFloat\n  Flags:\n  - OR\n  Data:\n    MutagenObjectType: %s\n" % t
+                        + ("    Keyword: %s:Skyrim.esm\n" % k if k else "") + "  ComparisonValue: 1\n" for t, k in either)
+        editor_id = "Protean_KeenDetectDead%s%s" % (side.capitalize(), place)
+        write(os.path.join(y, "MagicEffects", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id)
+              + name_block("Detect Dead")
+              + "MenuDisplayObject: 104F70:Skyrim.esm\n"
+              "Flags:\n- Recover\n- NoHitEvent\n- FXPersist\n- NoRecast\n- Painless\n- NoDeathDispel\n"
+              "BaseCost: 0\nMagicSkill: Alteration\nCastingLight: 03BA90:Skyrim.esm\n"
+              "HitShader: %s:Skyrim.esm\nSpellmakingArea: 200\n" % ("016439" if side == "enemy" else "000146")
+              + "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: DetectLife\n"
+              "CastType: FireAndForget\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+              "ImageSpaceModifier: 02FB1E:Skyrim.esm\nCastingSoundLevel: Silent\n"
+              "Description:\n  TargetLanguage: English\n  Value: ''\nConditions:\n" + cond)
+
+    # The senses Protean casts on the player. Night vision lasts until Protean dispels it (cast again, change back).
+    # The detects put their glow on the creatures around, not on the player, so they are short pulses that Protean
+    # repeats while the sense is on (as the Vampire Lord's Detect All Creatures: 2 s). Areas as the Detect Life
+    # spell's: 200 ft outdoors, 100 indoors.
+    def sense(local, editor_id, title, effects, duration):
+        write(os.path.join(y, "Spells", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id)
+              + name_block(title)
+              + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+              "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\n- AreaEffectIgnoresLOS\n"
+              "Type: Spell\nChargeTime: 0\nCastType: FireAndForget\nTargetType: Self\n"
+              "Effects:\n"
+              + "".join("- BaseEffect: %s\n  Data:\n%s    Duration: %d\n" % (e, "    Area: %d\n" % a if a else "", duration)
+                        for e, a in effects))
+
+    sense(KEEN_SENSES["night"], "Protean_KeenNight", "Night Vision", [("06B10C:Skyrim.esm", 0)], 86400)
+    sense(KEEN_SENSES["life"], "Protean_KeenLife", "Detect Life",
+          [("1019D8:Skyrim.esm", 200), ("1019D9:Skyrim.esm", 100), ("1019DA:Skyrim.esm", 200), ("1019DB:Skyrim.esm", 100)], 2)
+    sense(KEEN_SENSES["dead"], "Protean_KeenDead", "Detect Dead",
+          [("%s:%s" % (fid(e), PLUGIN), a) for e, a in zip(KEEN_DEAD_EFFECTS, (200, 100, 200, 100))], 2)
+
     # The tree for Custom Skills Framework (Exit-9B, MIT): SKSE/Plugins/CustomSkills/Protean.json. No skill level, so it
     # looks like the vanilla beast trees; the points are Protean_PerkPoints, which Protean keeps up to date.
     def ref(local):
@@ -576,6 +642,7 @@ def main():
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
+                           "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES},
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},

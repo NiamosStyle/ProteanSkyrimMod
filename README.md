@@ -23,6 +23,7 @@ Status: **1.0.0**. 35 forms. Built to be part of a larger mod: see `docs/INTEGRA
   sight, as in vanilla. Big animals cannot go indoors.
 - **Face stealing:** sneak to a corpse to copy its face, and wear it with the Stolen Face power.
 - **Perks (in progress):** feeding earns perk points for a Protean perk tree. Built so far: Unbound Form,
+  Keen (night vision, Detect Life and Detect Dead from an animal's Favorites menu, as the Vampire Lord has it),
   Rending Claws (claws in either hand, strongest on a full stamina bar) and Tendril (a whip of flesh cast from
   either hand: it drains stamina into you, yanks light foes to you and hauls you to large ones).
 

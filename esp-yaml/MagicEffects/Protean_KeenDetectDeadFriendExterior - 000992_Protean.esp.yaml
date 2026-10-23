@@ -1,0 +1,58 @@
+FormKey: 000992:Protean.esp
+EditorID: Protean_KeenDetectDeadFriendExterior
+Name:
+  TargetLanguage: English
+  Value: 'Detect Dead'
+MenuDisplayObject: 104F70:Skyrim.esm
+Flags:
+- Recover
+- NoHitEvent
+- FXPersist
+- NoRecast
+- Painless
+- NoDeathDispel
+BaseCost: 0
+MagicSkill: Alteration
+CastingLight: 03BA90:Skyrim.esm
+HitShader: 000146:Skyrim.esm
+SpellmakingArea: 200
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: DetectLife
+CastType: FireAndForget
+SkillUsageMultiplier: 0
+DualCastScale: 1
+ImageSpaceModifier: 02FB1E:Skyrim.esm
+CastingSoundLevel: Silent
+Description:
+  TargetLanguage: English
+  Value: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: IsInInteriorConditionData
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: HasKeywordConditionData
+    Keyword: 0F82F4:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: HasKeywordConditionData
+    Keyword: 013797:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: HasKeywordConditionData
+    Keyword: 01397A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: HasKeywordConditionData
+    Keyword: 013796:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: IsUndeadConditionData
+  ComparisonValue: 1
