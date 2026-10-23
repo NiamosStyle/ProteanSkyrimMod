@@ -1,7 +1,8 @@
 """Build the Rending Claws models: natural, horn-like claws on the fingertips, one model per hand and sex.
 
   python tools/build_claws.py     -> data/meshes/Protean/Claws/Claws_{R,L}_{M,F}.nif and Claws1st_{R,L}_{M,F}.nif
-                                     (in the STYLE below), plus every style in data/meshes/Protean/Claws/<style>/
+                                     (in the STYLE below), plus any other style in data/meshes/Protean/Claws/<style>/
+                                     to compare in game (dev 'clawstyle <style>'; 'default' goes back)
 
 Each claw is skinned 100% to its finger's last bone (NPC R Finger02, 12, 22, 32, 42 ...), so it bends with the
 finger in every animation. Positions come from the vanilla skeletons shipped with PyNifly (bind pose). The right
@@ -11,7 +12,10 @@ shapes, each in its finger bone's own space and named "ProteanClaw|<bone>": the 
 under that bone of the 1st-person skeleton.
 History: 2026-10-22 bone-coloured knife blades (14 units). 2026-10-23 the user asked for something more natural and
 less shiny: round horn claws with the game's bear-claw texture and a dull sheen, and the thumb's claw hooking toward
-the palm (the thumb bends across the hand, not the way the fingers do).
+the palm (the thumb bends across the hand, not the way the fingers do). Compared in game: cat (8 long, strong hook),
+bear (10, thick base: looked unnatural), beast (12), each with the bear-claw texture (78-106 x 112-144 px of
+textures/actors/bear/bearclaws.dds) or Hearthfire's horn either way up. Chosen: the cat shape in horn, dark at the
+base paling to the tip. The thumb and little finger claws were then nudged in 1st person only.
 """
 import math
 import os
@@ -31,22 +35,15 @@ SKELETONS = {"M": PYNIFLY + "/skeletons/Skyrim/skeleton.nif", "F": PYNIFLY + "/s
 SLOT = {"R": 59, "L": 58}
 # textures: diffuse, normal map, and the patch used (u left, v at the claw's base, u right, v at its tip)
 TEXTURES = {
-    # base game: dark horn with lengthwise ridges; a patch inside one claw of the texture
-    "bearclaw": ("textures\\actors\\bear\\bearclaws.dds", "textures\\actors\\bear\\bearclaws_n.dds",
-                 (78 / 256, 112 / 256, 106 / 256, 144 / 256)),
-    # Hearthfire's horn (in every Skyrim SE): pale at the base darkening to the tip, or the other way up
+    # Hearthfire's horn (in every Skyrim SE), used dark end at the claw's base, paling to the tip
     "horn": ("textures\\_byoh\\clutter\\resources\\horn01.dds", "textures\\_byoh\\clutter\\resources\\horn01_n.dds",
-             (70 / 256, 480 / 512, 120 / 256, 165 / 512)),
-    "hornpale": ("textures\\_byoh\\clutter\\resources\\horn01.dds", "textures\\_byoh\\clutter\\resources\\horn01_n.dds",
-                 (70 / 256, 165 / 512, 120 / 256, 480 / 512)),
+             (70 / 256, 165 / 512, 120 / 256, 480 / 512)),
 }
 GLOSSINESS, SPECULAR = 8.0, 0.25  # a dull sheen
 # length (game units, 1 ~ 1.43 cm), hook (curve, share of the length), base depth (back to belly), base half-width,
 # texture
-STYLES = {"cat": (8.0, 0.45, 1.5, 0.45, "bearclaw"), "bear": (10.0, 0.25, 1.7, 0.6, "bearclaw"),
-          "beast": (12.0, 0.35, 1.6, 0.5, "bearclaw"), "cathorn": (8.0, 0.45, 1.5, 0.45, "horn"),
-          "cathornpale": (8.0, 0.45, 1.5, 0.45, "hornpale")}
-STYLE = "cathornpale"  # the one Protean.esp points at (chosen in game 2026-10-23)
+STYLES = {"natural": (8.0, 0.45, 1.5, 0.45, "horn")}
+STYLE = "natural"  # the one Protean.esp points at (chosen in game 2026-10-23)
 LENGTH_FACTOR = {0: 0.7, 4: 0.85}  # thumb, little finger
 FIRST_PERSON_SHIFT = {0: 0.8, 4: 0.8}  # 1st person only: thumb and little finger claws this much further out (user)
 FIRST_PERSON_DROP = {0: 0.4, 4: 0.6}  # ... and this much lower, onto the finger (the little finger's floated)
@@ -203,5 +200,6 @@ if __name__ == "__main__":
     for sex in ("M", "F"):
         for side in ("R", "L"):
             build(sex, side, STYLE, OUT)
-            for style in STYLES:  # all of them, to compare in game (dev 'clawstyle <name>')
-                build(sex, side, style, os.path.join(OUT, style))
+            for style in STYLES:  # any others, to compare in game (dev 'clawstyle <name>')
+                if style != STYLE:
+                    build(sex, side, style, os.path.join(OUT, style))
