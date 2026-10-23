@@ -1,10 +1,13 @@
 """Build the Rending Claws models: knife-like bone blades on the fingertips, one model per hand and sex.
 
-  python tools/build_claws.py     -> data/meshes/Protean/Claws/Claws_{R,L}_{M,F}.nif
+  python tools/build_claws.py     -> data/meshes/Protean/Claws/Claws_{R,L}_{M,F}.nif and Claws1st_{R,L}_{M,F}.nif
 
 Each blade is skinned 100% to its finger's last bone (NPC R Finger02, 12, 22, 32, 42 ...), so it bends with the
 finger in every animation. Positions come from the vanilla skeletons shipped with PyNifly (bind pose). The right
 hand sits in body slot 59 (SBP_59_MOD_ARM_RIGHT), the left in 58, so each hand can wear claws on its own.
+The game does not build slots 58/59 for the 1st-person view, so Claws1st_* hold the same blades as plain unskinned
+shapes, each in its finger bone's own space and named "ProteanClaw|<bone>": the plugin (src/Claws.cpp) hangs each one
+under that bone of the 1st-person skeleton.
 Shape agreed with the user from Blender previews (2026-10-22): 14 units (~20 cm), the little finger's 80%, the
 thumb's half; a slight talon curve toward the palm; the sharp edge on the palm side; bone colour.
 """
@@ -43,6 +46,12 @@ def norm(a): return mul(a, 1.0 / length(a))
 
 def bone_name(side, finger, joint):
     return "NPC %s Finger%d%d [%sF%d%d]" % (side, finger, joint, side, finger, joint)
+
+
+def to_local(t, v):
+    """A model-space point into the space of a bone whose global transform is t (x = S R v + T, R by rows)."""
+    d = sub(v, list(t.translation))
+    return [sum(t.rotation[j][i] * d[j] for j in range(3)) / t.scale for i in range(3)]
 
 
 def inverse(t):
@@ -106,6 +115,38 @@ def blades(skel, side):
     return tris
 
 
+def set_shader(shape, skinned):
+    shader = shape.shader.properties
+    shader.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
+    shader.shaderflags1_set(ShaderFlags1.SPECULAR | ShaderFlags1.CAST_SHADOWS | ShaderFlags1.ZBUFFER_TEST
+                            | (ShaderFlags1.SKINNED if skinned else 0))
+    shader.shaderflags2_set(ShaderFlags2.ZBUFFER_WRITE)
+    shape.set_texture("Diffuse", TEXTURE)
+    shape.set_texture("Normal", NORMAL)
+    shape.save_shader_attributes()
+
+
+def build_first_person(sex, side, skel, tris):
+    path = os.path.join(OUT, "Claws1st_%s_%s.nif" % (side, sex))
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path)
+    for bone in sorted(set(b for _, _, b in tris)):
+        g = skel.nodes[bone].global_transform
+        verts, uvs, normals, faces = [], [], [], []
+        for corners, uv, b in tris:
+            if b != bone:
+                continue
+            local = [to_local(g, c) for c in corners]
+            n = norm(cross(sub(local[1], local[0]), sub(local[2], local[0])))
+            start = len(verts)
+            for c, u in zip(local, uv):
+                verts.append(tuple(c)); uvs.append(u); normals.append(tuple(n))
+            faces.append((start, start + 1, start + 2))
+        set_shader(nif.createShapeFromData("ProteanClaw|" + bone, verts, faces, uvs, normals), False)
+    nif.save()
+    print("wrote", path)
+
+
 def build(sex, side):
     skel = NifFile(SKELETONS[sex])
     tris = blades(skel, side)
@@ -133,16 +174,10 @@ def build(sex, side):
         shape.setShapeWeights(b, [(v, 1.0) for v in range(len(verts)) if owner[v] == b])
     shape.set_partitions([SkyPartition(part_id=SLOT[side], flags=0, namedict=nif.dict)], [0] * len(faces))
 
-    shader = shape.shader.properties
-    shader.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
-    shader.shaderflags1_set(ShaderFlags1.SPECULAR | ShaderFlags1.SKINNED | ShaderFlags1.CAST_SHADOWS
-                            | ShaderFlags1.ZBUFFER_TEST)
-    shader.shaderflags2_set(ShaderFlags2.ZBUFFER_WRITE)
-    shape.set_texture("Diffuse", TEXTURE)
-    shape.set_texture("Normal", NORMAL)
-    shape.save_shader_attributes()
+    set_shader(shape, True)
     nif.save()
     print("wrote", path, len(verts), "verts", len(faces), "tris", bones)
+    build_first_person(sex, side, skel, tris)
     return path
 
 

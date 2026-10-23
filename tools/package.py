@@ -22,7 +22,8 @@ files = {
     "SKSE/Plugins/CustomSkills/Protean.json": os.path.join(ROOT, "data", "SKSE", "Plugins", "CustomSkills", "Protean.json"),
 }
 # the claw models (tools/build_claws.py)
-for name in ("Claws_R_M", "Claws_L_M", "Claws_R_F", "Claws_L_F"):
+for name in ("Claws_R_M", "Claws_L_M", "Claws_R_F", "Claws_L_F",
+             "Claws1st_R_M", "Claws1st_L_M", "Claws1st_R_F", "Claws1st_L_F"):
     files["meshes/Protean/Claws/%s.nif" % name] = os.path.join(ROOT, "data", "meshes", "Protean", "Claws", name + ".nif")
 for name, path in files.items():
     if not os.path.isfile(path):

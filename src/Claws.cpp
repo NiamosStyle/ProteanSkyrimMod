@@ -38,6 +38,87 @@ namespace protean::Claws
 				}
 			}
 		}
+
+		constexpr auto kPrefix = "ProteanClaw|"sv;
+
+		// the blades now hanging in a 1st-person body
+		std::vector<RE::NiAVObject*> Hung(RE::NiAVObject* a_root, char a_side)
+		{
+			std::vector<RE::NiAVObject*> out;
+			const auto                   mine = std::string(kPrefix) + "NPC " + a_side + " ";
+			RE::BSVisit::TraverseScenegraphGeometries(a_root, [&](RE::BSGeometry* a_geo) {
+				if (std::string_view(a_geo->name.c_str()).starts_with(mine)) {
+					out.push_back(a_geo);
+				}
+				return RE::BSVisit::BSVisitControl::kContinue;
+			});
+			return out;
+		}
+
+		void Hang(RE::PlayerCharacter* a_p, bool a_left, bool a_on)
+		{
+			auto* root = a_p->Get3D(true);
+			if (!root) {
+				return;
+			}
+			const char side = a_left ? 'L' : 'R';
+			const auto hung = Hung(root, side);
+			if (!a_on) {
+				for (auto* blade : hung) {
+					if (blade->parent) {
+						blade->parent->DetachChild2(blade);
+					}
+				}
+				return;
+			}
+			if (!hung.empty()) {
+				return;
+			}
+			const auto* base = a_p->GetActorBase();
+			const char  sex = base && base->GetSex() == RE::SEX::kFemale ? 'F' : 'M';
+			const auto  path = fmt::format("Protean\\Claws\\Claws1st_{}_{}.nif", side, sex);
+			RE::NiPointer<RE::NiNode> model;
+			if ((RE::BSModelDB::Demand(path.c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
+				(RE::BSModelDB::Demand(("Meshes\\" + path).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
+				logger::warn("claws: could not load {}", path);
+				return;
+			}
+			// the loaded model is shared: hang a copy
+			RE::NiPointer<RE::NiObject> clone(model->Clone());
+			auto*                       copy = clone ? clone->AsNode() : nullptr;
+			if (!copy) {
+				return;
+			}
+			std::vector<RE::NiPointer<RE::NiAVObject>> blades;
+			for (auto& child : copy->GetChildren()) {
+				if (child) {
+					blades.emplace_back(child);
+				}
+			}
+			int n = 0;
+			for (auto& blade : blades) {
+				const std::string_view name(blade->name.c_str());
+				if (!name.starts_with(kPrefix)) {
+					continue;
+				}
+				auto* bone = root->GetObjectByName(RE::BSFixedString(std::string(name.substr(kPrefix.size()))));
+				if (auto* node = bone ? bone->AsNode() : nullptr) {
+					copy->DetachChild2(blade.get());
+					blade->local = RE::NiTransform();
+					node->AttachChild(blade.get(), true);
+					RE::NiUpdateData update;
+					blade->Update(update);
+					++n;
+				}
+			}
+			logger::info("claws: {} hand, {} blade(s) hung in 1st person", a_left ? "left" : "right", n);
+		}
+
+		void HangBoth(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_weapon)
+		{
+			Hang(a_p, false, a_p->GetEquippedObject(false) == a_weapon);
+			Hang(a_p, true, a_p->GetEquippedObject(true) == a_weapon);
+		}
 	}
 
 	void Sync()
@@ -51,6 +132,20 @@ namespace protean::Claws
 		using Slot = RE::BGSBipedObjectForm::BipedObjectSlot;
 		Wear(p, reg.ClawPiece(false), Slot::kModArmRight, p->GetEquippedObject(false) == weapon, "right");
 		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, p->GetEquippedObject(true) == weapon, "left");
+		HangBoth(p, weapon);
+	}
+
+	void OnFrame(float a_delta)
+	{
+		static float since = 0.0f;
+		if ((since += a_delta) < 0.25f) {
+			return;
+		}
+		since = 0.0f;
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		if (auto* weapon = Registry::Get().ClawWeapon(); p && weapon) {
+			HangBoth(p, weapon);
+		}
 	}
 
 	void Give()

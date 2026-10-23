@@ -5,6 +5,7 @@
 
 #include "Attacks.h"
 #include "Camera.h"
+#include "Claws.h"
 #include "Dev.h"
 #include "Fly.h"
 #include "Hud.h"
@@ -27,6 +28,7 @@ namespace protean::Hooks
 				Attacks::OnFrame();
 				Shift::OnFrame();
 				Evolve::OnFrame(a_delta);
+				Claws::OnFrame(a_delta);
 				Face::OnFrame();
 				Hud::OnFrame(a_this);
 				Dev::Poll();

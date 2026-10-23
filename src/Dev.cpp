@@ -253,6 +253,39 @@ namespace protean::Dev
 						cc->radius, cc->height, cc->scale, cc->actorHeight, root ? root->worldBound.radius : 0.0f, p->GetScale(),
 						p->GetActorBase() ? p->GetActorBase()->GetHeight() : 0.0f);
 				}
+			} else if (a_cmd == "find3d" && !a_arg.empty()) {
+				// find3d <text>: every node in the 3rd- and 1st-person models whose name contains the text
+				for (const bool first : { false, true }) {
+					auto* root = p->Get3D(first);
+					logger::info("dev: find3d '{}' in {} person model ({})", a_arg, first ? "1st" : "3rd", root ? "loaded" : "none");
+					if (root) {
+						RE::BSVisit::TraverseScenegraphObjects(root, [&](RE::NiAVObject* a_obj) {
+							if (a_obj->name.contains(a_arg)) {
+								const auto& t = a_obj->world.translate;
+								logger::info("dev:   '{}' culled {} at {:.1f} {:.1f} {:.1f} parent '{}'", a_obj->name.c_str(),
+									a_obj->GetAppCulled(), t.x, t.y, t.z, a_obj->parent ? a_obj->parent->name.c_str() : "");
+							}
+							return RE::BSVisit::BSVisitControl::kContinue;
+						});
+						RE::BSVisit::TraverseScenegraphGeometries(root, [&](RE::BSGeometry* a_geo) {
+							if (a_geo->name.contains(a_arg)) {
+								logger::info("dev:   shape '{}' culled {} parent '{}'", a_geo->name.c_str(), a_geo->GetAppCulled(),
+									a_geo->parent ? a_geo->parent->name.c_str() : "");
+							}
+							return RE::BSVisit::BSVisitControl::kContinue;
+						});
+					}
+					// what each body slot holds, and whether its model was made
+					if (const auto& biped = p->GetBiped(first)) {
+						for (std::uint32_t i = 0; i < RE::BIPED_OBJECTS::kTotal; ++i) {
+							const auto& o = biped->objects[i];
+							if (o.item) {
+								logger::info("dev:   slot {} '{}' addon {:X} model {}", i, o.item->GetName(),
+									o.addon ? o.addon->GetFormID() : 0, o.partClone ? o.partClone->name.c_str() : "(none)");
+							}
+						}
+					}
+				}
 			} else if (a_cmd == "draw") {
 				p->DrawWeaponMagicHands(true);
 				logger::info("dev: draw requested");
