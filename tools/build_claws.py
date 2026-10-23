@@ -29,12 +29,23 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "meshes", "Protean", "Claws")
 SKELETONS = {"M": PYNIFLY + "/skeletons/Skyrim/skeleton.nif", "F": PYNIFLY + "/skeletons/Skyrim/skeleton_female.nif"}
 SLOT = {"R": 59, "L": 58}
-TEXTURE = "textures\\actors\\bear\\bearclaws.dds"  # base game: dark horn with lengthwise ridges
-NORMAL = "textures\\actors\\bear\\bearclaws_n.dds"
-UV_BOX = (78 / 256, 112 / 256, 106 / 256, 144 / 256)  # a patch inside one claw of that texture (either way up)
+# textures: diffuse, normal map, and the patch used (u left, v at the claw's base, u right, v at its tip)
+TEXTURES = {
+    # base game: dark horn with lengthwise ridges; a patch inside one claw of the texture
+    "bearclaw": ("textures\\actors\\bear\\bearclaws.dds", "textures\\actors\\bear\\bearclaws_n.dds",
+                 (78 / 256, 112 / 256, 106 / 256, 144 / 256)),
+    # Hearthfire's horn (in every Skyrim SE): pale at the base darkening to the tip, or the other way up
+    "horn": ("textures\\_byoh\\clutter\\resources\\horn01.dds", "textures\\_byoh\\clutter\\resources\\horn01_n.dds",
+             (70 / 256, 480 / 512, 120 / 256, 165 / 512)),
+    "hornpale": ("textures\\_byoh\\clutter\\resources\\horn01.dds", "textures\\_byoh\\clutter\\resources\\horn01_n.dds",
+                 (70 / 256, 165 / 512, 120 / 256, 480 / 512)),
+}
 GLOSSINESS, SPECULAR = 8.0, 0.25  # a dull sheen
-# length (game units, 1 ~ 1.43 cm), hook (curve, share of the length), base depth (back to belly), base half-width
-STYLES = {"cat": (8.0, 0.45, 1.5, 0.45), "bear": (10.0, 0.25, 1.7, 0.6), "beast": (12.0, 0.35, 1.6, 0.5)}
+# length (game units, 1 ~ 1.43 cm), hook (curve, share of the length), base depth (back to belly), base half-width,
+# texture
+STYLES = {"cat": (8.0, 0.45, 1.5, 0.45, "bearclaw"), "bear": (10.0, 0.25, 1.7, 0.6, "bearclaw"),
+          "beast": (12.0, 0.35, 1.6, 0.5, "bearclaw"), "cathorn": (8.0, 0.45, 1.5, 0.45, "horn"),
+          "cathornpale": (8.0, 0.45, 1.5, 0.45, "hornpale")}
 STYLE = "bear"  # the one Protean.esp points at
 LENGTH_FACTOR = {0: 0.7, 4: 0.85}  # thumb, little finger
 SEGMENTS = 16
@@ -74,7 +85,7 @@ def inverse(t):
 
 def claws_for(skel, side, style):
     """Each claw as (bone, verts, normals, uvs, faces) in model space, with smooth round sides."""
-    length0, hook, depth, half_width = STYLES[style]
+    length0, hook, depth, half_width, texture = STYLES[style]
     pos = lambda n: list(skel.nodes[n].global_transform.translation)
     hand = pos("NPC %s Hand [%sHnd]" % (side, side))
     fingers = {i: [pos(bone_name(side, i, j)) for j in range(3)] for i in range(5)}
@@ -84,7 +95,7 @@ def claws_for(skel, side, style):
     if dot(palm, sub(fingers[0][1], hand)) < 0:  # the thumb sits on the palm side
         palm = mul(palm, -1)
     palm_centre = add(mul(add(hand, fingers[2][0]), 0.5), mul(palm, 2.0))
-    u0, v0, u1, v1 = UV_BOX
+    u0, v0, u1, v1 = TEXTURES[texture][2]
     claws = []
     for i in range(5):
         f1, f2 = fingers[i][1], fingers[i][2]
@@ -125,7 +136,7 @@ def claws_for(skel, side, style):
     return claws
 
 
-def set_shader(shape, skinned):
+def set_shader(shape, skinned, style):
     shader = shape.shader.properties
     shader.bufType = PynBufferTypes.BSLightingShaderPropertyBufType
     shader.shaderflags1_set(ShaderFlags1.SPECULAR | ShaderFlags1.CAST_SHADOWS | ShaderFlags1.ZBUFFER_TEST
@@ -133,19 +144,20 @@ def set_shader(shape, skinned):
     shader.shaderflags2_set(ShaderFlags2.ZBUFFER_WRITE)
     shader.Glossiness = GLOSSINESS
     shader.Spec_Str = SPECULAR
-    shape.set_texture("Diffuse", TEXTURE)
-    shape.set_texture("Normal", NORMAL)
+    diffuse, normal, _ = TEXTURES[STYLES[style][4]]
+    shape.set_texture("Diffuse", diffuse)
+    shape.set_texture("Normal", normal)
     shape.save_shader_attributes()
 
 
-def build_first_person(path, skel, claws):
+def build_first_person(path, skel, claws, style):
     nif = NifFile()
     nif.initialize("SKYRIMSE", path)
     for bone, verts, normals, uvs, faces in claws:
         g = skel.nodes[bone].global_transform
         local = [tuple(to_local(g, v)) for v in verts]
         turned = [tuple(sum(g.rotation[j][i] * n[j] for j in range(3)) for i in range(3)) for n in normals]
-        set_shader(nif.createShapeFromData("ProteanClaw|" + bone, local, faces, uvs, turned), False)
+        set_shader(nif.createShapeFromData("ProteanClaw|" + bone, local, faces, uvs, turned), False, style)
     nif.save()
 
 
@@ -175,9 +187,9 @@ def build(sex, side, style, folder):
         shape.set_skin_to_bone_xform(b, inverse(skel.nodes[b].global_transform))
         shape.setShapeWeights(b, [(v, 1.0) for v in range(len(verts)) if owner[v] == b])
     shape.set_partitions([SkyPartition(part_id=SLOT[side], flags=0, namedict=nif.dict)], [0] * len(faces))
-    set_shader(shape, True)
+    set_shader(shape, True, style)
     nif.save()
-    build_first_person(os.path.join(folder, "Claws1st_%s_%s.nif" % (side, sex)), skel, claws)
+    build_first_person(os.path.join(folder, "Claws1st_%s_%s.nif" % (side, sex)), skel, claws, style)
     print("wrote", style, path, len(verts), "verts", len(faces), "tris")
 
 
