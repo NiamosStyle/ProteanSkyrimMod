@@ -375,7 +375,7 @@ def main():
     write(os.path.join(y, "Weapons", "Protean_RendingClaws - %s_%s.yaml" % (fid(CLAW_WEAPON), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_RendingClaws\n" % (fid(CLAW_WEAPON), PLUGIN)
           + name_block("Rending Claws")
-          + "EquipmentType: 013F45:Skyrim.esm\n"
+          + "EquipmentType: 013F44:Skyrim.esm\n"  # EitherHand (Feral's 013F45 is BothHands: one equip filled both)
           "Description:\n  TargetLanguage: English\n  Value: ''\n"
           "ImpactDataSet: 0C190F:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
           "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
@@ -391,8 +391,9 @@ def main():
               "FormKey: %s:%s\nEditorID: Protean_ClawsAA_%s\n" % (fid(arma), PLUGIN, side) + template
               + "Priority:\n  Male: 10\n  Female: 10\n"
               "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
-              "WorldModel:\n  Male:\n    File: Protean\\Claws\\Claws_%s_M.nif\n"
-              "  Female:\n    File: Protean\\Claws\\Claws_%s_F.nif\n" % (side, side)
+              + "".join("%s:\n  Male:\n    File: Protean\\Claws\\Claws_%s_M.nif\n"
+                        "  Female:\n    File: Protean\\Claws\\Claws_%s_F.nif\n" % (field, side, side)
+                        for field in ("WorldModel", "FirstPersonModel"))  # the same model in 1st person
               + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
         write(os.path.join(y, "Armors", "Protean_Claws_%s - %s_%s.yaml" % (side, fid(armo), PLUGIN)),
               "FormKey: %s:%s\nEditorID: Protean_Claws_%s\n" % (fid(armo), PLUGIN, side)

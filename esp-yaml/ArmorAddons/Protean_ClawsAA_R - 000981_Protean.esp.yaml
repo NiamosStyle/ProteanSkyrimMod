@@ -17,6 +17,11 @@ WorldModel:
     File: Protean\Claws\Claws_R_M.nif
   Female:
     File: Protean\Claws\Claws_R_F.nif
+FirstPersonModel:
+  Male:
+    File: Protean\Claws\Claws_R_M.nif
+  Female:
+    File: Protean\Claws\Claws_R_F.nif
 AdditionalRaces:
 - 013740:Skyrim.esm
 - 08883A:Skyrim.esm
