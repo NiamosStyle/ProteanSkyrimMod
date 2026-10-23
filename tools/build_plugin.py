@@ -30,48 +30,49 @@ KW_TRANSFORMED = 0x80A
 EVOLUTION = 0x80B  # the power that opens the perk tree (Custom Skills Framework menu)
 # The perk tree (docs/protean-perk-spec.md). Perk records are plain: Protean's plugin reads HasPerk and does the work.
 # id -> (local id, name, description, x, y, links). Appended, never renumbered: saves remember the perks.
-# Tree coordinates (Custom Skills Framework): x positive = left, y positive = up. Beast left, Hunter middle, Deceiver right.
+# Tree coordinates (Custom Skills Framework, vanilla-like spacing: neighbours about 1 unit apart so their names show
+# when zoomed in): x positive = left, y positive = up. Beast left, Hunter middle, Deceiver right.
 # The menu stretches the layout: TREE_SCALE_X across, TREE_SCALE_Y up (1 looked small next to the vanilla werewolf
 # tree; 2.5 both ways was too tall). Moving the root below 0 made the whole tree draw bigger, so it stays at y 0.
-TREE_SCALE_X = 2.5
-TREE_SCALE_Y = 1.5
+TREE_SCALE_X = 1.0
+TREE_SCALE_Y = 1.0
 PERKS = {
     "unbound_form": (0x960, "Unbound Form",
                      "You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill "
                      "speeds your stamina's recovery for a while (the boosts stack).", 0, 0,
                      ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
     # Beast
-    "keen": (0x961, "Keen", "In animal form, switch on night vision, Detect Life and Detect Death.", 2.2, 1.2,
+    "keen": (0x961, "Keen", "In animal form, switch on night vision, Detect Life and Detect Death.", 1.8, 0.8,
              ["survivor", "predator", "stalker"]),
     "survivor": (0x962, "Survivor", "Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter "
-                 "of the difference when the animal is stronger than you.", 3.3, 2.3, ["apex"]),
-    "predator": (0x963, "Predator", "Your animal forms deal more damage.", 2.3, 2.5, ["apex"]),
-    "stalker": (0x964, "Stalker", "Your animal forms are harder to detect.", 1.4, 2.3, ["apex"]),
-    "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.8, []),
+                 "of the difference when the animal is stronger than you.", 3.3, 1.9, ["apex"]),
+    "predator": (0x963, "Predator", "Your animal forms deal more damage.", 2.3, 2.1, ["apex"]),
+    "stalker": (0x964, "Stalker", "Your animal forms are harder to detect.", 1.4, 1.9, ["apex"]),
+    "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands: a weapon for each hand, at a stamina cost.",
-                      0.8, 1.3, ["tendril", "devastator"]),
+                      0.8, 0.9, ["tendril", "devastator"]),
     "tendril": (0x967, "Tendril", "A whip of flesh lashes out, tearing at health and stamina; you take part of the "
-                "stamina it drains.", 0.9, 2.4, []),
-    "predators_rush": (0x968, "Predator's Rush", "You move faster, sprint faster still, and leap higher.", 0, 1.5,
+                "stamina it drains.", 0.9, 2, []),
+    "predators_rush": (0x968, "Predator's Rush", "You move faster, sprint faster still, and leap higher.", 0, 1.1,
                        ["preys_flight"]),
-    "preys_flight": (0x969, "Prey's Flight", "Jump again in mid-air, and glide.", 0, 2.6, ["devastator"]),
-    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: more armor.", -0.8, 1.3,
+    "preys_flight": (0x969, "Prey's Flight", "Jump again in mid-air, and glide.", 0, 2.2, ["devastator"]),
+    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: more armor.", -0.8, 0.9,
                         ["regeneration", "devastator"]),
     "regeneration": (0x96B, "Regeneration", "A toggle: while on, stamina drains and health returns by the same amount.",
-                     -0.9, 2.4, []),
+                     -0.9, 2, []),
     "devastator": (0x96C, "Devastator", "Unleash a devastating attack all around you. Costs all your stamina and needs "
-                   "two kill boosts. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.8, []),
+                   "two kill boosts. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.4, []),
     # Deceiver
-    "borrowed_visage": (0x96D, "Borrowed Visage", "Steal the face of a corpse and wear it.", -2.2, 1.2,
+    "borrowed_visage": (0x96D, "Borrowed Visage", "Steal the face of a corpse and wear it.", -1.8, 0.8,
                         ["metamorphosis", "inconspicuous"]),
     "metamorphosis": (0x96E, "Metamorphosis", "Make a stolen face and race your own, and leave your crimes behind. "
-                      "Costs all your stamina.", -3.3, 2.3, []),
+                      "Costs all your stamina.", -3.3, 1.9, []),
     "inconspicuous": (0x96F, "Inconspicuous", "The more friendly people around you, the harder you are to notice.",
-                      -1.9, 2.4, ["infected", "assassin"]),
-    "infected": (0x970, "Infected", "Slip an infection into someone's pocket; the infected fight for you.", -1.4, 3.5, []),
+                      -1.9, 2, ["infected", "assassin"]),
+    "infected": (0x970, "Infected", "Slip an infection into someone's pocket; the infected fight for you.", -1.4, 3.1, []),
     "assassin": (0x971, "Assassin", "Sneak attacks are far deadlier against someone who trusts the face you wear.",
-                 -2.5, 3.7, []),
+                 -2.5, 3.3, []),
 }
 # Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
 # base id -> (local id, description)

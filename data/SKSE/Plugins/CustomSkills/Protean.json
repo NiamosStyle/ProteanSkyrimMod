@@ -29,8 +29,8 @@
         {
           "id": "keen",
           "perk": "Protean.esp|961",
-          "x": 5.5,
-          "y": 1.8,
+          "x": 1.8,
+          "y": 0.8,
           "links": [
             "survivor",
             "predator",
@@ -40,8 +40,8 @@
         {
           "id": "survivor",
           "perk": "Protean.esp|962",
-          "x": 8.25,
-          "y": 3.45,
+          "x": 3.3,
+          "y": 1.9,
           "links": [
             "apex"
           ]
@@ -49,8 +49,8 @@
         {
           "id": "predator",
           "perk": "Protean.esp|963",
-          "x": 5.75,
-          "y": 3.75,
+          "x": 2.3,
+          "y": 2.1,
           "links": [
             "apex"
           ]
@@ -58,8 +58,8 @@
         {
           "id": "stalker",
           "perk": "Protean.esp|964",
-          "x": 3.5,
-          "y": 3.45,
+          "x": 1.4,
+          "y": 1.9,
           "links": [
             "apex"
           ]
@@ -67,14 +67,14 @@
         {
           "id": "apex",
           "perk": "Protean.esp|965",
-          "x": 5.75,
-          "y": 5.7
+          "x": 2.3,
+          "y": 3.4
         },
         {
           "id": "rending_claws",
           "perk": "Protean.esp|966",
-          "x": 2.0,
-          "y": 1.95,
+          "x": 0.8,
+          "y": 0.9,
           "links": [
             "tendril",
             "devastator"
@@ -83,14 +83,14 @@
         {
           "id": "tendril",
           "perk": "Protean.esp|967",
-          "x": 2.25,
-          "y": 3.6
+          "x": 0.9,
+          "y": 2.0
         },
         {
           "id": "predators_rush",
           "perk": "Protean.esp|968",
           "x": 0.0,
-          "y": 2.25,
+          "y": 1.1,
           "links": [
             "preys_flight"
           ]
@@ -99,7 +99,7 @@
           "id": "preys_flight",
           "perk": "Protean.esp|969",
           "x": 0.0,
-          "y": 3.9,
+          "y": 2.2,
           "links": [
             "devastator"
           ]
@@ -107,8 +107,8 @@
         {
           "id": "subtle_carapace",
           "perk": "Protean.esp|96A",
-          "x": -2.0,
-          "y": 1.95,
+          "x": -0.8,
+          "y": 0.9,
           "links": [
             "regeneration",
             "devastator"
@@ -117,20 +117,20 @@
         {
           "id": "regeneration",
           "perk": "Protean.esp|96B",
-          "x": -2.25,
-          "y": 3.6
+          "x": -0.9,
+          "y": 2.0
         },
         {
           "id": "devastator",
           "perk": "Protean.esp|96C",
           "x": 0.0,
-          "y": 5.7
+          "y": 3.4
         },
         {
           "id": "borrowed_visage",
           "perk": "Protean.esp|96D",
-          "x": -5.5,
-          "y": 1.8,
+          "x": -1.8,
+          "y": 0.8,
           "links": [
             "metamorphosis",
             "inconspicuous"
@@ -139,14 +139,14 @@
         {
           "id": "metamorphosis",
           "perk": "Protean.esp|96E",
-          "x": -8.25,
-          "y": 3.45
+          "x": -3.3,
+          "y": 1.9
         },
         {
           "id": "inconspicuous",
           "perk": "Protean.esp|96F",
-          "x": -4.75,
-          "y": 3.6,
+          "x": -1.9,
+          "y": 2.0,
           "links": [
             "infected",
             "assassin"
@@ -155,14 +155,14 @@
         {
           "id": "infected",
           "perk": "Protean.esp|970",
-          "x": -3.5,
-          "y": 5.25
+          "x": -1.4,
+          "y": 3.1
         },
         {
           "id": "assassin",
           "perk": "Protean.esp|971",
-          "x": -6.25,
-          "y": 5.55
+          "x": -2.5,
+          "y": 3.3
         }
       ]
     }
