@@ -46,8 +46,10 @@ GLOSSINESS, SPECULAR = 8.0, 0.25  # a dull sheen
 STYLES = {"cat": (8.0, 0.45, 1.5, 0.45, "bearclaw"), "bear": (10.0, 0.25, 1.7, 0.6, "bearclaw"),
           "beast": (12.0, 0.35, 1.6, 0.5, "bearclaw"), "cathorn": (8.0, 0.45, 1.5, 0.45, "horn"),
           "cathornpale": (8.0, 0.45, 1.5, 0.45, "hornpale")}
-STYLE = "bear"  # the one Protean.esp points at
+STYLE = "cathornpale"  # the one Protean.esp points at (chosen in game 2026-10-23)
 LENGTH_FACTOR = {0: 0.7, 4: 0.85}  # thumb, little finger
+FIRST_PERSON_SHIFT = {0: 0.8, 4: 0.8}  # 1st person only: thumb and little finger claws this much further out (user)
+FIRST_PERSON_DROP = {0: 0.4, 4: 0.6}  # ... and this much lower, onto the finger (the little finger's floated)
 SEGMENTS = 16
 SIDES = 8
 
@@ -132,7 +134,7 @@ def claws_for(skel, side, style):
         verts.append(base); normals.append(mul(d, -1)); uvs.append(((u0 + u1) / 2, v0))
         for q in range(SIDES):
             faces.append((centre, q + 1, q))
-        claws.append((bone_name(side, i, 2), verts, normals, uvs, faces))
+        claws.append((bone_name(side, i, 2), verts, normals, uvs, faces, curl))
     return claws
 
 
@@ -153,9 +155,13 @@ def set_shader(shape, skinned, style):
 def build_first_person(path, skel, claws, style):
     nif = NifFile()
     nif.initialize("SKYRIMSE", path)
-    for bone, verts, normals, uvs, faces in claws:
+    for bone, verts, normals, uvs, faces, curl in claws:
         g = skel.nodes[bone].global_transform
-        local = [tuple(to_local(g, v)) for v in verts]
+        side, finger = bone[4], int(bone[12])  # "NPC R Finger02 [RF02]"
+        # the 1st-person fingers are shaped a little differently: some claws sit further along their finger there
+        along = norm(sub(list(g.translation), list(skel.nodes[bone_name(side, finger, 1)].global_transform.translation)))
+        shift = add(mul(along, FIRST_PERSON_SHIFT.get(finger, 0.0)), mul(curl, FIRST_PERSON_DROP.get(finger, 0.0)))
+        local = [tuple(to_local(g, add(v, shift))) for v in verts]
         turned = [tuple(sum(g.rotation[j][i] * n[j] for j in range(3)) for i in range(3)) for n in normals]
         set_shader(nif.createShapeFromData("ProteanClaw|" + bone, local, faces, uvs, turned), False, style)
     nif.save()
@@ -165,7 +171,7 @@ def build(sex, side, style, folder):
     skel = NifFile(SKELETONS[sex])
     claws = claws_for(skel, side, style)
     verts, uvs, normals, faces, owner = [], [], [], [], []
-    for bone, cv, cn, cu, cf in claws:
+    for bone, cv, cn, cu, cf, _ in claws:
         start = len(verts)
         verts += [tuple(v) for v in cv]
         normals += [tuple(n) for n in cn]
