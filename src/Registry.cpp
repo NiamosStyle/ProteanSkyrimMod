@@ -90,6 +90,13 @@ namespace protean
 		if (!_clawWeapon || !_clawRight || !_clawLeft) {
 			logger::warn("Rending Claws records missing from {}", plugin);
 		}
+		if (const auto& t = j.value("tendril", nlohmann::json::object()); !t.empty()) {
+			_tendril = dh->LookupForm<RE::SpellItem>(t.value("spell", 0u), plugin);
+		}
+		if (!_tendril || _tendril->effects.size() < 2) {
+			logger::warn("Tendril records missing from {}", plugin);
+			_tendril = nullptr;
+		}
 		_perks.clear();
 		for (const auto& [id, local] : j.value("perks", nlohmann::json::object()).items()) {
 			if (auto* perk = dh->LookupForm<RE::BGSPerk>(local.get<RE::FormID>(), plugin)) {

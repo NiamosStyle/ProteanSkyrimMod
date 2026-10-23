@@ -9,6 +9,7 @@
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
+#include "Tendril.h"
 
 namespace protean::Dev
 {
@@ -320,6 +321,8 @@ namespace protean::Dev
 				} else {
 					logger::warn("dev: clawimpact: no impact data set {}", a_arg);
 				}
+			} else if (a_cmd == "tendril") {
+				Tendril::Give();  // the Tendril spell, as the perk teaches it
 			} else if (a_cmd == "tendrilproj" && !a_arg.empty()) {
 				// tendrilproj <field> <value>: tune the Tendril's projectile live (speed, range, fade, radius, relaunch,
 				// lifetime, force, flags, type)

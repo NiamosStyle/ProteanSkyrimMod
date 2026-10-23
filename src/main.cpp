@@ -10,6 +10,7 @@
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
+#include "Tendril.h"
 
 namespace
 {
@@ -18,7 +19,8 @@ namespace
 	class Sink : public RE::BSTEventSink<RE::TESEquipEvent>,
 	             public RE::BSTEventSink<RE::TESSpellCastEvent>,
 	             public RE::BSTEventSink<RE::TESActivateEvent>,
-             public RE::BSTEventSink<RE::TESDeathEvent>
+	             public RE::BSTEventSink<RE::TESDeathEvent>,
+	             public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
 	{
 	public:
 		static Sink* Get()
@@ -54,6 +56,27 @@ namespace
 				auto& reg = protean::Registry::Get();
 				if (spell && (spell == reg.Revert() || spell == reg.Starter() || spell == reg.FacePower() || spell == reg.Evolution() || reg.ByPower(spell->GetFormID()))) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Shift::OnPowerCast(spell); });
+				}
+				if (spell && spell == reg.Tendril()) {
+					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Tendril::OnCast(spell); });
+				}
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		// the Tendril's damage landing on someone: it may pull
+		RE::BSEventNotifyControl ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*) override
+		{
+			auto* tendril = protean::Registry::Get().Tendril();
+			if (a_event && tendril && a_event->caster && a_event->caster->IsPlayerRef() && a_event->target &&
+				a_event->magicEffect == tendril->effects[0]->baseEffect->GetFormID()) {
+				if (auto* actor = a_event->target->As<RE::Actor>()) {
+					const auto id = actor->GetFormID();
+					SKSE::GetTaskInterface()->AddTask([id]() {
+						if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
+							protean::Tendril::OnHit(a);
+						}
+					});
 				}
 			}
 			return RE::BSEventNotifyControl::kContinue;
@@ -101,6 +124,7 @@ namespace
 				events->AddEventSink<RE::TESSpellCastEvent>(Sink::Get());
 				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
 				events->AddEventSink<RE::TESDeathEvent>(Sink::Get());
+				events->AddEventSink<RE::TESMagicEffectApplyEvent>(Sink::Get());
 				protean::Dev::Init();
 				protean::Attacks::Install();
 				protean::Move::Install();

@@ -9,7 +9,7 @@ Flags:
 - NoDuration
 - NoArea
 BaseCost: 0
-MagicSkill: None
+MagicSkill: Alteration
 Archetype:
   MutagenObjectType: MagicEffectArchetype
   Type: Absorb
@@ -22,4 +22,4 @@ SkillUsageMultiplier: 0
 DualCastScale: 1
 Description:
   TargetLanguage: English
-  Value: ''
+  Value: 'Drains <mag> points of Stamina and gives them to you.'

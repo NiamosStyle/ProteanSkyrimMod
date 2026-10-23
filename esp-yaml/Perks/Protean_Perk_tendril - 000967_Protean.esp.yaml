@@ -5,6 +5,6 @@ Name:
   Value: 'Tendril'
 Description:
   TargetLanguage: English
-  Value: 'A whip of flesh lashes out, tearing at health and stamina; you take part of the stamina it drains.'
+  Value: 'Learn Tendril, a whip of flesh cast from either hand: it tears at health, drains Stamina into you, yanks light foes to you and hauls you to large ones. Each lash costs Stamina.'
 NumRanks: 1
 Playable: True

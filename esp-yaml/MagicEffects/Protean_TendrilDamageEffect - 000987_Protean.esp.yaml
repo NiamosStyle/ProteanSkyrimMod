@@ -9,7 +9,7 @@ Flags:
 - NoDuration
 - NoArea
 BaseCost: 0
-MagicSkill: None
+MagicSkill: Alteration
 Archetype:
   MutagenObjectType: MagicEffectArchetype
   Type: ValueModifier
@@ -22,4 +22,4 @@ SkillUsageMultiplier: 0
 DualCastScale: 1
 Description:
   TargetLanguage: English
-  Value: ''
+  Value: 'A whip of flesh lashes out for <mag> points of damage. It yanks a light foe to you, or hauls you to a large one. Costs 25 Stamina; 3 seconds between lashes.'

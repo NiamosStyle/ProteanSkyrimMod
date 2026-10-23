@@ -11,6 +11,7 @@
 #include "Hud.h"
 #include "Move.h"
 #include "Shift.h"
+#include "Tendril.h"
 
 namespace protean::Hooks
 {
@@ -24,6 +25,7 @@ namespace protean::Hooks
 				func(a_this, a_delta);
 				Move::AfterUpdate(a_this);
 				Fly::AfterUpdate(a_this, a_delta);
+				Tendril::OnFrame(a_this, a_delta);
 				Camera::OnFrame(a_this);
 				Attacks::OnFrame();
 				Shift::OnFrame();

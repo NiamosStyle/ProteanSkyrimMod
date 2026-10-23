@@ -71,6 +71,7 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* Evolution() const { return _evolution; }  // opens the perk tree
 		[[nodiscard]] RE::TESObjectWEAP* ClawWeapon() const { return _clawWeapon; }  // Rending Claws
 		[[nodiscard]] RE::TESObjectARMO* ClawPiece(bool a_left) const { return a_left ? _clawLeft : _clawRight; }
+		[[nodiscard]] RE::SpellItem* Tendril() const { return _tendril; }  // its effects: [0] damage health, [1] absorb stamina
 		[[nodiscard]] RE::BGSPerk*   Perk(std::string_view a_id) const;          // a Protean perk by id, or null
 		[[nodiscard]] const std::map<std::string, RE::BGSPerk*, std::less<>>& Perks() const { return _perks; }
 		[[nodiscard]] bool PerkBuilt(std::string_view a_id) const { return _perksBuilt.contains(a_id); }  // else a placeholder
@@ -102,6 +103,7 @@ namespace protean
 		RE::TESObjectWEAP*    _clawWeapon{ nullptr };
 		RE::TESObjectARMO*    _clawRight{ nullptr };
 		RE::TESObjectARMO*    _clawLeft{ nullptr };
+		RE::SpellItem*        _tendril{ nullptr };
 		std::map<std::string, RE::BGSPerk*, std::less<>> _perks;
 		std::set<std::string, std::less<>> _perksBuilt;
 		RE::TESFaction*       _disguise{ nullptr };

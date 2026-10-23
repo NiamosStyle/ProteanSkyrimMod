@@ -16,7 +16,6 @@
   "left": 2436
  },
  "tendril": {
-  "weapon": 2437,
   "spell": 2441,
   "projectile": 2438
  },
@@ -46,6 +45,7 @@
  },
  "perksBuilt": [
   "rending_claws",
+  "tendril",
   "unbound_form"
  ],
  "globals": {

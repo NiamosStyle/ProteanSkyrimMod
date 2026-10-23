@@ -52,8 +52,9 @@ PERKS = {
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
                       0.8, 0.9, ["tendril", "devastator"]),
-    "tendril": (0x967, "Tendril", "A whip of flesh lashes out, tearing at health and stamina; you take part of the "
-                "stamina it drains.", 0.9, 2, []),
+    "tendril": (0x967, "Tendril", "Learn Tendril, a whip of flesh cast from either hand: it tears at health, drains "
+                "Stamina into you, yanks light foes to you and hauls you to large ones. Each lash costs Stamina.",
+                0.9, 2, []),
     "predators_rush": (0x968, "Predator's Rush", "You move faster, sprint faster still, and leap higher.", 0, 1.1,
                        ["preys_flight"]),
     "preys_flight": (0x969, "Prey's Flight", "Jump again in mid-air, and glide.", 0, 2.2, ["devastator"]),
@@ -87,10 +88,12 @@ RANK2 = {
 # armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
 CLAW_WEAPON, CLAW_ARMA_R, CLAW_ARMA_L, CLAW_ARMO_R, CLAW_ARMO_L = 0x980, 0x981, 0x982, 0x983, 0x984
 CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM_RIGHT), 58 (MOD_ARM_LEFT)
-# Tendril (tools/build_tendril.py makes the model): an empty-handed weapon for either hand; its swing fires a hidden
-# spell (damage + absorb stamina) whose projectile is the tendril, sent out like a flame spell's stream (the way
-# Pull Mastery sends its chain; studied 2026-10-23, nothing copied). Protean sets the magnitudes before each throw.
-TENDRIL_WEAPON, TENDRIL_PROJECTILE, TENDRIL_DAMAGE, TENDRIL_DRAIN, TENDRIL_SPELL = 0x985, 0x986, 0x987, 0x988, 0x989
+# Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
+# spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
+# tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
+# copied). Protean sets the magnitudes, charges the stamina, keeps the cooldown and pulls (src/Tendril.cpp).
+# 0x985 was the inventory item until then; not reused.
+TENDRIL_PROJECTILE, TENDRIL_DAMAGE, TENDRIL_DRAIN, TENDRIL_SPELL = 0x986, 0x987, 0x988, 0x989
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -98,7 +101,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
-BUILT = {"unbound_form", "rending_claws"}
+BUILT = {"unbound_form", "rending_claws", "tendril"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -425,18 +428,6 @@ def main():
               "Armature:\n- %s:%s\n" % (fid(arma), PLUGIN))
 
     # ---- Tendril
-    write(os.path.join(y, "Weapons", "Protean_Tendril - %s_%s.yaml" % (fid(TENDRIL_WEAPON), PLUGIN)),
-          "FormKey: %s:%s\nEditorID: Protean_Tendril\n" % (fid(TENDRIL_WEAPON), PLUGIN)
-          + name_block("Tendril")
-          + "EquipmentType: 013F44:Skyrim.esm\n"  # EitherHand: mix and match with the claws (the user)
-          "Description:\n  TargetLanguage: English\n  Value: ''\n"
-          "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
-          "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
-          "BasicStats:\n  Damage: 2\n"  # a close jab barely hurts; the throw is the attack
-          "Data:\n  Speed: 1\n  Reach: 0.7\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
-          "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
-          "Critical:\n  Damage: 1\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
-          "DetectionSoundLevel: Normal\n")
     write(os.path.join(y, "Projectiles", "Protean_TendrilProjectile - %s_%s.yaml" % (fid(TENDRIL_PROJECTILE), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_TendrilProjectile\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
           + "Model:\n  File: Protean\\Tendril\\Tendril.nif\n"
@@ -446,24 +437,29 @@ def main():
           + "Sound: 03F246:Skyrim.esm\n"  # the dragon's tail whip (a placeholder until the sounds are previewed)
           "FadeDuration: 5\nCollisionRadius: 1\nRelaunchInterval: 0.25\nMuzzleFlashModel: ''\nSoundLevel: 1\n")
 
-    def tendril_effect(local, editor_id, title, archetype):
+    def tendril_effect(local, editor_id, title, archetype, desc):
         write(os.path.join(y, "MagicEffects", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
               "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id)
               + name_block(title)
-              + "Flags:\n- Hostile\n- Detrimental\n- NoDuration\n- NoArea\nBaseCost: 0\nMagicSkill: None\n"
+              # Alteration only so the magic menu lists it (with no school it was missing); no skill use comes of it
+              + "Flags:\n- Hostile\n- Detrimental\n- NoDuration\n- NoArea\nBaseCost: 0\nMagicSkill: Alteration\n"
               "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: %s\n  ActorValue: %s\n" % archetype
               + "Projectile: %s:%s\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
               + "ImpactData: 0F23C4:Skyrim.esm\n"  # flesh and blood, like the claws (a placeholder until previewed)
               "CastType: FireAndForget\nTargetType: Aimed\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
-              "Description:\n  TargetLanguage: English\n  Value: ''\n")
+              "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq(desc))
 
-    tendril_effect(TENDRIL_DAMAGE, "Protean_TendrilDamageEffect", "Tendril", ("ValueModifier", "Health"))
-    tendril_effect(TENDRIL_DRAIN, "Protean_TendrilDrainEffect", "Tendril Drain", ("Absorb", "Stamina"))
+    tendril_effect(TENDRIL_DAMAGE, "Protean_TendrilDamageEffect", "Tendril", ("ValueModifier", "Health"),
+                   "A whip of flesh lashes out for <mag> points of damage. It yanks a light foe to you, or hauls you "
+                   "to a large one. Costs %d Stamina; %d seconds between lashes."
+                   % (GLOBALS["Protean_TendrilCost"][1], GLOBALS["Protean_TendrilCooldown"][1]))
+    tendril_effect(TENDRIL_DRAIN, "Protean_TendrilDrainEffect", "Tendril Drain", ("Absorb", "Stamina"),
+                   "Drains <mag> points of Stamina and gives them to you.")
     write(os.path.join(y, "Spells", "Protean_TendrilSpell - %s_%s.yaml" % (fid(TENDRIL_SPELL), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_TendrilSpell\n" % (fid(TENDRIL_SPELL), PLUGIN)
           + name_block("Tendril")
           + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
-          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\n- NoDualCastModification\nType: Spell\nChargeTime: 0\n"
           "CastType: FireAndForget\nTargetType: Aimed\n"
           "Effects:\n"
           + "".join("- BaseEffect: %s:%s\n  Data:\n    Magnitude: %d\n" % (fid(e), PLUGIN, m)
@@ -579,7 +575,7 @@ def main():
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
-                           "tendril": {"weapon": TENDRIL_WEAPON, "spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
+                           "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
