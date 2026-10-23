@@ -68,10 +68,12 @@ def build():
             json.dump({"name": "Protean", "description": "Rending Claws attack animations (%s person)" % ("1st" if person else "3rd"),
                        "author": "Protean"}, f, indent=2)
         with open(os.path.join(dst, "config.json"), "w", encoding="utf-8") as f:
-            json.dump({"name": "Rending Claws", "description": "Claw attacks while the right hand holds Rending Claws.",
+            # either hand: with a claw in the left hand alone, the clawed hand made a fist (the user, 2026-10-23)
+            claw = [{"condition": "IsEquipped", "requiredVersion": "1.0.0.0",
+                     "Form": {"pluginName": "Protean.esp", "formID": CLAW_WEAPON}, "Left hand": left} for left in (False, True)]
+            json.dump({"name": "Rending Claws", "description": "Claw attacks while either hand holds Rending Claws.",
                        "priority": 15100,
-                       "conditions": [{"condition": "IsEquipped", "requiredVersion": "1.0.0.0",
-                                       "Form": {"pluginName": "Protean.esp", "formID": CLAW_WEAPON}, "Left hand": False}]},
+                       "conditions": [{"condition": "OR", "requiredVersion": "1.0.0.0", "Conditions": claw}]},
                       f, indent=2)
         written += [rel + "/config.json", rel + "/RendingClaws/config.json"]
         for name, source in names.items():
