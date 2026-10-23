@@ -40,6 +40,7 @@
   "subtle_carapace_2": 2421
  },
  "perksBuilt": [
+  "rending_claws",
   "unbound_form"
  ],
  "globals": {
@@ -61,7 +62,11 @@
   "Protean_KillBoostPct": 2383,
   "Protean_KillBoostMax": 2384,
   "Protean_PerkPoints": 2385,
-  "Protean_ShowPerkMenu": 2386
+  "Protean_ShowPerkMenu": 2386,
+  "Protean_ClawDamageMin": 2387,
+  "Protean_ClawDamageMax": 2388,
+  "Protean_ClawDamagePerLevel": 2389,
+  "Protean_ClawSwingCost": 2390
  },
  "openInteriorKeywords": [
   {

@@ -1,11 +1,59 @@
 #include "Claws.h"
 
+#include "Evolve.h"
 #include "Registry.h"
 
 namespace protean::Claws
 {
 	namespace
 	{
+		constexpr auto kPerk = "rending_claws";
+
+		float MaxStamina(RE::PlayerCharacter* a_p)
+		{
+			return a_p->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kStamina) +
+			       a_p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kStamina);
+		}
+
+		// the claws hit hardest on a full stamina bar, like a dagger on an empty one; the top rises with level
+		void SetDamage(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_weapon)
+		{
+			const auto& reg = Registry::Get();
+			const float max = MaxStamina(a_p);
+			const float share = max > 0.0f ? std::clamp(a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) / max, 0.0f, 1.0f) : 0.0f;
+			const float low = reg.Dial("Protean_ClawDamageMin", 6.0f);
+			const float high = reg.Dial("Protean_ClawDamageMax", 12.0f) + reg.Dial("Protean_ClawDamagePerLevel", 0.6f) * a_p->GetLevel();
+			a_weapon->attackDamage = static_cast<std::uint16_t>(std::clamp(std::lround(low + (high - low) * share), 0L, 65535L));
+		}
+
+		// every swing of a clawed hand costs stamina
+		class AnimSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override
+			{
+				auto* p = RE::PlayerCharacter::GetSingleton();
+				auto* weapon = Registry::Get().ClawWeapon();
+				if (!a_event || !p || !weapon || a_event->holder != p) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				const std::string_view tag(a_event->tag.c_str());
+				const bool right = tag == "weaponSwing" && p->GetEquippedObject(false) == weapon;
+				const bool left = tag == "weaponLeftSwing" && p->GetEquippedObject(true) == weapon;
+				if (right || left) {
+					const float cost = Registry::Get().Dial("Protean_ClawSwingCost", 5.0f);
+					if (cost > 0.0f) {
+						p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
+					}
+					logger::info("claws: {} swing, stamina -{:.0f}, damage {}", right ? "right" : "left", cost, weapon->attackDamage);
+				} else if (tag.find("wing") != std::string_view::npos && (p->GetEquippedObject(false) == weapon || p->GetEquippedObject(true) == weapon)) {
+					logger::info("claws: other swing event '{}'", tag);  // to learn what unarmed swings send
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+		AnimSink g_anim;
+
 		std::int32_t Count(RE::PlayerCharacter* a_p, RE::TESBoundObject* a_item)
 		{
 			const auto counts = a_p->GetInventoryCounts([a_item](RE::TESBoundObject& a_obj) { return &a_obj == a_item; });
@@ -137,6 +185,10 @@ namespace protean::Claws
 		Wear(p, reg.ClawPiece(false), Slot::kModArmRight, p->GetEquippedObject(false) == weapon, "right");
 		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, p->GetEquippedObject(true) == weapon, "left");
 		HangBoth(p, weapon);
+		// the swing listener: the player's animation graphs are rebuilt on a race change, so add it again
+		// (claws go back on with an equip, which brings us here)
+		p->RemoveAnimationGraphEventSink(&g_anim);
+		p->AddAnimationGraphEventSink(&g_anim);
 	}
 
 	void SetStyle(const std::string& a_style)
@@ -184,6 +236,15 @@ namespace protean::Claws
 		auto* p = RE::PlayerCharacter::GetSingleton();
 		if (auto* weapon = Registry::Get().ClawWeapon(); p && weapon) {
 			HangBoth(p, weapon);
+			SetDamage(p, weapon);
+			// the perk keeps one claw for each hand in the inventory (checked now and then: it counts the inventory)
+			static float sinceGive = 0.0f;
+			if ((sinceGive += 0.25f) >= 2.0f) {
+				sinceGive = 0.0f;
+				if (Evolve::Has(kPerk)) {
+					Give();
+				}
+			}
 		}
 	}
 

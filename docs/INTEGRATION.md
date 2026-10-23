@@ -58,6 +58,10 @@ script or the console can change them at any time.
 | `Protean_KillBoostSeconds` | xx94E | Float | 90 | how long one kill's stamina-regeneration stack lasts (needs the Unbound Form perk) |
 | `Protean_KillBoostPct` | xx94F | Float | 15 | stamina regeneration each stack adds, percentage points of the normal rate |
 | `Protean_KillBoostMax` | xx950 | Float | 0 | most stacks at once; 0 = no limit |
+| `Protean_ClawDamageMin` | xx953 | Float | 6 | Rending Claws damage on an empty stamina bar (it scales with the bar up to the full-bar damage) |
+| `Protean_ClawDamageMax` | xx954 | Float | 12 | Rending Claws damage on a full stamina bar, before the level part |
+| `Protean_ClawDamagePerLevel` | xx955 | Float | 0.6 | Rending Claws full-bar damage added per player level (12 + 0.6 x level: 18 at 10, 42 at 50) |
+| `Protean_ClawSwingCost` | xx956 | Float | 5 | stamina each Rending Claws swing costs; 0 = free |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its

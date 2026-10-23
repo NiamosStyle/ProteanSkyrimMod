@@ -50,7 +50,7 @@ PERKS = {
     "stalker": (0x964, "Stalker", "Your animal forms are harder to detect.", 1.4, 1.9, ["apex"]),
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
-    "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands: a weapon for each hand, at a stamina cost.",
+    "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
                       0.8, 0.9, ["tendril", "devastator"]),
     "tendril": (0x967, "Tendril", "A whip of flesh lashes out, tearing at health and stamina; you take part of the "
                 "stamina it drains.", 0.9, 2, []),
@@ -94,7 +94,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
-BUILT = {"unbound_form"}
+BUILT = {"unbound_form", "rending_claws"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -117,6 +117,10 @@ GLOBALS = {
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
     "Protean_PerkPoints":          (0x951, 0,    "Float", "Protean perk points to spend (kept by Protean; the perk menu spends them)"),
     "Protean_ShowPerkMenu":        (0x952, 0,    "Short", "set to 1 to open the Protean perk menu (Custom Skills Framework clears it)"),
+    "Protean_ClawDamageMin":       (0x953, 6,    "Float", "Rending Claws damage on an empty stamina bar"),
+    "Protean_ClawDamageMax":       (0x954, 12,   "Float", "Rending Claws damage on a full stamina bar, before the level part"),
+    "Protean_ClawDamagePerLevel":  (0x955, 0.6,  "Float", "Rending Claws full-bar damage added per player level"),
+    "Protean_ClawSwingCost":       (0x956, 5,    "Float", "stamina each Rending Claws swing costs; 0 = free"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {

@@ -10,7 +10,7 @@ namespace protean::Claws
 	// shapes named "ProteanClaw|<bone>") hang straight under the finger bones of the 1st-person skeleton.
 
 	void Sync();                    // main thread: make the worn claw pieces match what the hands hold
-	void OnFrame(float a_delta);  // re-hang the 1st-person blades if the game rebuilt the 1st-person body
-	void Give();  // dev: put the weapon in the player's inventory
+	void OnFrame(float a_delta);  // re-hang 1st-person blades the game dropped; damage from stamina; the perk's claws
+	void Give();  // one claw weapon for each hand in the inventory (the perk keeps them there; also dev 'claws')
 	void SetStyle(const std::string& a_style);  // dev: models from Protean\Claws\<style>\ ("default": the usual ones)
 }
