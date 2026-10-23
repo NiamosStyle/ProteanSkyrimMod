@@ -446,6 +446,8 @@ def main():
               "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: %s\n  ActorValue: %s\n" % archetype
               + "Projectile: %s:%s\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
               + "ImpactData: 0F23C4:Skyrim.esm\n"  # flesh and blood, like the claws (a placeholder until previewed)
+              # a sound on every throw, hit or miss (the user: too quiet otherwise); placeholder: the dragon's tail whip
+              + "Sounds:\n- Type: Release\n  Sound: 03F246:Skyrim.esm\n"
               "CastType: FireAndForget\nTargetType: Aimed\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
               "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq(desc))
 

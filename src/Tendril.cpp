@@ -188,7 +188,8 @@ namespace protean::Tendril
 		}
 		if (g_paid > 0.0f && Clock::now() > g_armed) {
 			a_p->AsActorValueOwner()->RestoreActorValue(RE::ActorValue::kStamina, g_paid);
-			logger::info("tendril: missed, {:.0f} stamina back", g_paid);
+			g_cooldown = 0.0f;  // and no wait after a miss (the user)
+			logger::info("tendril: missed, {:.0f} stamina back, no cooldown", g_paid);
 			g_paid = 0.0f;
 		}
 		UpdateHaul(a_p, a_delta);
