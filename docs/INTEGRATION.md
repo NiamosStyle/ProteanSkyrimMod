@@ -56,7 +56,7 @@ script or the console can change them at any time.
 | `Protean_ArmorBonus` | xx94C | Float | 0 | armor rating added while transformed |
 | `Protean_ChangeStaminaCost` | xx94D | Float | 15 | stamina a change into a form the player asks for costs (refused if too tired); 0 = free |
 | `Protean_KillBoostSeconds` | xx94E | Float | 90 | how long one kill's stamina-regeneration stack lasts (needs the Unbound Form perk) |
-| `Protean_KillBoostPct` | xx94F | Float | 5 | stamina regeneration each stack adds, percentage points of the normal rate |
+| `Protean_KillBoostPct` | xx94F | Float | 15 | stamina regeneration each stack adds, percentage points of the normal rate |
 | `Protean_KillBoostMax` | xx950 | Float | 0 | most stacks at once; 0 = no limit |
 
 Notes:

@@ -45,7 +45,7 @@ GLOBALS = {
     "Protean_ArmorBonus":          (0x94C, 0,    "Float", "armor rating added while transformed"),
     "Protean_ChangeStaminaCost":   (0x94D, 15,   "Float", "stamina a player-requested change into a form costs (0 = free)"),
     "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one kill's stamina-regeneration stack lasts"),
-    "Protean_KillBoostPct":        (0x94F, 5,    "Float", "stamina regeneration each stack adds, in percentage points of the normal rate"),
+    "Protean_KillBoostPct":        (0x94F, 15,   "Float", "stamina regeneration each stack adds, in percentage points of the normal rate"),
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).

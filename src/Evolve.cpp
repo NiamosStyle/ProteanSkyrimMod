@@ -54,7 +54,7 @@ namespace protean::Evolve
 		void SyncBoost(RE::PlayerCharacter* a_p)
 		{
 			auto&       s = State::Get();
-			const float want = Has(kUnbound) ? Registry::Get().Dial("Protean_KillBoostPct", 5.0f) * static_cast<float>(s.boosts.size()) : 0.0f;
+			const float want = Has(kUnbound) ? Registry::Get().Dial("Protean_KillBoostPct", 15.0f) * static_cast<float>(s.boosts.size()) : 0.0f;
 			if (std::abs(want - s.boostApplied) > 0.001f) {
 				a_p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kStaminaRateMult,
 					want - s.boostApplied);

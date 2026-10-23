@@ -513,8 +513,6 @@ namespace protean::Shift
 	{
 		// Health keeps its share of the maximum across a change, both ways (never below 1%, so changing back
 		// cannot kill). Maximum = permanent value + temporary modifier; the damage taken sits on top of it.
-		std::chrono::steady_clock::time_point g_watchAfterRevert{};  // diagnostics: vitals for a few seconds after a revert
-
 		float MaxHealth(RE::PlayerCharacter* a_p)
 		{
 			return a_p->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth) +
@@ -722,8 +720,6 @@ namespace protean::Shift
 			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, -1.0f);
 		}
 		SetHealthShare(p, share);
-		g_watchAfterRevert = std::chrono::steady_clock::now();
-		logger::info("revert: z {:.1f}, in midair {}", p->GetPositionZ(), p->IsInMidair());
 
 		RestoreGear(p);
 		TakeOffMarkers(p);
@@ -994,22 +990,6 @@ namespace protean::Shift
 	void OnFrame()
 	{
 		FinishChange();  // every frame: the change lands on time
-		if (auto* wp = Player(); wp && g_watchAfterRevert != std::chrono::steady_clock::time_point{}) {
-			using namespace std::chrono;
-			static auto lastLog = steady_clock::now();
-			const auto  now = steady_clock::now();
-			if (now - g_watchAfterRevert > seconds(5)) {
-				g_watchAfterRevert = {};
-			} else if (now - lastLog >= milliseconds(100) || wp->IsDead()) {
-				lastLog = now;
-				logger::info("after revert {:.2f}s: health {:.1f}, z {:.1f}, midair {}, dead {}",
-					duration<float>(now - g_watchAfterRevert).count(), wp->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth),
-					wp->GetPositionZ(), wp->IsInMidair(), wp->IsDead());
-				if (wp->IsDead()) {
-					g_watchAfterRevert = {};
-				}
-			}
-		}
 		static int frames = 0;
 		if (++frames % 30 != 0) {
 			return;
