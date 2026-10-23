@@ -59,7 +59,8 @@ PERKS = {
     "predators_rush": (0x968, "Predator's Rush", "In your own form you move faster and jump far higher, and a held sprint keeps building speed "
                        "until it is dangerously fast. Sprinting still costs Stamina.", 0, 1.1,
                        ["preys_flight"]),
-    "preys_flight": (0x969, "Prey's Flight", "Jump again in mid-air, and glide.", 0, 2.2, ["devastator"]),
+    "preys_flight": (0x969, "Prey's Flight", ("No fall damage. In human form, jump again in mid-air, hold Jump to glide, and power attack in the air "
+                     "to dive and stagger everyone around your landing."), 0, 2.2, ["devastator"]),
     "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: more armor.", -0.8, 0.9,
                         ["regeneration", "devastator"]),
     "regeneration": (0x96B, "Regeneration", "A toggle: while on, stamina drains and health returns by the same amount.",
@@ -113,7 +114,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
-BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush"}
+BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -159,6 +160,14 @@ GLOBALS = {
     "Protean_RushSprintTop":       (0x979, 3.0,  "Float", "Predator's Rush: the most a held sprint builds to, times a normal sprint"),
     "Protean_RushRampSeconds":     (0x97A, 10,   "Float", "Predator's Rush: seconds of unbroken sprinting to reach the top speed"),
     "Protean_RushJumpHeight":      (0x97B, 400,  "Float", "Predator's Rush: jump height (the game's fJumpHeightMin; 76 normally)"),
+    "Protean_FlightJumpCost":      (0x994, 15,   "Float", "Prey's Flight: stamina the jump in mid-air costs"),
+    "Protean_FlightJumpHeight":    (0x995, 0,    "Float", "Prey's Flight: how high the jump in mid-air lifts you, game units; 0 = as high as your jump"),
+    "Protean_GlideCost":           (0x996, 5,    "Float", "Prey's Flight: stamina per second of gliding"),
+    "Protean_GlideFallSpeed":      (0x997, 300,  "Float", "Prey's Flight: gliding fall speed, game units a second (a fall tops out near 1400)"),
+    "Protean_GlideSpeed":          (0x99B, 900,  "Float", "Prey's Flight: the least speed a glide carries you forward, game units a second"),
+    "Protean_SlamCost":            (0x998, 30,   "Float", "Prey's Flight: stamina the dive costs"),
+    "Protean_SlamRadius":          (0x999, 550,  "Float", "Prey's Flight: the dive's landing staggers everyone this near, game units (550 ~ 8 m)"),
+    "Protean_SlamMinAir":          (0x99A, 1.0,  "Float", "Prey's Flight: seconds in the air before a power attack dives"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {

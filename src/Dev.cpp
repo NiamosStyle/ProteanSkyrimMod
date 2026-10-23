@@ -10,6 +10,7 @@
 #include "Shift.h"
 #include "State.h"
 #include "Tendril.h"
+#include "Flight.h"
 
 namespace protean::Dev
 {
@@ -361,6 +362,8 @@ namespace protean::Dev
 						static_cast<std::uint32_t>(d.types.underlying()), d.speed, d.range, d.fadeOutTime, d.collisionRadius, d.relaunchInterval, d.lifetime, d.force,
 						static_cast<std::uint32_t>(d.flags.underlying()));
 				}
+			} else if (a_cmd == "slamsound" || a_cmd == "slamshake") {
+				Flight::SetLooks(a_cmd == "slamsound" ? "sound" : "shake", a_arg);  // compare the dive's landing live
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");

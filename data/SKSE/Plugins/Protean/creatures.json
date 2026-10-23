@@ -59,6 +59,7 @@
  "perksBuilt": [
   "keen",
   "predators_rush",
+  "preys_flight",
   "rending_claws",
   "tendril",
   "unbound_form"
@@ -101,7 +102,15 @@
   "Protean_RushSprintStart": 2424,
   "Protean_RushSprintTop": 2425,
   "Protean_RushRampSeconds": 2426,
-  "Protean_RushJumpHeight": 2427
+  "Protean_RushJumpHeight": 2427,
+  "Protean_FlightJumpCost": 2452,
+  "Protean_FlightJumpHeight": 2453,
+  "Protean_GlideCost": 2454,
+  "Protean_GlideFallSpeed": 2455,
+  "Protean_GlideSpeed": 2459,
+  "Protean_SlamCost": 2456,
+  "Protean_SlamRadius": 2457,
+  "Protean_SlamMinAir": 2458
  },
  "openInteriorKeywords": [
   {

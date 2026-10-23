@@ -5,6 +5,6 @@ Name:
   Value: 'Prey''s Flight'
 Description:
   TargetLanguage: English
-  Value: 'Jump again in mid-air, and glide.'
+  Value: 'No fall damage. In human form, jump again in mid-air, hold Jump to glide, and power attack in the air to dive and stagger everyone around your landing.'
 NumRanks: 1
 Playable: True

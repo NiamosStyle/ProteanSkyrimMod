@@ -12,6 +12,7 @@
 #include "State.h"
 #include "Tendril.h"
 #include "Keen.h"
+#include "Flight.h"
 #include "Rush.h"
 
 namespace
@@ -138,6 +139,7 @@ namespace
 				protean::Hooks::Install();
 				protean::Keen::Install();
 				protean::Rush::Install();
+				protean::Flight::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
