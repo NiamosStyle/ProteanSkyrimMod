@@ -64,6 +64,13 @@ script or the console can change them at any time.
 | `Protean_ClawSwingCost` | xx956 | Float | 5 | stamina each Rending Claws swing costs; 0 = free |
 | `Protean_ClawDamagePerLevelSq` | xx957 | Float | 0.02 | Rending Claws full-bar damage added per player level squared |
 | `Protean_ClawEmptyShare` | xx958 | Float | 0.3 | Rending Claws damage on an empty stamina bar, as a share of the full-bar damage (between the two it follows the bar) |
+| `Protean_TendrilCost` | xx959 | Float | 25 | stamina each Tendril lash costs (given back on a miss) |
+| `Protean_TendrilCooldown` | xx95A | Float | 3 | seconds between Tendril lashes (none after a miss) |
+| `Protean_TendrilDamageShare` | xx95B | Float | 0.5 | Tendril damage as a share of Rending Claws' full-bar damage |
+| `Protean_TendrilDrain` | xx95C | Float | 20 | stamina a Tendril hit drains and gives the player, before the level part |
+| `Protean_TendrilDrainPerLevel` | xx95D | Float | 0.5 | Tendril drain added per player level |
+| `Protean_TendrilRange` | xx95E | Float | 1500 | reach in game units (~21 m); the projectile record's range is set from it when the plugin is built |
+| `Protean_TendrilPullMult` | xx95F | Float | 1.0 | multiplies both pulls: the yank's force (15) and the haul's speed (2200 units/s) |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -135,6 +142,9 @@ not contiguous.
 | `Protean_WitnessFaction` | xx806 | People who were hostile when they saw the change |
 | `Protean_FacePower` (lesser power) | xx807 | Stolen Face |
 | `Protean_DisguiseFaction` / `Protean_ExposedFaction` | xx808 / xx809 | Face stealing |
+| `Protean_TendrilSpell` (spell) | xx989 | Tendril, taught by its perk (xx967); either hand |
+| `Protean_TendrilDamageEffect` / `Protean_TendrilDrainEffect` | xx987 / xx988 | Damage Health / Absorb Stamina; Protean sets the magnitudes from the player's level |
+| `Protean_TendrilProjectile` | xx986 | The tendril itself (flame-type projectile, model `meshes/Protean/Tendril/Tendril.nif`) |
 
 ## 6. Rules a larger mod should know
 
@@ -144,3 +154,7 @@ not contiguous.
   when changing in and out (never below 1%), so changing back cannot kill.
 - The player's collision body stays human-sized in every form (a vanilla limitation, accepted).
 - The co-save (`Protean`) keeps the state; Protean leaves nothing in the save proper once human again.
+- Tendril pulls: a hit on a Small or Medium race knocks the target off its feet toward the player; on a Large or
+  Extra Large race (trolls, bears, giants, mammoths, grounded dragons) it hauls the player to the target instead,
+  with no fall damage from the haul. Nothing flying, swimming, following the player or essential is pulled
+  (it is still damaged). Its hits are ordinary hostile magic: crime and aggression as for any spell.

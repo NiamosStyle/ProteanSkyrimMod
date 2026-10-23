@@ -22,11 +22,15 @@ Status: **1.0.0**. 35 forms. Built to be part of a larger mod: see `docs/INTEGRA
 - **The world:** people who see you change know it was you; guards attack werewolves and werebears on
   sight, as in vanilla. Big animals cannot go indoors.
 - **Face stealing:** sneak to a corpse to copy its face, and wear it with the Stolen Face power.
+- **Perks (in progress):** feeding earns perk points for a Protean perk tree. Built so far: Unbound Form,
+  Rending Claws (claws in either hand, strongest on a full stamina bar) and Tendril (a whip of flesh cast from
+  either hand: it drains stamina into you, yanks light foes to you and hauls you to large ones).
 
 ## Requirements
 
 Skyrim SE 1.7.104, SKSE64, Address Library, Dawnguard and Dragonborn, Equip Enchantment Fix, the monster
-race crash fix. DevBench is for development only.
+race crash fix, Custom Skills Framework (the perk tree), Open Animation Replacer (the claw animations).
+DevBench is for development only.
 
 ## Credits
 
@@ -36,6 +40,11 @@ This mod is a new build on the ideas of two existing mods. No files or scripts f
   werewolf-style "no inventory or spells, press again to revert" design.
 - **Shapeshift - Hare** by Bobiguy (Nexus SE 142327): unequip-everything handling across armor slots,
   Equip Enchantment Fix use, the craftable spell tome.
+- **Pull Mastery** by xzax (Nexus SE 35134) and **Xyn's Simple Rope Arrow** (Nexus SE 77707): the ideas behind
+  Tendril (a long model fired as a flame-type projectile; a negative knock that pulls the target in). Studied
+  only; Tendril's model, records and code are Protean's own.
+- **Feral** (Nexus SE 34552): showed that the game's own beast-race animations make good claw attacks.
+  Protean takes them from the game's archive, not from Feral.
 
 ## Layout
 

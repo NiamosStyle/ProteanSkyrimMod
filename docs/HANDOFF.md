@@ -71,10 +71,17 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
   of a kind and the 5th/10th/20th give points; named faces will add perk points directly. Co-save v11.
 - Perk tree via Custom Skills Framework (user installs it): `data/SKSE/Plugins/CustomSkills/Protean.json` from the
   PERKS table in `tools/build_plugin.py`; points in `Protean_PerkPoints`; the Evolution power opens it. All 18 perks
-  are placed; only Unbound Form works (Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
+  are placed; Unbound Form, Rending Claws and Tendril work (Unbound Form: Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
   stacking); placeholders are taken back when the menu closes. Changing form costs 15 stamina.
-- Rending Claws: models, weapon and per-hand claw pieces built, not yet tried in game. See `src/Claws.cpp`,
-  `tools/build_claws.py`, `tools/build_claw_anims.py` (claw animations from the game archive).
+- Rending Claws: done and tested in game (damage follows the stamina bar, 5 stamina a swing, werewolf hit
+  sounds, claw animations in either hand via OAR). See `src/Claws.cpp`, `tools/build_claws.py`,
+  `tools/build_claw_anims.py` (claw animations from the game archive).
+- Tendril: done and tested in game. The perk teaches a spell for either hand (the user preferred the casting
+  motion to an inventory item). 25 stamina and a 3 s cooldown; a miss gives both back. A hit yanks light
+  targets in (negative `KnockExplosion`, force 15) or hauls the player to Large/Extra Large races. The throw
+  sound (vampire lord swipe) is played by Protean at the cast: as the projectile's sound it came late. The
+  extra blood art on a hit showed nothing in game (three tried) and was left as it is. See `src/Tendril.cpp`,
+  `tools/build_tendril.py`; dev `tendril`, `tendrilproj`, `tendrilthrow`, `tendrilblood`, `tendrilimpact`.
 
 Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
 DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the

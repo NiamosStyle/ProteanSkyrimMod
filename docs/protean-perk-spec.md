@@ -187,14 +187,15 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Unbound Form
 - **What it does:** Claws are equipped in each hand, like a weapon. Each hand can be unequipped on its own, so you can hold a shield, another weapon, or magic in one hand while the other keeps its claw. Each hand can also hold a different item, such as a claw in one hand and a Tendril in the other.
 - **Stamina:** Costs a base amount of Stamina to use.
-- **Look:** Built on **Feral** as the base, but we'll make our own meshes with larger, fiercer claws.
-- **Status:** Needs research. Choosing Feral is settled. The custom claw meshes and the per-hand equipping are new work.
+- **Look:** Our own natural horn claws. The attack animations are the game's own beast-race claw animations (Feral uses the same ones), so Feral is not needed; Open Animation Replacer is.
+- **Status:** Done and tested in game (2026-10-23): damage follows the stamina bar, 5 Stamina a swing, werewolf hit sounds.
 
 ### Tendril
 - **Requires:** Rending Claws
-- **What it does:** A whip that shoots out and hits the target, damaging both their health and their stamina. The player gains a percentage of the stamina the target loses. The whip should feel whippy and fast, inspired by Prototype.
-- **Equipping:** Can be held in one hand, with a claw in the other.
-- **Status:** Needs invention. We may be able to borrow from Miraak's tendril (from the Dragonborn DLC), which is a possible source for the whip effect. We still need to check how it works, and the stamina transfer is new. A prototype will be needed before we commit to this design.
+- **What it does:** A whip of flesh that shoots out and hits the target, damaging their health and draining their stamina into the player. A light target is yanked off its feet to the player; a large one (troll, bear, giant, mammoth, grounded dragon) hauls the player to it instead.
+- **Equipping:** A spell, taught by the perk, for either hand: a claw in one hand and the Tendril in the other works. (Decided in game: the spell-casting motion is fine, so no inventory item.)
+- **Numbers:** 25 Stamina a lash, 3 seconds between lashes; a miss gives the Stamina back and needs no wait. Damage is half of Rending Claws' full-bar damage; the drain is 20 + half the player's level. Reach about 21 m.
+- **Status:** Done and tested in game (2026-10-23). Built from the ideas of Pull Mastery and Xyn's Rope Arrow (studied, nothing copied), not from Miraak's tendrils, which turned out to be effects rather than a whip. Our own model: sinew skin from Apocrypha's tentacles, a horn barb. Throw sound: the vampire lord's swipe. An extra blood effect on hits did not show and was left out.
 
 ### Predator's Rush
 - **Requires:** Unbound Form
@@ -288,7 +289,7 @@ Each branch gets its own working session. Risky prototypes happen before the bra
 
 ## Open questions for you
 
-1. **Tendril source:** Should we study Miraak's tendril and adapt it, or design the whip from scratch?
+1. ~~**Tendril source:**~~ Answered: our own, built on Pull Mastery's ideas (see Tendril).
 2. **Evolution point name:** Which name do you want? "Biomass," "Vitae," or something from Protean lore?
 3. **Checks in game:** Confirm that Harkon leaves a usable body, and confirm the details of Ildari Sarothril's quest.
 4. **Perk cost curve:** The plan is 1, 2, 3, and so on, with each rank costing its own step. Does that match what you want?
