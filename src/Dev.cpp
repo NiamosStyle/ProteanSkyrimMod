@@ -320,6 +320,30 @@ namespace protean::Dev
 				} else {
 					logger::warn("dev: clawimpact: no impact data set {}", a_arg);
 				}
+			} else if (a_cmd == "tendrilproj" && !a_arg.empty()) {
+				// tendrilproj <field> <value>: tune the Tendril's projectile live (speed, range, fade, radius, relaunch,
+				// lifetime, force, flags, type)
+				auto* proj = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSProjectile>(0x986, "Protean.esp");
+				const auto  space = a_arg.find(' ');
+				const auto  field = a_arg.substr(0, space);
+				const float value = space == std::string::npos ? 0.0f : std::strtof(a_arg.c_str() + space + 1, nullptr);
+				if (!proj) {
+					logger::warn("dev: tendrilproj: no projectile");
+				} else {
+					auto& d = proj->data;
+					if (field == "speed") d.speed = value;
+					else if (field == "range") d.range = value;
+					else if (field == "fade") d.fadeOutTime = value;
+					else if (field == "radius") d.collisionRadius = value;
+					else if (field == "relaunch") d.relaunchInterval = value;
+					else if (field == "lifetime") d.lifetime = value;
+					else if (field == "force") d.force = value;
+					else if (field == "flags") d.flags = static_cast<RE::BGSProjectileData::BGSProjectileFlags>(static_cast<std::uint32_t>(value));
+					else if (field == "type") d.types = static_cast<RE::BGSProjectileData::Type>(static_cast<std::uint32_t>(value));  // 1 missile, 4 beam, 8 flame
+					logger::info("dev: tendril projectile type {} speed {} range {} fade {} radius {} relaunch {} lifetime {} force {} flags {:X}",
+						static_cast<std::uint32_t>(d.types.underlying()), d.speed, d.range, d.fadeOutTime, d.collisionRadius, d.relaunchInterval, d.lifetime, d.force,
+						static_cast<std::uint32_t>(d.flags.underlying()));
+				}
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");
