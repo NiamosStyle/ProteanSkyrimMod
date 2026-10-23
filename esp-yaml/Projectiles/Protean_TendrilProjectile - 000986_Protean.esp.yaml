@@ -6,11 +6,11 @@ Flags:
 - Supersonic
 - PassThroughSmallTransparent
 Type: Flame
-Speed: 6000
+Speed: 3600
 Range: 1500
 Sound: 03F246:Skyrim.esm
-FadeDuration: 0.5
-CollisionRadius: 6
+FadeDuration: 5
+CollisionRadius: 1
 RelaunchInterval: 0.25
 MuzzleFlashModel: ''
 SoundLevel: 1

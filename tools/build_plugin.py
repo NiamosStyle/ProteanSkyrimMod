@@ -441,9 +441,10 @@ def main():
           "FormKey: %s:%s\nEditorID: Protean_TendrilProjectile\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
           + "Model:\n  File: Protean\\Tendril\\Tendril.nif\n"
           "Flags:\n- Supersonic\n- PassThroughSmallTransparent\n"
-          "Type: Flame\nSpeed: 6000\nRange: %d\n" % GLOBALS["Protean_TendrilRange"][1]
+          # speed and fade as Pull Mastery's chain: at 6000 and a 0.5 s fade the tendril hardly showed (user, 2026-10-23)
+          "Type: Flame\nSpeed: 3600\nRange: %d\n" % GLOBALS["Protean_TendrilRange"][1]
           + "Sound: 03F246:Skyrim.esm\n"  # the dragon's tail whip (a placeholder until the sounds are previewed)
-          "FadeDuration: 0.5\nCollisionRadius: 6\nRelaunchInterval: 0.25\nMuzzleFlashModel: ''\nSoundLevel: 1\n")
+          "FadeDuration: 5\nCollisionRadius: 1\nRelaunchInterval: 0.25\nMuzzleFlashModel: ''\nSoundLevel: 1\n")
 
     def tendril_effect(local, editor_id, title, archetype):
         write(os.path.join(y, "MagicEffects", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
