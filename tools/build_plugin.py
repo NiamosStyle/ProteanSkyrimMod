@@ -117,10 +117,15 @@ GLOBALS = {
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
     "Protean_PerkPoints":          (0x951, 0,    "Float", "Protean perk points to spend (kept by Protean; the perk menu spends them)"),
     "Protean_ShowPerkMenu":        (0x952, 0,    "Short", "set to 1 to open the Protean perk menu (Custom Skills Framework clears it)"),
-    "Protean_ClawDamageMin":       (0x953, 6,    "Float", "Rending Claws damage on an empty stamina bar"),
-    "Protean_ClawDamageMax":       (0x954, 12,   "Float", "Rending Claws damage on a full stamina bar, before the level part"),
-    "Protean_ClawDamagePerLevel":  (0x955, 0.6,  "Float", "Rending Claws full-bar damage added per player level"),
+    # Rending Claws damage on a full stamina bar = Max + PerLevel x level + PerLevelSq x level^2 (about 25% over a
+    # one-handed specialist's sword: 11 at level 1, 19 at 10, 49 at 30, 95 at 50); on an empty bar EmptyShare of that,
+    # never below Min; in between it follows the bar
+    "Protean_ClawDamageMin":       (0x953, 6,    "Float", "Rending Claws damage never goes below this"),
+    "Protean_ClawDamageMax":       (0x954, 10,   "Float", "Rending Claws full-bar damage before the level parts"),
+    "Protean_ClawDamagePerLevel":  (0x955, 0.7,  "Float", "Rending Claws full-bar damage added per player level"),
     "Protean_ClawSwingCost":       (0x956, 5,    "Float", "stamina each Rending Claws swing costs; 0 = free"),
+    "Protean_ClawDamagePerLevelSq": (0x957, 0.02, "Float", "Rending Claws full-bar damage added per player level squared"),
+    "Protean_ClawEmptyShare":      (0x958, 0.3,  "Float", "Rending Claws damage on an empty stamina bar, as a share of the full-bar damage"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {

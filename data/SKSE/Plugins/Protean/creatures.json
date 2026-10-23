@@ -66,7 +66,9 @@
   "Protean_ClawDamageMin": 2387,
   "Protean_ClawDamageMax": 2388,
   "Protean_ClawDamagePerLevel": 2389,
-  "Protean_ClawSwingCost": 2390
+  "Protean_ClawSwingCost": 2390,
+  "Protean_ClawDamagePerLevelSq": 2391,
+  "Protean_ClawEmptyShare": 2392
  },
  "openInteriorKeywords": [
   {

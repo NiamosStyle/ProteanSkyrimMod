@@ -15,14 +15,18 @@ namespace protean::Claws
 			       a_p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kStamina);
 		}
 
-		// the claws hit hardest on a full stamina bar, like a dagger on an empty one; the top rises with level
+		// the claws hit hardest on a full stamina bar and about a third as hard on an empty one; the top rises with level
+		// faster and faster, the way a specialist's weapon does (skill, perks and smithing multiply)
 		void SetDamage(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_weapon)
 		{
 			const auto& reg = Registry::Get();
 			const float max = MaxStamina(a_p);
 			const float share = max > 0.0f ? std::clamp(a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) / max, 0.0f, 1.0f) : 0.0f;
-			const float low = reg.Dial("Protean_ClawDamageMin", 6.0f);
-			const float high = reg.Dial("Protean_ClawDamageMax", 12.0f) + reg.Dial("Protean_ClawDamagePerLevel", 0.6f) * a_p->GetLevel();
+			const float level = static_cast<float>(a_p->GetLevel());
+			const float high = reg.Dial("Protean_ClawDamageMax", 10.0f) + reg.Dial("Protean_ClawDamagePerLevel", 0.7f) * level +
+			                   reg.Dial("Protean_ClawDamagePerLevelSq", 0.02f) * level * level;
+			const float minimum = reg.Dial("Protean_ClawDamageMin", 6.0f);
+			const float low = std::max(minimum, high * reg.Dial("Protean_ClawEmptyShare", 0.3f));
 			a_weapon->attackDamage = static_cast<std::uint16_t>(std::clamp(std::lround(low + (high - low) * share), 0L, 65535L));
 		}
 
