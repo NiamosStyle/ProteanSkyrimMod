@@ -81,7 +81,7 @@ def inverse(t):
     s = 1.0 / t.scale
     tr = [-(rt[i][0] * t.translation[0] + rt[i][1] * t.translation[1] + rt[i][2] * t.translation[2]) * s for i in range(3)]
     out = TransformBuf()
-    out.store(tr, [[rt[i][j] * s for j in range(3)] for i in range(3)], [s, s, s])
+    out.store(tr, rt, [s, s, s])  # the scale goes in once (female hand bones are scaled 0.85)
     return out
 
 
