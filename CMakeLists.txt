@@ -27,6 +27,7 @@ add_commonlibsse_plugin(
 		src/main.cpp
 		src/Attacks.cpp
 		src/Camera.cpp
+		src/Claws.cpp
 		src/Dev.cpp
 		src/Evolve.cpp
 		src/Face.cpp
@@ -53,6 +54,7 @@ if(PROTEAN_DEPLOY_DIR)
 		COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${PROTEAN_DEPLOY_DIR}/SKSE/Plugins/"
 		COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/Protean.esp" "${PROTEAN_DEPLOY_DIR}/"
 		COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data/SKSE" "${PROTEAN_DEPLOY_DIR}/SKSE"
+		COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data/meshes" "${PROTEAN_DEPLOY_DIR}/meshes"
 		COMMENT "Deploying Protean to ${PROTEAN_DEPLOY_DIR}"
 		VERBATIM
 	)

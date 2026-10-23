@@ -83,6 +83,16 @@ RANK2 = {
     "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
     "subtle_carapace": (0x975, "The carapace hardens further: more armor."),
 }
+# Rending Claws (tools/build_claws.py makes the models): an empty-handed weapon for either hand, and one hidden
+# armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
+CLAW_WEAPON, CLAW_ARMA_R, CLAW_ARMA_L, CLAW_ARMO_R, CLAW_ARMO_L = 0x980, 0x981, 0x982, 0x983, 0x984
+CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM_RIGHT), 58 (MOD_ARM_LEFT)
+# the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
+CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
+              "013742:Skyrim.esm", "08883D:Skyrim.esm",
+              "013743:Skyrim.esm", "088840:Skyrim.esm", "013744:Skyrim.esm", "088844:Skyrim.esm", "013745:Skyrim.esm",
+              "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
+              "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -361,6 +371,35 @@ def main():
     for pid, (local, desc) in RANK2.items():
         perk(pid + "_2", local, PERKS[pid][1], desc)
 
+    # ---- Rending Claws
+    write(os.path.join(y, "Weapons", "Protean_RendingClaws - %s_%s.yaml" % (fid(CLAW_WEAPON), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_RendingClaws\n" % (fid(CLAW_WEAPON), PLUGIN)
+          + name_block("Rending Claws")
+          + "EquipmentType: 013F45:Skyrim.esm\n"
+          "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "ImpactDataSet: 0C190F:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
+          "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
+          "BasicStats:\n  Damage: 6\n"
+          "Data:\n  Speed: 1.3\n  Reach: 0.7\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
+          "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
+          "Critical:\n  Damage: 3\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
+          "DetectionSoundLevel: Normal\n")
+    for side, arma, armo in (("R", CLAW_ARMA_R, CLAW_ARMO_R), ("L", CLAW_ARMA_L, CLAW_ARMO_L)):
+        template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
+                "Race: 000019:Skyrim.esm\n" % CLAW_SLOT_FLAG[side])
+        write(os.path.join(y, "ArmorAddons", "Protean_ClawsAA_%s - %s_%s.yaml" % (side, fid(arma), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_ClawsAA_%s\n" % (fid(arma), PLUGIN, side) + template
+              + "Priority:\n  Male: 10\n  Female: 10\n"
+              "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
+              "WorldModel:\n  Male:\n    File: Protean\\Claws\\Claws_%s_M.nif\n"
+              "  Female:\n    File: Protean\\Claws\\Claws_%s_F.nif\n" % (side, side)
+              + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
+        write(os.path.join(y, "Armors", "Protean_Claws_%s - %s_%s.yaml" % (side, fid(armo), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_Claws_%s\n" % (fid(armo), PLUGIN, side)
+              + "MajorFlags:\n- NonPlayable\n" + template
+              + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+              "Armature:\n- %s:%s\n" % (fid(arma), PLUGIN))
+
     # The tree for Custom Skills Framework (Exit-9B, MIT): SKSE/Plugins/CustomSkills/Protean.json. No skill level, so it
     # looks like the vanilla beast trees; the points are Protean_PerkPoints, which Protean keeps up to date.
     def ref(local):
@@ -470,6 +509,7 @@ def main():
                            "tome": TOME, "beastFaction": BEAST_FACTION, "witnessFaction": WITNESS_FACTION,
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
                            "evolution": EVOLUTION,
+                           "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},

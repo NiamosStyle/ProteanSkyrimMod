@@ -82,6 +82,14 @@ namespace protean
 			logger::warn("face stealing records missing from {}: regenerate the plugin", plugin);
 		}
 		_evolution = dh->LookupForm<RE::SpellItem>(j.value("evolution", 0u), plugin);
+		if (const auto& c = j.value("claws", nlohmann::json::object()); !c.empty()) {
+			_clawWeapon = dh->LookupForm<RE::TESObjectWEAP>(c.value("weapon", 0u), plugin);
+			_clawRight = dh->LookupForm<RE::TESObjectARMO>(c.value("right", 0u), plugin);
+			_clawLeft = dh->LookupForm<RE::TESObjectARMO>(c.value("left", 0u), plugin);
+		}
+		if (!_clawWeapon || !_clawRight || !_clawLeft) {
+			logger::warn("Rending Claws records missing from {}", plugin);
+		}
 		_perks.clear();
 		for (const auto& [id, local] : j.value("perks", nlohmann::json::object()).items()) {
 			if (auto* perk = dh->LookupForm<RE::BGSPerk>(local.get<RE::FormID>(), plugin)) {

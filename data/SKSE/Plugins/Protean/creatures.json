@@ -10,6 +10,11 @@
  "disguiseFaction": 2056,
  "exposedFaction": 2057,
  "evolution": 2059,
+ "claws": {
+  "weapon": 2432,
+  "right": 2435,
+  "left": 2436
+ },
  "perks": {
   "unbound_form": 2400,
   "keen": 2401,

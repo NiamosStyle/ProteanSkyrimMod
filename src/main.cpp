@@ -1,5 +1,6 @@
 #include "Attacks.h"
 #include "Camera.h"
+#include "Claws.h"
 #include "Dev.h"
 #include "Evolve.h"
 #include "Face.h"
@@ -30,8 +31,16 @@ namespace
 		RE::BSEventNotifyControl ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>*) override
 		{
 			if (a_event && a_event->equipped && a_event->actor && a_event->actor->IsPlayerRef()) {
-				if (const auto* c = protean::Registry::Get().ByHeart(a_event->baseObject)) {
+				auto& reg = protean::Registry::Get();
+				if (const auto* c = reg.ByHeart(a_event->baseObject)) {
 					SKSE::GetTaskInterface()->AddTask([c]() { protean::Shift::Learn(*c); });
+				}
+			}
+			// the claw weapon going into or out of a hand (equipped or not): the claw pieces follow
+			if (a_event && a_event->actor && a_event->actor->IsPlayerRef()) {
+				auto& reg = protean::Registry::Get();
+				if (reg.ClawWeapon() && a_event->baseObject == reg.ClawWeapon()->GetFormID()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Claws::Sync(); });
 				}
 			}
 			return RE::BSEventNotifyControl::kContinue;
@@ -117,6 +126,7 @@ namespace
 			if (g_ready) {
 				protean::Face::OnGameLoaded();
 				protean::Shift::OnGameLoaded();
+				protean::Claws::Sync();
 			}
 			break;
 		default:

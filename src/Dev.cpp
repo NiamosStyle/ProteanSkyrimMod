@@ -1,6 +1,7 @@
 #include "Dev.h"
 
 #include "Attacks.h"
+#include "Claws.h"
 #include "Evolve.h"
 #include "Face.h"
 #include "Fly.h"
@@ -272,6 +273,9 @@ namespace protean::Dev
 			} else if (a_cmd == "killboost") {
 				Evolve::OnKill();  // as if the player had killed something
 				Evolve::Dump();
+			} else if (a_cmd == "claws") {
+				Claws::Give();  // the Rending Claws weapon, one per hand
+				logger::info("dev: claw weapons given");
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");
