@@ -4,15 +4,23 @@ animations into the installed Protean mod folder under an Open Animation Replace
   python -I tools/install_claw_anims.py "<MO2 mod folder of Protean>"
 
 The animation files are Feral's (restored from the game's own data), so they are not kept in this project or packed
-by tools/package.py. Before a release, take them from the game archives instead (needs BSArch).
+by tools/package.py. Before a release, take them from the game archives instead (tools/bsa.py reads them).
+Feral's 1st-person set has no power attacks forward, so those come from the game's own beast-race (Khajiit and
+Argonian) claw animations, renamed to the hand-to-hand names OAR replaces.
 """
 import json
 import os
 import shutil
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bsa  # noqa: E402
+
 FERAL = "C:/Users/user/AppData/Local/ModOrganizer/Skyrim Special Edition/mods/Feral/meshes/actors/character"
 CLAW_WEAPON = "980"  # Protean.esp, tools/build_plugin.py CLAW_WEAPON
+ANIMATIONS = "C:/Games/steamapps/common/Skyrim Special Edition/Data/Skyrim - Animations.bsa"
+FROM_GAME_1ST = {"h2h_attackpowerforwardlefthand.hkx": "beasth2h_attackpowerforwardlefthand.hkx",
+                 "h2h_attackpowerforwardrighthand.hkx": "beasth2h_attackpowerforwardrighthand.hkx"}
 
 mod = sys.argv[1]
 for person in ("", "_1stperson/"):
@@ -33,5 +41,10 @@ for person in ("", "_1stperson/"):
     for name in os.listdir(src):
         if name.lower().endswith(".hkx"):
             shutil.copy2(os.path.join(src, name), os.path.join(dst, name))
+            n += 1
+    if person:
+        for name, source in FROM_GAME_1ST.items():
+            with open(os.path.join(dst, name), "wb") as f:
+                f.write(bsa.read(ANIMATIONS, "meshes/actors/character/_1stperson/animations/" + source))
             n += 1
     print("copied", n, "animations to", dst)
