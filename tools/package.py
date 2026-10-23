@@ -3,7 +3,8 @@
   python -I tools/package.py [version]        -> dist/Protean-<version>.zip
 
 Contents: Protean.esp, SKSE/Plugins/Protean.dll, SKSE/Plugins/Protean.ini (Dev off), SKSE/Plugins/Protean/creatures.json,
-SKSE/Plugins/CustomSkills/Protean.json (the perk tree; needs Custom Skills Framework).
+SKSE/Plugins/CustomSkills/Protean.json (the perk tree; needs Custom Skills Framework), the Rending Claws models and
+attack animations (the animations need Open Animation Replacer).
 Run tools/build_plugin.py (with the creatures you want enabled) and tools/build.bat first.
 """
 import os
@@ -25,6 +26,11 @@ files = {
 for name in ("Claws_R_M", "Claws_L_M", "Claws_R_F", "Claws_L_F",
              "Claws1st_R_M", "Claws1st_L_M", "Claws1st_R_F", "Claws1st_L_F"):
     files["meshes/Protean/Claws/%s.nif" % name] = os.path.join(ROOT, "data", "meshes", "Protean", "Claws", name + ".nif")
+# the claw attack animations (Open Animation Replacer; from the game's archive by tools/build_claw_anims.py)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_claw_anims  # noqa: E402
+for rel in build_claw_anims.build():
+    files[rel] = os.path.join(ROOT, "data", rel)
 for name, path in files.items():
     if not os.path.isfile(path):
         sys.exit("missing " + path)

@@ -74,7 +74,7 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
   are placed; only Unbound Form works (Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
   stacking); placeholders are taken back when the menu closes. Changing form costs 15 stamina.
 - Rending Claws: models, weapon and per-hand claw pieces built, not yet tried in game. See `src/Claws.cpp`,
-  `tools/build_claws.py`, `tools/install_claw_anims.py` (dev-only animations from Feral).
+  `tools/build_claws.py`, `tools/build_claw_anims.py` (claw animations from the game archive).
 
 Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
 DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the
