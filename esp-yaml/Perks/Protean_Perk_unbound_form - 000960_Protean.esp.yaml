@@ -1,0 +1,10 @@
+FormKey: 000960:Protean.esp
+EditorID: Protean_Perk_unbound_form
+Name:
+  TargetLanguage: English
+  Value: 'Unbound Form'
+Description:
+  TargetLanguage: English
+  Value: 'You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill speeds your stamina''s recovery for a while (the boosts stack).'
+NumRanks: 1
+Playable: True

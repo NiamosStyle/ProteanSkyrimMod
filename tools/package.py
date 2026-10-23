@@ -2,7 +2,8 @@
 
   python -I tools/package.py [version]        -> dist/Protean-<version>.zip
 
-Contents: Protean.esp, SKSE/Plugins/Protean.dll, SKSE/Plugins/Protean.ini (Dev off), SKSE/Plugins/Protean/creatures.json.
+Contents: Protean.esp, SKSE/Plugins/Protean.dll, SKSE/Plugins/Protean.ini (Dev off), SKSE/Plugins/Protean/creatures.json,
+SKSE/Plugins/CustomSkills/Protean.json (the perk tree; needs Custom Skills Framework).
 Run tools/build_plugin.py (with the creatures you want enabled) and tools/build.bat first.
 """
 import os
@@ -17,6 +18,8 @@ files = {
     "Protean.esp": os.path.join(ROOT, "data", "Protean.esp"),
     "SKSE/Plugins/Protean.dll": dll,
     "SKSE/Plugins/Protean/creatures.json": os.path.join(ROOT, "data", "SKSE", "Plugins", "Protean", "creatures.json"),
+    # the perk tree, shown by Custom Skills Framework (a requirement since the perk tree)
+    "SKSE/Plugins/CustomSkills/Protean.json": os.path.join(ROOT, "data", "SKSE", "Plugins", "CustomSkills", "Protean.json"),
 }
 for name, path in files.items():
     if not os.path.isfile(path):

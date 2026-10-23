@@ -9,6 +9,10 @@
  "facePower": 2055,
  "disguiseFaction": 2056,
  "exposedFaction": 2057,
+ "evolution": 2059,
+ "perks": {
+  "unbound_form": 2400
+ },
  "globals": {
   "Protean_ActiveForm": 2368,
   "Protean_HealthBonusPct": 2369,
@@ -26,7 +30,9 @@
   "Protean_ChangeStaminaCost": 2381,
   "Protean_KillBoostSeconds": 2382,
   "Protean_KillBoostPct": 2383,
-  "Protean_KillBoostMax": 2384
+  "Protean_KillBoostMax": 2384,
+  "Protean_PerkPoints": 2385,
+  "Protean_ShowPerkMenu": 2386
  },
  "openInteriorKeywords": [
   {

@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 10;  // 3 to 9 are still read
+		constexpr std::uint32_t kVersion = 11;  // 3 to 10 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -203,12 +203,10 @@ namespace protean
 			Put(a, s.damageBonus);
 			Put(a, s.evoTotal);
 			Put(a, s.facePoints);
-			for (auto* m : { &s.feeds, &s.perks }) {
-				Put<std::uint32_t>(a, static_cast<std::uint32_t>(m->size()));
-				for (const auto& [id, n] : *m) {
-					PutStr(a, id);
-					Put(a, n);
-				}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.feeds.size()));
+			for (const auto& [id, n] : s.feeds) {
+				PutStr(a, id);
+				Put(a, n);
 			}
 			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.boosts.size()));
 			for (float t : s.boosts) {
@@ -339,17 +337,21 @@ namespace protean
 					if (version >= 10) {
 						Get(a, s.evoTotal);
 						Get(a, s.facePoints);
-						for (auto* m : { &s.feeds, &s.perks }) {
-							if (!Get(a, n) || n > 10000) {
-								return;
-							}
-							for (std::uint32_t i = 0; i < n; ++i) {
-								std::string  id;
-								std::uint32_t v = 0;
-								if (!GetStr(a, id) || !Get(a, v)) {
+						// v10 also kept a list of bought perks; since v11 they are the player's real perks
+						std::map<std::string, std::uint32_t> oldPerks;
+						for (auto* m : { &s.feeds, &oldPerks }) {
+							if (version < 11 || m == &s.feeds) {
+								if (!Get(a, n) || n > 10000) {
 									return;
 								}
-								(*m)[id] = v;
+								for (std::uint32_t i = 0; i < n; ++i) {
+									std::string   id;
+									std::uint32_t v = 0;
+									if (!GetStr(a, id) || !Get(a, v)) {
+										return;
+									}
+									(*m)[id] = v;
+								}
 							}
 						}
 						if (!Get(a, n) || n > 10000) {

@@ -9,35 +9,20 @@ namespace protean::Evolve
 	{
 		constexpr auto kUnbound = "unbound_form";
 
-		// the perks that exist so far: id -> (name, ranks)
-		struct Perk
-		{
-			const char*   id;
-			const char*   name;
-			std::uint32_t ranks;
-		};
-		constexpr std::array kPerks{ Perk{ kUnbound, "Unbound Form", 1 } };
-
-		const Perk* Find(std::string_view a_id)
-		{
-			for (const auto& p : kPerks) {
-				if (a_id == p.id) {
-					return &p;
-				}
-			}
-			return nullptr;
-		}
-
+		// Protean perks the player has (each record is one rank)
 		std::uint32_t Bought()
 		{
+			auto*         p = RE::PlayerCharacter::GetSingleton();
 			std::uint32_t n = 0;
-			for (const auto& [id, rank] : State::Get().perks) {
-				n += rank;
+			for (const auto& [id, perk] : Registry::Get().Perks()) {
+				if (p && p->HasPerk(perk)) {
+					++n;
+				}
 			}
 			return n;
 		}
 
-		// Disease immunity is a temporary modifier on the resistance, taken once; the state remembers it was given.
+		// Disease immunity is a temporary modifier on the resistance; the state remembers how much is on.
 		void SyncDisease(RE::PlayerCharacter* a_p)
 		{
 			auto&       s = State::Get();
@@ -59,6 +44,30 @@ namespace protean::Evolve
 				a_p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kStaminaRateMult,
 					want - s.boostApplied);
 				s.boostApplied = want;
+			}
+		}
+
+		// Everything that follows from the points and the perks, however they changed (feeding, the menu, a load):
+		// the points left in the menu's global, Unbound Form's gifts, and the Evolution power once there is
+		// anything to spend or show.
+		void Sync()
+		{
+			auto* p = RE::PlayerCharacter::GetSingleton();
+			if (!p) {
+				return;
+			}
+			auto& reg = Registry::Get();
+			if (const auto left = static_cast<float>(PointsAvailable()); reg.Dial("Protean_PerkPoints", -1.0f) != left) {
+				reg.SetGlobal("Protean_PerkPoints", left);
+			}
+			if (Has(kUnbound) && !p->HasSpell(reg.Starter())) {
+				p->AddSpell(reg.Starter());  // the Instinct power: shapeshifting, and hearts in corpses
+			}
+			SyncDisease(p);
+			const auto& s = State::Get();
+			if (auto* evo = reg.Evolution(); evo && !p->HasSpell(evo) && (s.evoTotal > 0 || s.facePoints > 0 || Bought() > 0)) {
+				p->AddSpell(evo);
+				logger::info("evolution: the Evolution power given");
 			}
 		}
 	}
@@ -89,6 +98,7 @@ namespace protean::Evolve
 		const std::uint32_t after = PointsEarned(s.evoTotal);
 		logger::info("evolution: +{} ({}), total {}, perk points earned {}, available {}", a_points, a_why, s.evoTotal, after,
 			PointsAvailable());
+		Sync();
 		if (after > before) {
 			Shift::Notify(std::format("You have a new Protean perk point ({} available).", PointsAvailable()));
 		}
@@ -99,6 +109,7 @@ namespace protean::Evolve
 		auto& s = State::Get();
 		++s.facePoints;
 		logger::info("evolution: +1 perk point from a face ({}), available {}", a_why, PointsAvailable());
+		Sync();
 		Shift::Notify(std::format("You have a new Protean perk point ({} available).", PointsAvailable()));
 	}
 
@@ -117,41 +128,38 @@ namespace protean::Evolve
 
 	bool Has(std::string_view a_perk)
 	{
-		const auto& perks = State::Get().perks;
-		const auto  it = perks.find(std::string(a_perk));
-		return it != perks.end() && it->second > 0;
+		auto*       p = RE::PlayerCharacter::GetSingleton();
+		auto* perk = Registry::Get().Perk(a_perk);
+		return p && perk && p->HasPerk(perk);
 	}
 
 	bool Buy(std::string_view a_perk)
 	{
-		auto*       p = RE::PlayerCharacter::GetSingleton();
-		auto&       s = State::Get();
-		const auto* perk = Find(a_perk);
-		if (!perk) {
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		auto* perk = Registry::Get().Perk(a_perk);
+		if (!p || !perk) {
 			Shift::Notify("There is no such perk.");
 			return false;
 		}
-		const auto current = s.perks.find(perk->id);
-		if (current != s.perks.end() && current->second >= perk->ranks) {
-			Shift::Notify(std::format("You already have all of {}.", perk->name));
+		if (p->HasPerk(perk)) {
+			Shift::Notify(std::format("You already have {}.", perk->GetName()));
 			return false;
 		}
 		if (PointsAvailable() == 0) {
 			Shift::Notify("You have no perk points.");
 			return false;
 		}
-		const std::uint32_t rank = ++s.perks[perk->id];
-		logger::info("perk bought: '{}' rank {}, points left {}", perk->id, rank, PointsAvailable());
-		Shift::Notify(std::format("You learned {}.", perk->name));
-		if (a_perk == kUnbound) {
-			// it opens shapeshifting: the Instinct power, which also makes hearts drop from corpses
-			auto& reg = Registry::Get();
-			if (!p->HasSpell(reg.Starter())) {
-				p->AddSpell(reg.Starter());
-			}
-			SyncDisease(p);
-		}
+		p->AddPerk(perk);
+		logger::info("perk bought (dev): '{}', points left {}", a_perk, PointsAvailable());
+		Sync();
 		return true;
+	}
+
+	void OpenMenu()
+	{
+		Sync();  // the menu shows Protean_PerkPoints: make it current first
+		Registry::Get().SetGlobal("Protean_ShowPerkMenu", 1.0f);  // Custom Skills Framework opens the menu and clears it
+		logger::info("evolution: perk menu requested, {} point(s) to spend", PointsAvailable());
 	}
 
 	std::uint32_t BoostStacks()
@@ -181,7 +189,16 @@ namespace protean::Evolve
 	{
 		auto* p = RE::PlayerCharacter::GetSingleton();
 		auto& s = State::Get();
-		if (!p || (s.boosts.empty() && s.boostApplied == 0.0f)) {
+		if (!p) {
+			return;
+		}
+		// a perk bought in the menu shows up here: a few times a second is plenty
+		static float sinceSync = 0.0f;
+		if ((sinceSync += a_delta) >= 0.25f) {
+			sinceSync = 0.0f;
+			Sync();
+		}
+		if (s.boosts.empty() && s.boostApplied == 0.0f) {
 			return;
 		}
 		for (auto& t : s.boosts) {
@@ -203,7 +220,7 @@ namespace protean::Evolve
 		}
 		// A save made with a boost on keeps the temporary modifier in the save proper and the stacks in the co-save,
 		// so the two agree. Just make the modifiers match the stacks.
-		SyncDisease(p);
+		Sync();
 		SyncBoost(p);
 	}
 
@@ -211,16 +228,16 @@ namespace protean::Evolve
 	{
 		const auto& s = State::Get();
 		std::string perks;
-		for (const auto& [id, rank] : s.perks) {
-			perks += std::format(" {}={}", id, rank);
+		for (const auto& [id, perk] : Registry::Get().Perks()) {
+			perks += std::format(" {}={}", id, Has(id) ? 1 : 0);
 		}
 		std::string feeds;
 		for (const auto& [id, n] : s.feeds) {
 			feeds += std::format(" {}={}", id, n);
 		}
-		logger::info("dev: evolution total {} earned {} face {} bought {} available {}; perks{}; feeds{}; boost stacks {} applied {:.0f}; "
-		             "disease {:.0f}",
-			s.evoTotal, PointsEarned(s.evoTotal), s.facePoints, Bought(), PointsAvailable(), perks, feeds, s.boosts.size(), s.boostApplied,
-			s.diseaseApplied);
+		logger::info("dev: evolution total {} earned {} face {} bought {} available {} (global {}); perks{}; feeds{}; boost stacks {} "
+		             "applied {:.0f}; disease {:.0f}",
+			s.evoTotal, PointsEarned(s.evoTotal), s.facePoints, Bought(), PointsAvailable(), Registry::Get().Dial("Protean_PerkPoints", -1.0f),
+			perks, feeds, s.boosts.size(), s.boostApplied, s.diseaseApplied);
 	}
 }

@@ -17,8 +17,11 @@ namespace protean::Evolve
 	void Add(std::uint32_t a_points, std::string_view a_why);
 	void AddFacePoint(std::string_view a_why);
 
-	[[nodiscard]] bool Has(std::string_view a_perk);  // bought at least once
-	bool               Buy(std::string_view a_perk);  // spends one perk point; says why when it cannot
+	// The perks are real perk records in Protean.esp, bought in the Custom Skills Framework menu (the Evolution power).
+	// The player's perk list is the record of what was bought; Protean_PerkPoints is kept at the points left.
+	[[nodiscard]] bool Has(std::string_view a_perk);  // the player has this perk
+	bool               Buy(std::string_view a_perk);  // dev: spends one perk point without the menu
+	void               OpenMenu();                    // the Evolution power was cast
 
 	// The kill boost (Unbound Form): each kill adds a stack of stamina regeneration that lasts Protean_KillBoostSeconds.
 	void                        OnKill();

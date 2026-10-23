@@ -43,7 +43,7 @@ namespace
 			if (a_event && a_event->object && a_event->object->IsPlayerRef()) {
 				auto* spell = RE::TESForm::LookupByID<RE::SpellItem>(a_event->spell);
 				auto& reg = protean::Registry::Get();
-				if (spell && (spell == reg.Revert() || spell == reg.Starter() || spell == reg.FacePower() || reg.ByPower(spell->GetFormID()))) {
+				if (spell && (spell == reg.Revert() || spell == reg.Starter() || spell == reg.FacePower() || spell == reg.Evolution() || reg.ByPower(spell->GetFormID()))) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Shift::OnPowerCast(spell); });
 				}
 			}

@@ -97,7 +97,6 @@ namespace protean
 		std::uint32_t                        evoTotal{ 0 };
 		std::uint32_t                        facePoints{ 0 };  // perk points given directly by named faces
 		std::map<std::string, std::uint32_t> feeds;            // creature id -> hearts eaten
-		std::map<std::string, std::uint32_t> perks;            // perk id -> rank bought
 		std::vector<float>                   boosts;           // kill boost stacks: seconds left on each
 		float                                boostApplied{ 0.0f };    // StaminaRateMult added now
 		float                                diseaseApplied{ 0.0f };  // ResistDisease added now

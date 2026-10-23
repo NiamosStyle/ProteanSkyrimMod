@@ -27,6 +27,14 @@ FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stea
 # Integration markers (docs/INTEGRATION.md). Per form, by its index in data/creatures.json (stable):
 # keyword Protean_Form_<id> = FORM_KEYWORD + index, its effect FORM_EFFECT + index, the hidden ability FORM_ABILITY + index.
 KW_TRANSFORMED = 0x80A
+EVOLUTION = 0x80B  # the power that opens the perk tree (Custom Skills Framework menu)
+# The perk tree (docs/protean-perk-spec.md). Perk records are plain: Protean's plugin reads HasPerk and does the work.
+# id -> (local id, name, description, x, y, links). Appended, never renumbered: saves remember the perks.
+PERKS = {
+    "unbound_form": (0x960, "Unbound Form",
+                     "You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill "
+                     "speeds your stamina's recovery for a while (the boosts stack).", 0, 0, []),
+}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -47,6 +55,8 @@ GLOBALS = {
     "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one kill's stamina-regeneration stack lasts"),
     "Protean_KillBoostPct":        (0x94F, 15,   "Float", "stamina regeneration each stack adds, in percentage points of the normal rate"),
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
+    "Protean_PerkPoints":          (0x951, 0,    "Float", "Protean perk points to spend (kept by Protean; the perk menu spends them)"),
+    "Protean_ShowPerkMenu":        (0x952, 0,    "Short", "set to 1 to open the Protean perk menu (Custom Skills Framework clears it)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -285,6 +295,35 @@ def main():
           "Return to your own form.")
     power(FACE_POWER, "Protean_FacePower", "Shapeshift: Stolen Face",
           "Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.")
+    power(EVOLUTION, "Protean_Evolution", "Evolution",
+          "Look into what you are becoming: spend Protean perk points, earned by feeding.")
+
+    for pid, (local, title, desc, _, _, _) in PERKS.items():
+        write(os.path.join(y, "Perks", "Protean_Perk_%s - %s_%s.yaml" % (pid, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_Perk_%s\n" % (fid(local), PLUGIN, pid)
+              + name_block(title)
+              + "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq(desc)
+              + "NumRanks: 1\nPlayable: True\n")
+
+    # The tree for Custom Skills Framework (Exit-9B, MIT): SKSE/Plugins/CustomSkills/Protean.json. No skill level, so it
+    # looks like the vanilla beast trees; the points are Protean_PerkPoints, which Protean keeps up to date.
+    def ref(local):
+        return "%s|%X" % (PLUGIN, local)
+
+    write(os.path.join(ROOT, "data", "SKSE", "Plugins", "CustomSkills", "Protean.json"), json.dumps({
+        "$schema": "https://raw.githubusercontent.com/Exit-9B/CustomSkills/main/docs/schema/CustomSkill.json",
+        "version": 1,
+        "skydome": {"model": "DLC01/Interface/INTVampirePerkSkydome.nif", "cameraRightPoint": 2},
+        "showMenu": ref(GLOBALS["Protean_ShowPerkMenu"][0]),
+        "perkPoints": ref(GLOBALS["Protean_PerkPoints"][0]),
+        "skills": [{
+            "id": "protean",
+            "name": "Protean",
+            "description": "New perks come with feeding. Each perk point takes one more feeding than the last.",
+            "nodes": [{"id": pid, "perk": ref(local), "x": x, "y": yy, **({"links": links} if links else {})}
+                      for pid, (local, _, _, x, yy, links) in PERKS.items()],
+        }],
+    }, indent=2))
 
     write(os.path.join(y, "Books", "Protean_SpellTomeInstinct - %s_%s.yaml" % (fid(TOME), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_SpellTomeInstinct\n" % (fid(TOME), PLUGIN)
@@ -373,6 +412,7 @@ def main():
     write(out, json.dumps({"plugin": PLUGIN, "effect": EFFECT, "starter": STARTER, "revert": REVERT,
                            "tome": TOME, "beastFaction": BEAST_FACTION, "witnessFaction": WITNESS_FACTION,
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
+                           "evolution": EVOLUTION, "perks": {pid: v[0] for pid, v in PERKS.items()},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

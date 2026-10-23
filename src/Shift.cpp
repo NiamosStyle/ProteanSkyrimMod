@@ -895,6 +895,10 @@ namespace protean::Shift
 			Face::OnPower();
 			return;
 		}
+		if (a_spell == reg.Evolution()) {
+			Evolve::OpenMenu();
+			return;
+		}
 		if (a_spell == reg.Starter()) {
 			if (s.known.empty()) {
 				Notify("You know no forms yet. Eat the heart of an animal.");

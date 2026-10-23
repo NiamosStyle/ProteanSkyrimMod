@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Exit-9B/CustomSkills/main/docs/schema/CustomSkill.json",
+  "version": 1,
+  "skydome": {
+    "model": "DLC01/Interface/INTVampirePerkSkydome.nif",
+    "cameraRightPoint": 2
+  },
+  "showMenu": "Protean.esp|952",
+  "perkPoints": "Protean.esp|951",
+  "skills": [
+    {
+      "id": "protean",
+      "name": "Protean",
+      "description": "New perks come with feeding. Each perk point takes one more feeding than the last.",
+      "nodes": [
+        {
+          "id": "unbound_form",
+          "perk": "Protean.esp|960",
+          "x": 0,
+          "y": 0
+        }
+      ]
+    }
+  ]
+}

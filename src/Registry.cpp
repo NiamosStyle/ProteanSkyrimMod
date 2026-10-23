@@ -40,6 +40,12 @@ namespace protean
 		return r;
 	}
 
+	RE::BGSPerk* Registry::Perk(std::string_view a_id) const
+	{
+		const auto it = _perks.find(a_id);
+		return it != _perks.end() ? it->second : nullptr;
+	}
+
 	bool Registry::Load()
 	{
 		_creatures.clear();
@@ -75,6 +81,14 @@ namespace protean
 		if (!_facePower || !_disguise || !_exposed) {
 			logger::warn("face stealing records missing from {}: regenerate the plugin", plugin);
 		}
+		_evolution = dh->LookupForm<RE::SpellItem>(j.value("evolution", 0u), plugin);
+		_perks.clear();
+		for (const auto& [id, local] : j.value("perks", nlohmann::json::object()).items()) {
+			if (auto* perk = dh->LookupForm<RE::BGSPerk>(local.get<RE::FormID>(), plugin)) {
+				_perks[id] = perk;
+			}
+		}
+		logger::info("registry: {} perk(s), evolution power {}", _perks.size(), _evolution ? "found" : "MISSING");
 		_globals.clear();
 		for (const auto& [name, local] : j.value("globals", nlohmann::json::object()).items()) {
 			if (auto* g = dh->LookupForm<RE::TESGlobal>(local.get<RE::FormID>(), plugin)) {
