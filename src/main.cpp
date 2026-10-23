@@ -11,6 +11,7 @@
 #include "Shift.h"
 #include "State.h"
 #include "Tendril.h"
+#include "Keen.h"
 
 namespace
 {
@@ -131,6 +132,7 @@ namespace
 				protean::Fly::Install();
 				protean::Face::Install();
 				protean::Hooks::Install();
+				protean::Keen::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}

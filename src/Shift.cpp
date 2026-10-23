@@ -32,7 +32,8 @@ namespace protean::Shift
 		}
 
 		// The Esc key ("Pause") belongs to the same control group as the inventory and magic menus. Move it into a
-		// group we never lock, so the game menu (save, load, quit) opens and closes while transformed.
+		// group we never lock, so the game menu (save, load, quit) opens and closes while transformed. The Favorites
+		// key goes with it: an animal's Favorites menu offers only its own powers (see Keen).
 		void KeepPauseMenu(bool a_locked)
 		{
 			auto* cm = RE::ControlMap::GetSingleton();
@@ -47,7 +48,7 @@ namespace protean::Shift
 				}
 				for (auto& list : ctx->deviceMappings) {
 					for (auto& m : list) {
-						if (m.eventID == "Pause" || m.eventID == "Cancel") {
+						if (m.eventID == "Pause" || m.eventID == "Cancel" || m.eventID == "Favorites") {
 							if (a_locked && m.userEventGroupFlag.all(Flag::kMenu)) {
 								m.userEventGroupFlag = Flag::kVATS;
 							} else if (!a_locked && m.userEventGroupFlag.all(Flag::kVATS)) {
