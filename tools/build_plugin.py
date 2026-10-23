@@ -31,6 +31,10 @@ EVOLUTION = 0x80B  # the power that opens the perk tree (Custom Skills Framework
 # The perk tree (docs/protean-perk-spec.md). Perk records are plain: Protean's plugin reads HasPerk and does the work.
 # id -> (local id, name, description, x, y, links). Appended, never renumbered: saves remember the perks.
 # Tree coordinates (Custom Skills Framework): x positive = left, y positive = up. Beast left, Hunter middle, Deceiver right.
+# The menu stretches the layout: TREE_SCALE_X across, TREE_SCALE_Y up (1 looked small next to the vanilla werewolf
+# tree; 2.5 both ways was too tall). Moving the root below 0 made the whole tree draw bigger, so it stays at y 0.
+TREE_SCALE_X = 2.5
+TREE_SCALE_Y = 1.5
 PERKS = {
     "unbound_form": (0x960, "Unbound Form",
                      "You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill "
@@ -371,7 +375,8 @@ def main():
             "id": "protean",
             "name": "Protean",
             "description": "New perks come with feeding. Each perk point takes one more feeding than the last.",
-            "nodes": [{"id": pid, "perk": ref(local), "x": x, "y": yy, **({"links": links} if links else {})}
+            "nodes": [{"id": pid, "perk": ref(local), "x": round(x * TREE_SCALE_X, 2), "y": round(yy * TREE_SCALE_Y, 2),
+                       **({"links": links} if links else {})}
                       for pid, (local, _, _, x, yy, links) in PERKS.items()],
         }],
     }, indent=2))
