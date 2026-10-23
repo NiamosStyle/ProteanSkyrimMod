@@ -434,8 +434,8 @@ def main():
           "Flags:\n- Supersonic\n- PassThroughSmallTransparent\n"
           # speed and fade as Pull Mastery's chain: at 6000 and a 0.5 s fade the tendril hardly showed (user, 2026-10-23)
           "Type: Flame\nSpeed: 3600\nRange: %d\n" % GLOBALS["Protean_TendrilRange"][1]
-          + "Sound: 03F246:Skyrim.esm\n"  # the dragon's tail whip (a placeholder until the sounds are previewed)
-          "FadeDuration: 5\nCollisionRadius: 1\nRelaunchInterval: 0.25\nMuzzleFlashModel: ''\nSoundLevel: 1\n")
+          # no sound of its own: it played only once the tendril had come back; Protean plays the throw's sound
+          + "FadeDuration: 5\nCollisionRadius: 1\nRelaunchInterval: 0.25\nMuzzleFlashModel: ''\nSoundLevel: 1\n")
 
     def tendril_effect(local, editor_id, title, archetype, desc):
         write(os.path.join(y, "MagicEffects", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
@@ -446,8 +446,6 @@ def main():
               "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: %s\n  ActorValue: %s\n" % archetype
               + "Projectile: %s:%s\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
               + "ImpactData: 0F23C4:Skyrim.esm\n"  # flesh and blood, like the claws (a placeholder until previewed)
-              # a sound on every throw, hit or miss (the user: too quiet otherwise); placeholder: the dragon's tail whip
-              + "Sounds:\n- Type: Release\n  Sound: 03F246:Skyrim.esm\n"
               "CastType: FireAndForget\nTargetType: Aimed\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
               "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq(desc))
 

@@ -8,7 +8,6 @@ Flags:
 Type: Flame
 Speed: 3600
 Range: 1500
-Sound: 03F246:Skyrim.esm
 FadeDuration: 5
 CollisionRadius: 1
 RelaunchInterval: 0.25

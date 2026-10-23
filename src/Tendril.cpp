@@ -14,6 +14,12 @@ namespace protean::Tendril
 		constexpr float kKnock = 15.0f;          // the yank: Pull Mastery's force (a negative knock pulls)
 		constexpr float kHaulSpeed = 2200.0f;    // the player hauled to a large target, game units / s
 		constexpr float kHaulGravity = 1000.0f;  // the haul's own gravity (as a leap's): a short, low arc
+		// every throw: the vampire lord's swipe (Dawnguard), chosen by ear in game over a dragon's tail whip, a werewolf's,
+		// a spriggan's and a chaurus's attack and an Apocrypha tentacle (user, 2026-10-23). Played here at the throw: as
+		// the projectile's sound it came only after the tendril had come back.
+		std::string g_throwSound{ "NPCVampireLordAttackLeft" };
+		// on a hit, blood on the target: an art object or an effect shader (dev 'tendrilblood' compares them live)
+		RE::FormID g_blood{ 0x000A6EF5 };  // BloodSprayDecap01: a gush of blood (Pull Mastery's spears use it too)
 		constexpr float kHaulGap = 150.0f;       // stop this far short of the target's edge (at 60 the player bumped a mammoth)
 
 		float g_cooldown{ 0.0f };     // seconds until the next throw
@@ -219,6 +225,14 @@ namespace protean::Tendril
 			logger::info("tendril: a throw slipped past the gate (cooldown {:.1f} s): no pull", g_cooldown);
 			return;
 		}
+		RE::BSSoundHandle sound;
+		if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+			audio->GetSoundHandleByName(sound, g_throwSound.c_str(), 0x1A);
+		}
+		if (sound.IsValid()) {
+			sound.SetPosition(p->GetPosition());
+			sound.Play();
+		}
 		const float cost = Dial("Protean_TendrilCost", 25.0f);
 		p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
 		g_cooldown = Dial("Protean_TendrilCooldown", 3.0f);
@@ -237,6 +251,13 @@ namespace protean::Tendril
 		auto* p = RE::PlayerCharacter::GetSingleton();
 		if (!p || !a_target || a_target == p || Clock::now() > g_armed) {
 			return;
+		}
+		if (auto* form = RE::TESForm::LookupByID(g_blood)) {
+			if (auto* art = form->As<RE::BGSArtObject>()) {
+				a_target->ApplyArtObject(art, 1.0f);
+			} else if (auto* shader = form->As<RE::TESEffectShader>()) {
+				a_target->ApplyEffectShader(shader, 1.5f);
+			}
 		}
 		g_armed = {};  // one pull per throw
 		g_paid = 0.0f;  // it hit: no refund
@@ -257,6 +278,16 @@ namespace protean::Tendril
 		} else {
 			Yank(p, a_target);
 		}
+	}
+
+	void SetLooks(std::string_view a_what, const std::string& a_value)
+	{
+		if (a_what == "sound") {
+			g_throwSound = a_value;
+		} else if (a_what == "blood") {
+			g_blood = static_cast<RE::FormID>(std::strtoul(a_value.c_str(), nullptr, 16));
+		}
+		logger::info("tendril: throw sound '{}', blood {:08X}", g_throwSound, g_blood);
 	}
 
 	void Give()

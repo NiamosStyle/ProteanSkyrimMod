@@ -321,35 +321,22 @@ namespace protean::Dev
 				} else {
 					logger::warn("dev: clawimpact: no impact data set {}", a_arg);
 				}
+			} else if (a_cmd == "tendrilblood" || a_cmd == "tendrilthrow") {
+				// tendrilblood <hex ARTO or EFSH>: the blood on a hit; tendrilthrow <SNDR editor ID>: the throw's sound
+				Tendril::SetLooks(a_cmd == "tendrilblood" ? "blood" : "sound", a_arg);
 			} else if (a_cmd == "tendril") {
 				Tendril::Give();  // the Tendril spell, as the perk teaches it
-			} else if ((a_cmd == "tendrilsound" || a_cmd == "tendrilimpact") && !a_arg.empty()) {
-				// tendrilsound <hex SNDR>: the sound every throw makes; tendrilimpact <hex IPDS>: what a hit looks and
-				// sounds like (blood, flesh). Both to compare live.
+			} else if (a_cmd == "tendrilimpact" && !a_arg.empty()) {
+				// tendrilimpact <hex IPDS>: the hit's impact set (mostly what hitting a surface looks and sounds like)
 				auto*      spell = Registry::Get().Tendril();
 				const auto id = static_cast<RE::FormID>(std::strtoul(a_arg.c_str(), nullptr, 16));
-				if (!spell) {
-					logger::warn("dev: {}: no Tendril", a_cmd);
-				} else if (a_cmd == "tendrilsound") {
-					auto* sound = RE::TESForm::LookupByID<RE::BGSSoundDescriptorForm>(id);
-					auto* fx = spell->effects[0]->baseEffect;
-					bool  set = false;
-					for (auto& pair : fx->effectSounds) {
-						if (pair.id == RE::MagicSystem::SoundID::kRelease) {
-							pair.sound = sound;
-							set = true;
-						}
+				auto*      set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(id);
+				for (auto* e : spell ? spell->effects : RE::BSTArray<RE::Effect*>{}) {
+					if (set && e && e->baseEffect) {
+						e->baseEffect->data.impactDataSet = set;
 					}
-					logger::info("dev: tendril throw sound {} {:08X} '{}'", set && sound ? "now" : "NOT set:", id, sound ? sound->GetFormEditorID() : "?");
-				} else {
-					auto* set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(id);
-					for (auto* e : spell->effects) {
-						if (set && e && e->baseEffect) {
-							e->baseEffect->data.impactDataSet = set;
-						}
-					}
-					logger::info("dev: tendril impact set {} {:08X} '{}'", set ? "now" : "NOT set:", id, set ? set->GetFormEditorID() : "?");
 				}
+				logger::info("dev: tendril impact set {} {:08X}", set && spell ? "now" : "NOT set:", id);
 			} else if (a_cmd == "tendrilproj" && !a_arg.empty()) {
 				// tendrilproj <field> <value>: tune the Tendril's projectile live (speed, range, fade, radius, relaunch,
 				// lifetime, force, flags, type)

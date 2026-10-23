@@ -16,9 +16,6 @@ Archetype:
   ActorValue: Health
 Projectile: 000986:Protean.esp
 ImpactData: 0F23C4:Skyrim.esm
-Sounds:
-- Type: Release
-  Sound: 03F246:Skyrim.esm
 CastType: FireAndForget
 TargetType: Aimed
 SkillUsageMultiplier: 0
