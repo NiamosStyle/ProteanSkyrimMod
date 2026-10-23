@@ -97,6 +97,10 @@ namespace protean
 			logger::warn("Tendril records missing from {}", plugin);
 			_tendril = nullptr;
 		}
+		_killBoost = dh->LookupForm<RE::SpellItem>(j.value("killBoost", 0u), plugin);
+		if (!_killBoost) {
+			logger::warn("Kill Boost display missing from {}", plugin);
+		}
 		_keenPowers = {};
 		_keenSenses = {};
 		if (const auto& k = j.value("keen", nlohmann::json::object()); !k.empty()) {

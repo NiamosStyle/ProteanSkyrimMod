@@ -36,14 +36,39 @@ namespace protean::Evolve
 
 		// The stacks' regeneration is a temporary modifier on StaminaRateMult (the multiplier the game applies to
 		// stamina regeneration, 100 = normal); the state remembers how much is on, so a load can take it off or keep it.
+		// What Active Effects shows: an ability whose only effect states the total; it does nothing itself. Its
+		// magnitude is set on the record and the ability given again whenever the total changes (an active effect
+		// keeps the magnitude it started with), and after a load (the save keeps the record's own).
+		bool g_boostShownStale = true;
+
+		void ShowBoost(RE::PlayerCharacter* a_p, float a_total)
+		{
+			auto* spell = Registry::Get().KillBoostDisplay();
+			if (!spell || spell->effects.empty()) {
+				return;
+			}
+			if (a_p->HasSpell(spell)) {
+				a_p->RemoveSpell(spell);
+			}
+			if (a_total > 0.0f) {
+				spell->effects[0]->effectItem.magnitude = a_total;
+				a_p->AddSpell(spell);
+			}
+		}
+
 		void SyncBoost(RE::PlayerCharacter* a_p)
 		{
 			auto&       s = State::Get();
 			const float want = Has(kUnbound) ? Registry::Get().Dial("Protean_KillBoostPct", 15.0f) * static_cast<float>(s.boosts.size()) : 0.0f;
-			if (std::abs(want - s.boostApplied) > 0.001f) {
+			const bool  changed = std::abs(want - s.boostApplied) > 0.001f;
+			if (changed) {
 				a_p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kStaminaRateMult,
 					want - s.boostApplied);
 				s.boostApplied = want;
+			}
+			if (changed || g_boostShownStale) {
+				g_boostShownStale = false;
+				ShowBoost(a_p, want);
 			}
 		}
 
@@ -229,6 +254,7 @@ namespace protean::Evolve
 		}
 		// A save made with a boost on keeps the temporary modifier in the save proper and the stacks in the co-save,
 		// so the two agree. Just make the modifiers match the stacks.
+		g_boostShownStale = true;
 		Sync();
 		SyncBoost(p);
 	}

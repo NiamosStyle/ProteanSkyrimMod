@@ -56,7 +56,8 @@ PERKS = {
     "tendril": (0x967, "Tendril", "Learn Tendril, a whip of flesh cast from either hand: it tears at health, drains "
                 "Stamina into you, yanks light foes to you and hauls you to large ones. Each lash costs Stamina.",
                 0.9, 2, []),
-    "predators_rush": (0x968, "Predator's Rush", "You move faster, sprint faster still, and leap higher.", 0, 1.1,
+    "predators_rush": (0x968, "Predator's Rush", "In your own form you move faster and jump far higher, and a held sprint keeps building speed "
+                       "until it is dangerously fast. Sprinting still costs Stamina.", 0, 1.1,
                        ["preys_flight"]),
     "preys_flight": (0x969, "Prey's Flight", "Jump again in mid-air, and glide.", 0, 2.2, ["devastator"]),
     "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: more armor.", -0.8, 0.9,
@@ -102,6 +103,9 @@ TENDRIL_PROJECTILE, TENDRIL_DAMAGE, TENDRIL_DRAIN, TENDRIL_SPELL = 0x986, 0x987,
 KEEN_POWERS = {"night": 0x98A, "life": 0x98B, "dead": 0x98C}
 KEEN_SENSES = {"night": 0x98D, "life": 0x98E, "dead": 0x98F}
 KEEN_DEAD_EFFECTS = (0x990, 0x991, 0x992, 0x993)  # enemy outdoors, enemy indoors, friend outdoors, friend indoors
+# Unbound Form's kill boost shown in Active Effects: an ability whose effect only states the total (the boost itself is a
+# modifier on StaminaRateMult); Protean sets its magnitude.
+KILL_BOOST_EFFECT, KILL_BOOST_SPELL = 0x97C, 0x97D
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -109,7 +113,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
-BUILT = {"unbound_form", "rending_claws", "tendril", "keen"}
+BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -150,6 +154,11 @@ GLOBALS = {
     "Protean_TendrilRange":        (0x95E, 1500, "Float", "how far the Tendril reaches, game units (1500 ~ 21 m)"),
     "Protean_TendrilPullMult":     (0x95F, 1.0,  "Float", "multiplies the Tendril's pull"),
     "Protean_KeenDrain":           (0x976, 2.0,  "Float", "stamina per second each of Keen's Detect Life and Detect Dead drains while on"),
+    "Protean_RushSpeed":           (0x977, 0.1,  "Float", "Predator's Rush: walking and running speed added, as a share (0.1 = +10%)"),
+    "Protean_RushSprintStart":     (0x978, 1.25, "Float", "Predator's Rush: sprint speed when a sprint begins, times a normal sprint"),
+    "Protean_RushSprintTop":       (0x979, 3.0,  "Float", "Predator's Rush: the most a held sprint builds to, times a normal sprint"),
+    "Protean_RushRampSeconds":     (0x97A, 10,   "Float", "Predator's Rush: seconds of unbroken sprinting to reach the top speed"),
+    "Protean_RushJumpHeight":      (0x97B, 400,  "Float", "Predator's Rush: jump height (the game's fJumpHeightMin; 76 normally)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -474,6 +483,21 @@ def main():
           + "".join("- BaseEffect: %s:%s\n  Data:\n    Magnitude: %d\n" % (fid(e), PLUGIN, m)
                     for e, m in ((TENDRIL_DAMAGE, 6), (TENDRIL_DRAIN, 20))))  # Protean sets both before each throw
 
+    # ---- the kill boost, as Active Effects shows it
+    write(os.path.join(y, "MagicEffects", "Protean_KillBoostEffect - %s_%s.yaml" % (fid(KILL_BOOST_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_KillBoostEffect\n" % (fid(KILL_BOOST_EFFECT), PLUGIN)
+          + name_block("Kill Boost")
+          + "Flags:\n- Recover\n- NoArea\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: ConstantEffect\n"
+          "SkillUsageMultiplier: 0\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: Stamina regenerates <mag>% faster. Every kill adds to it for a while.\n")
+    write(os.path.join(y, "Spells", "Protean_KillBoost - %s_%s.yaml" % (fid(KILL_BOOST_SPELL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_KillBoost\n" % (fid(KILL_BOOST_SPELL), PLUGIN)
+          + name_block("Kill Boost")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\nType: Ability\nChargeTime: 0\nCastType: ConstantEffect\nTargetType: Self\n"
+          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 15\n" % (fid(KILL_BOOST_EFFECT), PLUGIN))
+
     # ---- Keen
     power(KEEN_POWERS["night"], "Protean_KeenNightPower", "Keen: Night Vision",
           "In animal form, see in the dark. Cast again to stop.")
@@ -642,7 +666,7 @@ def main():
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
-                           "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES},
+                           "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},

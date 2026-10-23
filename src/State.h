@@ -100,6 +100,7 @@ namespace protean
 		std::vector<float>                   boosts;           // kill boost stacks: seconds left on each
 		float                                boostApplied{ 0.0f };    // StaminaRateMult added now
 		float                                diseaseApplied{ 0.0f };  // ResistDisease added now
+		float                                rushApplied{ 0.0f };     // SpeedMult Predator's Rush added now
 
 		static State& Get();
 		void          Reset();

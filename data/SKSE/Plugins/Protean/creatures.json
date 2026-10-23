@@ -31,6 +31,7 @@
    "dead": 2447
   }
  },
+ "killBoost": 2429,
  "perks": {
   "unbound_form": 2400,
   "keen": 2401,
@@ -57,6 +58,7 @@
  },
  "perksBuilt": [
   "keen",
+  "predators_rush",
   "rending_claws",
   "tendril",
   "unbound_form"
@@ -94,7 +96,12 @@
   "Protean_TendrilDrainPerLevel": 2397,
   "Protean_TendrilRange": 2398,
   "Protean_TendrilPullMult": 2399,
-  "Protean_KeenDrain": 2422
+  "Protean_KeenDrain": 2422,
+  "Protean_RushSpeed": 2423,
+  "Protean_RushSprintStart": 2424,
+  "Protean_RushSprintTop": 2425,
+  "Protean_RushRampSeconds": 2426,
+  "Protean_RushJumpHeight": 2427
  },
  "openInteriorKeywords": [
   {
