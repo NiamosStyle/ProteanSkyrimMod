@@ -58,3 +58,24 @@ What exists, what was decided and why, and what is known and accepted. Read the 
 
 - Watching the mod events arrive (needs a listening script in the larger mod).
 - The user's own MO2 install still has the dev channel on (`[Dev] Commands=1`); the release zip has it off.
+
+## Perk tree work (branch `skill-tree`, 2026-10-22)
+
+Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live unless noted:
+- Health keeps its percentage across a change (both ways, never below 1%); bonus = `Protean_HealthBonusPct` (0.25)
+  x own max + `Protean_HealthGapShare` (0.25) x how far the animal's health exceeds it. Revert warning (except
+  flying), danger line and top-up healing removed. A revert sets health first, so it never passes through zero
+  (the engine killed the player mid-fight otherwise).
+- Gear put back after a revert no longer carries the prevent-removal lock.
+- Evolution points (`src/Evolve.cpp`): a running count of feedings; perk points at totals 1, 3, 6, 10...; first heart
+  of a kind and the 5th/10th/20th give points; named faces will add perk points directly. Co-save v11.
+- Perk tree via Custom Skills Framework (user installs it): `data/SKSE/Plugins/CustomSkills/Protean.json` from the
+  PERKS table in `tools/build_plugin.py`; points in `Protean_PerkPoints`; the Evolution power opens it. All 18 perks
+  are placed; only Unbound Form works (Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
+  stacking); placeholders are taken back when the menu closes. Changing form costs 15 stamina.
+- Rending Claws: models, weapon and per-hand claw pieces built, not yet tried in game. See `src/Claws.cpp`,
+  `tools/build_claws.py`, `tools/install_claw_anims.py` (dev-only animations from Feral).
+
+Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
+DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the
+game twice (render code, Protean not in the stack).
