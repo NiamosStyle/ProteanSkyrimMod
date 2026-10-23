@@ -1,0 +1,10 @@
+FormKey: 000970:Protean.esp
+EditorID: Protean_Perk_infected
+Name:
+  TargetLanguage: English
+  Value: 'Infected'
+Description:
+  TargetLanguage: English
+  Value: 'Slip an infection into someone''s pocket; the infected fight for you.'
+NumRanks: 1
+Playable: True

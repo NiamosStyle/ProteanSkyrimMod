@@ -1,0 +1,10 @@
+FormKey: 000961:Protean.esp
+EditorID: Protean_Perk_keen
+Name:
+  TargetLanguage: English
+  Value: 'Keen'
+Description:
+  TargetLanguage: English
+  Value: 'In animal form, switch on night vision, Detect Life and Detect Death.'
+NumRanks: 1
+Playable: True

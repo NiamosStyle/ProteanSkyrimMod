@@ -1,0 +1,11 @@
+FormKey: 000962:Protean.esp
+EditorID: Protean_Perk_survivor
+Name:
+  TargetLanguage: English
+  Value: 'Survivor'
+Description:
+  TargetLanguage: English
+  Value: 'Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter of the difference when the animal is stronger than you.'
+NumRanks: 1
+Playable: True
+NextPerk: 000972:Protean.esp

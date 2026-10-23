@@ -1,0 +1,10 @@
+FormKey: 000967:Protean.esp
+EditorID: Protean_Perk_tendril
+Name:
+  TargetLanguage: English
+  Value: 'Tendril'
+Description:
+  TargetLanguage: English
+  Value: 'A whip of flesh lashes out, tearing at health and stamina; you take part of the stamina it drains.'
+NumRanks: 1
+Playable: True

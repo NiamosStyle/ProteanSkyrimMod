@@ -1,0 +1,10 @@
+FormKey: 000974:Protean.esp
+EditorID: Protean_Perk_stalker_2
+Name:
+  TargetLanguage: English
+  Value: 'Stalker'
+Description:
+  TargetLanguage: English
+  Value: 'Enemies lose track of your animal forms sooner.'
+NumRanks: 1
+Playable: True

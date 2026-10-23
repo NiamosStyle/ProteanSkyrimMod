@@ -1,0 +1,10 @@
+FormKey: 00096D:Protean.esp
+EditorID: Protean_Perk_borrowed_visage
+Name:
+  TargetLanguage: English
+  Value: 'Borrowed Visage'
+Description:
+  TargetLanguage: English
+  Value: 'Steal the face of a corpse and wear it.'
+NumRanks: 1
+Playable: True

@@ -1,0 +1,10 @@
+FormKey: 000972:Protean.esp
+EditorID: Protean_Perk_survivor_2
+Name:
+  TargetLanguage: English
+  Value: 'Survivor'
+Description:
+  TargetLanguage: English
+  Value: 'Your animal forms gain still more health: 75% of your own, plus a quarter of the difference. Predators can feed on corpses to heal.'
+NumRanks: 1
+Playable: True

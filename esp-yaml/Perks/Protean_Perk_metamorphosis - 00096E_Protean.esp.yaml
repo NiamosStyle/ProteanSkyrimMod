@@ -1,0 +1,10 @@
+FormKey: 00096E:Protean.esp
+EditorID: Protean_Perk_metamorphosis
+Name:
+  TargetLanguage: English
+  Value: 'Metamorphosis'
+Description:
+  TargetLanguage: English
+  Value: 'Make a stolen face and race your own, and leave your crimes behind. Costs all your stamina.'
+NumRanks: 1
+Playable: True

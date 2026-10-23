@@ -1,0 +1,10 @@
+FormKey: 00096C:Protean.esp
+EditorID: Protean_Perk_devastator
+Name:
+  TargetLanguage: English
+  Value: 'Devastator'
+Description:
+  TargetLanguage: English
+  Value: 'Unleash a devastating attack all around you. Costs all your stamina and needs two kill boosts. Requires Rending Claws, Prey''s Flight and Subtle Carapace.'
+NumRanks: 1
+Playable: True

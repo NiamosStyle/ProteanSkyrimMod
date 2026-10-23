@@ -1,0 +1,10 @@
+FormKey: 000969:Protean.esp
+EditorID: Protean_Perk_preys_flight
+Name:
+  TargetLanguage: English
+  Value: 'Prey''s Flight'
+Description:
+  TargetLanguage: English
+  Value: 'Jump again in mid-air, and glide.'
+NumRanks: 1
+Playable: True

@@ -88,7 +88,12 @@ namespace protean
 				_perks[id] = perk;
 			}
 		}
-		logger::info("registry: {} perk(s), evolution power {}", _perks.size(), _evolution ? "found" : "MISSING");
+		_perksBuilt.clear();
+		for (const auto& id : j.value("perksBuilt", nlohmann::json::array())) {
+			_perksBuilt.insert(id.get<std::string>());
+		}
+		logger::info("registry: {} perk(s) ({} working), evolution power {}", _perks.size(), _perksBuilt.size(),
+			_evolution ? "found" : "MISSING");
 		_globals.clear();
 		for (const auto& [name, local] : j.value("globals", nlohmann::json::object()).items()) {
 			if (auto* g = dh->LookupForm<RE::TESGlobal>(local.get<RE::FormID>(), plugin)) {

@@ -1,0 +1,10 @@
+FormKey: 00096F:Protean.esp
+EditorID: Protean_Perk_inconspicuous
+Name:
+  TargetLanguage: English
+  Value: 'Inconspicuous'
+Description:
+  TargetLanguage: English
+  Value: 'The more friendly people around you, the harder you are to notice.'
+NumRanks: 1
+Playable: True

@@ -1,0 +1,10 @@
+FormKey: 000971:Protean.esp
+EditorID: Protean_Perk_assassin
+Name:
+  TargetLanguage: English
+  Value: 'Assassin'
+Description:
+  TargetLanguage: English
+  Value: 'Sneak attacks are far deadlier against someone who trusts the face you wear.'
+NumRanks: 1
+Playable: True

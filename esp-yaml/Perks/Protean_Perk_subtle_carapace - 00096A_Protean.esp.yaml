@@ -1,0 +1,11 @@
+FormKey: 00096A:Protean.esp
+EditorID: Protean_Perk_subtle_carapace
+Name:
+  TargetLanguage: English
+  Value: 'Subtle Carapace'
+Description:
+  TargetLanguage: English
+  Value: 'A hidden carapace hardens your skin: more armor.'
+NumRanks: 1
+Playable: True
+NextPerk: 000975:Protean.esp

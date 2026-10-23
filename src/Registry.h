@@ -71,6 +71,7 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* Evolution() const { return _evolution; }  // opens the perk tree
 		[[nodiscard]] RE::BGSPerk*   Perk(std::string_view a_id) const;          // a Protean perk by id, or null
 		[[nodiscard]] const std::map<std::string, RE::BGSPerk*, std::less<>>& Perks() const { return _perks; }
+		[[nodiscard]] bool PerkBuilt(std::string_view a_id) const { return _perksBuilt.contains(a_id); }  // else a placeholder
 		[[nodiscard]] RE::TESFaction* DisguiseFaction() const { return _disguise; }
 		[[nodiscard]] RE::TESFaction* ExposedFaction() const { return _exposed; }
 		[[nodiscard]] const std::vector<RE::BGSKeyword*>& OpenInteriorKeywords() const { return _openKeywords; }
@@ -97,6 +98,7 @@ namespace protean
 		RE::SpellItem*        _facePower{ nullptr };
 		RE::SpellItem*        _evolution{ nullptr };
 		std::map<std::string, RE::BGSPerk*, std::less<>> _perks;
+		std::set<std::string, std::less<>> _perksBuilt;
 		RE::TESFaction*       _disguise{ nullptr };
 		RE::TESFaction*       _exposed{ nullptr };
 		std::vector<RE::BGSKeyword*> _openKeywords;

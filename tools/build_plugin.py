@@ -30,11 +30,56 @@ KW_TRANSFORMED = 0x80A
 EVOLUTION = 0x80B  # the power that opens the perk tree (Custom Skills Framework menu)
 # The perk tree (docs/protean-perk-spec.md). Perk records are plain: Protean's plugin reads HasPerk and does the work.
 # id -> (local id, name, description, x, y, links). Appended, never renumbered: saves remember the perks.
+# Tree coordinates (Custom Skills Framework): x positive = left, y positive = up. Beast left, Hunter middle, Deceiver right.
 PERKS = {
     "unbound_form": (0x960, "Unbound Form",
                      "You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill "
-                     "speeds your stamina's recovery for a while (the boosts stack).", 0, 0, []),
+                     "speeds your stamina's recovery for a while (the boosts stack).", 0, 0,
+                     ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
+    # Beast
+    "keen": (0x961, "Keen", "In animal form, switch on night vision, Detect Life and Detect Death.", 2.2, 1.2,
+             ["survivor", "predator", "stalker"]),
+    "survivor": (0x962, "Survivor", "Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter "
+                 "of the difference when the animal is stronger than you.", 3.3, 2.3, ["apex"]),
+    "predator": (0x963, "Predator", "Your animal forms deal more damage.", 2.3, 2.5, ["apex"]),
+    "stalker": (0x964, "Stalker", "Your animal forms are harder to detect.", 1.4, 2.3, ["apex"]),
+    "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.8, []),
+    # Hunter
+    "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands: a weapon for each hand, at a stamina cost.",
+                      0.8, 1.3, ["tendril", "devastator"]),
+    "tendril": (0x967, "Tendril", "A whip of flesh lashes out, tearing at health and stamina; you take part of the "
+                "stamina it drains.", 0.9, 2.4, []),
+    "predators_rush": (0x968, "Predator's Rush", "You move faster, sprint faster still, and leap higher.", 0, 1.5,
+                       ["preys_flight"]),
+    "preys_flight": (0x969, "Prey's Flight", "Jump again in mid-air, and glide.", 0, 2.6, ["devastator"]),
+    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: more armor.", -0.8, 1.3,
+                        ["regeneration", "devastator"]),
+    "regeneration": (0x96B, "Regeneration", "A toggle: while on, stamina drains and health returns by the same amount.",
+                     -0.9, 2.4, []),
+    "devastator": (0x96C, "Devastator", "Unleash a devastating attack all around you. Costs all your stamina and needs "
+                   "two kill boosts. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.8, []),
+    # Deceiver
+    "borrowed_visage": (0x96D, "Borrowed Visage", "Steal the face of a corpse and wear it.", -2.2, 1.2,
+                        ["metamorphosis", "inconspicuous"]),
+    "metamorphosis": (0x96E, "Metamorphosis", "Make a stolen face and race your own, and leave your crimes behind. "
+                      "Costs all your stamina.", -3.3, 2.3, []),
+    "inconspicuous": (0x96F, "Inconspicuous", "The more friendly people around you, the harder you are to notice.",
+                      -1.9, 2.4, ["infected", "assassin"]),
+    "infected": (0x970, "Infected", "Slip an infection into someone's pocket; the infected fight for you.", -1.4, 3.5, []),
+    "assassin": (0x971, "Assassin", "Sneak attacks are far deadlier against someone who trusts the face you wear.",
+                 -2.5, 3.7, []),
 }
+# Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
+# base id -> (local id, description)
+RANK2 = {
+    "survivor": (0x972, "Your animal forms gain still more health: 75% of your own, plus a quarter of the difference. "
+                 "Predators can feed on corpses to heal."),
+    "predator": (0x973, "Your animal forms' attacks also poison."),
+    "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
+    "subtle_carapace": (0x975, "The carapace hardens further: more armor."),
+}
+# Perks that work. The rest are placeholders: Protean takes them back and returns the point.
+BUILT = {"unbound_form"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -298,12 +343,18 @@ def main():
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
 
-    for pid, (local, title, desc, _, _, _) in PERKS.items():
+    def perk(pid, local, title, desc, nxt=None):
         write(os.path.join(y, "Perks", "Protean_Perk_%s - %s_%s.yaml" % (pid, fid(local), PLUGIN)),
               "FormKey: %s:%s\nEditorID: Protean_Perk_%s\n" % (fid(local), PLUGIN, pid)
               + name_block(title)
               + "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq(desc)
-              + "NumRanks: 1\nPlayable: True\n")
+              + "NumRanks: 1\nPlayable: True\n"
+              + ("NextPerk: %s:%s\n" % (fid(nxt), PLUGIN) if nxt else ""))
+
+    for pid, (local, title, desc, _, _, _) in PERKS.items():
+        perk(pid, local, title, desc, RANK2[pid][0] if pid in RANK2 else None)
+    for pid, (local, desc) in RANK2.items():
+        perk(pid + "_2", local, PERKS[pid][1], desc)
 
     # The tree for Custom Skills Framework (Exit-9B, MIT): SKSE/Plugins/CustomSkills/Protean.json. No skill level, so it
     # looks like the vanilla beast trees; the points are Protean_PerkPoints, which Protean keeps up to date.
@@ -412,7 +463,9 @@ def main():
     write(out, json.dumps({"plugin": PLUGIN, "effect": EFFECT, "starter": STARTER, "revert": REVERT,
                            "tome": TOME, "beastFaction": BEAST_FACTION, "witnessFaction": WITNESS_FACTION,
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
-                           "evolution": EVOLUTION, "perks": {pid: v[0] for pid, v in PERKS.items()},
+                           "evolution": EVOLUTION,
+                           "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
+                           "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

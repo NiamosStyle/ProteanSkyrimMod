@@ -1,0 +1,10 @@
+FormKey: 000973:Protean.esp
+EditorID: Protean_Perk_predator_2
+Name:
+  TargetLanguage: English
+  Value: 'Predator'
+Description:
+  TargetLanguage: English
+  Value: 'Your animal forms'' attacks also poison.'
+NumRanks: 1
+Playable: True

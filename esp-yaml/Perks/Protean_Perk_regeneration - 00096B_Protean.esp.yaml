@@ -1,0 +1,10 @@
+FormKey: 00096B:Protean.esp
+EditorID: Protean_Perk_regeneration
+Name:
+  TargetLanguage: English
+  Value: 'Regeneration'
+Description:
+  TargetLanguage: English
+  Value: 'A toggle: while on, stamina drains and health returns by the same amount.'
+NumRanks: 1
+Playable: True

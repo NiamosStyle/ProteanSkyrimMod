@@ -1,0 +1,10 @@
+FormKey: 000966:Protean.esp
+EditorID: Protean_Perk_rending_claws
+Name:
+  TargetLanguage: English
+  Value: 'Rending Claws'
+Description:
+  TargetLanguage: English
+  Value: 'Claws grow from your hands: a weapon for each hand, at a stamina cost.'
+NumRanks: 1
+Playable: True

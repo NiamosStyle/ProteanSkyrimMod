@@ -17,7 +17,152 @@
           "id": "unbound_form",
           "perk": "Protean.esp|960",
           "x": 0,
-          "y": 0
+          "y": 0,
+          "links": [
+            "keen",
+            "rending_claws",
+            "predators_rush",
+            "subtle_carapace",
+            "borrowed_visage"
+          ]
+        },
+        {
+          "id": "keen",
+          "perk": "Protean.esp|961",
+          "x": 2.2,
+          "y": 1.2,
+          "links": [
+            "survivor",
+            "predator",
+            "stalker"
+          ]
+        },
+        {
+          "id": "survivor",
+          "perk": "Protean.esp|962",
+          "x": 3.3,
+          "y": 2.3,
+          "links": [
+            "apex"
+          ]
+        },
+        {
+          "id": "predator",
+          "perk": "Protean.esp|963",
+          "x": 2.3,
+          "y": 2.5,
+          "links": [
+            "apex"
+          ]
+        },
+        {
+          "id": "stalker",
+          "perk": "Protean.esp|964",
+          "x": 1.4,
+          "y": 2.3,
+          "links": [
+            "apex"
+          ]
+        },
+        {
+          "id": "apex",
+          "perk": "Protean.esp|965",
+          "x": 2.3,
+          "y": 3.8
+        },
+        {
+          "id": "rending_claws",
+          "perk": "Protean.esp|966",
+          "x": 0.8,
+          "y": 1.3,
+          "links": [
+            "tendril",
+            "devastator"
+          ]
+        },
+        {
+          "id": "tendril",
+          "perk": "Protean.esp|967",
+          "x": 0.9,
+          "y": 2.4
+        },
+        {
+          "id": "predators_rush",
+          "perk": "Protean.esp|968",
+          "x": 0,
+          "y": 1.5,
+          "links": [
+            "preys_flight"
+          ]
+        },
+        {
+          "id": "preys_flight",
+          "perk": "Protean.esp|969",
+          "x": 0,
+          "y": 2.6,
+          "links": [
+            "devastator"
+          ]
+        },
+        {
+          "id": "subtle_carapace",
+          "perk": "Protean.esp|96A",
+          "x": -0.8,
+          "y": 1.3,
+          "links": [
+            "regeneration",
+            "devastator"
+          ]
+        },
+        {
+          "id": "regeneration",
+          "perk": "Protean.esp|96B",
+          "x": -0.9,
+          "y": 2.4
+        },
+        {
+          "id": "devastator",
+          "perk": "Protean.esp|96C",
+          "x": 0,
+          "y": 3.8
+        },
+        {
+          "id": "borrowed_visage",
+          "perk": "Protean.esp|96D",
+          "x": -2.2,
+          "y": 1.2,
+          "links": [
+            "metamorphosis",
+            "inconspicuous"
+          ]
+        },
+        {
+          "id": "metamorphosis",
+          "perk": "Protean.esp|96E",
+          "x": -3.3,
+          "y": 2.3
+        },
+        {
+          "id": "inconspicuous",
+          "perk": "Protean.esp|96F",
+          "x": -1.9,
+          "y": 2.4,
+          "links": [
+            "infected",
+            "assassin"
+          ]
+        },
+        {
+          "id": "infected",
+          "perk": "Protean.esp|970",
+          "x": -1.4,
+          "y": 3.5
+        },
+        {
+          "id": "assassin",
+          "perk": "Protean.esp|971",
+          "x": -2.5,
+          "y": 3.7
         }
       ]
     }

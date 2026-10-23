@@ -11,8 +11,32 @@
  "exposedFaction": 2057,
  "evolution": 2059,
  "perks": {
-  "unbound_form": 2400
+  "unbound_form": 2400,
+  "keen": 2401,
+  "survivor": 2402,
+  "predator": 2403,
+  "stalker": 2404,
+  "apex": 2405,
+  "rending_claws": 2406,
+  "tendril": 2407,
+  "predators_rush": 2408,
+  "preys_flight": 2409,
+  "subtle_carapace": 2410,
+  "regeneration": 2411,
+  "devastator": 2412,
+  "borrowed_visage": 2413,
+  "metamorphosis": 2414,
+  "inconspicuous": 2415,
+  "infected": 2416,
+  "assassin": 2417,
+  "survivor_2": 2418,
+  "predator_2": 2419,
+  "stalker_2": 2420,
+  "subtle_carapace_2": 2421
  },
+ "perksBuilt": [
+  "unbound_form"
+ ],
  "globals": {
   "Protean_ActiveForm": 2368,
   "Protean_HealthBonusPct": 2369,

@@ -1,0 +1,11 @@
+FormKey: 000964:Protean.esp
+EditorID: Protean_Perk_stalker
+Name:
+  TargetLanguage: English
+  Value: 'Stalker'
+Description:
+  TargetLanguage: English
+  Value: 'Your animal forms are harder to detect.'
+NumRanks: 1
+Playable: True
+NextPerk: 000974:Protean.esp

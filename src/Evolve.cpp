@@ -57,6 +57,15 @@ namespace protean::Evolve
 				return;
 			}
 			auto& reg = Registry::Get();
+			// a placeholder perk (not built yet) is taken back: the point returns by itself, since points left are
+			// worked out from the perks owned
+			for (const auto& [id, perk] : reg.Perks()) {
+				if (!reg.PerkBuilt(id) && p->HasPerk(perk)) {
+					p->RemovePerk(perk);
+					Shift::Notify(std::format("{} is not ready yet. Your perk point is returned.", perk->GetName()));
+					logger::info("evolution: placeholder perk '{}' taken back", id);
+				}
+			}
 			if (const auto left = static_cast<float>(PointsAvailable()); reg.Dial("Protean_PerkPoints", -1.0f) != left) {
 				reg.SetGlobal("Protean_PerkPoints", left);
 			}
