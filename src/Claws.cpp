@@ -40,6 +40,9 @@ namespace protean::Claws
 		}
 
 		constexpr auto kPrefix = "ProteanClaw|"sv;
+		constexpr auto kFolder = "Protean\\Claws\\"sv;
+
+		std::string g_folder{ kFolder };  // the models in use (dev 'clawstyle' points it at a style's own folder)
 
 		// the blades now hanging in a 1st-person body
 		std::vector<RE::NiAVObject*> Hung(RE::NiAVObject* a_root, char a_side)
@@ -76,7 +79,7 @@ namespace protean::Claws
 			}
 			const auto* base = a_p->GetActorBase();
 			const char  sex = base && base->GetSex() == RE::SEX::kFemale ? 'F' : 'M';
-			const auto  path = fmt::format("Protean\\Claws\\Claws1st_{}_{}.nif", side, sex);
+			const auto  path = fmt::format("{}Claws1st_{}_{}.nif", g_folder, side, sex);
 			RE::NiPointer<RE::NiNode> model;
 			if ((RE::BSModelDB::Demand(path.c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
 				(RE::BSModelDB::Demand(("Meshes\\" + path).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
@@ -133,6 +136,37 @@ namespace protean::Claws
 		Wear(p, reg.ClawPiece(false), Slot::kModArmRight, p->GetEquippedObject(false) == weapon, "right");
 		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, p->GetEquippedObject(true) == weapon, "left");
 		HangBoth(p, weapon);
+	}
+
+	void SetStyle(const std::string& a_style)
+	{
+		g_folder = std::string(kFolder) + (a_style.empty() || a_style == "default" ? "" : a_style + "\\");
+		const auto& reg = Registry::Get();
+		for (const bool left : { false, true }) {
+			auto* piece = reg.ClawPiece(left);
+			if (!piece) {
+				continue;
+			}
+			for (auto* addon : piece->armorAddons) {
+				for (const auto sex : { RE::SEXES::kMale, RE::SEXES::kFemale }) {
+					const auto model = fmt::format("{}Claws_{}_{}.nif", g_folder, left ? 'L' : 'R', sex == RE::SEXES::kMale ? 'M' : 'F');
+					addon->bipedModels[sex].SetModel(model.c_str());
+					addon->bipedModel1stPersons[sex].SetModel(model.c_str());
+				}
+			}
+		}
+		// take everything off, then put it back on with the new models
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		if (!p) {
+			return;
+		}
+		using Slot = RE::BGSBipedObjectForm::BipedObjectSlot;
+		Wear(p, reg.ClawPiece(false), Slot::kModArmRight, false, "right");
+		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, false, "left");
+		Hang(p, false, false);
+		Hang(p, true, false);
+		SKSE::GetTaskInterface()->AddTask([]() { Sync(); });
+		logger::info("claws: models now from {}", g_folder);
 	}
 
 	void OnFrame(float a_delta)

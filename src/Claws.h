@@ -12,4 +12,5 @@ namespace protean::Claws
 	void Sync();                    // main thread: make the worn claw pieces match what the hands hold
 	void OnFrame(float a_delta);  // re-hang the 1st-person blades if the game rebuilt the 1st-person body
 	void Give();  // dev: put the weapon in the player's inventory
+	void SetStyle(const std::string& a_style);  // dev: models from Protean\Claws\<style>\ ("default": the usual ones)
 }

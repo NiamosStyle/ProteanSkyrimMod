@@ -309,6 +309,8 @@ namespace protean::Dev
 			} else if (a_cmd == "claws") {
 				Claws::Give();  // the Rending Claws weapon, one per hand
 				logger::info("dev: claw weapons given");
+			} else if (a_cmd == "clawstyle") {
+				Claws::SetStyle(a_arg);  // cat, bear, beast or default (tools/build_claws.py STYLES)
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");
