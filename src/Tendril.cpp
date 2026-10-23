@@ -14,10 +14,11 @@ namespace protean::Tendril
 		constexpr float kKnock = 15.0f;          // the yank: Pull Mastery's force (a negative knock pulls)
 		constexpr float kHaulSpeed = 2200.0f;    // the player hauled to a large target, game units / s
 		constexpr float kHaulGravity = 1000.0f;  // the haul's own gravity (as a leap's): a short, low arc
-		constexpr float kHaulGap = 60.0f;        // stop this far short of the target's edge
+		constexpr float kHaulGap = 150.0f;       // stop this far short of the target's edge (at 60 the player bumped a mammoth)
 
 		float g_cooldown{ 0.0f };     // seconds until the next throw
-		Clock::time_point g_armed{};  // a paid throw is in flight until then: its hit may pull
+		Clock::time_point g_armed{};  // a paid throw is in flight until then: its hit may pull; no hit by then = a miss
+		float             g_paid{ 0.0f };  // what the throw in flight cost: a miss gives it back (the user)
 		Clock::time_point g_toldAt{};
 		Clock::time_point g_thrownAt{};  // the last paid throw: the gate leaves its own cast alone a moment
 
@@ -185,6 +186,11 @@ namespace protean::Tendril
 		if (g_cooldown > 0.0f) {
 			g_cooldown -= a_delta;
 		}
+		if (g_paid > 0.0f && Clock::now() > g_armed) {
+			a_p->AsActorValueOwner()->RestoreActorValue(RE::ActorValue::kStamina, g_paid);
+			logger::info("tendril: missed, {:.0f} stamina back", g_paid);
+			g_paid = 0.0f;
+		}
 		UpdateHaul(a_p, a_delta);
 		Gate(a_p, spell);
 		static float since = 0.0f;
@@ -216,7 +222,11 @@ namespace protean::Tendril
 		p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
 		g_cooldown = Dial("Protean_TendrilCooldown", 3.0f);
 		g_thrownAt = Clock::now();
-		g_armed = g_thrownAt + std::chrono::milliseconds(1500);
+		// in flight for range / speed, plus a little for the hit to be reported
+		const auto* proj = a_spell->effects[0]->baseEffect->data.projectileBase;
+		const float flight = proj && proj->data.speed > 0.0f ? proj->data.range / proj->data.speed : 0.5f;
+		g_armed = g_thrownAt + std::chrono::milliseconds(static_cast<int>(1000.0f * (flight + 0.3f)));
+		g_paid = cost;
 		logger::info("tendril: thrown, stamina -{:.0f}, damage {:.0f}, drain {:.0f}", cost, a_spell->effects[0]->effectItem.magnitude,
 			a_spell->effects[1]->effectItem.magnitude);
 	}
@@ -228,6 +238,7 @@ namespace protean::Tendril
 			return;
 		}
 		g_armed = {};  // one pull per throw
+		g_paid = 0.0f;  // it hit: no refund
 		const char* skip = a_target->IsDead()             ? "dead" :
 		                   a_target->IsPlayerTeammate()   ? "a follower" :
 		                   a_target->IsEssential()        ? "essential" :
