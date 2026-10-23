@@ -87,6 +87,10 @@ RANK2 = {
 # armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
 CLAW_WEAPON, CLAW_ARMA_R, CLAW_ARMA_L, CLAW_ARMO_R, CLAW_ARMO_L = 0x980, 0x981, 0x982, 0x983, 0x984
 CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM_RIGHT), 58 (MOD_ARM_LEFT)
+# Tendril (tools/build_tendril.py makes the model): an empty-handed weapon for either hand; its swing fires a hidden
+# spell (damage + absorb stamina) whose projectile is the tendril, sent out like a flame spell's stream (the way
+# Pull Mastery sends its chain; studied 2026-10-23, nothing copied). Protean sets the magnitudes before each throw.
+TENDRIL_WEAPON, TENDRIL_PROJECTILE, TENDRIL_DAMAGE, TENDRIL_DRAIN, TENDRIL_SPELL = 0x985, 0x986, 0x987, 0x988, 0x989
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -126,6 +130,14 @@ GLOBALS = {
     "Protean_ClawSwingCost":       (0x956, 5,    "Float", "stamina each Rending Claws swing costs; 0 = free"),
     "Protean_ClawDamagePerLevelSq": (0x957, 0.02, "Float", "Rending Claws full-bar damage added per player level squared"),
     "Protean_ClawEmptyShare":      (0x958, 0.3,  "Float", "Rending Claws damage on an empty stamina bar, as a share of the full-bar damage"),
+    # Tendril (numbers agreed with the user 2026-10-23)
+    "Protean_TendrilCost":         (0x959, 25,   "Float", "stamina each Tendril throw costs"),
+    "Protean_TendrilCooldown":     (0x95A, 3,    "Float", "seconds between Tendril throws"),
+    "Protean_TendrilDamageShare":  (0x95B, 0.5,  "Float", "Tendril damage as a share of Rending Claws' full-bar damage"),
+    "Protean_TendrilDrain":        (0x95C, 20,   "Float", "stamina a Tendril hit drains (and gives you) before the level part"),
+    "Protean_TendrilDrainPerLevel": (0x95D, 0.5, "Float", "Tendril drain added per player level"),
+    "Protean_TendrilRange":        (0x95E, 1500, "Float", "how far the Tendril reaches, game units (1500 ~ 21 m)"),
+    "Protean_TendrilPullMult":     (0x95F, 1.0,  "Float", "multiplies the Tendril's pull"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -412,6 +424,50 @@ def main():
               + "Description:\n  TargetLanguage: English\n  Value: ''\n"
               "Armature:\n- %s:%s\n" % (fid(arma), PLUGIN))
 
+    # ---- Tendril
+    write(os.path.join(y, "Weapons", "Protean_Tendril - %s_%s.yaml" % (fid(TENDRIL_WEAPON), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_Tendril\n" % (fid(TENDRIL_WEAPON), PLUGIN)
+          + name_block("Tendril")
+          + "EquipmentType: 013F44:Skyrim.esm\n"  # EitherHand: mix and match with the claws (the user)
+          "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
+          "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
+          "BasicStats:\n  Damage: 2\n"  # a close jab barely hurts; the throw is the attack
+          "Data:\n  Speed: 1\n  Reach: 0.7\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
+          "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
+          "Critical:\n  Damage: 1\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
+          "DetectionSoundLevel: Normal\n")
+    write(os.path.join(y, "Projectiles", "Protean_TendrilProjectile - %s_%s.yaml" % (fid(TENDRIL_PROJECTILE), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_TendrilProjectile\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
+          + "Model:\n  File: Protean\\Tendril\\Tendril.nif\n"
+          "Flags:\n- Supersonic\n- PassThroughSmallTransparent\n"
+          "Type: Flame\nSpeed: 6000\nRange: %d\n" % GLOBALS["Protean_TendrilRange"][1]
+          + "Sound: 03F246:Skyrim.esm\n"  # the dragon's tail whip (a placeholder until the sounds are previewed)
+          "FadeDuration: 0.5\nCollisionRadius: 6\nRelaunchInterval: 0.25\nMuzzleFlashModel: ''\nSoundLevel: 1\n")
+
+    def tendril_effect(local, editor_id, title, archetype):
+        write(os.path.join(y, "MagicEffects", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id)
+              + name_block(title)
+              + "Flags:\n- Hostile\n- Detrimental\n- NoDuration\n- NoArea\nBaseCost: 0\nMagicSkill: None\n"
+              "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: %s\n  ActorValue: %s\n" % archetype
+              + "Projectile: %s:%s\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
+              + "ImpactData: 0F23C4:Skyrim.esm\n"  # flesh and blood, like the claws (a placeholder until previewed)
+              "CastType: FireAndForget\nTargetType: Aimed\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+              "Description:\n  TargetLanguage: English\n  Value: ''\n")
+
+    tendril_effect(TENDRIL_DAMAGE, "Protean_TendrilDamageEffect", "Tendril", ("ValueModifier", "Health"))
+    tendril_effect(TENDRIL_DRAIN, "Protean_TendrilDrainEffect", "Tendril Drain", ("Absorb", "Stamina"))
+    write(os.path.join(y, "Spells", "Protean_TendrilSpell - %s_%s.yaml" % (fid(TENDRIL_SPELL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_TendrilSpell\n" % (fid(TENDRIL_SPELL), PLUGIN)
+          + name_block("Tendril")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "CastType: FireAndForget\nTargetType: Aimed\n"
+          "Effects:\n"
+          + "".join("- BaseEffect: %s:%s\n  Data:\n    Magnitude: %d\n" % (fid(e), PLUGIN, m)
+                    for e, m in ((TENDRIL_DAMAGE, 6), (TENDRIL_DRAIN, 20))))  # Protean sets both before each throw
+
     # The tree for Custom Skills Framework (Exit-9B, MIT): SKSE/Plugins/CustomSkills/Protean.json. No skill level, so it
     # looks like the vanilla beast trees; the points are Protean_PerkPoints, which Protean keeps up to date.
     def ref(local):
@@ -522,6 +578,7 @@ def main():
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
+                           "tendril": {"weapon": TENDRIL_WEAPON, "spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},

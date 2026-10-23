@@ -1,0 +1,16 @@
+FormKey: 000986:Protean.esp
+EditorID: Protean_TendrilProjectile
+Model:
+  File: Protean\Tendril\Tendril.nif
+Flags:
+- Supersonic
+- PassThroughSmallTransparent
+Type: Flame
+Speed: 6000
+Range: 1500
+Sound: 03F246:Skyrim.esm
+FadeDuration: 0.5
+CollisionRadius: 6
+RelaunchInterval: 0.25
+MuzzleFlashModel: ''
+SoundLevel: 1

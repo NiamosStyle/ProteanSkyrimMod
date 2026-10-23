@@ -1,0 +1,25 @@
+FormKey: 000988:Protean.esp
+EditorID: Protean_TendrilDrainEffect
+Name:
+  TargetLanguage: English
+  Value: 'Tendril Drain'
+Flags:
+- Hostile
+- Detrimental
+- NoDuration
+- NoArea
+BaseCost: 0
+MagicSkill: None
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: Absorb
+  ActorValue: Stamina
+Projectile: 000986:Protean.esp
+ImpactData: 0F23C4:Skyrim.esm
+CastType: FireAndForget
+TargetType: Aimed
+SkillUsageMultiplier: 0
+DualCastScale: 1
+Description:
+  TargetLanguage: English
+  Value: ''

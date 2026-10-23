@@ -15,6 +15,11 @@
   "right": 2435,
   "left": 2436
  },
+ "tendril": {
+  "weapon": 2437,
+  "spell": 2441,
+  "projectile": 2438
+ },
  "perks": {
   "unbound_form": 2400,
   "keen": 2401,
@@ -68,7 +73,14 @@
   "Protean_ClawDamagePerLevel": 2389,
   "Protean_ClawSwingCost": 2390,
   "Protean_ClawDamagePerLevelSq": 2391,
-  "Protean_ClawEmptyShare": 2392
+  "Protean_ClawEmptyShare": 2392,
+  "Protean_TendrilCost": 2393,
+  "Protean_TendrilCooldown": 2394,
+  "Protean_TendrilDamageShare": 2395,
+  "Protean_TendrilDrain": 2396,
+  "Protean_TendrilDrainPerLevel": 2397,
+  "Protean_TendrilRange": 2398,
+  "Protean_TendrilPullMult": 2399
  },
  "openInteriorKeywords": [
   {
