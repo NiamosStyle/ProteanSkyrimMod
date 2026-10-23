@@ -169,7 +169,9 @@ namespace protean::Shift
 						}
 					}
 				}
-				mgr->EquipObject(a_p, form, chosen, 1, (w.left && leftSlot) ? leftSlot : nullptr, false, true, false, true);
+				// a_forceEquip is the "prevent removal" lock (Papyrus EquipItem's abPreventRemoval): leave it off, or the
+				// player cannot take the gear off again (seen 2026-10-22: footwraps stuck after a revert)
+				mgr->EquipObject(a_p, form, chosen, 1, (w.left && leftSlot) ? leftSlot : nullptr, false, false, false, true);
 				++restored;
 			}
 			s.worn.clear();
