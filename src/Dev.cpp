@@ -311,6 +311,15 @@ namespace protean::Dev
 				logger::info("dev: claw weapons given");
 			} else if (a_cmd == "clawstyle") {
 				Claws::SetStyle(a_arg);  // cat, bear, beast or default (tools/build_claws.py STYLES)
+			} else if (a_cmd == "clawimpact" && !a_arg.empty()) {
+				// clawimpact <hex form ID>: the claws' hit effects and sounds (an impact data set), to compare by ear
+				auto* set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(static_cast<RE::FormID>(std::strtoul(a_arg.c_str(), nullptr, 16)));
+				if (auto* weapon = Registry::Get().ClawWeapon(); weapon && set) {
+					weapon->impactDataSet = set;
+					logger::info("dev: claw impact set now {:08X} '{}'", set->GetFormID(), set->GetFormEditorID());
+				} else {
+					logger::warn("dev: clawimpact: no impact data set {}", a_arg);
+				}
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");

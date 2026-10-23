@@ -386,7 +386,9 @@ def main():
           + name_block("Rending Claws")
           + "EquipmentType: 013F44:Skyrim.esm\n"  # EitherHand (Feral's 013F45 is BothHands: one equip filled both)
           "Description:\n  TargetLanguage: English\n  Value: ''\n"
-          "ImpactDataSet: 0C190F:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
+          # hits sound and look like a werewolf's swipe (FXMeleeWerewolfFleshImpactSet; chosen by ear in game over
+          # the fist set Feral uses, the sabre cat's claw and a sword's slash)
+          "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
           "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
           "BasicStats:\n  Damage: 6\n"
           "Data:\n  Speed: 1.3\n  Reach: 0.7\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
