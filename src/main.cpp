@@ -3,6 +3,7 @@
 #include "Claws.h"
 #include "Dev.h"
 #include "Evolve.h"
+#include "Feed.h"
 #include "Face.h"
 #include "Fly.h"
 #include "Hooks.h"
@@ -160,6 +161,7 @@ namespace
 			protean::Attacks::Cancel();
 			protean::Move::Reset();
 			protean::Keen::Reset();
+			protean::Feed::Cancel();
 			break;
 		case SKSE::MessagingInterface::kNewGame:
 			protean::Face::BeforeLoad();

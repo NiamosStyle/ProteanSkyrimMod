@@ -1,6 +1,7 @@
 #include "Hooks.h"
 
 #include "Evolve.h"
+#include "Feed.h"
 #include "Face.h"
 
 #include "Attacks.h"
@@ -33,6 +34,7 @@ namespace protean::Hooks
 				Keen::OnFrame(a_this, a_delta);
 				Rush::OnFrame(a_this, a_delta);
 				Carapace::OnFrame(a_this, a_delta);
+				Feed::OnFrame(a_this, a_delta);
 				Flight::OnFrame(a_this, a_delta);
 				Flight::KeepFall(a_this, a_delta);
 				Camera::OnFrame(a_this);

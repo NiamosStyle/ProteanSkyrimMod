@@ -102,6 +102,7 @@ namespace protean
 		float                                diseaseApplied{ 0.0f };  // ResistDisease added now
 		float                                rushApplied{ 0.0f };     // SpeedMult Predator's Rush added now
 		float                                carapaceApplied{ 0.0f };  // DamageResist Subtle Carapace added now
+		std::set<RE::FormID>                 eaten;                    // bodies already eaten (Survivor 2)
 
 		static State& Get();
 		void          Reset();

@@ -48,6 +48,8 @@ namespace protean
 		float                             spellDelay{ 0.3f };   // seconds from the last event to the cast
 		std::int32_t                      stanceState{ 0 };     // the graph's iState kept while in the stance (giant: 1,
 		                                                        // its combat walk); 0 = left to the game
+		std::string                       diet;                 // Survivor 2: meat | plants | both; empty = does not eat
+		std::string                       feedEvent;            // graph event of its eating animation; empty = none
 		bool                              swims{ false };       // a water animal: breathes water (on land the game suffocates it;
 		                                                        // it may change on land and slither in, by user decision)
 

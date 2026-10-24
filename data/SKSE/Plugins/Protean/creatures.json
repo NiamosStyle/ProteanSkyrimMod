@@ -130,7 +130,11 @@
   "Protean_CarapaceArmor": 2474,
   "Protean_CarapaceArmorPerLevel": 2475,
   "Protean_Carapace2Armor": 2476,
-  "Protean_Carapace2ArmorPerLevel": 2477
+  "Protean_Carapace2ArmorPerLevel": 2477,
+  "Protean_FeedCorpseHeal": 2478,
+  "Protean_FeedPlantHeal": 2479,
+  "Protean_FeedSeconds": 2480,
+  "Protean_FeedReach": 2481
  },
  "openInteriorKeywords": [
   {
@@ -325,7 +329,9 @@
     "id": 787195
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "ice_wolf",
@@ -418,7 +424,9 @@
    "height": 1.15,
    "npc": "EncWolfIce",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "pit_wolf",
@@ -519,7 +527,9 @@
     "id": 787195
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "deer",
@@ -576,7 +586,9 @@
     "DeerRace"
    ],
    "height": 1.0,
-   "npc": "EncDeer"
+   "npc": "EncDeer",
+   "diet": "plants",
+   "feed_event": "idleDeerFeedingStart"
   },
   {
    "id": "elk",
@@ -632,7 +644,9 @@
    ],
    "height": 1.0,
    "npc": "EncElk",
-   "sprint": 40
+   "sprint": 40,
+   "diet": "plants",
+   "feed_event": "idleDeerFeedingStart"
   },
   {
    "id": "fox",
@@ -713,7 +727,9 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "sprint": 40
+   "sprint": 40,
+   "diet": "both",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "hare",
@@ -760,7 +776,9 @@
    },
    "leap": 500,
    "leap_height": 140,
-   "sprint": 40
+   "sprint": 40,
+   "diet": "plants",
+   "feed_event": ""
   },
   {
    "id": "dog",
@@ -833,7 +851,9 @@
     "id": 307913
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "both",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "goat",
@@ -905,7 +925,9 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 455288
-   }
+   },
+   "diet": "plants",
+   "feed_event": "idleGoatFeedingStart"
   },
   {
    "id": "cow",
@@ -978,7 +1000,9 @@
    "skin": {
     "file": "Skyrim.esm",
     "id": 321412
-   }
+   },
+   "diet": "plants",
+   "feed_event": "idleCowFeedingStart"
   },
   {
    "id": "bear",
@@ -1072,7 +1096,9 @@
    "taps": [
     "attackStart_Attack1",
     "attackStart_Attack2"
-   ]
+   ],
+   "diet": "both",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "cave_bear",
@@ -1168,7 +1194,9 @@
    "taps": [
     "attackStart_Attack1",
     "attackStart_Attack2"
-   ]
+   ],
+   "diet": "both",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "snow_bear",
@@ -1262,7 +1290,9 @@
    "taps": [
     "attackStart_Attack1",
     "attackStart_Attack2"
-   ]
+   ],
+   "diet": "both",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "sabre_cat",
@@ -1361,7 +1391,9 @@
    "height": 1.0,
    "npc": "EncSabreCat",
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "snowy_sabre_cat",
@@ -1464,7 +1496,9 @@
     "id": 645733
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "vale_sabre_cat",
@@ -1567,7 +1601,9 @@
     "id": 15465
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "death_hound",
@@ -1640,7 +1676,9 @@
     "id": 90062
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "boar",
@@ -1710,7 +1748,9 @@
     "id": 147513
    },
    "reach": 120,
-   "strike_angle": 50
+   "strike_angle": 50,
+   "diet": "both",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "skeever",
@@ -1783,7 +1823,9 @@
     "SkeeverRace"
    ],
    "height": 1.0,
-   "npc": "EncSkeever"
+   "npc": "EncSkeever",
+   "diet": "both",
+   "feed_event": "idleCowFeedingStart"
   },
   {
    "id": "chicken",
@@ -1824,7 +1866,9 @@
     "file": "Skyrim.esm",
     "id": 692636
    },
-   "sprint": 0
+   "sprint": 0,
+   "diet": "both",
+   "feed_event": ""
   },
   {
    "id": "ash_hopper",
@@ -1922,7 +1966,9 @@
    ],
    "leap": 1000,
    "leap_height": 250,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "plants",
+   "feed_event": ""
   },
   {
    "id": "mudcrab",
@@ -2012,7 +2058,9 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "both",
+   "feed_event": ""
   },
   {
    "id": "chaurus",
@@ -2132,7 +2180,9 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   },
   {
    "id": "troll",
@@ -2275,7 +2325,9 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   },
   {
    "id": "frost_troll",
@@ -2424,7 +2476,9 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   },
   {
    "id": "horse",
@@ -2478,7 +2532,9 @@
    },
    "reach": 120,
    "strike_angle": 50,
-   "own_sprint": true
+   "own_sprint": true,
+   "diet": "plants",
+   "feed_event": "idleGrazing"
   },
   {
    "id": "horker",
@@ -2549,7 +2605,9 @@
    "npc": "EncHorker",
    "reach": 120,
    "strike_angle": 50,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "mammoth",
@@ -2635,7 +2693,9 @@
     "attackStart_Attack1",
     "attackStart_Attack2"
    ],
-   "sprint": 0
+   "sprint": 0,
+   "diet": "plants",
+   "feed_event": "idleFeedingStart"
   },
   {
    "id": "giant",
@@ -2720,7 +2780,9 @@
    },
    "stance": "combatIdleStart",
    "stance_state": 1,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "both",
+   "feed_event": ""
   },
   {
    "id": "werewolf",
@@ -2829,7 +2891,9 @@
    ],
    "height": 1.0,
    "npc": "EncWerewolf01",
-   "own_sprint": true
+   "own_sprint": true,
+   "diet": "meat",
+   "feed_event": "SpecialFeeding"
   },
   {
    "id": "werebear",
@@ -2958,7 +3022,9 @@
    ],
    "height": 1.0,
    "npc": "DLC2EncWerebear",
-   "own_sprint": true
+   "own_sprint": true,
+   "diet": "both",
+   "feed_event": "SpecialFeeding"
   },
   {
    "id": "slaughterfish",
@@ -3019,7 +3085,9 @@
    "reach": 120,
    "strike_angle": 50,
    "swims": true,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   },
   {
    "id": "chaurus_hunter",
@@ -3092,7 +3160,9 @@
    "reach": 120,
    "strike_angle": 50,
    "flies": true,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   },
   {
    "id": "chaurus_hunter_fledgling",
@@ -3165,7 +3235,9 @@
    "reach": 120,
    "strike_angle": 50,
    "flies": true,
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   },
   {
    "id": "frostbite_spider",
@@ -3262,7 +3334,9 @@
     "spitStanceStart",
     "MLH_SpellRelease_event"
    ],
-   "sprint": 0
+   "sprint": 0,
+   "diet": "meat",
+   "feed_event": ""
   }
  ]
 }

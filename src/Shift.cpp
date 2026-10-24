@@ -459,6 +459,42 @@ namespace protean::Shift
 		RE::SendHUDMessage::ShowHUDMessage(a_text.c_str());
 	}
 
+	void SeenFeeding(RE::Actor* a_body)
+	{
+		auto* p = Player();
+		auto& s = State::Get();
+		auto* wf = Registry::Get().WitnessFaction();
+		auto* pl = RE::ProcessLists::GetSingleton();
+		if (!p || !pl) {
+			return;
+		}
+		const auto here = p->GetPosition();
+		int        seen = 0;
+		for (auto& handle : pl->highActorHandles) {
+			auto actor = handle.get();
+			if (!actor || actor.get() == p || actor.get() == a_body || actor->IsDead() || actor->IsPlayerTeammate()) {
+				continue;
+			}
+			// only people count, as for a stolen face
+			if (auto* r = actor->GetRace(); !r || !r->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) || Registry::Get().ByRace(r)) {
+				continue;
+			}
+			if (here.GetDistance(actor->GetPosition()) > kWitnessRange || actor->RequestDetectionLevel(p) <= 0) {
+				continue;
+			}
+			++seen;
+			if (wf && std::ranges::find(s.hostileWitnesses, actor->GetFormID()) == s.hostileWitnesses.end()) {
+				actor->AddToFaction(wf, 0);
+				s.hostileWitnesses.push_back(actor->GetFormID());
+			}
+			actor->StartCombat(p);
+			logger::info("  {:08X} '{}' saw the animal eat '{}'", actor->GetFormID(), actor->GetName(), a_body->GetName());
+		}
+		if (seen > 0) {
+			Notify("You were seen!");
+		}
+	}
+
 	namespace
 	{
 		// ---- integration (docs/INTEGRATION.md) ---------------------------------------------------------

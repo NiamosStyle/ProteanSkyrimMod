@@ -1,4 +1,5 @@
 #include "Attacks.h"
+#include "Feed.h"
 
 #include "Move.h"
 #include "Registry.h"
@@ -292,13 +293,19 @@ namespace protean::Attacks
 						continue;
 					}
 					if (b->userEvent == ue->activate && b->IsDown()) {
-						// doors, containers, talking, picking things up: blocked in animal form (user decision)
-						static auto last = std::chrono::steady_clock::time_point{};
-						const auto  now = std::chrono::steady_clock::now();
-						if (now - last > std::chrono::seconds(3)) {
-							last = now;
-							Shift::Notify("You cannot do that in animal form. Change back first.");
-						}
+						// doors, containers, talking, picking things up: blocked in animal form (user decision); with
+						// Survivor 2, eating a body or a plant in reach
+						SKSE::GetTaskInterface()->AddTask([] {
+							if (Feed::OnActivate()) {
+								return;
+							}
+							static auto last = std::chrono::steady_clock::time_point{};
+							const auto  now = std::chrono::steady_clock::now();
+							if (now - last > std::chrono::seconds(3)) {
+								last = now;
+								Shift::Notify("You cannot do that in animal form. Change back first.");
+							}
+						});
 						continue;
 					}
 					// With the game's attack controls taken (the giant), the button no longer carries its action name:

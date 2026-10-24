@@ -84,7 +84,8 @@ PERKS = {
 # base id -> (local id, description)
 RANK2 = {
     "survivor": (0x972, "Your animal forms gain still more health: 75% of your own, plus a quarter of the difference. "
-                 "Predators can feed on corpses to heal."),
+                 "Activate by a body (meat eaters) or a plant (plant eaters) to eat: a body heals 25% of your health, a plant 20%. "
+                 "Eating takes a few seconds standing still; anyone who sees you eat a person turns on you."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
@@ -189,6 +190,10 @@ GLOBALS = {
     "Protean_CarapaceArmorPerLevel": (0x9AB, 4,  "Float", "Subtle Carapace rank 1: armor added per player level"),
     "Protean_Carapace2Armor":      (0x9AC, 100,  "Float", "Subtle Carapace rank 2: armor before the level part (replaces rank 1's)"),
     "Protean_Carapace2ArmorPerLevel": (0x9AD, 7, "Float", "Subtle Carapace rank 2: armor added per player level"),
+    "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "Survivor rank 2: share of maximum health a meal of a body heals"),
+    "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
+    "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a meal takes, standing still"),
+    "Protean_FeedReach":           (0x9B1, 250,  "Float", "Survivor rank 2: how near a body or plant must be, game units"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -248,6 +253,25 @@ MELEE = {
     # no movement after transforming, and every attack refused, until combatIdleStart)
     # and walks properly only with the graph's iState at 1, its combat walk (measured: 0 = no walk or a split-legged one)
     "giant": {"stance": "combatIdleStart", "stance_state": 1},
+}
+# Survivor rank 2: what each form eats (meat = bodies, plants = harvestable plants, both), and the graph event that
+# starts its eating animation ("" = it just stands). Diets from Wikipedia for the real animals (2026-10-24: wolf,
+# sabre-tooth cat, spider, walrus carnivores; bear, boar, fox, dog, rat, crab, chicken omnivores; deer, elk, goat, cow,
+# horse, hare, mammoth herbivores) and from the games' lore for the made-up ones. The events are first guesses from
+# the animals' behavior files, checked live.
+DIET = {
+    **{c: ("meat", "idleFeedingStart") for c in ("wolf", "ice_wolf", "pit_wolf", "death_hound", "sabre_cat",
+                                              "snowy_sabre_cat", "vale_sabre_cat", "horker")},
+    **{c: ("meat", "") for c in ("albino_spider", "frostbite_spider", "chaurus", "chaurus_hunter",
+                                 "chaurus_hunter_fledgling", "slaughterfish", "troll", "frost_troll")},
+    "werewolf": ("meat", "SpecialFeeding"),
+    **{c: ("both", "idleFeedingStart") for c in ("fox", "dog", "bear", "cave_bear", "snow_bear", "boar")},
+    "skeever": ("both", "idleCowFeedingStart"), "mudcrab": ("both", ""), "chicken": ("both", ""),
+    "werebear": ("both", "SpecialFeeding"), "giant": ("both", ""),
+    **{c: ("plants", "idleDeerFeedingStart") for c in ("deer", "elk")},
+    "goat": ("plants", "idleGoatFeedingStart"), "cow": ("plants", "idleCowFeedingStart"),
+    "horse": ("plants", "idleGrazing"), "mammoth": ("plants", "idleFeedingStart"), "hare": ("plants", ""),
+    "ash_hopper": ("plants", ""),
 }
 # Protean's sprint boost (SpeedMult added while Sprint is held); everyone else gets the horse's gallop, +33% (user)
 # Only four-legged animals sprint (user): none for two legs or more than four
@@ -702,6 +726,7 @@ def main():
             **body(c, npcs),
             **by_race(MELEE, c, creatures),
             **({"sprint": SPRINT[c["id"]]} if c["id"] in SPRINT else {}),
+            **({"diet": DIET[c["id"]][0], "feed_event": DIET[c["id"]][1]} if c["id"] in DIET else {}),
         })
 
     # Keywords that mark a location as a cave-like open interior (Troll/Horker may go there). Measured over
