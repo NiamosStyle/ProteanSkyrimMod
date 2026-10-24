@@ -187,6 +187,8 @@ namespace protean::Stalker
 		SetAmbush(p, true);
 		g_ambush = kAmbushWindow;
 		logger::info("stalker: ambush bite thrown");
+		// the game ends the fade only when a bite lands (seen 2026-10-24: a miss left the wolf invisible), so the swing does
+		End(p, "attacked");
 	}
 
 	bool Hidden() { return g_faded; }
