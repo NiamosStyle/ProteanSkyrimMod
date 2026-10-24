@@ -12,6 +12,8 @@ namespace protean::Stalker
 	{
 		constexpr float kAmbushWindow = 1.5f;  // seconds from the swing to its hit that the ambush perk is held
 
+		bool        g_on = false;     // Stalk is switched on
+		float       g_tick = 0.0f;    // seconds to the next check of the Stalk power
 		float       g_still = 0.0f;   // seconds the player has been still enough to fade
 		bool        g_faded = false;  // Protean cast the fade and has not ended it
 		float       g_ambush = 0.0f;  // seconds left of the ambush window (0 = none)
@@ -70,6 +72,9 @@ namespace protean::Stalker
 			if (!Evolve::Has("stalker") || !Shift::ActiveCreature()) {
 				return "not a Stalker animal";
 			}
+			if (!g_on) {
+				return "Stalk is off";
+			}
 			if (a_p->IsDead() || a_p->IsInCombat()) {
 				return "in a fight";
 			}
@@ -99,8 +104,24 @@ namespace protean::Stalker
 			SetAmbush(a_p, false);
 			logger::info("stalker: the ambush bite missed");
 		}
+		// the Stalk power is known only by an animal with the perk; stalking ends with the animal form
+		const bool stalker = Shift::ActiveCreature() && Evolve::Has("stalker");
+		if ((g_tick -= a_delta) <= 0.0f) {
+			g_tick = 0.5f;
+			if (auto* power = Registry::Get().StalkerPower(); power && stalker != a_p->HasSpell(power)) {
+				if (stalker) {
+					a_p->AddSpell(power);
+				} else {
+					a_p->RemoveSpell(power);
+				}
+			}
+		}
+		if (!stalker && g_on) {
+			g_on = false;
+			logger::info("stalker: Stalk off (no longer a Stalker animal)");
+		}
 		const auto why = Blocker(a_p);
-		if (why != g_why && Evolve::Has("stalker") && Shift::ActiveCreature()) {
+		if (why != g_why && stalker) {
 			logger::info("stalker: {}", why.empty() ? "still enough to fade" : why);
 		}
 		g_why = why;
@@ -129,6 +150,24 @@ namespace protean::Stalker
 		av->DamageActorValue(RE::ActorValue::kStamina, Dial("Protean_StalkerDrain", 2.0f) * a_delta);
 		if (av->GetActorValue(RE::ActorValue::kStamina) <= 0.0f) {
 			End(a_p, "no stamina");
+		}
+	}
+
+	void OnPowerCast()
+	{
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		if (!p) {
+			return;
+		}
+		if (!Shift::ActiveCreature()) {
+			Shift::Notify("Stalk works only in animal form.");
+			return;
+		}
+		g_on = !g_on;
+		Shift::Notify(g_on ? "You stalk: keep still or walk to fade from sight." : "You stop stalking.");
+		logger::info("stalker: Stalk {}", g_on ? "on" : "off");
+		if (!g_on) {
+			End(p, "Stalk off");
 		}
 	}
 
@@ -191,6 +230,7 @@ namespace protean::Stalker
 
 	void Reset()
 	{
+		g_on = false;
 		g_still = 0.0f;
 		g_faded = false;
 		g_ambush = 0.0f;

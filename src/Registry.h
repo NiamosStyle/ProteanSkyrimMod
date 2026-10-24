@@ -83,6 +83,7 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* PredatorPoison() const { return _predatorPoison; }  // Predator rank 2; its effect [0] damages health
 		[[nodiscard]] RE::SpellItem* StalkerFade() const { return _stalkerFade; }        // Stalker: the game's Invisibility, cast on the player
 		[[nodiscard]] RE::BGSPerk*   StalkerAmbush() const { return _stalkerAmbush; }    // Stalker: hidden, multiplies the bite from hiding
+		[[nodiscard]] RE::SpellItem* StalkerPower() const { return _stalkerPower; }      // Stalker: Stalk, switches stalking on or off
 		[[nodiscard]] RE::BGSPerk*   Perk(std::string_view a_id) const;          // a Protean perk by id, or null
 		[[nodiscard]] const std::map<std::string, RE::BGSPerk*, std::less<>>& Perks() const { return _perks; }
 		[[nodiscard]] bool PerkBuilt(std::string_view a_id) const { return _perksBuilt.contains(a_id); }  // else a placeholder
@@ -120,6 +121,7 @@ namespace protean
 		RE::SpellItem*        _predatorPoison{ nullptr };
 		RE::SpellItem*        _stalkerFade{ nullptr };
 		RE::BGSPerk*          _stalkerAmbush{ nullptr };
+		RE::SpellItem*        _stalkerPower{ nullptr };
 		std::array<RE::SpellItem*, 3> _keenPowers{};
 		std::array<RE::SpellItem*, 3> _keenSenses{};
 		std::map<std::string, RE::BGSPerk*, std::less<>> _perks;

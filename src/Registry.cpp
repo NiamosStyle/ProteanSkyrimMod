@@ -111,8 +111,9 @@ namespace protean
 		}
 		_stalkerFade = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("fade", 0u), plugin);
 		_stalkerAmbush = dh->LookupForm<RE::BGSPerk>(j.value("stalker", nlohmann::json::object()).value("ambush", 0u), plugin);
-		if (!_stalkerFade || !_stalkerAmbush) {
-			logger::warn("Stalker's fade or ambush perk missing from {}", plugin);
+		_stalkerPower = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("power", 0u), plugin);
+		if (!_stalkerFade || !_stalkerAmbush || !_stalkerPower) {
+			logger::warn("Stalker's fade, ambush perk or power missing from {}", plugin);
 		}
 		if (!_killBoost) {
 			logger::warn("Kill Boost display missing from {}", plugin);

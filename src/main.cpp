@@ -66,6 +66,9 @@ namespace
 				if (spell && std::ranges::find(reg.KeenPowers(), spell) != reg.KeenPowers().end()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Keen::OnPowerCast(spell); });
 				}
+				if (spell && spell == reg.StalkerPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Stalker::OnPowerCast(); });
+				}
 				if (spell && spell == reg.Tendril()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Tendril::OnCast(spell); });
 				}

@@ -46,6 +46,9 @@ namespace protean::Keen
 						g_list->forms.push_back(power);
 					}
 				}
+				if (auto* stalk = Registry::Get().StalkerPower()) {
+					g_list->forms.push_back(stalk);  // Stalker's toggle; known only while the animal has that perk
+				}
 				_oldRace = *_race;
 				_oldSpells = *_spells;
 				*_race = p->GetRace();

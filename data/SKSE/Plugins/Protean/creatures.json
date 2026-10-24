@@ -77,7 +77,8 @@
  "predatorPoison": 2467,
  "stalker": {
   "fade": 2483,
-  "ambush": 2484
+  "ambush": 2484,
+  "power": 2488
  },
  "globals": {
   "Protean_ActiveForm": 2368,

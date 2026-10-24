@@ -49,9 +49,9 @@ PERKS = {
                  "of the difference when the animal is stronger than you.", 3.3, 1.9, ["apex"]),
     "predator": (0x963, "Predator", "Your animal forms deal more damage, 2% more for each level you have (at most double).",
                  2.3, 2.1, ["apex"]),
-    "stalker": (0x964, "Stalker", "In animal form, stand still or walk for a moment out of a fight to fade from sight. "
-                "Staying hidden costs Stamina; running, being hit or attacking ends it, and a bite from hiding does "
-                "double damage.", 1.4, 1.9, ["apex"]),
+    "stalker": (0x964, "Stalker", "In animal form, open Favorites to switch on Stalk: stand still or walk for a moment "
+                "out of a fight to fade from sight. Staying hidden costs Stamina; running, being hit or attacking ends "
+                "it, and a bite from hiding does double damage.", 1.4, 1.9, ["apex"]),
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
@@ -123,6 +123,7 @@ PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
 # on an attack) and the hidden perk held from a bite thrown from hiding to its hit (Protean sets its multiplier).
 # xx9B2 was a test perk installed once (2026-10-24, never committed); not reused.
 STALKER_FADE_SPELL, STALKER_AMBUSH_PERK = 0x9B3, 0x9B4
+STALKER_POWER = 0x9B8  # Stalk: the toggle in the animal's Favorites menu, beside Keen's powers
 VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
@@ -616,6 +617,8 @@ def main():
           "In animal form, sense the living through walls, at a steady cost in Stamina. Cast again to stop.")
     power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Keen: Detect Dead",
           "In animal form, sense the dead and undead through walls, at a steady cost in Stamina. Cast again to stop.")
+    power(STALKER_POWER, "Protean_StalkPower", "Stalker: Stalk",
+          "In animal form, while on, keep still or walk to fade from sight; staying hidden costs Stamina. Cast again to stop.")
     # Detect Dead as fire-and-forget: the game's held Detect Undead effects (DetectUndead*ConcSelf), same looks and
     # target conditions, with a duration.
     dead_kw = {"enemy": ("013797", "01397A", "0F82F4"), "friend": ("0F82F4", "013797", "01397A")}
@@ -782,7 +785,7 @@ def main():
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),
                            "predatorPoison": PREDATOR_POISON_SPELL,
-                           "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK},
+                           "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))
