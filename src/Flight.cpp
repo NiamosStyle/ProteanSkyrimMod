@@ -38,6 +38,75 @@ namespace protean::Flight
 		float g_stuck = 0.0f;  // seconds on the ground with the game's jumping flag still up
 
 		std::string g_sound = "NPCDragonLandCrashShortSD";
+
+		// the glide's looks while being chosen live: art objects / effect shaders on the player (dev 'glidefx <hex>...')
+		// and a wind loop (dev 'glidesound <SNDR editor ID>')
+		std::vector<RE::FormID> g_fx{ 0x000ABF02, 0x02002947 };  // AbsorbRedHandFX01, DLC1DrainVitalCasterFXS
+		std::string             g_wind = "AMBDungeonIceWindRadius2DLPSD";  // the user's pick of the loops; 2D: the outdoor ones stayed faint
+		float                   g_windVolume = 1.6f;  // a little louder than the loop's own (the user)
+		int                     g_windLogged = 0;
+		std::array<RE::BSSoundHandle, 3> g_windHandles;
+		int                     g_windLayers = 1;  // copies played at once, for more volume than one allows
+		bool                    g_looksOn = false;
+
+		void Looks(RE::PlayerCharacter* a_p, bool a_on)
+		{
+			if (a_on == g_looksOn) {
+				return;
+			}
+			g_looksOn = a_on;
+			if (a_on) {
+				for (const auto id : g_fx) {
+					auto* form = RE::TESForm::LookupByID(id);
+					if (auto* art = form ? form->As<RE::BGSArtObject>() : nullptr) {
+						// a hand effect on each hand (left to itself it sat at the feet)
+						auto* root = a_p->Get3D(false);
+						for (const char* node : { "NPC R MagicNode [RMag]", "NPC L MagicNode [LMag]" }) {
+							a_p->ApplyArtObject(art, -1.0f, nullptr, false, false, root ? root->GetObjectByName(node) : nullptr);
+						}
+					} else if (auto* shader = form ? form->As<RE::TESEffectShader>() : nullptr) {
+						a_p->ApplyEffectShader(shader, -1.0f);
+					}
+				}
+				if (auto* audio = RE::BSAudioManager::GetSingleton(); audio && !g_wind.empty()) {
+					for (int i = 0; i < g_windLayers; ++i) {
+						auto& h = g_windHandles[i];
+						audio->GetSoundHandleByName(h, g_wind.c_str(), 0x1A);
+						if (h.IsValid()) {
+							h.SetObjectToFollow(a_p->Get3D());
+							h.SetVolume(g_windVolume);
+							h.Play();
+						}
+					}
+					if (g_windLogged++ < 20) {
+						logger::info("flight: glide wind '{}' x{} {}", g_wind, g_windLayers, g_windHandles[0].IsValid() ? "playing" : "NOT FOUND");
+					}
+				}
+				return;
+			}
+			// off: the effects on the player that are ours end
+			if (auto* pl = RE::ProcessLists::GetSingleton()) {
+				const auto mine = [&](RE::ReferenceEffect* a_e, RE::TESForm* a_form) {
+					auto ref = a_e->target.get();
+					if (ref && ref->IsPlayerRef() && a_form && std::ranges::find(g_fx, a_form->GetFormID()) != g_fx.end()) {
+						a_e->finished = true;
+					}
+				};
+				pl->ForEachModelEffect([&](RE::ModelReferenceEffect* a_e) {
+					mine(a_e, a_e->artObject);
+					return RE::BSContainer::ForEachResult::kContinue;
+				});
+				pl->ForEachShaderEffect([&](RE::ShaderReferenceEffect* a_e) {
+					mine(a_e, a_e->effectData);
+					return RE::BSContainer::ForEachResult::kContinue;
+				});
+			}
+			for (auto& h : g_windHandles) {
+				if (h.IsValid()) {
+					h.FadeOutAndRelease(400);
+				}
+			}
+		}
 		int         g_pose = 1;               // which glide marker (1-3; 0 = none): the pose being chosen
 		RE::SpellItem* g_marker = nullptr;    // the one on the player now
 
@@ -398,6 +467,7 @@ namespace protean::Flight
 		}
 		Update(a_p, a_delta);
 		Mark(a_p, g_gliding);  // every way a glide ends takes the marker off
+		Looks(a_p, g_gliding);
 
 		// test aid: each change while airborne, to find what briefly swaps the glide pose for a run
 		static bool  wasGliding = false;
@@ -528,6 +598,43 @@ namespace protean::Flight
 			in >> v.x >> v.y >> v.z;
 			(a_what == "armr" ? g_armR : g_armL) = v;
 			logger::info("dev: glide arms right ({}, {}, {}) left ({}, {}, {})", g_armR.x, g_armR.y, g_armR.z, g_armL.x, g_armL.y, g_armL.z);
+			return;
+		}
+		if (a_what == "fx") {
+			// off first, so a glide under way shows the new set from its next start
+			if (auto* p = RE::PlayerCharacter::GetSingleton(); p && g_looksOn) {
+				Looks(p, false);
+			}
+			g_fx.clear();
+			std::istringstream in{ std::string(a_value) };
+			for (std::string w; in >> w;) {
+				if (w != "none") {
+					g_fx.push_back(static_cast<RE::FormID>(std::strtoul(w.c_str(), nullptr, 16)));
+				}
+			}
+			std::string list;
+			for (const auto id : g_fx) {
+				auto* f = RE::TESForm::LookupByID(id);
+				list += std::format(" {:08X}({})", id, f ? (f->Is(RE::FormType::ArtObject) ? "art" : f->Is(RE::FormType::EffectShader) ? "shader" : "?") : "missing");
+			}
+			logger::info("dev: glide fx{}", list);
+			return;
+		}
+		if (a_what == "wind") {
+			if (auto* p = RE::PlayerCharacter::GetSingleton(); p && g_looksOn) {
+				Looks(p, false);
+			}
+			std::istringstream in{ std::string(a_value) };
+			std::string        name;
+			in >> name;
+			if (float vol = 0.0f; in >> vol) {
+				g_windVolume = vol;
+			}
+			if (int layers = 0; in >> layers) {
+				g_windLayers = std::clamp(layers, 1, static_cast<int>(g_windHandles.size()));
+			}
+			g_wind = name == "none" ? "" : name;
+			logger::info("dev: glide wind '{}' volume {:.2f} layers {}", g_wind, g_windVolume, g_windLayers);
 			return;
 		}
 		if (a_what == "steer") {

@@ -365,6 +365,9 @@ namespace protean::Dev
 			} else if (a_cmd == "glidearm" && a_arg.size() > 2) {
 				// glidearm r|l <x> <y> <z>: turn that upper arm further while gliding, degrees (choosing the look)
 				Flight::SetLooks(a_arg[0] == 'l' ? "arml" : "armr", std::string_view(a_arg).substr(2));
+			} else if (a_cmd == "glidefx" || a_cmd == "glidesound") {
+				// glidefx <hex form>... | none ; glidesound <SNDR editor ID> | none: the glide's looks, chosen live
+				Flight::SetLooks(a_cmd == "glidefx" ? "fx" : "wind", a_arg);
 			} else if (a_cmd == "glidesteer" || a_cmd == "glidediag") {
 				Flight::SetLooks(a_cmd == "glidesteer" ? "steer" : "diag", a_arg);  // test switches for the glide's shake
 			} else if (a_cmd == "glidepose") {
