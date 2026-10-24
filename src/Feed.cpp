@@ -12,6 +12,13 @@ namespace protean::Feed
 		constexpr std::string_view kPerk = "survivor_2";
 		constexpr float            kFront = 0.5f;   // cos of the widest angle off the facing a meal is looked for (60 deg)
 		constexpr float            kStray = 40.0f;  // game units the player may slide while eating
+		// the meal's sounds, played at these seconds into it (a body's once, it is long) (user's picks, chosen live 2026-10-24: the animal
+		// sounds were too quiet to hear); the body gets the werewolf's feeding blood spray
+		constexpr const char*      kPlantSound = "ITMFoodEat";
+		constexpr const char*      kBodySound = "NPCWerewolfFeeding";
+		constexpr float            kSoundAt[] = { 0.3f, 1.8f };
+		constexpr RE::FormID       kBodyBlood = 0x0F3A8A;  // BloodSprayWereWolfEat01, Skyrim.esm
+		constexpr float            kRetryAnim = 0.5f;      // seconds the eating animation is asked for again
 
 		struct Meal
 		{
@@ -20,6 +27,8 @@ namespace protean::Feed
 			RE::ObjectRefHandle target;
 			float              t{ 0.0f };
 			RE::NiPoint3       at;
+			bool               played{ false };  // the graph took the eating animation
+			int                sounds{ 0 };      // sounds played so far
 		};
 		Meal g_meal;
 
@@ -93,6 +102,18 @@ namespace protean::Feed
 				return RE::BSContainer::ForEachResult::kContinue;
 			});
 			return best;
+		}
+
+		void Sound(RE::PlayerCharacter* a_p, const char* a_name)
+		{
+			RE::BSSoundHandle h;
+			if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+				audio->GetSoundHandleByName(h, a_name, 0x1A);
+			}
+			if (h.IsValid()) {
+				h.SetPosition(a_p->GetPosition());
+				h.Play();
+			}
 		}
 
 		void Stop(RE::PlayerCharacter* a_p, std::string_view a_why)
@@ -170,7 +191,10 @@ namespace protean::Feed
 		const auto to = target->GetPosition() - p->GetPosition();
 		p->SetAngle(RE::NiPoint3{ p->GetAngleX(), p->GetAngleY(), std::atan2(to.x, to.y) });
 		const bool played = !c->feedEvent.empty() && p->NotifyAnimationGraph(c->feedEvent);
-		g_meal = { true, corpse, target->GetHandle(), 0.0f, p->GetPosition() };
+		g_meal = { true, corpse, target->GetHandle(), 0.0f, p->GetPosition(), played, 0 };
+		if (auto* blood = corpse ? RE::TESForm::LookupByID<RE::BGSArtObject>(kBodyBlood) : nullptr) {
+			target->ApplyArtObject(blood, Dial("Protean_FeedSeconds", 3.0f));
+		}
 		logger::info("feed: '{}' starts on '{}' ({}), graph took '{}': {}", c->id, target->GetName(), corpse ? "body" : "plant",
 			c->feedEvent, played);
 		if (corpse) {
@@ -196,6 +220,18 @@ namespace protean::Feed
 			Stop(a_p, "the meal is gone");
 		} else if ((g_meal.t += a_delta) >= Dial("Protean_FeedSeconds", 3.0f)) {
 			Finish(a_p);
+		} else {
+			// the graph refuses the eating animation straight after a walk (seen 2026-10-24): asked again for a moment
+			if (const auto* c = Shift::ActiveCreature(); !g_meal.played && g_meal.t < kRetryAnim && c && !c->feedEvent.empty() &&
+				a_p->NotifyAnimationGraph(c->feedEvent)) {
+				g_meal.played = true;
+				logger::info("feed: the graph took '{}' after {:.2f} s", c->feedEvent, g_meal.t);
+			}
+			const int plays = g_meal.corpse ? 1 : static_cast<int>(std::size(kSoundAt));  // the werewolf's is long (user)
+			if (g_meal.sounds < plays && g_meal.t >= kSoundAt[g_meal.sounds]) {
+				++g_meal.sounds;
+				Sound(a_p, g_meal.corpse ? kBodySound : kPlantSound);
+			}
 		}
 	}
 
