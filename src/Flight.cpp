@@ -284,8 +284,6 @@ namespace protean::Flight
 				const float vx = v.quad.m128_f32[0] / kUnit;
 				const float vy = v.quad.m128_f32[1] / kUnit;
 				if (!g_gliding) {
-					a_p->RemoveAnimationGraphEventSink(&g_graphSink);
-					a_p->AddAnimationGraphEventSink(&g_graphSink);
 					g_landedInGlide = false;  // nothing left from before this glide
 					g_gliding = true;
 					g_glideStart = vz;
@@ -320,6 +318,13 @@ namespace protean::Flight
 
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
 	{
+		// the graph listener, once per animation graph (a load or a change of form builds new ones). Removed and
+		// added again at each glide's start, the graph left its fall for a moment and a run showed (testing 2026-10-24)
+		static RE::BSAnimationGraphManager* listened = nullptr;
+		if (RE::BSTSmartPointer<RE::BSAnimationGraphManager> mgr; a_p->GetAnimationGraphManager(mgr) && mgr.get() != listened) {
+			listened = mgr.get();
+			a_p->AddAnimationGraphEventSink(&g_graphSink);
+		}
 		Update(a_p, a_delta);
 		Mark(a_p, g_gliding);  // every way a glide ends takes the marker off
 
@@ -337,6 +342,18 @@ namespace protean::Flight
 		}
 		wasGliding = g_gliding;
 		wasInJump = inJump;
+
+		// test aid: what the graph's direction blend sees while gliding and turning (the pose shook like a kite)
+		static float sinceSample = 0.0f;
+		if (g_gliding && (sinceSample += a_delta) >= 0.1f) {
+			sinceSample = 0.0f;
+			float dir = 0.0f, turn = 0.0f, speed = 0.0f;
+			a_p->GetGraphVariableFloat("Direction", dir);
+			a_p->GetGraphVariableFloat("TurnDelta", turn);
+			a_p->GetGraphVariableFloat("Speed", speed);
+			logger::info("flight: glide sample heading {:.0f} direction {:.2f} turnDelta {:.2f} speed {:.0f}",
+				a_p->GetAngleZ() * 57.2958f, dir, turn, speed);
+		}
 	}
 
 	void AfterAnimation(RE::PlayerCharacter* a_p)

@@ -573,8 +573,7 @@ namespace protean::Shift
 		AddHeart(a_corpse);
 	}
 
-	// at the death, so the heart is there the first time the body is opened (added on opening, the loot window was
-	// already filled and showed it only the second time); opening still adds it to a body that died out of sight
+	// as the body is searched, before the loot window fills (Hooks: TESNPC::Activate); the activate event adds it too
 	void AddHeart(RE::Actor* a_corpse)
 	{
 		if (!a_corpse || !a_corpse->IsDead()) {
