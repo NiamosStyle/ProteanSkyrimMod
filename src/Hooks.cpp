@@ -44,12 +44,25 @@ namespace protean::Hooks
 			static inline REL::Relocation<decltype(thunk)> func;
 			static constexpr std::size_t                   idx = 0xAD;  // Actor::Update, SE/AE
 		};
+
+		// the frame's animation applied to the skeleton: a bone turned before this is overwritten
+		struct PlayerUpdateAnimation
+		{
+			static void thunk(RE::PlayerCharacter* a_this, float a_delta)
+			{
+				func(a_this, a_delta);
+				Flight::AfterAnimation(a_this);
+			}
+			static inline REL::Relocation<decltype(thunk)> func;
+			static constexpr std::size_t                   idx = 0x7D;  // TESObjectREFR::UpdateAnimation
+		};
 	}
 
 	void Install()
 	{
 		REL::Relocation<std::uintptr_t> vtbl{ RE::VTABLE_PlayerCharacter[0] };
 		PlayerUpdate::func = vtbl.write_vfunc(PlayerUpdate::idx, PlayerUpdate::thunk);
-		logger::info("hooked PlayerCharacter::Update");
+		PlayerUpdateAnimation::func = vtbl.write_vfunc(PlayerUpdateAnimation::idx, PlayerUpdateAnimation::thunk);
+		logger::info("hooked PlayerCharacter::Update and UpdateAnimation");
 	}
 }

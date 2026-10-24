@@ -13,5 +13,6 @@ namespace protean::Flight
 
 	void Install();                                         // kDataLoaded: watch Jump and the attack keys
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta);  // after the player's update
+	void AfterAnimation(RE::PlayerCharacter* a_p);          // after the frame's animation reached the skeleton
 	void SetLooks(std::string_view a_what, std::string_view a_value);  // dev: "sound" <SNDR editor ID>, "shake" <strength>
 }

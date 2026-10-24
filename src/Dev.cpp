@@ -362,6 +362,9 @@ namespace protean::Dev
 						static_cast<std::uint32_t>(d.types.underlying()), d.speed, d.range, d.fadeOutTime, d.collisionRadius, d.relaunchInterval, d.lifetime, d.force,
 						static_cast<std::uint32_t>(d.flags.underlying()));
 				}
+			} else if (a_cmd == "glidearm" && a_arg.size() > 2) {
+				// glidearm r|l <x> <y> <z>: turn that upper arm further while gliding, degrees (choosing the look)
+				Flight::SetLooks(a_arg[0] == 'l' ? "arml" : "armr", std::string_view(a_arg).substr(2));
 			} else if (a_cmd == "glidepose") {
 				Flight::SetLooks("pose", a_arg);  // glidepose <0-3>: which glide marker (the OAR pose being chosen)
 			} else if (a_cmd == "slamsound" || a_cmd == "slamshake") {

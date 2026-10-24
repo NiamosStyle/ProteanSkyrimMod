@@ -10,6 +10,7 @@ build/
 __pycache__/
 build.log
 dist/
-# Rending Claws animations: the game's own files, renamed (Bethesda data, made by tools/build_claw_anims.py)
+# Rending Claws animations: the game's own files, renamed (Bethesda data, made by tools/build_claw_anims.py);
+# the glide pose, made by tools/build_glide_anim.py
 data/meshes/actors/character/animations/OpenAnimationReplacer/
 data/meshes/actors/character/_1stperson/animations/OpenAnimationReplacer/

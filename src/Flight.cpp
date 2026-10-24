@@ -37,6 +37,31 @@ namespace protean::Flight
 		std::string g_sound = "NPCDragonLandCrashShortSD";
 		int         g_pose = 1;               // which glide marker (1-3; 0 = none): the pose being chosen
 		RE::SpellItem* g_marker = nullptr;    // the one on the player now
+
+		// the arms turned a little further on top of the glide pose (degrees about each bone's own x, y, z), being
+		// chosen live: dev 'glidearm r|l x y z'
+		RE::NiPoint3 g_armR{};  // none: Protean's glide animation has the arms out (25 deg about y was the pick on a borrowed pose)
+		RE::NiPoint3 g_armL{};
+
+		void TurnArms(RE::PlayerCharacter* a_p)
+		{
+			auto* root = a_p->Get3D(false);
+			if (!root) {
+				return;
+			}
+			constexpr float kDeg = 3.14159265f / 180.0f;
+			for (const auto& [name, turn] : { std::pair{ "NPC R UpperArm [RUar]", g_armR }, std::pair{ "NPC L UpperArm [LUar]", g_armL } }) {
+				auto* bone = root->GetObjectByName(name);
+				if (!bone || (turn.x == 0.0f && turn.y == 0.0f && turn.z == 0.0f)) {
+					continue;
+				}
+				RE::NiMatrix3 m;
+				m.SetEulerAnglesXYZ(turn.x * kDeg, turn.y * kDeg, turn.z * kDeg);
+				bone->local.rotate = bone->local.rotate * m;
+				RE::NiUpdateData update;
+				bone->Update(update);
+			}
+		}
 		float       g_shake = 1.0f;
 
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
@@ -112,6 +137,7 @@ namespace protean::Flight
 					a->SetGraphVariableFloat("staggerDirection", (angle >= 0.0f ? angle : 360.0f + angle) / 360.0f);
 					a->SetGraphVariableFloat("staggerMagnitude", 1.0f);
 					a->NotifyAnimationGraph("staggerStart");
+					logger::info("flight: slam staggers '{}' {:08X} at {:.0f}", a->GetName(), a->GetFormID(), a->GetPosition().GetDistance(here));
 					++hit;
 				}
 			}
@@ -265,6 +291,28 @@ namespace protean::Flight
 	{
 		Update(a_p, a_delta);
 		Mark(a_p, g_gliding);  // every way a glide ends takes the marker off
+
+		// test aid: each change while airborne, to find what briefly swaps the glide pose for a run
+		static bool  wasGliding = false;
+		static bool  wasInJump = false;
+		static float airTime = 0.0f;
+		bool         inJump = false;
+		a_p->GetGraphVariableBool("bInJumpState", inJump);
+		airTime = g_air > 0.0f ? airTime + a_delta : 0.0f;
+		if (g_air > 0.0f && (g_gliding != wasGliding || inJump != wasInJump)) {
+			auto* cc = a_p->GetCharController();
+			logger::info("flight: at {:.2f} s in the air gliding {} graph in jump {} (state {})", airTime, g_gliding, inJump,
+				cc ? static_cast<int>(cc->context.currentState) : -1);
+		}
+		wasGliding = g_gliding;
+		wasInJump = inJump;
+	}
+
+	void AfterAnimation(RE::PlayerCharacter* a_p)
+	{
+		if (g_gliding) {
+			TurnArms(a_p);
+		}
 	}
 
 	namespace
@@ -313,6 +361,14 @@ namespace protean::Flight
 
 	void SetLooks(std::string_view a_what, std::string_view a_value)
 	{
+		if (a_what == "armr" || a_what == "arml") {
+			RE::NiPoint3 v{};
+			std::istringstream in{ std::string(a_value) };
+			in >> v.x >> v.y >> v.z;
+			(a_what == "armr" ? g_armR : g_armL) = v;
+			logger::info("dev: glide arms right ({}, {}, {}) left ({}, {}, {})", g_armR.x, g_armR.y, g_armR.z, g_armL.x, g_armL.y, g_armL.z);
+			return;
+		}
 		if (a_what == "pose") {
 			g_pose = std::atoi(std::string(a_value).c_str());
 			logger::info("dev: glide pose {}", g_pose);

@@ -31,6 +31,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_claw_anims  # noqa: E402
 for rel in build_claw_anims.build():
     files[rel] = os.path.join(ROOT, "data", rel)
+# the glide pose (Open Animation Replacer; written from scratch by tools/build_glide_anim.py)
+import build_glide_anim  # noqa: E402
+for rel in build_glide_anim.build():
+    files[rel] = os.path.join(ROOT, "data", rel)
 for name, path in files.items():
     if not os.path.isfile(path):
         sys.exit("missing " + path)
