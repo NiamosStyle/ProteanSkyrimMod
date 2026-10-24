@@ -427,6 +427,47 @@ namespace protean::Flight
 		}
 	}
 
+	void KeepFall(RE::PlayerCharacter* a_p, float a_delta)
+	{
+		// A jump far higher than the game's (Predator's Rush, the jump in mid-air) outlasts the jump's animation: the
+		// graph gave up on it while still in the air and showed a run for a moment before the fall (seen in testing
+		// 2026-10-24). At the top of the arc the fall is started here, and a graph out of its jump while airborne is
+		// put back after a moment.
+		static float lastVz = 0.0f;
+		static float out = 0.0f;
+		static float stuck = 0.0f;
+		auto*        cc = a_p->GetCharController();
+		if (!cc || Shift::ActiveCreature() || (!Evolve::Has(kPerk) && !Evolve::Has("predators_rush")) ||
+			cc->flags.all(RE::CHARACTER_FLAGS::kSupport) || a_p->AsActorState()->IsSwimming() || g_diving) {
+			lastVz = 0.0f;
+			out = 0.0f;
+			stuck = 0.0f;
+			return;
+		}
+		// The engine's own trap: at the top of a jump straight up it can switch to its on-ground state with nothing
+		// underneath, where gravity is off and the player sinks ~11 units a second (seen in testing 2026-10-24; other
+		// jump mods show it too). A moment of that and the player is put back in the air.
+		if (cc->context.currentState == RE::hkpCharacterStateType::kOnGround) {
+			if ((stuck += a_delta) > 0.05f) {
+				cc->context.currentState = RE::hkpCharacterStateType::kInAir;
+				stuck = 0.0f;
+			}
+		} else {
+			stuck = 0.0f;
+		}
+		RE::hkVector4 v;
+		cc->GetLinearVelocityImpl(v);
+		const float vz = v.quad.m128_f32[2] / kUnit;
+		bool        inJump = true;
+		a_p->GetGraphVariableBool("bInJumpState", inJump);
+		out = inJump ? 0.0f : out + a_delta;
+		if ((lastVz > 0.0f && vz <= 0.0f) || out > kOutOfFall) {
+			a_p->NotifyAnimationGraph("JumpFall");
+			out = 0.0f;
+		}
+		lastVz = vz;
+	}
+
 	void AfterAnimation(RE::PlayerCharacter* a_p)
 	{
 		if (g_gliding) {

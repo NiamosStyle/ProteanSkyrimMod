@@ -32,6 +32,7 @@ namespace protean::Hooks
 				Keen::OnFrame(a_this, a_delta);
 				Rush::OnFrame(a_this, a_delta);
 				Flight::OnFrame(a_this, a_delta);
+				Flight::KeepFall(a_this, a_delta);
 				Camera::OnFrame(a_this);
 				Attacks::OnFrame();
 				Shift::OnFrame();
