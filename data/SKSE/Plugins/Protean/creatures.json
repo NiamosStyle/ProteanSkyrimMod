@@ -588,7 +588,7 @@
    "height": 1.0,
    "npc": "EncDeer",
    "diet": "plants",
-   "feed_event": "idleDeerFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "elk",
@@ -646,7 +646,7 @@
    "npc": "EncElk",
    "sprint": 40,
    "diet": "plants",
-   "feed_event": "idleDeerFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "fox",
@@ -927,7 +927,7 @@
     "id": 455288
    },
    "diet": "plants",
-   "feed_event": "idleGoatFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "cow",
@@ -1002,7 +1002,7 @@
     "id": 321412
    },
    "diet": "plants",
-   "feed_event": "idleCowFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "bear",
@@ -1393,7 +1393,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "snowy_sabre_cat",
@@ -1498,7 +1498,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "vale_sabre_cat",
@@ -1603,7 +1603,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "death_hound",
@@ -2893,7 +2893,7 @@
    "npc": "EncWerewolf01",
    "own_sprint": true,
    "diet": "meat",
-   "feed_event": "SpecialFeeding"
+   "feed_event": ""
   },
   {
    "id": "werebear",
@@ -3024,7 +3024,7 @@
    "npc": "DLC2EncWerebear",
    "own_sprint": true,
    "diet": "both",
-   "feed_event": "SpecialFeeding"
+   "feed_event": ""
   },
   {
    "id": "slaughterfish",
