@@ -95,6 +95,10 @@ script or the console can change them at any time.
 | `Protean_CarapaceArmorPerLevel` | xx9AB | Float | 4 | Subtle Carapace rank 1: armor added per player level |
 | `Protean_Carapace2Armor` | xx9AC | Float | 100 | Subtle Carapace rank 2: armor before the level part (replaces rank 1's) |
 | `Protean_Carapace2ArmorPerLevel` | xx9AD | Float | 7 | Subtle Carapace rank 2: armor added per player level |
+| `Protean_FeedCorpseHeal` | xx9AE | Float | 0.25 | Survivor rank 2: share of maximum health a meal of a body heals |
+| `Protean_FeedPlantHeal` | xx9AF | Float | 0.2 | Survivor rank 2: share of maximum health a plant heals |
+| `Protean_FeedSeconds` | xx9B0 | Float | 3 | Survivor rank 2: seconds a meal takes, standing still |
+| `Protean_FeedReach` | xx9B1 | Float | 250 | Survivor rank 2: how near a body or plant must be, game units |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -103,7 +107,8 @@ Notes:
   new value takes effect at the next change. Everything else applies at once.
 - **Damage:** ordinary perks with the `Mod Attack Damage` entry point already reach every form's
   attacks (measured: a +25% perk raised an elk's kick from 5 to 6.25). `Protean_DamageMult` is a
-  Protean-wide multiplier on top. Perks conditioned on weapon types or worn gauntlets will not apply:
+  Protean-wide multiplier on top: it and Predator raise the `AttackDamageMult` actor value, which multiplies the
+  bites too (measured: 5 at x1, 10 at x2). Perks conditioned on weapon types or worn gauntlets will not apply:
   an animal holds nothing.
 - **Armor:** perks that boost worn armor pieces do nothing for an animal (it wears none). Raise
   `Protean_ArmorBonus`, or the `DamageResist` actor value directly, instead.
@@ -112,6 +117,10 @@ Notes:
   in every animal form, and in human form only while no light or heavy armor is worn in the body slot. Predator rank 2
   casts `Protean_PredatorPoison` (xx9A3, effect xx9A2) on a power attack's hit in animal form; actors with
   `ActorTypeUndead` or `ActorTypeDwarven` are skipped.
+- **Feeding (Survivor rank 2):** Activate in animal form eats the nearest body or harvestable plant in front, by
+  the form's diet (`diet` in `creatures.json`: meat, plants or both). A meal takes `Protean_FeedSeconds` standing
+  still; moving or jumping ends it without healing. One meal per body (kept in the co-save); a plant is harvested
+  the game's way (it grows back on the game's timer) and the ingredient is taken back out of the inventory.
 - **Stamina:** the forms use the player's own stamina. Sprint drain and spit cost have their own dials;
   power attacks cost what the game's power-attack rule says (40 x `fPowerAttackStaminaPenalty`).
 - Per-form values (reach, cone, sprint strength, leap, taps) live in
@@ -179,6 +188,7 @@ not contiguous.
 | `Protean_KeenDetectDead*` (effects) | xx990-xx993 | The game's held Detect Undead effects as fire-and-forget ones |
 | `Protean_KillBoost` (ability) / `Protean_KillBoostEffect` | xx97D / xx97C | Shows Unbound Form's kill boost in Active Effects (magnitude = the current total) |
 | `Protean_Glide1` (ability) / `Protean_GlideEffect1` | xx99F / xx99C | Hidden, on the player while gliding: Open Animation Replacer's condition for the glide pose |
+| `Protean_PredatorPoison` (spell) / `Protean_PredatorPoisonEffect` | xx9A3 / xx9A2 | Predator rank 2's poison (Damage Health over time, poison resistance counts); Protean sets magnitude and duration from the player's level |
 
 ## 6. Rules a larger mod should know
 
@@ -202,6 +212,13 @@ not contiguous.
 - The glide pose is Protean's own animation (`meshes/actors/character/animations/OpenAnimationReplacer/Protean/Glide/`,
   replacing `mt_jumpfall` while `Protean_GlideEffect1` is on). An animation mod that replaces the fall at a higher
   OAR priority than 2,000,000,001 would hide it.
+- Activate is not blocked for a Survivor 2 animal near a meal. Eating a person's body where people can see it puts
+  them in `Protean_WitnessFaction` and into combat, until the player changes back (as for seeing the change).
+- A save made in animal form can come back without the health and damage bonuses (the game drops some temporary
+  modifiers on a load after a restart; measured 2026-10-24). The co-save keeps the temporary modifiers of the
+  values Protean changes (health, AttackDamageMult, DamageResist, SpeedMult, StaminaRateMult, ResistDisease,
+  WaterBreathing); after a load Protean puts back its own part when exactly that much is missing, and only logs any
+  other difference.
 - Hearts go into an animal's body as it is searched (Protean hooks the NPC base form's activation), so the loot window
   shows them the first time.
 - Favorites in animal form works like the Vampire Lord's: it lists only Revert Form and the Keen powers the player

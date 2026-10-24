@@ -158,14 +158,14 @@ Stealing the face of any of these characters grants one automatic perk point. No
   - Rank 1: the health bonus rises from 25% of your health to 50%, plus a quarter of the size gap as before. See "Changes to Protean itself."
   - Rank 2: it rises to 75%, plus the same quarter of the gap. Predator animals also gain the ability to "activate" a corpse and eat it, like a werewolf, which restores health.
   - Idea to explore: herbivores could "activate" plants and mushrooms to eat them for the same health restoration. If this can't be done, herbivores instead get an extra health regeneration bonus outside of combat.
-- **Status:** Ready for the health bonus: Protean has a setting for it. Predator corpse-eating is new work, because Protean has no corpse eating yet and blocks activating anything in animal form. The herbivore plant and mushroom eating is a new idea and needs research into how to make plants and mushrooms activatable.
+- **Status:** Done, tested in game (2026-10-24). The health bonus is 50% / 75% (each rank adds `Protean_SurvivorHealthPct`). Rank 2: press Activate in animal form by a body (meat eaters) or a harvestable plant (plant eaters; omnivores both, diets from Wikipedia and the games' lore) to eat for 3 s standing still; a body heals 25% of maximum health (once per body), a plant 20% (it counts as harvested and grows back; the ingredient is not kept). Moving ends the meal without healing. Eating a person in sight of people turns them hostile until the change back. Sounds: the player's eating sound twice for a plant, the werewolf's feeding sound once and its blood spray for a body. Only deer and elk, goat, cow, sabre cats, werewolf and werebear have an eating animation in the game; the rest just stand (accepted: plenty of vanilla actions have none).
 
 ### Predator ×2
 - **Requires:** Keen
 - **What it does:**
   - Rank 1: more damage in animal forms.
   - Rank 2: attacks in animal form add poison.
-- **Status:** Rank 1 is ready: damage perks are already proven to work on animal attacks. Rank 2 needs research into adding poison on hit.
+- **Status:** Done, tested in game (2026-10-24). Rank 1: animal-form damage +2% per level, at most double (`AttackDamageMult`, set at the change). Rank 2: a power attack's hit in animal form poisons, 5 + 0.3 x level damage a second for 5 s (refreshed, not stacked; poison resistance counts; the undead and Dwarven machines are immune).
 
 ### Stalker ×2
 - **Requires:** Keen
@@ -210,7 +210,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 ### Subtle Carapace ×2
 - **Requires:** Unbound Form
 - **What it does:** Armor bonus, with two ranks.
-- **Status:** Ready. Armor bonuses are standard, and Protean has a setting for armor while transformed, because animals wear no armor for normal perks to boost. We need to set the values for each rank.
+- **Status:** Done, tested in game (2026-10-24). Rank 1: 50 + 4 x level armor; rank 2: 100 + 7 x level (replaces rank 1's). It works in every animal form, and in human form only while no light or heavy armor is worn on the body (clothes and robes are fine): the restriction that balances it. At level 50 rank 2 is about a well-made light armor set. The numbers are starting points for the user's playtest.
 
 ### Regeneration
 - **Requires:** Subtle Carapace

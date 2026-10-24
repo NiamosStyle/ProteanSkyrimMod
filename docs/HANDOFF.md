@@ -68,11 +68,30 @@ What exists, what was decided and why, and what is known and accepted. Read the 
 - Adding an item to an actor at its death (while it ragdolls) left a stiff body that could not be searched; add a
   heart as the body is searched (hook `TESNPC::Activate`, vfunc 0x37) instead.
 - Outdoor wind loops are faint as a sound following the player; the dungeon "2D" loops are not.
+- A control taken through ControlMap (Protean takes Activate in animal form) arrives in the input sink without its
+  action name: match the key it is bound to (`ControlMap::GetMappedKey`), as for the giant's attack buttons.
+- A load after a restart dropped the player's temporary modifiers on Health and AttackDamageMult (a save made as the
+  wolf: +75 health and +0.02 gone; DamageResist +107 kept). Changing back then took the bonus off a second time
+  (human maximum 25). The co-save now keeps those modifiers and puts Protean's part back (`Shift.cpp`
+  RepairTemporary). Console `modav` changes the permanent modifier, not the temporary one.
+- `AttackDamageMult` does multiply animal bites (5 -> 10 at x2). An elk spawned in an odd state (health -2363) took
+  5 whatever the multiplier and misled the first test; check a test target's health first.
+- `tai` (AI off) also stops magic effects ticking on the frozen actor: the poison did nothing until AI was back.
+- A graph can refuse an idle event straight after a walk that it accepts standing (the deer's feeding): ask again
+  for a moment.
+- Most creatures' own eating sounds (goat chew, cow chew cud) were not heard when played at the player; the player's
+  `ITMFoodEat` and `NPCWerewolfFeeding` were.
+- Dev channel: numbers must rise across batches too; a script that restarted from `date +%s` each loop wrote lower
+  numbers and every later command was skipped.
 
 ## Ideas not done
 
 - Watching the mod events arrive (needs a listening script in the larger mod).
 - The user's own MO2 install still has the dev channel on (`[Dev] Commands=1`); the release zip has it off.
+- A quest NPC can still start a conversation with an animal (force greet: the woman who starts the Mistwatch quest
+  talked to the deer, 2026-10-24). Closing dialogue in animal form is an idea; check how the game retries a force
+  greet first.
+- Eating a plant briefly shows the ingredient "added" message before Protean takes it back.
 
 ## Perk tree work (branch `skill-tree`, 2026-10-22)
 
@@ -107,6 +126,11 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
 - Predator's Rush and Prey's Flight: done and tested in game (2026-10-24); see the spec and `src/Rush.cpp`,
   `src/Flight.cpp`. Dev: `glidediag <frames>` (per-frame pose probe), `glidepose`, `glidearm`, `glidefx`,
   `glidesound <SNDR> [volume] [layers]`, `glidesteer`, `slamsound`, `slamshake`.
+- Survivor, Predator, Subtle Carapace: done and tested in game (2026-10-24), numbers agreed as starting points for
+  the user's playtest (Survivor 50/75%; Predator +2%/level to double, rank 2 poison 5 + 0.3/level a second for 5 s;
+  Carapace 50 + 4/level, rank 2 100 + 7/level, animal form or no body armor). Survivor 2 feeding in `src/Feed.cpp`
+  (diets in `DIET`, `tools/build_plugin.py`), Carapace in `src/Carapace.cpp`, Predator in `src/Predator.cpp`.
+  Co-save v15 (carapaceApplied, eaten, savedTemp).
 
 Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
 DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the

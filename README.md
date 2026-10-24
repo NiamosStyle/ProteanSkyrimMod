@@ -27,7 +27,10 @@ Status: **1.0.0**. 35 forms. Built to be part of a larger mod: see `docs/INTEGRA
   Rending Claws (claws in either hand, strongest on a full stamina bar), Tendril (a whip of flesh cast from
   either hand: it drains stamina into you, yanks light foes to you and hauls you to large ones), Predator's Rush
   (a sprint that keeps building, big jumps, jumping while sprinting) and Prey's Flight (no fall damage, a jump in
-  mid-air, a wingsuit glide, and a diving slam that staggers everyone around the landing).
+  mid-air, a wingsuit glide, and a diving slam that staggers everyone around the landing), Survivor (more health in
+  animal form; rank 2 lets animals eat bodies or plants to heal), Predator (animal damage that grows with your level;
+  rank 2 poisons with power attacks) and Subtle Carapace (armor that grows with your level, in animal form or when you
+  wear no body armor).
 
 ## Requirements
 
