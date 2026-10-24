@@ -292,9 +292,18 @@ namespace protean::Attacks
 					if (!b) {
 						continue;
 					}
-					if (b->userEvent == ue->activate && b->IsDown()) {
+					// With the game's attack controls taken (the giant), the button no longer carries its action name:
+					// recognise it by the key it is bound to instead.
+					auto bound = [&](const RE::BSFixedString& a_action) {
+						auto* cm = RE::ControlMap::GetSingleton();
+						return b->userEvent == a_action ||
+						       (cm && b->GetIDCode() == cm->GetMappedKey(a_action, b->GetDevice()) && b->GetIDCode() != 0xFF);
+					};
+					// Activate is one of the controls taken in animal form, so it too is recognised by its key
+					if (b->IsDown() && bound(ue->activate)) {
 						// doors, containers, talking, picking things up: blocked in animal form (user decision); with
 						// Survivor 2, eating a body or a plant in reach
+						logger::info("activate pressed in animal form");
 						SKSE::GetTaskInterface()->AddTask([] {
 							if (Feed::OnActivate()) {
 								return;
@@ -308,13 +317,6 @@ namespace protean::Attacks
 						});
 						continue;
 					}
-					// With the game's attack controls taken (the giant), the button no longer carries its action name:
-					// recognise it by the key it is bound to instead.
-					auto bound = [&](const RE::BSFixedString& a_action) {
-						auto* cm = RE::ControlMap::GetSingleton();
-						return b->userEvent == a_action ||
-						       (cm && b->GetIDCode() == cm->GetMappedKey(a_action, b->GetDevice()) && b->GetIDCode() != 0xFF);
-					};
 					if (b->IsDown() && bound(ue->shout)) {
 						SKSE::GetTaskInterface()->AddTask([] { Shift::OnPowerKey(); });
 						continue;

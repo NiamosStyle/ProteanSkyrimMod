@@ -151,6 +151,7 @@ namespace protean::Feed
 		auto*       p = RE::PlayerCharacter::GetSingleton();
 		const auto* c = Shift::ActiveCreature();
 		if (!p || !c || c->diet.empty() || !Evolve::Has(kPerk)) {
+			logger::info("feed: Activate, no meal: form '{}' diet '{}', perk {}", c ? c->id : "", c ? c->diet : "", Evolve::Has(kPerk));
 			return false;
 		}
 		if (g_meal.on) {
@@ -162,6 +163,7 @@ namespace protean::Feed
 		bool corpse = false;
 		auto* target = Find(p, *c, corpse);
 		if (!target) {
+			logger::info("feed: Activate, nothing to eat in reach");
 			return false;
 		}
 		// face the meal

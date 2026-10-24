@@ -103,10 +103,19 @@ namespace protean
 		float                                rushApplied{ 0.0f };     // SpeedMult Predator's Rush added now
 		float                                carapaceApplied{ 0.0f };  // DamageResist Subtle Carapace added now
 		std::set<RE::FormID>                 eaten;                    // bodies already eaten (Survivor 2)
+		// The temporary modifiers of the actor values Protean changes (kTempChecked), as they were at the save. A load
+		// lost some of them (2026-10-24: the health bonus and AttackDamageMult were gone after a load as the wolf,
+		// DamageResist was kept); Shift::OnGameLoaded puts back Protean's part when exactly that much is missing.
+		std::vector<std::pair<std::uint32_t, float>> savedTemp;
 
 		static State& Get();
 		void          Reset();
 	};
+
+	// the actor values whose temporary modifier Protean changes, checked after a load
+	inline constexpr RE::ActorValue kTempChecked[] = { RE::ActorValue::kHealth, RE::ActorValue::kAttackDamageMult,
+		RE::ActorValue::kDamageResist, RE::ActorValue::kSpeedMult, RE::ActorValue::kStaminaRateMult,
+		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing };
 
 	namespace Persist
 	{

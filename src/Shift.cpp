@@ -988,14 +988,68 @@ namespace protean::Shift
 		}
 	}
 
+	namespace
+	{
+		// Protean's own part of each checked actor value's temporary modifier, from what the co-save says is on
+		float OwnPart(RE::ActorValue a_av)
+		{
+			const auto& s = State::Get();
+			const bool  animal = !s.active.empty();
+			switch (a_av) {
+			case RE::ActorValue::kHealth:
+				return animal ? s.healthBonus : 0.0f;
+			case RE::ActorValue::kAttackDamageMult:
+				return s.damageBonus;
+			case RE::ActorValue::kDamageResist:
+				return s.armorBonus + s.carapaceApplied;
+			case RE::ActorValue::kSpeedMult:
+				return s.rushApplied;  // the sprint's part is taken off on load by Move::ClearSprint
+			case RE::ActorValue::kStaminaRateMult:
+				return s.boostApplied;
+			case RE::ActorValue::kResistDisease:
+				return s.diseaseApplied;
+			case RE::ActorValue::kWaterBreathing: {
+				const auto* c = Active();
+				return c && c->swims ? 1.0f : 0.0f;
+			}
+			default:
+				return 0.0f;
+			}
+		}
+
+		// A load can come back without some of the temporary modifiers the save had (see State::savedTemp). When the
+		// shortfall is Protean's own part, it is put back; anything else is only logged.
+		void RepairTemporary(RE::PlayerCharacter* a_p)
+		{
+			auto& s = State::Get();
+			for (const auto& [id, saved] : s.savedTemp) {
+				const auto  av = static_cast<RE::ActorValue>(id);
+				const float now = a_p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, av);
+				const float own = OwnPart(av);
+				if (std::abs(saved - now) < 0.01f) {
+					continue;
+				}
+				if (own != 0.0f && std::abs(saved - now - own) < 0.01f) {
+					a_p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, av, own);
+					logger::warn("load: actor value {} lost Protean's {:.2f} (saved {:.2f}, loaded {:.2f}); put back", id, own, saved, now);
+				} else {
+					logger::warn("load: actor value {} temporary modifier saved {:.2f}, loaded {:.2f} (Protean's part {:.2f}); left alone",
+						id, saved, now, own);
+				}
+			}
+			s.savedTemp.clear();
+		}
+	}
+
 	void OnGameLoaded()
 	{
-		Evolve::OnGameLoaded();
 		auto& s = State::Get();
 		auto* p = Player();
 		if (!p) {
 			return;
 		}
+		RepairTemporary(p);  // first: what follows takes the modifiers as they are
+		Evolve::OnGameLoaded();
 		Move::ClearSprint();  // a save made mid-sprint holds the sprint's speed; the co-save says how much
 		// Every form learned has its power (seen 2026-10-21: a save without powers the player had been given;
 		// the co-save's list of learned forms is the record that counts).
