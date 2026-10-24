@@ -85,6 +85,16 @@ script or the console can change them at any time.
 | `Protean_SlamRadius` | xx999 | Float | 550 | Prey's Flight: the dive's landing staggers everyone this near (~8 m), followers too |
 | `Protean_SlamMinAir` | xx99A | Float | 1.0 | Prey's Flight: seconds in the air before a power attack dives |
 | `Protean_GlideSpeed` | xx99B | Float | 900 | Prey's Flight: the least speed a glide carries the player forward, where they face |
+| `Protean_SurvivorHealthPct` | xx9A4 | Float | 0.25 | Survivor: each rank adds this to `Protean_HealthBonusPct` (25% -> 50% -> 75%) |
+| `Protean_PredatorDamagePerLevel` | xx9A5 | Float | 0.02 | Predator: animal-form damage added per player level, as a share |
+| `Protean_PredatorDamageMax` | xx9A6 | Float | 1.0 | Predator: the most it adds (1.0 = double) |
+| `Protean_PredatorPoison` | xx9A7 | Float | 5 | Predator rank 2: poison damage a second before the level part |
+| `Protean_PredatorPoisonPerLevel` | xx9A8 | Float | 0.3 | Predator rank 2: poison damage a second added per player level |
+| `Protean_PredatorPoisonSeconds` | xx9A9 | Float | 5 | Predator rank 2: how long the poison lasts |
+| `Protean_CarapaceArmor` | xx9AA | Float | 50 | Subtle Carapace rank 1: armor before the level part |
+| `Protean_CarapaceArmorPerLevel` | xx9AB | Float | 4 | Subtle Carapace rank 1: armor added per player level |
+| `Protean_Carapace2Armor` | xx9AC | Float | 100 | Subtle Carapace rank 2: armor before the level part (replaces rank 1's) |
+| `Protean_Carapace2ArmorPerLevel` | xx9AD | Float | 7 | Subtle Carapace rank 2: armor added per player level |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -97,6 +107,11 @@ Notes:
   an animal holds nothing.
 - **Armor:** perks that boost worn armor pieces do nothing for an animal (it wears none). Raise
   `Protean_ArmorBonus`, or the `DamageResist` actor value directly, instead.
+- **Survivor, Predator, Subtle Carapace:** Survivor and Predator's damage are worked out at the change (a level gained
+  as an animal counts from the next change). Subtle Carapace is a `DamageResist` modifier kept up to date all the time:
+  in every animal form, and in human form only while no light or heavy armor is worn in the body slot. Predator rank 2
+  casts `Protean_PredatorPoison` (xx9A3, effect xx9A2) on a power attack's hit in animal form; actors with
+  `ActorTypeUndead` or `ActorTypeDwarven` are skipped.
 - **Stamina:** the forms use the player's own stamina. Sprint drain and spit cost have their own dials;
   power attacks cost what the game's power-attack rule says (40 x `fPowerAttackStaminaPenalty`).
 - Per-form values (reach, cone, sprint strength, leap, taps) live in

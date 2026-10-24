@@ -1,0 +1,22 @@
+FormKey: 0009A2:Protean.esp
+EditorID: Protean_PredatorPoisonEffect
+Name:
+  TargetLanguage: English
+  Value: 'Predator''s Poison'
+Flags:
+- Hostile
+- Detrimental
+- NoArea
+BaseCost: 0
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: ValueModifier
+  ActorValue: Health
+ResistValue: PoisonResist
+CastType: FireAndForget
+TargetType: TargetActor
+SkillUsageMultiplier: 0
+DualCastScale: 1
+Description:
+  TargetLanguage: English
+  Value: 'Poison deals <mag> points of damage a second for <dur> seconds.'

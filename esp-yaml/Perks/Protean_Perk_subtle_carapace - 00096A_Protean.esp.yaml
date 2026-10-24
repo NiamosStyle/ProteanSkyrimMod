@@ -5,7 +5,7 @@ Name:
   Value: 'Subtle Carapace'
 Description:
   TargetLanguage: English
-  Value: 'A hidden carapace hardens your skin: more armor.'
+  Value: 'A hidden carapace hardens your skin: 50 armor plus 4 per level, in animal form, or in your own when you wear no body armor (clothes and robes are fine).'
 NumRanks: 1
 Playable: True
 NextPerk: 000975:Protean.esp

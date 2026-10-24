@@ -5,6 +5,7 @@
 
 #include "Attacks.h"
 #include "Camera.h"
+#include "Carapace.h"
 #include "Claws.h"
 #include "Dev.h"
 #include "Fly.h"
@@ -31,6 +32,7 @@ namespace protean::Hooks
 				Tendril::OnFrame(a_this, a_delta);
 				Keen::OnFrame(a_this, a_delta);
 				Rush::OnFrame(a_this, a_delta);
+				Carapace::OnFrame(a_this, a_delta);
 				Flight::OnFrame(a_this, a_delta);
 				Flight::KeepFall(a_this, a_delta);
 				Camera::OnFrame(a_this);

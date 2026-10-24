@@ -7,6 +7,7 @@
 #include "Move.h"
 #include "State.h"
 #include "Evolve.h"
+#include "Predator.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
 
@@ -488,7 +489,7 @@ namespace protean::Shift
 			auto&       s = State::Get();
 			auto*       av = a_p->AsActorValueOwner();
 			s.armorBonus = reg.Dial("Protean_ArmorBonus", 0.0f);
-			s.damageBonus = reg.Dial("Protean_DamageMult", 1.0f) - 1.0f;
+			s.damageBonus = reg.Dial("Protean_DamageMult", 1.0f) - 1.0f + Predator::DamageShare(a_p);
 			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kDamageResist, s.armorBonus);
 			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kAttackDamageMult, s.damageBonus);
 		}
@@ -619,7 +620,10 @@ namespace protean::Shift
 		const float own = MaxHealth(p);
 		const float animal = a_c.HealthAtLevel(p->GetLevel());
 		auto&       reg0 = Registry::Get();
-		const float bonus = std::floor(own * reg0.Dial("Protean_HealthBonusPct", 0.25f) +
+		// Survivor: each rank adds its share to the base (25% -> 50% -> 75%)
+		const float ranks = (Evolve::Has("survivor") ? 1.0f : 0.0f) + (Evolve::Has("survivor_2") ? 1.0f : 0.0f);
+		const float pct = reg0.Dial("Protean_HealthBonusPct", 0.25f) + ranks * reg0.Dial("Protean_SurvivorHealthPct", 0.25f);
+		const float bonus = std::floor(own * pct +
 		                               std::max(animal - own, 0.0f) * reg0.Dial("Protean_HealthGapShare", 0.25f));
 		s.realRace = p->GetRace() ? p->GetRace()->GetFormID() : 0;
 		s.healthBonus = bonus;
@@ -661,7 +665,8 @@ namespace protean::Shift
 			}
 		}
 		LogVitals("after", p);
-		logger::info("health bonus {:.0f} (own {:.0f}, creature {:.0f} at level {}); kept {:.1f}% of maximum", bonus, own, animal, p->GetLevel(),
+		logger::info("health bonus {:.0f} ({:.0f}% of own {:.0f}, creature {:.0f} at level {}); damage x{:.2f}; kept {:.1f}% of maximum", bonus,
+			pct * 100.0f, own, animal, p->GetLevel(), 1.0f + s.damageBonus,
 			share * 100.0f);
 		SendModEvent("Protean_Transformed", a_c.id, static_cast<float>(a_c.index + 1));
 	}

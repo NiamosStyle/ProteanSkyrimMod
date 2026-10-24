@@ -14,6 +14,7 @@
 #include "Keen.h"
 #include "Flight.h"
 #include "Rush.h"
+#include "Predator.h"
 
 namespace
 {
@@ -147,6 +148,7 @@ namespace
 				protean::Keen::Install();
 				protean::Rush::Install();
 				protean::Flight::Install();
+				protean::Predator::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}

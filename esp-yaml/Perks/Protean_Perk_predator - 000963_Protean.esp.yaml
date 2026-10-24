@@ -5,7 +5,7 @@ Name:
   Value: 'Predator'
 Description:
   TargetLanguage: English
-  Value: 'Your animal forms deal more damage.'
+  Value: 'Your animal forms deal more damage, 2% more for each level you have (at most double).'
 NumRanks: 1
 Playable: True
 NextPerk: 000973:Protean.esp

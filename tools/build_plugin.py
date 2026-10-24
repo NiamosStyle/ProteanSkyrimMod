@@ -47,7 +47,8 @@ PERKS = {
              ["survivor", "predator", "stalker"]),
     "survivor": (0x962, "Survivor", "Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter "
                  "of the difference when the animal is stronger than you.", 3.3, 1.9, ["apex"]),
-    "predator": (0x963, "Predator", "Your animal forms deal more damage.", 2.3, 2.1, ["apex"]),
+    "predator": (0x963, "Predator", "Your animal forms deal more damage, 2% more for each level you have (at most double).",
+                 2.3, 2.1, ["apex"]),
     "stalker": (0x964, "Stalker", "Your animal forms are harder to detect.", 1.4, 1.9, ["apex"]),
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
@@ -61,7 +62,8 @@ PERKS = {
                        ["preys_flight"]),
     "preys_flight": (0x969, "Prey's Flight", ("No fall damage. In human form, jump again in mid-air, hold Jump to glide, and power attack in the air "
                      "to dive and stagger everyone around your landing."), 0, 2.2, ["devastator"]),
-    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: more armor.", -0.8, 0.9,
+    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: 50 armor plus 4 per level, in animal "
+                        "form, or in your own when you wear no body armor (clothes and robes are fine).", -0.8, 0.9,
                         ["regeneration", "devastator"]),
     "regeneration": (0x96B, "Regeneration", "A toggle: while on, stamina drains and health returns by the same amount.",
                      -0.9, 2, []),
@@ -83,9 +85,10 @@ PERKS = {
 RANK2 = {
     "survivor": (0x972, "Your animal forms gain still more health: 75% of your own, plus a quarter of the difference. "
                  "Predators can feed on corpses to heal."),
-    "predator": (0x973, "Your animal forms' attacks also poison."),
+    "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
+                 "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
-    "subtle_carapace": (0x975, "The carapace hardens further: more armor."),
+    "subtle_carapace": (0x975, "The carapace hardens further: 100 armor plus 7 per level, under the same rule."),
 }
 # Rending Claws (tools/build_claws.py makes the models): an empty-handed weapon for either hand, and one hidden
 # armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
@@ -111,6 +114,8 @@ KILL_BOOST_EFFECT, KILL_BOOST_SPELL = 0x97C, 0x97D
 # the pose was chosen; xx99D, xx99E, xx9A0, xx9A1 were those spares, never released)
 GLIDE_EFFECTS = [0x99C]
 GLIDE_SPELLS = [0x99F]
+# Predator rank 2: the poison a power attack in animal form leaves (Protean casts it on the hit, magnitude from the level)
+PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -118,7 +123,8 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "088845:Skyrim.esm", "013746:Skyrim.esm", "088794:Skyrim.esm", "013747:Skyrim.esm", "0A82B9:Skyrim.esm",
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
-BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight"}
+BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
+         "subtle_carapace"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -172,6 +178,17 @@ GLOBALS = {
     "Protean_SlamCost":            (0x998, 30,   "Float", "Prey's Flight: stamina the dive costs"),
     "Protean_SlamRadius":          (0x999, 550,  "Float", "Prey's Flight: the dive's landing staggers everyone this near, game units (550 ~ 8 m)"),
     "Protean_SlamMinAir":          (0x99A, 1.0,  "Float", "Prey's Flight: seconds in the air before a power attack dives"),
+    # Survivor, Predator, Subtle Carapace (numbers agreed with the user 2026-10-24; tuning comes from playtesting)
+    "Protean_SurvivorHealthPct":   (0x9A4, 0.25, "Float", "Survivor: health bonus share each rank adds to Protean_HealthBonusPct"),
+    "Protean_PredatorDamagePerLevel": (0x9A5, 0.02, "Float", "Predator: animal-form damage added per player level, as a share (0.02 = +2%)"),
+    "Protean_PredatorDamageMax":   (0x9A6, 1.0,  "Float", "Predator: the most damage it adds, as a share (1.0 = double)"),
+    "Protean_PredatorPoison":      (0x9A7, 5,    "Float", "Predator rank 2: poison damage per second before the level part"),
+    "Protean_PredatorPoisonPerLevel": (0x9A8, 0.3, "Float", "Predator rank 2: poison damage per second added per player level"),
+    "Protean_PredatorPoisonSeconds": (0x9A9, 5,  "Float", "Predator rank 2: how long the poison lasts, seconds"),
+    "Protean_CarapaceArmor":       (0x9AA, 50,   "Float", "Subtle Carapace rank 1: armor before the level part"),
+    "Protean_CarapaceArmorPerLevel": (0x9AB, 4,  "Float", "Subtle Carapace rank 1: armor added per player level"),
+    "Protean_Carapace2Armor":      (0x9AC, 100,  "Float", "Subtle Carapace rank 2: armor before the level part (replaces rank 1's)"),
+    "Protean_Carapace2ArmorPerLevel": (0x9AD, 7, "Float", "Subtle Carapace rank 2: armor added per player level"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -496,6 +513,23 @@ def main():
           + "".join("- BaseEffect: %s:%s\n  Data:\n    Magnitude: %d\n" % (fid(e), PLUGIN, m)
                     for e, m in ((TENDRIL_DAMAGE, 6), (TENDRIL_DRAIN, 20))))  # Protean sets both before each throw
 
+    # ---- Predator rank 2's poison: damage over time a power attack leaves; poison resistance counts
+    write(os.path.join(y, "MagicEffects", "Protean_PredatorPoisonEffect - %s_%s.yaml" % (fid(PREDATOR_POISON_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_PredatorPoisonEffect\n" % (fid(PREDATOR_POISON_EFFECT), PLUGIN)
+          + name_block("Predator's Poison")
+          + "Flags:\n- Hostile\n- Detrimental\n- NoArea\nBaseCost: 0\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: ValueModifier\n  ActorValue: Health\n"
+          "ResistValue: PoisonResist\nCastType: FireAndForget\nTargetType: TargetActor\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq("Poison deals <mag> points of damage a second for <dur> seconds."))
+    write(os.path.join(y, "Spells", "Protean_PredatorPoison - %s_%s.yaml" % (fid(PREDATOR_POISON_SPELL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_PredatorPoison\n" % (fid(PREDATOR_POISON_SPELL), PLUGIN)
+          + name_block("Predator's Poison")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "CastType: FireAndForget\nTargetType: TargetActor\n"
+          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 5\n    Duration: %d\n"  # Protean sets both before each cast
+          % (fid(PREDATOR_POISON_EFFECT), PLUGIN, GLOBALS["Protean_PredatorPoisonSeconds"][1]))
+
     # ---- the glide markers (hidden): the Open Animation Replacer condition for the glide pose
     for i, (e, sp) in enumerate(zip(GLIDE_EFFECTS, GLIDE_SPELLS)):
         write(os.path.join(y, "MagicEffects", "Protean_GlideEffect%d - %s_%s.yaml" % (i + 1, fid(e), PLUGIN)),
@@ -696,7 +730,8 @@ def main():
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
-                           "perksBuilt": sorted(BUILT),
+                           "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2}),
+                           "predatorPoison": PREDATOR_POISON_SPELL,
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

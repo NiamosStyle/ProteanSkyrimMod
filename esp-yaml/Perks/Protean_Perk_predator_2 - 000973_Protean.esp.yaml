@@ -5,6 +5,6 @@ Name:
   Value: 'Predator'
 Description:
   TargetLanguage: English
-  Value: 'Your animal forms'' attacks also poison.'
+  Value: 'Your animal forms'' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 seconds. The undead and Dwarven machines are immune.'
 NumRanks: 1
 Playable: True

@@ -61,12 +61,19 @@
  },
  "perksBuilt": [
   "keen",
+  "predator",
+  "predator_2",
   "predators_rush",
   "preys_flight",
   "rending_claws",
+  "subtle_carapace",
+  "subtle_carapace_2",
+  "survivor",
+  "survivor_2",
   "tendril",
   "unbound_form"
  ],
+ "predatorPoison": 2467,
  "globals": {
   "Protean_ActiveForm": 2368,
   "Protean_HealthBonusPct": 2369,
@@ -113,7 +120,17 @@
   "Protean_GlideSpeed": 2459,
   "Protean_SlamCost": 2456,
   "Protean_SlamRadius": 2457,
-  "Protean_SlamMinAir": 2458
+  "Protean_SlamMinAir": 2458,
+  "Protean_SurvivorHealthPct": 2468,
+  "Protean_PredatorDamagePerLevel": 2469,
+  "Protean_PredatorDamageMax": 2470,
+  "Protean_PredatorPoison": 2471,
+  "Protean_PredatorPoisonPerLevel": 2472,
+  "Protean_PredatorPoisonSeconds": 2473,
+  "Protean_CarapaceArmor": 2474,
+  "Protean_CarapaceArmorPerLevel": 2475,
+  "Protean_Carapace2Armor": 2476,
+  "Protean_Carapace2ArmorPerLevel": 2477
  },
  "openInteriorKeywords": [
   {

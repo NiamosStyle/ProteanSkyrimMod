@@ -104,6 +104,11 @@ namespace protean
 				_glideMarkers.push_back(sp);
 			}
 		}
+		_predatorPoison = dh->LookupForm<RE::SpellItem>(j.value("predatorPoison", 0u), plugin);
+		if (!_predatorPoison || _predatorPoison->effects.empty()) {
+			logger::warn("Predator poison missing from {}", plugin);
+			_predatorPoison = nullptr;
+		}
 		if (!_killBoost) {
 			logger::warn("Kill Boost display missing from {}", plugin);
 		}
