@@ -12,12 +12,15 @@ namespace protean::Feed
 		constexpr std::string_view kPerk = "survivor_2";
 		constexpr float            kFront = 0.5f;   // cos of the widest angle off the facing a meal is looked for (60 deg)
 		constexpr float            kStray = 40.0f;  // game units the player may slide while eating
-		// the meal's sounds, played at these seconds into it (a body's once, it is long) (user's picks, chosen live 2026-10-24: the animal
-		// sounds were too quiet to hear); the body gets the werewolf's feeding blood spray
+		// the meal's sounds, played at these seconds into it, a body's once as it is long (user's picks, chosen live
+		// 2026-10-24: the animals' own sounds were too quiet to hear)
 		constexpr const char*      kPlantSound = "ITMFoodEat";
 		constexpr const char*      kBodySound = "NPCWerewolfFeeding";
 		constexpr float            kSoundAt[] = { 0.3f, 1.8f };
-		constexpr RE::FormID       kBodyBlood = 0x0F3A8A;  // BloodSprayWereWolfEat01, Skyrim.esm
+		// BloodSprayImpactSetRed, Skyrim.esm: a hit's blood splashed down from the animal's head onto the body (user's pick,
+		// live 2026-10-24; the werewolf's feeding spray put on the body showed nothing)
+		constexpr RE::FormID       kBodyBlood = 0x01F82A;
+		constexpr float            kBloodAt[] = { 0.3f, 1.8f };
 		constexpr float            kRetryAnim = 0.5f;      // seconds the eating animation is asked for again
 
 		struct Meal
@@ -29,6 +32,7 @@ namespace protean::Feed
 			RE::NiPoint3       at;
 			bool               played{ false };  // the graph took the eating animation
 			int                sounds{ 0 };      // sounds played so far
+			int                blood{ 0 };       // blood splashes so far (a body)
 		};
 		Meal g_meal;
 
@@ -116,6 +120,21 @@ namespace protean::Feed
 			}
 		}
 
+		// down from the head node the race names (the wolf's Canine_Head, a person's NPC Head [Head]); with no node the
+		// game played nothing
+		void Blood(RE::PlayerCharacter* a_p)
+		{
+			auto*       set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(kBodyBlood);
+			auto*       race = a_p->GetRace();
+			auto*       parts = race ? race->bodyPartData : nullptr;
+			auto*       head = parts ? parts->parts[RE::BGSBodyPartDefs::LIMB_ENUM::kHead] : nullptr;
+			const char* node = head && !head->targetName.empty() ? head->targetName.c_str() : "NPC Head [Head]";
+			RE::NiPoint3 down{ 0.0f, 0.0f, -1.0f };
+			if (auto* im = RE::BGSImpactManager::GetSingleton(); im && set && !im->PlayImpactEffect(a_p, set, node, down, 512.0f, false, false)) {
+				logger::info("feed: no blood from node '{}'", node);
+			}
+		}
+
 		void Stop(RE::PlayerCharacter* a_p, std::string_view a_why)
 		{
 			if (!g_meal.on) {
@@ -191,10 +210,7 @@ namespace protean::Feed
 		const auto to = target->GetPosition() - p->GetPosition();
 		p->SetAngle(RE::NiPoint3{ p->GetAngleX(), p->GetAngleY(), std::atan2(to.x, to.y) });
 		const bool played = !c->feedEvent.empty() && p->NotifyAnimationGraph(c->feedEvent);
-		g_meal = { true, corpse, target->GetHandle(), 0.0f, p->GetPosition(), played, 0 };
-		if (auto* blood = corpse ? RE::TESForm::LookupByID<RE::BGSArtObject>(kBodyBlood) : nullptr) {
-			target->ApplyArtObject(blood, Dial("Protean_FeedSeconds", 3.0f));
-		}
+		g_meal = { true, corpse, target->GetHandle(), 0.0f, p->GetPosition(), played, 0, 0 };
 		logger::info("feed: '{}' starts on '{}' ({}), graph took '{}': {}", c->id, target->GetName(), corpse ? "body" : "plant",
 			c->feedEvent, played);
 		if (corpse) {
@@ -231,6 +247,10 @@ namespace protean::Feed
 			if (g_meal.sounds < plays && g_meal.t >= kSoundAt[g_meal.sounds]) {
 				++g_meal.sounds;
 				Sound(a_p, g_meal.corpse ? kBodySound : kPlantSound);
+			}
+			if (g_meal.corpse && g_meal.blood < static_cast<int>(std::size(kBloodAt)) && g_meal.t >= kBloodAt[g_meal.blood]) {
+				++g_meal.blood;
+				Blood(a_p);
 			}
 		}
 	}
