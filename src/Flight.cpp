@@ -30,6 +30,8 @@ namespace protean::Flight
 		float g_glideStart = 0.0f;  // the fall speed when the glide began, game units / s
 		float g_glideStartAcross = 0.0f;  // the speed across the ground when it began
 		float g_glideEase = 0.0f;
+		float g_easeOut = 0.0f;  // seconds left easing a glide that ended in the air into the fall
+		constexpr float kEaseOut = 0.5f;
 		int   g_fallSent = 0;
 		float g_outOfFall = 0.0f;               // seconds the graph has been out of its fall while gliding
 		constexpr float kOutOfFall = 0.1f;  // log lines so far for the glide's fall pose
@@ -46,7 +48,7 @@ namespace protean::Flight
 		float                   g_windVolume = 1.6f;  // a little louder than the loop's own (the user)
 		int                     g_windLogged = 0;
 		std::array<RE::BSSoundHandle, 3> g_windHandles;
-		int                     g_windLayers = 1;  // copies played at once, for more volume than one allows
+		int                     g_windLayers = 2;  // the user: a little louder than one  // copies played at once, for more volume than one allows
 		bool                    g_looksOn = false;
 
 		void Looks(RE::PlayerCharacter* a_p, bool a_on)
@@ -211,6 +213,7 @@ namespace protean::Flight
 
 		void Reset()
 		{
+			g_easeOut = 0.0f;
 			g_air = 0.0f;
 			g_doubleUsed = false;
 			g_doubleQueued = false;
@@ -393,7 +396,20 @@ namespace protean::Flight
 					SetVz(cc, v.quad.m128_f32[0], v.quad.m128_f32[1], vzGlide);  // test: the fall slowed, no push
 				}
 			} else {
+				if (g_gliding) {
+					// ended in the air (Jump let go, or the bar empty): the fall's pose comes back (the glide's 24 s clip
+					// would otherwise run on to the ground) and the glide's speed eases into the fall over kEaseOut
+					// (dropped at once, the body lurched)
+					a_p->NotifyAnimationGraph("JumpFall");
+					g_easeOut = kEaseOut;
+					logger::info("flight: glide ended in the air ({})", g_jumpHeld ? "stamina" : "Jump let go");
+				}
 				g_gliding = false;
+				if (g_easeOut > 0.0f) {
+					g_easeOut -= a_delta;
+					// the vertical goes on under gravity from where the glide left it; the horizontal is kept
+					SetVz(cc, v.quad.m128_f32[0], v.quad.m128_f32[1], vz - kGravity * a_delta);
+				}
 			}
 		}
 
