@@ -362,6 +362,8 @@ namespace protean::Dev
 						static_cast<std::uint32_t>(d.types.underlying()), d.speed, d.range, d.fadeOutTime, d.collisionRadius, d.relaunchInterval, d.lifetime, d.force,
 						static_cast<std::uint32_t>(d.flags.underlying()));
 				}
+			} else if (a_cmd == "glidepose") {
+				Flight::SetLooks("pose", a_arg);  // glidepose <0-3>: which glide marker (the OAR pose being chosen)
 			} else if (a_cmd == "slamsound" || a_cmd == "slamshake") {
 				Flight::SetLooks(a_cmd == "slamsound" ? "sound" : "shake", a_arg);  // compare the dive's landing live
 			} else if (a_cmd == "kill") {

@@ -30,10 +30,13 @@ namespace protean::Flight
 		float g_glideStart = 0.0f;  // the fall speed when the glide began, game units / s
 		float g_glideStartAcross = 0.0f;  // the speed across the ground when it began
 		float g_glideEase = 0.0f;
+		int   g_fallSent = 0;  // log lines so far for the glide's fall pose
 		bool  g_diving = false;
 		float g_stuck = 0.0f;  // seconds on the ground with the game's jumping flag still up
 
 		std::string g_sound = "NPCDragonLandCrashShortSD";
+		int         g_pose = 1;               // which glide marker (1-3; 0 = none): the pose being chosen
+		RE::SpellItem* g_marker = nullptr;    // the one on the player now
 		float       g_shake = 1.0f;
 
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
@@ -64,6 +67,23 @@ namespace protean::Flight
 				a_cc->context.currentState = RE::hkpCharacterStateType::kInAir;
 			}
 			a_cc->SetLinearVelocityImpl(RE::hkVector4(a_vx, a_vy, a_vz * kUnit, 0.0f));
+		}
+
+		// the hidden marker Open Animation Replacer looks for to play the glide pose in place of the fall
+		void Mark(RE::PlayerCharacter* a_p, bool a_on)
+		{
+			const auto& markers = Registry::Get().GlideMarkers();
+			RE::SpellItem* want = a_on && g_pose >= 1 && g_pose <= static_cast<int>(markers.size()) ? markers[g_pose - 1] : nullptr;
+			if (want == g_marker) {
+				return;
+			}
+			if (g_marker) {
+				a_p->RemoveSpell(g_marker);
+			}
+			if (want) {
+				a_p->AddSpell(want);
+			}
+			g_marker = want;
 		}
 
 		void Reset()
@@ -110,124 +130,141 @@ namespace protean::Flight
 		}
 	}
 
-	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
+	namespace
 	{
-		auto* cc = a_p->GetCharController();
-		const bool jumpPressed = g_jumpPressed.exchange(false);
-		const bool powerPressed = g_powerPressed.exchange(false);
-		if (!cc || a_p->IsDead() || !Evolve::Has(kPerk)) {
-			Reset();
-			return;
-		}
+		void Update(RE::PlayerCharacter* a_p, float a_delta)
+		{
+			auto* cc = a_p->GetCharController();
+			const bool jumpPressed = g_jumpPressed.exchange(false);
+			const bool powerPressed = g_powerPressed.exchange(false);
+			if (!cc || a_p->IsDead() || !Evolve::Has(kPerk)) {
+				Reset();
+				return;
+			}
 
-		const auto state = cc->context.currentState;
-		// off the ground by the support flag: the state can still read "on ground" for a moment after a take-off,
-		// which once let the jump in mid-air be had again and again
-		const bool air = !cc->flags.all(RE::CHARACTER_FLAGS::kSupport) && state != RE::hkpCharacterStateType::kSwimming;
-		const auto v = Velocity(cc);
-		const float vz = v.quad.m128_f32[2] / kUnit;
+			const auto state = cc->context.currentState;
+			// off the ground by the support flag: the state can still read "on ground" for a moment after a take-off,
+			// which once let the jump in mid-air be had again and again
+			const bool air = !cc->flags.all(RE::CHARACTER_FLAGS::kSupport) && state != RE::hkpCharacterStateType::kSwimming;
+			const auto v = Velocity(cc);
+			const float vz = v.quad.m128_f32[2] / kUnit;
 
-		// no fall damage: while coming down the drop is measured from here. Only the height: the fall's time is how
-		// the game knows to play the landing, and with it held at 0 a landing could leave the jump unfinished
-		if (air && vz < 0.0f) {
-			RE::hkVector4 pos;
-			cc->GetPositionImpl(pos, false);
-			cc->fallStartHeight = pos.quad.m128_f32[2] / kUnit;
-		}
-		if (jumpPressed && !air) {
-			bool inJump = false;
-			a_p->GetGraphVariableBool("bInJumpState", inJump);
-			logger::info("flight: Jump on the ground: state {} wantState {} graph bInJumpState {} support {} flags {:08X}",
-				static_cast<int>(state), static_cast<int>(cc->wantState), inJump, cc->flags.all(RE::CHARACTER_FLAGS::kSupport),
-				static_cast<std::uint32_t>(cc->flags.underlying()));
-		}
-		// a jump the game never finished: standing still on the ground with its jumping flag up. Seen as Jump only
-		// hopping; put right after a moment so a real take-off is never touched
-		if (!air && state == RE::hkpCharacterStateType::kOnGround && cc->flags.all(RE::CHARACTER_FLAGS::kJumping)) {
-			g_stuck += a_delta;
-			if (g_stuck > 0.5f) {
-				cc->flags.reset(RE::CHARACTER_FLAGS::kJumping);
-				cc->flags.set(RE::CHARACTER_FLAGS::kCanJump);
-				logger::info("flight: a jump left unfinished, its flag cleared");
+			// no fall damage: while coming down the drop is measured from here. Only the height: the fall's time is how
+			// the game knows to play the landing, and with it held at 0 a landing could leave the jump unfinished
+			if (air && vz < 0.0f) {
+				RE::hkVector4 pos;
+				cc->GetPositionImpl(pos, false);
+				cc->fallStartHeight = pos.quad.m128_f32[2] / kUnit;
+			}
+			if (jumpPressed && !air) {
+				bool inJump = false;
+				a_p->GetGraphVariableBool("bInJumpState", inJump);
+				logger::info("flight: Jump on the ground: state {} wantState {} graph bInJumpState {} support {} flags {:08X}",
+					static_cast<int>(state), static_cast<int>(cc->wantState), inJump, cc->flags.all(RE::CHARACTER_FLAGS::kSupport),
+					static_cast<std::uint32_t>(cc->flags.underlying()));
+			}
+			// a jump the game never finished: standing still on the ground with its jumping flag up. Seen as Jump only
+			// hopping; put right after a moment so a real take-off is never touched
+			if (!air && state == RE::hkpCharacterStateType::kOnGround && cc->flags.all(RE::CHARACTER_FLAGS::kJumping)) {
+				g_stuck += a_delta;
+				if (g_stuck > 0.5f) {
+					cc->flags.reset(RE::CHARACTER_FLAGS::kJumping);
+					cc->flags.set(RE::CHARACTER_FLAGS::kCanJump);
+					logger::info("flight: a jump left unfinished, its flag cleared");
+					g_stuck = 0.0f;
+				}
+			} else {
 				g_stuck = 0.0f;
 			}
-		} else {
-			g_stuck = 0.0f;
-		}
-		if (Shift::ActiveCreature() || !air || a_p->AsActorState()->IsSwimming()) {
-			if (g_diving && cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {  // landed, not in water
-				Slam(a_p);
+			if (Shift::ActiveCreature() || !air || a_p->AsActorState()->IsSwimming()) {
+				if (g_diving && cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {  // landed, not in water
+					Slam(a_p);
+				}
+				Reset();
+				return;
 			}
-			Reset();
-			return;
-		}
-		g_air += a_delta;
+			g_air += a_delta;
 
-		if (g_diving) {
-			SetVz(cc, v.quad.m128_f32[0] * 0.3f, v.quad.m128_f32[1] * 0.3f, -kDiveSpeed);
-			return;
-		}
-		if (powerPressed && g_air >= Dial("Protean_SlamMinAir", 1.0f)) {
-			const float cost = Dial("Protean_SlamCost", 30.0f);
-			if (Stamina(a_p) >= cost) {
-				Spend(a_p, cost);
-				g_diving = true;
-				g_gliding = false;
+			if (g_diving) {
+				SetVz(cc, v.quad.m128_f32[0] * 0.3f, v.quad.m128_f32[1] * 0.3f, -kDiveSpeed);
+				return;
+			}
+			if (powerPressed && g_air >= Dial("Protean_SlamMinAir", 1.0f)) {
+				const float cost = Dial("Protean_SlamCost", 30.0f);
+				if (Stamina(a_p) >= cost) {
+					Spend(a_p, cost);
+					g_diving = true;
+					g_gliding = false;
+					g_push = -1.0f;
+					logger::info("flight: dive after {:.1f} s in the air", g_air);
+					return;
+				}
+			}
+
+			// pressed while the game's own jump is still lifting: kept until it is done, since the game holds its own
+			// speed till then and the second jump came out low
+			if (jumpPressed && !g_doubleUsed && g_push < 0.0f && g_air >= kDoubleAfter) {
+				g_doubleQueued = true;
+			}
+			if (g_doubleQueued && state != RE::hkpCharacterStateType::kJumping) {
+				g_doubleQueued = false;
+				const float cost = Dial("Protean_FlightJumpCost", 15.0f);
+				if (Stamina(a_p) >= cost) {
+					Spend(a_p, cost);
+					g_doubleUsed = true;
+					g_gliding = false;
+					g_push = 0.0f;
+					g_pushVz = std::sqrt(2.0f * kGravity * JumpHeight());
+					logger::info("flight: double jump after {:.1f} s in the air", g_air);
+				}
+			}
+			if (g_push >= 0.0f) {
+				g_push += a_delta;
+				if (g_push <= kPush) {
+					SetVz(cc, v.quad.m128_f32[0], v.quad.m128_f32[1], g_pushVz - kGravity * g_push);
+					return;
+				}
 				g_push = -1.0f;
-				logger::info("flight: dive after {:.1f} s in the air", g_air);
-				return;
 			}
-		}
 
-		// pressed while the game's own jump is still lifting: kept until it is done, since the game holds its own
-		// speed till then and the second jump came out low
-		if (jumpPressed && !g_doubleUsed && g_push < 0.0f && g_air >= kDoubleAfter) {
-			g_doubleQueued = true;
-		}
-		if (g_doubleQueued && state != RE::hkpCharacterStateType::kJumping) {
-			g_doubleQueued = false;
-			const float cost = Dial("Protean_FlightJumpCost", 15.0f);
-			if (Stamina(a_p) >= cost) {
+			// the glide: Jump held while falling
+			const float cost = Dial("Protean_GlideCost", 5.0f) * a_delta;
+			if (g_jumpHeld && vz < 0.0f && Stamina(a_p) > cost) {
+				const float vx = v.quad.m128_f32[0] / kUnit;
+				const float vy = v.quad.m128_f32[1] / kUnit;
+				if (!g_gliding) {
+					g_gliding = true;
+					g_glideStart = vz;
+					g_glideStartAcross = std::sqrt(vx * vx + vy * vy);
+					g_glideEase = 0.0f;
+				}
 				Spend(a_p, cost);
-				g_doubleUsed = true;
+				// the falling pose throughout: slowed, the fall sometimes read to the game as a run
+				if (bool inJump = true; a_p->GetGraphVariableBool("bInJumpState", inJump) && !inJump) {
+					const bool took = a_p->NotifyAnimationGraph("JumpFall");
+					if (g_fallSent++ < 3) {
+						logger::info("flight: glide out of the falling pose, JumpFall sent (taken {})", took);
+					}
+				}
+				g_glideEase = std::min(g_glideEase + a_delta * kEase, 1.0f);
+				const float down = -std::abs(Dial("Protean_GlideFallSpeed", 250.0f));
+				// forward where the player faces, at least the glide's speed (a faster run going in keeps its speed)
+				const float across = std::max(g_glideStartAcross, Dial("Protean_GlideSpeed", 900.0f));
+				const float speed = g_glideStartAcross + (across - g_glideStartAcross) * g_glideEase;
+				const float heading = a_p->GetAngleZ();
+				SetVz(cc, std::sin(heading) * speed * kUnit, std::cos(heading) * speed * kUnit,
+					g_glideStart + (down - g_glideStart) * g_glideEase);
+			} else {
 				g_gliding = false;
-				g_push = 0.0f;
-				g_pushVz = std::sqrt(2.0f * kGravity * JumpHeight());
-				logger::info("flight: double jump after {:.1f} s in the air", g_air);
 			}
-		}
-		if (g_push >= 0.0f) {
-			g_push += a_delta;
-			if (g_push <= kPush) {
-				SetVz(cc, v.quad.m128_f32[0], v.quad.m128_f32[1], g_pushVz - kGravity * g_push);
-				return;
-			}
-			g_push = -1.0f;
 		}
 
-		// the glide: Jump held while falling
-		const float cost = Dial("Protean_GlideCost", 5.0f) * a_delta;
-		if (g_jumpHeld && vz < 0.0f && Stamina(a_p) > cost) {
-			const float vx = v.quad.m128_f32[0] / kUnit;
-			const float vy = v.quad.m128_f32[1] / kUnit;
-			if (!g_gliding) {
-				g_gliding = true;
-				g_glideStart = vz;
-				g_glideStartAcross = std::sqrt(vx * vx + vy * vy);
-				g_glideEase = 0.0f;
-			}
-			Spend(a_p, cost);
-			g_glideEase = std::min(g_glideEase + a_delta * kEase, 1.0f);
-			const float down = -std::abs(Dial("Protean_GlideFallSpeed", 250.0f));
-			// forward where the player faces, at least the glide's speed (a faster run going in keeps its speed)
-			const float across = std::max(g_glideStartAcross, Dial("Protean_GlideSpeed", 900.0f));
-			const float speed = g_glideStartAcross + (across - g_glideStartAcross) * g_glideEase;
-			const float heading = a_p->GetAngleZ();
-			SetVz(cc, std::sin(heading) * speed * kUnit, std::cos(heading) * speed * kUnit,
-				g_glideStart + (down - g_glideStart) * g_glideEase);
-		} else {
-			g_gliding = false;
-		}
+	}
+
+	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
+	{
+		Update(a_p, a_delta);
+		Mark(a_p, g_gliding);  // every way a glide ends takes the marker off
 	}
 
 	namespace
@@ -276,6 +313,11 @@ namespace protean::Flight
 
 	void SetLooks(std::string_view a_what, std::string_view a_value)
 	{
+		if (a_what == "pose") {
+			g_pose = std::atoi(std::string(a_value).c_str());
+			logger::info("dev: glide pose {}", g_pose);
+			return;
+		}
 		if (a_what == "sound") {
 			g_sound = a_value;
 		} else if (a_what == "shake") {

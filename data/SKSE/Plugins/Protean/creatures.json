@@ -32,6 +32,11 @@
   }
  },
  "killBoost": 2429,
+ "glideMarkers": [
+  2463,
+  2464,
+  2465
+ ],
  "perks": {
   "unbound_form": 2400,
   "keen": 2401,

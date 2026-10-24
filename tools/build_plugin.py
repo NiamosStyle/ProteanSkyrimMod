@@ -107,6 +107,9 @@ KEEN_DEAD_EFFECTS = (0x990, 0x991, 0x992, 0x993)  # enemy outdoors, enemy indoor
 # Unbound Form's kill boost shown in Active Effects: an ability whose effect only states the total (the boost itself is a
 # modifier on StaminaRateMult); Protean sets its magnitude.
 KILL_BOOST_EFFECT, KILL_BOOST_SPELL = 0x97C, 0x97D
+# Prey's Flight: hidden markers while gliding (three while the pose is being chosen)
+GLIDE_EFFECTS = [0x99C, 0x99D, 0x99E]
+GLIDE_SPELLS = [0x99F, 0x9A0, 0x9A1]
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -492,6 +495,21 @@ def main():
           + "".join("- BaseEffect: %s:%s\n  Data:\n    Magnitude: %d\n" % (fid(e), PLUGIN, m)
                     for e, m in ((TENDRIL_DAMAGE, 6), (TENDRIL_DRAIN, 20))))  # Protean sets both before each throw
 
+    # ---- the glide markers (hidden): the Open Animation Replacer condition for the glide pose
+    for i, (e, sp) in enumerate(zip(GLIDE_EFFECTS, GLIDE_SPELLS)):
+        write(os.path.join(y, "MagicEffects", "Protean_GlideEffect%d - %s_%s.yaml" % (i + 1, fid(e), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_GlideEffect%d\n" % (fid(e), PLUGIN, i + 1)
+              + name_block("Gliding")
+              + "Flags:\n- Recover\n- HideInUI\n- NoArea\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
+              "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: ConstantEffect\n"
+              "SkillUsageMultiplier: 0\nDualCastScale: 1\n")
+        write(os.path.join(y, "Spells", "Protean_Glide%d - %s_%s.yaml" % (i + 1, fid(sp), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_Glide%d\n" % (fid(sp), PLUGIN, i + 1)
+              + name_block("Gliding")
+              + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+              "BaseCost: 0\nFlags:\n- ManualCostCalc\nType: Ability\nChargeTime: 0\nCastType: ConstantEffect\nTargetType: Self\n"
+              "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 0\n" % (fid(e), PLUGIN))
+
     # ---- the kill boost, as Active Effects shows it
     write(os.path.join(y, "MagicEffects", "Protean_KillBoostEffect - %s_%s.yaml" % (fid(KILL_BOOST_EFFECT), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_KillBoostEffect\n" % (fid(KILL_BOOST_EFFECT), PLUGIN)
@@ -675,7 +693,7 @@ def main():
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
-                           "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL,
+                           "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT),
                            "globals": {name: v[0] for name, v in GLOBALS.items()},

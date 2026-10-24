@@ -98,6 +98,12 @@ namespace protean
 			_tendril = nullptr;
 		}
 		_killBoost = dh->LookupForm<RE::SpellItem>(j.value("killBoost", 0u), plugin);
+		_glideMarkers.clear();
+		for (const auto id : j.value("glideMarkers", std::vector<RE::FormID>{})) {
+			if (auto* sp = dh->LookupForm<RE::SpellItem>(id, plugin)) {
+				_glideMarkers.push_back(sp);
+			}
+		}
 		if (!_killBoost) {
 			logger::warn("Kill Boost display missing from {}", plugin);
 		}
