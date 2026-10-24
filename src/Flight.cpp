@@ -30,7 +30,9 @@ namespace protean::Flight
 		float g_glideStart = 0.0f;  // the fall speed when the glide began, game units / s
 		float g_glideStartAcross = 0.0f;  // the speed across the ground when it began
 		float g_glideEase = 0.0f;
-		int   g_fallSent = 0;  // log lines so far for the glide's fall pose
+		int   g_fallSent = 0;
+		float g_outOfFall = 0.0f;               // seconds the graph has been out of its fall while gliding
+		constexpr float kOutOfFall = 0.1f;  // log lines so far for the glide's fall pose
 		bool  g_diving = false;
 		std::atomic<bool> g_landedInGlide{ false };  // the graph landed while still gliding (set from its event)
 		float g_stuck = 0.0f;  // seconds on the ground with the game's jumping flag still up
@@ -41,6 +43,8 @@ namespace protean::Flight
 
 		// the arms turned a little further on top of the glide pose (degrees about each bone's own x, y, z), being
 		// chosen live: dev 'glidearm r|l x y z'
+		bool         g_steer = true;  // test switch: the glide's forward push (dev 'glidesteer 0|1')
+		int          g_diag = 0;      // frames left to log in full (dev 'glidediag <frames>')
 		RE::NiPoint3 g_armR{};  // none: Protean's glide animation has the arms out (25 deg about y was the pick on a borrowed pose)
 		RE::NiPoint3 g_armL{};
 
@@ -292,11 +296,17 @@ namespace protean::Flight
 				}
 				Spend(a_p, cost);
 				// the falling pose throughout: slowed, the fall sometimes read to the game as a run
+				if (bool inJump = true; a_p->GetGraphVariableBool("bInJumpState", inJump) && inJump) {
+					g_outOfFall = 0.0f;
+				}
 				if (g_landedInGlide.exchange(false)) {
 					a_p->NotifyAnimationGraph("JumpFall");
 					logger::info("flight: the graph landed mid-glide, back into the fall");
-				} else if (bool inJump = true; a_p->GetGraphVariableBool("bInJumpState", inJump) && !inJump) {
+				} else if (bool inJump = true; a_p->GetGraphVariableBool("bInJumpState", inJump) && !inJump &&
+												(g_outOfFall += a_delta) > kOutOfFall) {
+					// only when the graph stays out: sent on a one-frame blip, the resend itself showed a run
 					const bool took = a_p->NotifyAnimationGraph("JumpFall");
+					g_outOfFall = 0.0f;
 					if (g_fallSent++ < 3) {
 						logger::info("flight: glide out of the falling pose, JumpFall sent (taken {})", took);
 					}
@@ -307,8 +317,12 @@ namespace protean::Flight
 				const float across = std::max(g_glideStartAcross, Dial("Protean_GlideSpeed", 900.0f));
 				const float speed = g_glideStartAcross + (across - g_glideStartAcross) * g_glideEase;
 				const float heading = a_p->GetAngleZ();
-				SetVz(cc, std::sin(heading) * speed * kUnit, std::cos(heading) * speed * kUnit,
-					g_glideStart + (down - g_glideStart) * g_glideEase);
+				const float vzGlide = g_glideStart + (down - g_glideStart) * g_glideEase;
+				if (g_steer) {
+					SetVz(cc, std::sin(heading) * speed * kUnit, std::cos(heading) * speed * kUnit, vzGlide);
+				} else {
+					SetVz(cc, v.quad.m128_f32[0], v.quad.m128_f32[1], vzGlide);  // test: the fall slowed, no push
+				}
 			} else {
 				g_gliding = false;
 			}
@@ -316,8 +330,65 @@ namespace protean::Flight
 
 	}
 
+	namespace
+	{
+		// test aid, the pose probe: how far the upper body turned against the character's root since the last frame
+		// (the skeleton as the frame's animation left it), with the frame's time and the glide's physics. A pose that
+		// shakes shows as big turns frame after frame; a hitch as a long frame; a jerk of the body as a jump in speed.
+		float          g_frameDelta = 0.0f;
+		RE::NiMatrix3  g_lastSpine{};
+		bool           g_haveSpine = false;
+		RE::NiPoint3   g_lastVel{};
+
+		float Angle(const RE::NiMatrix3& a, const RE::NiMatrix3& b)
+		{
+			// the angle of a^T b
+			float tr = 0.0f;
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
+					tr += a.entry[j][i] * b.entry[j][i];
+				}
+			}
+			return std::acos(std::clamp((tr - 1.0f) * 0.5f, -1.0f, 1.0f)) * 57.2958f;
+		}
+
+		void Probe(RE::PlayerCharacter* a_p)
+		{
+			auto* root = a_p->Get3D(false);
+			auto* spine = root ? root->GetObjectByName("NPC Spine2 [Spn2]") : nullptr;
+			auto* cc = a_p->GetCharController();
+			if (!spine || !cc || g_air <= 0.0f) {
+				g_haveSpine = false;
+				return;
+			}
+			// the spine against the model's root: the pose alone, not the character turning
+			const RE::NiMatrix3 rel = root->world.rotate.Transpose() * spine->world.rotate;
+			RE::hkVector4 v;
+			cc->GetLinearVelocityImpl(v);
+			const RE::NiPoint3 vel{ v.quad.m128_f32[0] / kUnit, v.quad.m128_f32[1] / kUnit, v.quad.m128_f32[2] / kUnit };
+			const float turned = g_haveSpine ? Angle(g_lastSpine, rel) : 0.0f;
+			const float jolt = g_haveSpine ? (vel - g_lastVel).Length() : 0.0f;
+			const bool  odd = turned > 4.0f || g_frameDelta > 0.05f || jolt > 300.0f;
+			if (g_diag > 0 || odd) {
+				bool inJump = false;
+				a_p->GetGraphVariableBool("bInJumpState", inJump);
+				logger::info("probe: t {:.2f} dt {:.3f} spine turned {:.1f} deg, speed ({:.0f}, {:.0f}, {:.0f}) jolt {:.0f}, gliding {} jump held {} "
+				             "graph in jump {} state {} support {}{}",
+					g_air, g_frameDelta, turned, vel.x, vel.y, vel.z, jolt, g_gliding, g_jumpHeld.load(), inJump,
+					static_cast<int>(cc->context.currentState), cc->flags.all(RE::CHARACTER_FLAGS::kSupport), odd ? "  <--" : "");
+				if (g_diag > 0) {
+					--g_diag;
+				}
+			}
+			g_lastSpine = rel;
+			g_lastVel = vel;
+			g_haveSpine = true;
+		}
+	}
+
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
 	{
+		g_frameDelta = a_delta;
 		// the graph listener, once per animation graph (a load or a change of form builds new ones). Removed and
 		// added again at each glide's start, the graph left its fall for a moment and a run showed (testing 2026-10-24)
 		static RE::BSAnimationGraphManager* listened = nullptr;
@@ -361,6 +432,7 @@ namespace protean::Flight
 		if (g_gliding) {
 			TurnArms(a_p);
 		}
+		Probe(a_p);
 	}
 
 	namespace
@@ -415,6 +487,16 @@ namespace protean::Flight
 			in >> v.x >> v.y >> v.z;
 			(a_what == "armr" ? g_armR : g_armL) = v;
 			logger::info("dev: glide arms right ({}, {}, {}) left ({}, {}, {})", g_armR.x, g_armR.y, g_armR.z, g_armL.x, g_armL.y, g_armL.z);
+			return;
+		}
+		if (a_what == "steer") {
+			g_steer = a_value != "0";
+			logger::info("dev: glide steering {}", g_steer);
+			return;
+		}
+		if (a_what == "diag") {
+			g_diag = std::atoi(std::string(a_value).c_str());
+			logger::info("dev: glide probe logs the next {} frames in the air", g_diag);
 			return;
 		}
 		if (a_what == "pose") {
