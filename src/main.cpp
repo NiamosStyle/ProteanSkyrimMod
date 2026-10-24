@@ -95,8 +95,9 @@ namespace
 				const auto* dying = a_event->actorDying.get();
 				const auto* killer = a_event->actorKiller.get();
 				const bool  pulled = !killer && protean::Tendril::PulledRecently(dying->GetFormID());
-				logger::info("death: '{}' {:08X}, killer '{}'{}", dying->GetName(), dying->GetFormID(), killer ? killer->GetName() : "none",
-					pulled ? " (landed from a Tendril pull: the player's kill)" : "");
+				if (pulled) {
+					logger::info("death: '{}' landed from a Tendril pull: the player's kill", dying->GetName());
+				}
 				if ((killer && killer->IsPlayerRef()) || pulled) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Evolve::OnKill(); });
 				}

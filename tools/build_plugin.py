@@ -107,9 +107,10 @@ KEEN_DEAD_EFFECTS = (0x990, 0x991, 0x992, 0x993)  # enemy outdoors, enemy indoor
 # Unbound Form's kill boost shown in Active Effects: an ability whose effect only states the total (the boost itself is a
 # modifier on StaminaRateMult); Protean sets its magnitude.
 KILL_BOOST_EFFECT, KILL_BOOST_SPELL = 0x97C, 0x97D
-# Prey's Flight: hidden markers while gliding (three while the pose is being chosen)
-GLIDE_EFFECTS = [0x99C, 0x99D, 0x99E]
-GLIDE_SPELLS = [0x99F, 0x9A0, 0x9A1]
+# Prey's Flight: the hidden marker while gliding, Open Animation Replacer's condition for the glide pose (three while
+# the pose was chosen; xx99D, xx99E, xx9A0, xx9A1 were those spares, never released)
+GLIDE_EFFECTS = [0x99C]
+GLIDE_SPELLS = [0x99F]
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",

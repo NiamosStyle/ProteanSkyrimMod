@@ -188,27 +188,18 @@ namespace protean::Flight
 			g_marker = want;
 		}
 
-		// test aid: the animation events while gliding, to find what takes the graph out of its fall every few seconds
+		// the game's fall fail-safe lands the player when the fall clip ends: back into the glide at once
 		class GraphSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
 		{
 		public:
 			RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override
 			{
-				if (a_event && g_gliding && a_event->holder && a_event->holder->IsPlayerRef()) {
-					// the game's fall fail-safe lands the player when the fall clip ends: back into the glide at once
-					if (std::string_view(a_event->tag.c_str()).starts_with("JumpLand")) {
-						g_landedInGlide = true;
-					}
-					if (_logged < 60) {
-						++_logged;
-						logger::info("flight: graph event '{}' ({}) while gliding", a_event->tag.c_str(), a_event->payload.c_str());
-					}
+				if (a_event && g_gliding && a_event->holder && a_event->holder->IsPlayerRef() &&
+					std::string_view(a_event->tag.c_str()).starts_with("JumpLand")) {
+					g_landedInGlide = true;
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
-
-		private:
-			int _logged{ 0 };
 		};
 		GraphSink g_graphSink;
 
@@ -284,13 +275,6 @@ namespace protean::Flight
 				RE::hkVector4 pos;
 				cc->GetPositionImpl(pos, false);
 				cc->fallStartHeight = pos.quad.m128_f32[2] / kUnit;
-			}
-			if (jumpPressed && !air) {
-				bool inJump = false;
-				a_p->GetGraphVariableBool("bInJumpState", inJump);
-				logger::info("flight: Jump on the ground: state {} wantState {} graph bInJumpState {} support {} flags {:08X}",
-					static_cast<int>(state), static_cast<int>(cc->wantState), inJump, cc->flags.all(RE::CHARACTER_FLAGS::kSupport),
-					static_cast<std::uint32_t>(cc->flags.underlying()));
 			}
 			// a jump the game never finished: standing still on the ground with its jumping flag up. Seen as Jump only
 			// hopping; put right after a moment so a real take-off is never touched
@@ -423,7 +407,7 @@ namespace protean::Flight
 
 	namespace
 	{
-		// test aid, the pose probe: how far the upper body turned against the character's root since the last frame
+		// dev 'glidediag <frames>', the pose probe: how far the upper body turned against the character's root since the last frame
 		// (the skeleton as the frame's animation left it), with the frame's time and the glide's physics. A pose that
 		// shakes shows as big turns frame after frame; a hitch as a long frame; a jerk of the body as a jump in speed.
 		float          g_frameDelta = 0.0f;
@@ -460,7 +444,7 @@ namespace protean::Flight
 			const float turned = g_haveSpine ? Angle(g_lastSpine, rel) : 0.0f;
 			const float jolt = g_haveSpine ? (vel - g_lastVel).Length() : 0.0f;
 			const bool  odd = turned > 4.0f || g_frameDelta > 0.05f || jolt > 300.0f;
-			if (g_diag > 0 || odd) {
+			if (g_diag > 0) {
 				bool inJump = false;
 				a_p->GetGraphVariableBool("bInJumpState", inJump);
 				logger::info("probe: t {:.2f} dt {:.3f} spine turned {:.1f} deg, speed ({:.0f}, {:.0f}, {:.0f}) jolt {:.0f}, gliding {} jump held {} "
@@ -490,33 +474,6 @@ namespace protean::Flight
 		Update(a_p, a_delta);
 		Mark(a_p, g_gliding);  // every way a glide ends takes the marker off
 		Looks(a_p, g_gliding);
-
-		// test aid: each change while airborne, to find what briefly swaps the glide pose for a run
-		static bool  wasGliding = false;
-		static bool  wasInJump = false;
-		static float airTime = 0.0f;
-		bool         inJump = false;
-		a_p->GetGraphVariableBool("bInJumpState", inJump);
-		airTime = g_air > 0.0f ? airTime + a_delta : 0.0f;
-		if (g_air > 0.0f && (g_gliding != wasGliding || inJump != wasInJump)) {
-			auto* cc = a_p->GetCharController();
-			logger::info("flight: at {:.2f} s in the air gliding {} graph in jump {} (state {})", airTime, g_gliding, inJump,
-				cc ? static_cast<int>(cc->context.currentState) : -1);
-		}
-		wasGliding = g_gliding;
-		wasInJump = inJump;
-
-		// test aid: what the graph's direction blend sees while gliding and turning (the pose shook like a kite)
-		static float sinceSample = 0.0f;
-		if (g_gliding && (sinceSample += a_delta) >= 0.1f) {
-			sinceSample = 0.0f;
-			float dir = 0.0f, turn = 0.0f, speed = 0.0f;
-			a_p->GetGraphVariableFloat("Direction", dir);
-			a_p->GetGraphVariableFloat("TurnDelta", turn);
-			a_p->GetGraphVariableFloat("Speed", speed);
-			logger::info("flight: glide sample heading {:.0f} direction {:.2f} turnDelta {:.2f} speed {:.0f}",
-				a_p->GetAngleZ() * 57.2958f, dir, turn, speed);
-		}
 	}
 
 	void KeepFall(RE::PlayerCharacter* a_p, float a_delta)
