@@ -331,7 +331,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "ice_wolf",
@@ -426,7 +426,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "pit_wolf",
@@ -529,7 +529,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "deer",
@@ -729,7 +729,7 @@
    "strike_angle": 50,
    "sprint": 40,
    "diet": "both",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "hare",
@@ -853,7 +853,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "both",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "goat",
@@ -1098,7 +1098,7 @@
     "attackStart_Attack2"
    ],
    "diet": "both",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "cave_bear",
@@ -1196,7 +1196,7 @@
     "attackStart_Attack2"
    ],
    "diet": "both",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "snow_bear",
@@ -1292,7 +1292,7 @@
     "attackStart_Attack2"
    ],
    "diet": "both",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "sabre_cat",
@@ -1678,7 +1678,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "boar",
@@ -1750,7 +1750,7 @@
    "reach": 120,
    "strike_angle": 50,
    "diet": "both",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "skeever",
@@ -1825,7 +1825,7 @@
    "height": 1.0,
    "npc": "EncSkeever",
    "diet": "both",
-   "feed_event": "idleCowFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "chicken",
@@ -2534,7 +2534,7 @@
    "strike_angle": 50,
    "own_sprint": true,
    "diet": "plants",
-   "feed_event": "idleGrazing"
+   "feed_event": ""
   },
   {
    "id": "horker",
@@ -2607,7 +2607,7 @@
    "strike_angle": 50,
    "sprint": 0,
    "diet": "meat",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "mammoth",
@@ -2695,7 +2695,7 @@
    ],
    "sprint": 0,
    "diet": "plants",
-   "feed_event": "idleFeedingStart"
+   "feed_event": ""
   },
   {
    "id": "giant",

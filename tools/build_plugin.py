@@ -258,20 +258,20 @@ MELEE = {
 # starts its eating animation ("" = it just stands). Diets from Wikipedia for the real animals (2026-10-24: wolf,
 # sabre-tooth cat, spider, walrus carnivores; bear, boar, fox, dog, rat, crab, chicken omnivores; deer, elk, goat, cow,
 # horse, hare, mammoth herbivores) and from the games' lore for the made-up ones. The events are first guesses from
-# the animals' behavior files, checked live.
+# the animals' behavior files.
 DIET = {
-    **{c: ("meat", "idleFeedingStart") for c in ("wolf", "ice_wolf", "pit_wolf", "death_hound", "sabre_cat",
-                                              "snowy_sabre_cat", "vale_sabre_cat", "horker")},
-    **{c: ("meat", "") for c in ("albino_spider", "frostbite_spider", "chaurus", "chaurus_hunter",
-                                 "chaurus_hunter_fledgling", "slaughterfish", "troll", "frost_troll")},
+    # eating animation accepted by the player's graph (probed live 2026-10-24); the rest have none in the game
+    **{c: ("meat", "idleFeedingStart") for c in ("sabre_cat", "snowy_sabre_cat", "vale_sabre_cat")},
+    **{c: ("meat", "") for c in ("wolf", "ice_wolf", "pit_wolf", "death_hound", "horker", "albino_spider",
+                                 "frostbite_spider", "chaurus", "chaurus_hunter", "chaurus_hunter_fledgling",
+                                 "slaughterfish", "troll", "frost_troll")},
     "werewolf": ("meat", "SpecialFeeding"),
-    **{c: ("both", "idleFeedingStart") for c in ("fox", "dog", "bear", "cave_bear", "snow_bear", "boar")},
-    "skeever": ("both", "idleCowFeedingStart"), "mudcrab": ("both", ""), "chicken": ("both", ""),
-    "werebear": ("both", "SpecialFeeding"), "giant": ("both", ""),
+    **{c: ("both", "") for c in ("fox", "dog", "bear", "cave_bear", "snow_bear", "boar", "skeever", "mudcrab", "chicken",
+                                 "giant")},
+    "werebear": ("both", "SpecialFeeding"),
     **{c: ("plants", "idleDeerFeedingStart") for c in ("deer", "elk")},
     "goat": ("plants", "idleGoatFeedingStart"), "cow": ("plants", "idleCowFeedingStart"),
-    "horse": ("plants", "idleGrazing"), "mammoth": ("plants", "idleFeedingStart"), "hare": ("plants", ""),
-    "ash_hopper": ("plants", ""),
+    **{c: ("plants", "") for c in ("horse", "mammoth", "hare", "ash_hopper")},  # the horse refused its idleGrazing
 }
 # Protean's sprint boost (SpeedMult added while Sprint is held); everyone else gets the horse's gallop, +33% (user)
 # Only four-legged animals sprint (user): none for two legs or more than four
