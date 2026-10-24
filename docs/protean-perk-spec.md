@@ -200,12 +200,12 @@ Stealing the face of any of these characters grants one automatic perk point. No
 ### Predator's Rush
 - **Requires:** Unbound Form
 - **What it does:** Adds a small speed bonus to normal movement, and a slightly larger speed bonus to sprinting. Sprinting still costs Stamina, so the player still pays to move really fast. Jumping should be high enough to land on the ledge of a one-story building.
-- **Status:** Ready to research. Speed and jump changes are standard. We need to choose the actual numbers, including the jump height.
+- **Status:** Done, tested in game (2026-10-24). Human form: +10% on foot; a sprint that builds from 1.25x to 3x a normal sprint over 10 s (capped there for area loading); jump height 400 (vanilla 76), with fall damage starting that much higher so a big jump hurts no more than a normal one. Jump works while sprinting (vanilla forbids it) and the sprint's build-up carries through the air. Dials xx977-xx97B.
 
 ### Prey's Flight
 - **Requires:** Predator's Rush
-- **What it does:** Double jump and gliding.
-- **Status:** Needs invention, but with a head start. Protean's flight and leap code already controls the player's movement through the air, which covers most of double jump and the physics of gliding. Paraglider (SE 53256) is a reference for how gliding feels. The animation is still the biggest unknown: new animations can't be made with the current tools, so we'd reuse an existing one. Candidates include the Flying Animations resource you have installed.
+- **What it does:** Double jump, gliding, a diving slam, and no fall damage.
+- **Status:** Done, tested in game (2026-10-24). No fall damage in any form. Human form: Jump again in mid-air (15 Stamina, 1.25x the player's jump); hold Jump while falling to glide (5 Stamina a second, eased in like Paraglider: down at 250, forward at 900 or more where the player faces); a power attack after 1 s in the air dives (30 Stamina) and the landing staggers everyone within ~8 m, followers too, with the dragon's landing crash and a camera shake. The glide pose is Protean's own wingsuit animation (Prototype's), written from scratch on the game's skeleton (`tools/build_glide_anim.py`, PyNifly's HKX writer), shown by Open Animation Replacer; red absorb wisps on the hands, the Vampiric Drain caster's wisps on the body, and the ice-cave wind. Running out of Stamina eases into a normal fall.
 
 ### Subtle Carapace ×2
 - **Requires:** Unbound Form

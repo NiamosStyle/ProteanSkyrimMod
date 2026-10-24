@@ -72,6 +72,19 @@ script or the console can change them at any time.
 | `Protean_TendrilRange` | xx95E | Float | 1500 | reach in game units (~21 m); the projectile record's range is set from it when the plugin is built |
 | `Protean_TendrilPullMult` | xx95F | Float | 1.0 | multiplies both pulls: the yank's force (15) and the haul's speed (2200 units/s) |
 | `Protean_KeenDrain` | xx976 | Float | 2 | stamina per second each of Keen's Detect Life and Detect Dead drains while on |
+| `Protean_RushSpeed` | xx977 | Float | 0.1 | Predator's Rush: walking and running speed added, as a share (0.1 = +10%) |
+| `Protean_RushSprintStart` | xx978 | Float | 1.25 | Predator's Rush: sprint speed when a sprint begins, times a normal sprint |
+| `Protean_RushSprintTop` | xx979 | Float | 3.0 | Predator's Rush: the most a held sprint builds to, times a normal sprint |
+| `Protean_RushRampSeconds` | xx97A | Float | 10 | Predator's Rush: seconds of unbroken sprinting to reach the top speed |
+| `Protean_RushJumpHeight` | xx97B | Float | 400 | Predator's Rush: jump height (the game's `fJumpHeightMin`, 76 normally) |
+| `Protean_FlightJumpCost` | xx994 | Float | 15 | Prey's Flight: stamina the jump in mid-air costs |
+| `Protean_FlightJumpHeight` | xx995 | Float | 1.25 | Prey's Flight: the jump in mid-air, as a share of the player's own jump height |
+| `Protean_GlideCost` | xx996 | Float | 5 | Prey's Flight: stamina per second of gliding |
+| `Protean_GlideFallSpeed` | xx997 | Float | 250 | Prey's Flight: gliding fall speed, game units a second |
+| `Protean_SlamCost` | xx998 | Float | 30 | Prey's Flight: stamina the dive costs |
+| `Protean_SlamRadius` | xx999 | Float | 550 | Prey's Flight: the dive's landing staggers everyone this near (~8 m), followers too |
+| `Protean_SlamMinAir` | xx99A | Float | 1.0 | Prey's Flight: seconds in the air before a power attack dives |
+| `Protean_GlideSpeed` | xx99B | Float | 900 | Prey's Flight: the least speed a glide carries the player forward, where they face |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -149,6 +162,8 @@ not contiguous.
 | `Protean_KeenNightPower` / `LifePower` / `DeadPower` (lesser powers) | xx98A / xx98B / xx98C | Keen's senses; known only while an animal owns the perk (xx961) |
 | `Protean_KeenNight` / `Protean_KeenLife` / `Protean_KeenDead` (self spells) | xx98D / xx98E / xx98F | What Protean casts: the game's night eye; 2 s Detect Life / Detect Dead pulses repeated while on |
 | `Protean_KeenDetectDead*` (effects) | xx990-xx993 | The game's held Detect Undead effects as fire-and-forget ones |
+| `Protean_KillBoost` (ability) / `Protean_KillBoostEffect` | xx97D / xx97C | Shows Unbound Form's kill boost in Active Effects (magnitude = the current total) |
+| `Protean_Glide1` (ability) / `Protean_GlideEffect1` | xx99F / xx99C | Hidden, on the player while gliding: Open Animation Replacer's condition for the glide pose |
 
 ## 6. Rules a larger mod should know
 
@@ -162,6 +177,18 @@ not contiguous.
   Extra Large race (trolls, bears, giants, mammoths, grounded dragons) it hauls the player to the target instead,
   with no fall damage from the haul. Nothing flying, swimming, following the player or essential is pulled
   (it is still damaged). Its hits are ordinary hostile magic: crime and aggression as for any spell.
+- Predator's Rush (human form) sets the game settings `fJumpHeightMin` (to `Protean_RushJumpHeight`) and
+  `fJumpFallHeightMin` (raised by as much, so a big jump hurts no more than a normal one) while it works, and puts
+  them back otherwise. It also starts a jump while sprinting, which the game does not allow.
+- Prey's Flight: no fall damage in any form (the fall's start height follows the player down). In human form a jump in
+  mid-air, a glide (Jump held while falling) and a dive (a power attack in the air) whose landing staggers everyone
+  near. With Rush or Flight Protean keeps long jumps in their jump and fall animations, and puts a player the engine
+  wrongly holds "on the ground" in mid-air (gravity off, a slow float) back in the air.
+- The glide pose is Protean's own animation (`meshes/actors/character/animations/OpenAnimationReplacer/Protean/Glide/`,
+  replacing `mt_jumpfall` while `Protean_GlideEffect1` is on). An animation mod that replaces the fall at a higher
+  OAR priority than 2,000,000,001 would hide it.
+- Hearts go into an animal's body as it is searched (Protean hooks the NPC base form's activation), so the loot window
+  shows them the first time.
 - Favorites in animal form works like the Vampire Lord's: it lists only Revert Form and the Keen powers the player
   knows. While that menu is being built, Protean points the default objects `VampireRace` and `VampireSpells` at the
   animal's race and its own list, then puts them back; a mod that reads those two during the Favorites menu sees

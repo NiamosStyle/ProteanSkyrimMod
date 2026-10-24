@@ -53,6 +53,21 @@ What exists, what was decided and why, and what is known and accepted. Read the 
 - A sound that follows the player's body is cut off when the race switch replaces the body: play it at
   the player's position instead.
 - Perks with `Mod Attack Damage` reach animal attacks (+25% test perk: 5 -> 6.25).
+- Bone turns made after `PlayerCharacter::Update` are overwritten by the frame's animation (only a wrist helper bone
+  kept them, looking mangled); turn bones after `UpdateAnimation` (vfunc 0x7D).
+- The fall loop has a fail-safe: when its clip ends without a landing the graph lands the player (a run showed every
+  ~6 s of gliding with the 5.3 s clip). Keep a replacement fall clip longer than any fall.
+- Animations written by PyNifly: keep them to ONE spline block (at most 256 frames). A 64 s clip of 8 blocks broke in
+  game exactly where block 2 began (a 50 deg jump into a stiff pose) though PyNifly read it back fine. 10 fps is
+  plenty for slow motion.
+- A jump far higher than vanilla outlasts the jump animation: the graph drops out of its jump in mid-air (a run
+  shows) unless `JumpFall` is sent at the top of the arc. A standing jump can also leave the controller in its
+  OnGround state with nothing underneath: gravity off, sinking ~11 u/s (a "float"); set it back to InAir.
+- Removing and re-adding an animation-graph event sink at a glide's start made the graph leave its fall for a moment;
+  add a sink once per graph manager.
+- Adding an item to an actor at its death (while it ragdolls) left a stiff body that could not be searched; add a
+  heart as the body is searched (hook `TESNPC::Activate`, vfunc 0x37) instead.
+- Outdoor wind loops are faint as a sound following the player; the dungeon "2D" loops are not.
 
 ## Ideas not done
 
@@ -88,6 +103,10 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
   default objects while they run, frees the Favorites key like Esc and gives the menu controls back while it is open
   (without that the menu froze). Detect Life/Dead glow on the creatures, not the player, so they are 2 s pulses
   Protean repeats each second while on (a day-long cast left glows that nothing could clear). See `src/Keen.cpp`.
+
+- Predator's Rush and Prey's Flight: done and tested in game (2026-10-24); see the spec and `src/Rush.cpp`,
+  `src/Flight.cpp`. Dev: `glidediag <frames>` (per-frame pose probe), `glidepose`, `glidearm`, `glidefx`,
+  `glidesound <SNDR> [volume] [layers]`, `glidesteer`, `slamsound`, `slamshake`.
 
 Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
 DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the

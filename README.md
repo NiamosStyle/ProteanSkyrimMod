@@ -24,13 +24,16 @@ Status: **1.0.0**. 35 forms. Built to be part of a larger mod: see `docs/INTEGRA
 - **Face stealing:** sneak to a corpse to copy its face, and wear it with the Stolen Face power.
 - **Perks (in progress):** feeding earns perk points for a Protean perk tree. Built so far: Unbound Form,
   Keen (night vision, Detect Life and Detect Dead from an animal's Favorites menu, as the Vampire Lord has it),
-  Rending Claws (claws in either hand, strongest on a full stamina bar) and Tendril (a whip of flesh cast from
-  either hand: it drains stamina into you, yanks light foes to you and hauls you to large ones).
+  Rending Claws (claws in either hand, strongest on a full stamina bar), Tendril (a whip of flesh cast from
+  either hand: it drains stamina into you, yanks light foes to you and hauls you to large ones), Predator's Rush
+  (a sprint that keeps building, big jumps, jumping while sprinting) and Prey's Flight (no fall damage, a jump in
+  mid-air, a wingsuit glide, and a diving slam that staggers everyone around the landing).
 
 ## Requirements
 
 Skyrim SE 1.7.104, SKSE64, Address Library, Dawnguard and Dragonborn, Equip Enchantment Fix, the monster
-race crash fix, Custom Skills Framework (the perk tree), Open Animation Replacer (the claw animations).
+race crash fix, Custom Skills Framework (the perk tree), Open Animation Replacer (the claw animations and the
+glide pose).
 DevBench is for development only.
 
 ## Credits
@@ -46,6 +49,10 @@ This mod is a new build on the ideas of two existing mods. No files or scripts f
   only; Tendril's model, records and code are Protean's own.
 - **Feral** (Nexus SE 34552): showed that the game's own beast-race animations make good claw attacks.
   Protean takes them from the game's archive, not from Feral.
+- **Skyrim's Paraglider** (Nexus SE 53256, MIT): how a glide eases in, and resetting the fall to avoid fall damage.
+  Studied only.
+- **PyNifly** by BadDog (GPL-3.0): its HKX writer is used at build time to write Protean's own glide animation.
+  None of its code ships with Protean.
 
 ## Layout
 
