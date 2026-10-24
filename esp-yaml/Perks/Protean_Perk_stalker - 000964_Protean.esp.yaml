@@ -5,7 +5,7 @@ Name:
   Value: 'Stalker'
 Description:
   TargetLanguage: English
-  Value: 'Your animal forms are harder to detect.'
+  Value: 'In animal form, stand still or walk for a moment out of a fight to fade from sight. Staying hidden costs Stamina; running, being hit or attacking ends it, and a bite from hiding does double damage.'
 NumRanks: 1
 Playable: True
 NextPerk: 000974:Protean.esp

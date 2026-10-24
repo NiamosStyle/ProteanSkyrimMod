@@ -256,4 +256,6 @@ namespace protean::Feed
 	}
 
 	void Cancel() { Stop(RE::PlayerCharacter::GetSingleton(), "cancelled"); }
+
+	bool Eating() { return g_meal.on; }
 }

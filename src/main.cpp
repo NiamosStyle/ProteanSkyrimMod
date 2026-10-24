@@ -16,6 +16,7 @@
 #include "Flight.h"
 #include "Rush.h"
 #include "Predator.h"
+#include "Stalker.h"
 
 namespace
 {
@@ -150,6 +151,7 @@ namespace
 				protean::Rush::Install();
 				protean::Flight::Install();
 				protean::Predator::Install();
+				protean::Stalker::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
@@ -162,6 +164,7 @@ namespace
 			protean::Move::Reset();
 			protean::Keen::Reset();
 			protean::Feed::Cancel();
+			protean::Stalker::Reset();
 			break;
 		case SKSE::MessagingInterface::kNewGame:
 			protean::Face::BeforeLoad();
@@ -171,6 +174,7 @@ namespace
 			if (g_ready) {
 				protean::Face::OnGameLoaded();
 				protean::Shift::OnGameLoaded();
+				protean::Stalker::OnGameLoaded();
 				protean::Claws::Sync();
 			}
 			break;

@@ -81,6 +81,8 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* KillBoostDisplay() const { return _killBoost; }  // shows the kill boost in Active Effects
 		[[nodiscard]] const std::vector<RE::SpellItem*>& GlideMarkers() const { return _glideMarkers; }  // OAR glide pose conditions
 		[[nodiscard]] RE::SpellItem* PredatorPoison() const { return _predatorPoison; }  // Predator rank 2; its effect [0] damages health
+		[[nodiscard]] RE::SpellItem* StalkerFade() const { return _stalkerFade; }        // Stalker: the game's Invisibility, cast on the player
+		[[nodiscard]] RE::BGSPerk*   StalkerAmbush() const { return _stalkerAmbush; }    // Stalker: hidden, multiplies the bite from hiding
 		[[nodiscard]] RE::BGSPerk*   Perk(std::string_view a_id) const;          // a Protean perk by id, or null
 		[[nodiscard]] const std::map<std::string, RE::BGSPerk*, std::less<>>& Perks() const { return _perks; }
 		[[nodiscard]] bool PerkBuilt(std::string_view a_id) const { return _perksBuilt.contains(a_id); }  // else a placeholder
@@ -116,6 +118,8 @@ namespace protean
 		RE::SpellItem*        _killBoost{ nullptr };
 		std::vector<RE::SpellItem*> _glideMarkers;
 		RE::SpellItem*        _predatorPoison{ nullptr };
+		RE::SpellItem*        _stalkerFade{ nullptr };
+		RE::BGSPerk*          _stalkerAmbush{ nullptr };
 		std::array<RE::SpellItem*, 3> _keenPowers{};
 		std::array<RE::SpellItem*, 3> _keenSenses{};
 		std::map<std::string, RE::BGSPerk*, std::less<>> _perks;

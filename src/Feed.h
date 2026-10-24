@@ -12,4 +12,5 @@ namespace protean::Feed
 	[[nodiscard]] bool OnActivate();  // main thread; true = a meal started (otherwise Activate stays blocked)
 	void               OnFrame(RE::PlayerCharacter* a_p, float a_delta);
 	void               Cancel();      // a change of form, a load
+	[[nodiscard]] bool Eating();      // a meal is under way
 }

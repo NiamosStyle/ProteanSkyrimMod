@@ -289,6 +289,8 @@ namespace protean::Move
 		g_sprintSpent = false;
 	}
 
+	bool SprintHeld() { return g_sprintHeld; }
+
 	void Reset()
 	{
 		ClearSprint();

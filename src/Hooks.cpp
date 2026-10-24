@@ -16,6 +16,7 @@
 #include "Flight.h"
 #include "Rush.h"
 #include "Shift.h"
+#include "Stalker.h"
 #include "Tendril.h"
 
 namespace protean::Hooks
@@ -35,6 +36,7 @@ namespace protean::Hooks
 				Rush::OnFrame(a_this, a_delta);
 				Carapace::OnFrame(a_this, a_delta);
 				Feed::OnFrame(a_this, a_delta);
+				Stalker::OnFrame(a_this, a_delta);
 				Flight::OnFrame(a_this, a_delta);
 				Flight::KeepFall(a_this, a_delta);
 				Camera::OnFrame(a_this);

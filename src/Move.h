@@ -16,4 +16,5 @@ namespace protean::Move
 	RE::NiPoint2 Keys();                                          // movement keys or stick: x = right, y = forward
 	void Reset();                                                 // revert / load: hand movement back to the game
 	void ClearSprint();                                           // take the sprint's speed off (also after a load)
+	[[nodiscard]] bool SprintHeld();                              // the Sprint key is held (Protean's own animal sprint)
 }

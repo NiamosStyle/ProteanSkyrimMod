@@ -1,0 +1,17 @@
+FormKey: 0009B4:Protean.esp
+EditorID: Protean_StalkerAmbush
+Name:
+  TargetLanguage: English
+  Value: 'Stalker''s Ambush'
+Description:
+  TargetLanguage: English
+  Value: ''
+NumRanks: 1
+Playable: False
+Hidden: True
+Effects:
+- MutagenObjectType: PerkEntryPointModifyValue
+  EntryPoint: ModAttackDamage
+  PerkConditionTabCount: 3
+  Modification: Multiply
+  Value: 2

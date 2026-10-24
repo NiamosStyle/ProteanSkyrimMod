@@ -66,6 +66,7 @@
   "predators_rush",
   "preys_flight",
   "rending_claws",
+  "stalker",
   "subtle_carapace",
   "subtle_carapace_2",
   "survivor",
@@ -74,6 +75,10 @@
   "unbound_form"
  ],
  "predatorPoison": 2467,
+ "stalker": {
+  "fade": 2483,
+  "ambush": 2484
+ },
  "globals": {
   "Protean_ActiveForm": 2368,
   "Protean_HealthBonusPct": 2369,
@@ -134,7 +139,10 @@
   "Protean_FeedCorpseHeal": 2478,
   "Protean_FeedPlantHeal": 2479,
   "Protean_FeedSeconds": 2480,
-  "Protean_FeedReach": 2481
+  "Protean_FeedReach": 2481,
+  "Protean_StalkerFadeSeconds": 2485,
+  "Protean_StalkerDrain": 2486,
+  "Protean_StalkerAmbushMult": 2487
  },
  "openInteriorKeywords": [
   {

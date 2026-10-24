@@ -109,6 +109,11 @@ namespace protean
 			logger::warn("Predator poison missing from {}", plugin);
 			_predatorPoison = nullptr;
 		}
+		_stalkerFade = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("fade", 0u), plugin);
+		_stalkerAmbush = dh->LookupForm<RE::BGSPerk>(j.value("stalker", nlohmann::json::object()).value("ambush", 0u), plugin);
+		if (!_stalkerFade || !_stalkerAmbush) {
+			logger::warn("Stalker's fade or ambush perk missing from {}", plugin);
+		}
 		if (!_killBoost) {
 			logger::warn("Kill Boost display missing from {}", plugin);
 		}

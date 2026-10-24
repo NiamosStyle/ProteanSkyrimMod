@@ -49,7 +49,9 @@ PERKS = {
                  "of the difference when the animal is stronger than you.", 3.3, 1.9, ["apex"]),
     "predator": (0x963, "Predator", "Your animal forms deal more damage, 2% more for each level you have (at most double).",
                  2.3, 2.1, ["apex"]),
-    "stalker": (0x964, "Stalker", "Your animal forms are harder to detect.", 1.4, 1.9, ["apex"]),
+    "stalker": (0x964, "Stalker", "In animal form, stand still or walk for a moment out of a fight to fade from sight. "
+                "Staying hidden costs Stamina; running, being hit or attacking ends it, and a bite from hiding does "
+                "double damage.", 1.4, 1.9, ["apex"]),
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
@@ -117,6 +119,11 @@ GLIDE_EFFECTS = [0x99C]
 GLIDE_SPELLS = [0x99F]
 # Predator rank 2: the poison a power attack in animal form leaves (Protean casts it on the hit, magnitude from the level)
 PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
+# Stalker rank 1: the fade (the game's own Invisibility effect in Protean's spell, so it shimmers and the game ends it
+# on an attack) and the hidden perk held from a bite thrown from hiding to its hit (Protean sets its multiplier).
+# xx9B2 was a test perk installed once (2026-10-24, never committed); not reused.
+STALKER_FADE_SPELL, STALKER_AMBUSH_PERK = 0x9B3, 0x9B4
+VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
               "013742:Skyrim.esm", "08883D:Skyrim.esm",
@@ -125,7 +132,9 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
-         "subtle_carapace"}
+         "subtle_carapace", "stalker"}
+# second ranks not built yet, though their first rank is
+RANK2_UNBUILT = {"stalker"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -194,6 +203,9 @@ GLOBALS = {
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a meal takes, standing still"),
     "Protean_FeedReach":           (0x9B1, 250,  "Float", "Survivor rank 2: how near a body or plant must be, game units"),
+    "Protean_StalkerFadeSeconds":  (0x9B5, 2,    "Float", "Stalker: seconds still or walking before the animal fades"),
+    "Protean_StalkerDrain":        (0x9B6, 2,    "Float", "Stalker: stamina a second while faded"),
+    "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -551,6 +563,22 @@ def main():
           "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 5\n    Duration: %d\n"  # Protean sets both before each cast
           % (fid(PREDATOR_POISON_EFFECT), PLUGIN, GLOBALS["Protean_PredatorPoisonSeconds"][1]))
 
+    # ---- Stalker: the fade (lasts until Protean or the game ends it) and the ambush perk
+    write(os.path.join(y, "Spells", "Protean_StalkerFade - %s_%s.yaml" % (fid(STALKER_FADE_SPELL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_StalkerFade\n" % (fid(STALKER_FADE_SPELL), PLUGIN)
+          + name_block("Stalker's Fade")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "CastType: FireAndForget\nTargetType: Self\n"
+          "Effects:\n- BaseEffect: %s\n  Data:\n    Duration: 3600\n" % VANILLA_INVISIBILITY)
+    write(os.path.join(y, "Perks", "Protean_StalkerAmbush - %s_%s.yaml" % (fid(STALKER_AMBUSH_PERK), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_StalkerAmbush\n" % (fid(STALKER_AMBUSH_PERK), PLUGIN)
+          + name_block("Stalker's Ambush")
+          + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
+          "- MutagenObjectType: PerkEntryPointModifyValue\n  EntryPoint: ModAttackDamage\n"
+          "  PerkConditionTabCount: 3\n  Modification: Multiply\n  Value: %s\n" % GLOBALS["Protean_StalkerAmbushMult"][1])
+
     # ---- the glide markers (hidden): the Open Animation Replacer condition for the glide pose
     for i, (e, sp) in enumerate(zip(GLIDE_EFFECTS, GLIDE_SPELLS)):
         write(os.path.join(y, "MagicEffects", "Protean_GlideEffect%d - %s_%s.yaml" % (i + 1, fid(e), PLUGIN)),
@@ -752,8 +780,9 @@ def main():
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
-                           "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2}),
+                           "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),
                            "predatorPoison": PREDATOR_POISON_SPELL,
+                           "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

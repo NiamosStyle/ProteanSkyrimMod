@@ -4,6 +4,7 @@
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
+#include "Stalker.h"
 
 namespace protean::Attacks
 {
@@ -237,7 +238,8 @@ namespace protean::Attacks
 				p->DrawWeaponMagicHands(true);
 			}
 			Move::FaceCamera(p);  // the mouse turns only the camera, so turn to it before striking
-			bool ok = p->NotifyAnimationGraph(a->event);
+			const bool hidden = Stalker::Hidden();  // the swing ends the fade (the game's rule): ask first
+			bool       ok = p->NotifyAnimationGraph(a->event);
 			if (!ok && !c->stance.empty()) {
 				// the giant attacks only from its combat stance; from a walk, stop first (wild giants stand to strike)
 				ok = (p->NotifyAnimationGraph(c->stance) && p->NotifyAnimationGraph(a->event)) ||
@@ -252,6 +254,7 @@ namespace protean::Attacks
 				const float baseReach = c->reach > 0.0f ? c->reach : (race ? (g_reach.race == race ? g_reach.original : race->data.unarmedReach) : 0.0f);
 				SetAttackData(p, a->event, c->strikeAngle, angleMult);
 				RaiseReach(race, baseReach * reachMult);
+				Stalker::OnAttack(hidden);
 			}
 			logger::info("attack: '{}' {} {} -> graph accepted: {}", c->id, a_power ? "power" : "normal", a->event, ok);
 		}
