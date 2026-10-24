@@ -570,6 +570,16 @@ namespace protean::Shift
 		if (Face::OnCorpseActivated(a_corpse)) {
 			return;  // the Loot / Copy appearance choice took over
 		}
+		AddHeart(a_corpse);
+	}
+
+	// at the death, so the heart is there the first time the body is opened (added on opening, the loot window was
+	// already filled and showed it only the second time); opening still adds it to a body that died out of sight
+	void AddHeart(RE::Actor* a_corpse)
+	{
+		if (!a_corpse || !a_corpse->IsDead()) {
+			return;
+		}
 		auto* p = Player();
 		auto& reg = Registry::Get();
 		if (!p->HasSpell(reg.Starter())) {

@@ -11,6 +11,7 @@ namespace protean::Tendril
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta);  // after the player's update: gate, magnitudes, the pull
 	void OnCast(RE::SpellItem* a_spell);                     // main thread: the player cast a spell
 	void OnHit(RE::Actor* a_target);                         // main thread: the Tendril's damage landed on a_target
+	bool PulledRecently(RE::FormID a_id);                    // yanked by the Tendril in the last few seconds
 	void Give();                                             // teach the spell (the perk does it; also dev 'tendril')
 	void SetLooks(std::string_view a_what, const std::string& a_value);  // dev: "sound" <SNDR editor ID> | "blood" <hex ARTO/EFSH>
 }

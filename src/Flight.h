@@ -4,7 +4,7 @@ namespace protean::Flight
 {
 	// Prey's Flight (human form; the fall immunity in every form). Owning the perk:
 	// - no fall damage, ever: the fall's starting height follows the player, so the game never counts a drop;
-	// - Jump in the air jumps again, once per jump, as high as the first (Protean_FlightJumpCost stamina);
+	// - Jump in the air jumps again, once per jump, a little higher than the first (Protean_FlightJumpCost stamina);
 	// - Jump held while falling glides: the fall eases to Protean_GlideFallSpeed and the player is carried where they
 	//   face at Protean_GlideSpeed or more, Protean_GlideCost stamina a second,
 	//   until Jump is let go or the bar is empty;

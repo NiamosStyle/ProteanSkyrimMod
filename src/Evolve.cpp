@@ -82,6 +82,15 @@ namespace protean::Evolve
 				return;
 			}
 			auto& reg = Registry::Get();
+			// each perk gained or lost, once (test aid: when a menu purchase took)
+			static std::set<std::string> owned;
+			for (const auto& [id, perk] : reg.Perks()) {
+				const bool has = p->HasPerk(perk);
+				if (has != owned.contains(id)) {
+					has ? (void)owned.insert(id) : (void)owned.erase(id);
+					logger::info("evolution: perk '{}' {}", id, has ? "owned" : "gone");
+				}
+			}
 			// a placeholder perk (not built yet) is taken back: the point returns by itself, since points left are
 			// worked out from the perks owned
 			for (const auto& [id, perk] : reg.Perks()) {

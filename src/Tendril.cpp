@@ -171,8 +171,14 @@ namespace protean::Tendril
 		}
 
 		// a light target: knocked off its feet toward the player
+		// the last one yanked: a landing that kills it is the player's kill (the game credits a fall to no one)
+		RE::FormID        g_yankedId = 0;
+		Clock::time_point g_yankedAt{};
+
 		void Yank(RE::PlayerCharacter* a_p, RE::Actor* a_target)
 		{
+			g_yankedId = a_target->GetFormID();
+			g_yankedAt = Clock::now();
 			auto* proc = a_target->GetActorRuntimeData().currentProcess;
 			if (!proc) {
 				return;
@@ -244,6 +250,11 @@ namespace protean::Tendril
 		g_paid = cost;
 		logger::info("tendril: thrown, stamina -{:.0f}, damage {:.0f}, drain {:.0f}", cost, a_spell->effects[0]->effectItem.magnitude,
 			a_spell->effects[1]->effectItem.magnitude);
+	}
+
+	bool PulledRecently(RE::FormID a_id)
+	{
+		return a_id != 0 && a_id == g_yankedId && Clock::now() - g_yankedAt < std::chrono::seconds(6);
 	}
 
 	void OnHit(RE::Actor* a_target)

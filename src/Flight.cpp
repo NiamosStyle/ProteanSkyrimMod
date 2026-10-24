@@ -14,6 +14,7 @@ namespace protean::Flight
 		constexpr float            kPush = 0.12f;                // seconds a jump's take-off speed is held
 		constexpr float            kEase = 1.5f;                 // the glide reaches its fall speed in 1 / kEase seconds
 		constexpr float            kDiveSpeed = 2500.0f;         // game units / s straight down
+		constexpr float            kDoubleAfter = 0.15f;         // seconds off the ground before the jump in mid-air
 		constexpr float            kPowerHold = 0.3f;            // seconds an attack key is held to count as a power attack
 
 		std::atomic<bool> g_jumpHeld{ false };
@@ -22,6 +23,7 @@ namespace protean::Flight
 
 		float g_air = 0.0f;         // seconds in the air
 		bool  g_doubleUsed = false;
+		bool  g_doubleQueued = false;
 		float g_push = -1.0f;       // >= 0: the double jump's take-off, seconds in
 		float g_pushVz = 0.0f;
 		bool  g_gliding = false;
@@ -29,21 +31,19 @@ namespace protean::Flight
 		float g_glideStartAcross = 0.0f;  // the speed across the ground when it began
 		float g_glideEase = 0.0f;
 		bool  g_diving = false;
+		float g_stuck = 0.0f;  // seconds on the ground with the game's jumping flag still up
 
 		std::string g_sound = "NPCDragonLandCrashShortSD";
 		float       g_shake = 1.0f;
 
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
-		// as high as the player's own jump (Predator's Rush's when owned), unless the dial says otherwise
+		// a share of the player's own jump (Predator's Rush's when owned)
 		float JumpHeight()
 		{
-			if (const float dial = Dial("Protean_FlightJumpHeight", 0.0f); dial > 0.0f) {
-				return dial;
-			}
 			auto* gs = RE::GameSettingCollection::GetSingleton();
 			auto* jump = gs ? gs->GetSetting("fJumpHeightMin") : nullptr;
-			return jump && jump->GetFloat() > 0.0f ? jump->GetFloat() : 76.0f;
+			return (jump && jump->GetFloat() > 0.0f ? jump->GetFloat() : 76.0f) * Dial("Protean_FlightJumpHeight", 1.25f);
 		}
 
 		float Stamina(RE::PlayerCharacter* a_p) { return a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina); }
@@ -58,7 +58,11 @@ namespace protean::Flight
 
 		void SetVz(RE::bhkCharacterController* a_cc, float a_vx, float a_vy, float a_vz)
 		{
-			a_cc->context.currentState = RE::hkpCharacterStateType::kInAir;
+			// the state only from the ground: overriding the game's own jump state mid-jump is the likely way a jump
+			// was left unfinished (every later Jump only hopped)
+			if (a_cc->context.currentState == RE::hkpCharacterStateType::kOnGround) {
+				a_cc->context.currentState = RE::hkpCharacterStateType::kInAir;
+			}
 			a_cc->SetLinearVelocityImpl(RE::hkVector4(a_vx, a_vy, a_vz * kUnit, 0.0f));
 		}
 
@@ -66,6 +70,7 @@ namespace protean::Flight
 		{
 			g_air = 0.0f;
 			g_doubleUsed = false;
+			g_doubleQueued = false;
 			g_push = -1.0f;
 			g_gliding = false;
 			g_diving = false;
@@ -115,24 +120,48 @@ namespace protean::Flight
 			return;
 		}
 
-		// no fall damage: the drop is always measured from here
-		RE::hkVector4 pos;
-		cc->GetPositionImpl(pos, false);
-		cc->fallStartHeight = pos.quad.m128_f32[2] / kUnit;
-		cc->fallTime = 0.0f;
-
 		const auto state = cc->context.currentState;
-		const bool air = state == RE::hkpCharacterStateType::kInAir || state == RE::hkpCharacterStateType::kJumping;
+		// off the ground by the support flag: the state can still read "on ground" for a moment after a take-off,
+		// which once let the jump in mid-air be had again and again
+		const bool air = !cc->flags.all(RE::CHARACTER_FLAGS::kSupport) && state != RE::hkpCharacterStateType::kSwimming;
+		const auto v = Velocity(cc);
+		const float vz = v.quad.m128_f32[2] / kUnit;
+
+		// no fall damage: while coming down the drop is measured from here. Only the height: the fall's time is how
+		// the game knows to play the landing, and with it held at 0 a landing could leave the jump unfinished
+		if (air && vz < 0.0f) {
+			RE::hkVector4 pos;
+			cc->GetPositionImpl(pos, false);
+			cc->fallStartHeight = pos.quad.m128_f32[2] / kUnit;
+		}
+		if (jumpPressed && !air) {
+			bool inJump = false;
+			a_p->GetGraphVariableBool("bInJumpState", inJump);
+			logger::info("flight: Jump on the ground: state {} wantState {} graph bInJumpState {} support {} flags {:08X}",
+				static_cast<int>(state), static_cast<int>(cc->wantState), inJump, cc->flags.all(RE::CHARACTER_FLAGS::kSupport),
+				static_cast<std::uint32_t>(cc->flags.underlying()));
+		}
+		// a jump the game never finished: standing still on the ground with its jumping flag up. Seen as Jump only
+		// hopping; put right after a moment so a real take-off is never touched
+		if (!air && state == RE::hkpCharacterStateType::kOnGround && cc->flags.all(RE::CHARACTER_FLAGS::kJumping)) {
+			g_stuck += a_delta;
+			if (g_stuck > 0.5f) {
+				cc->flags.reset(RE::CHARACTER_FLAGS::kJumping);
+				cc->flags.set(RE::CHARACTER_FLAGS::kCanJump);
+				logger::info("flight: a jump left unfinished, its flag cleared");
+				g_stuck = 0.0f;
+			}
+		} else {
+			g_stuck = 0.0f;
+		}
 		if (Shift::ActiveCreature() || !air || a_p->AsActorState()->IsSwimming()) {
-			if (g_diving && state == RE::hkpCharacterStateType::kOnGround) {
+			if (g_diving && cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {  // landed, not in water
 				Slam(a_p);
 			}
 			Reset();
 			return;
 		}
 		g_air += a_delta;
-		const auto v = Velocity(cc);
-		const float vz = v.quad.m128_f32[2] / kUnit;
 
 		if (g_diving) {
 			SetVz(cc, v.quad.m128_f32[0] * 0.3f, v.quad.m128_f32[1] * 0.3f, -kDiveSpeed);
@@ -150,7 +179,13 @@ namespace protean::Flight
 			}
 		}
 
-		if (jumpPressed && !g_doubleUsed && g_push < 0.0f) {
+		// pressed while the game's own jump is still lifting: kept until it is done, since the game holds its own
+		// speed till then and the second jump came out low
+		if (jumpPressed && !g_doubleUsed && g_push < 0.0f && g_air >= kDoubleAfter) {
+			g_doubleQueued = true;
+		}
+		if (g_doubleQueued && state != RE::hkpCharacterStateType::kJumping) {
+			g_doubleQueued = false;
 			const float cost = Dial("Protean_FlightJumpCost", 15.0f);
 			if (Stamina(a_p) >= cost) {
 				Spend(a_p, cost);
@@ -183,7 +218,7 @@ namespace protean::Flight
 			}
 			Spend(a_p, cost);
 			g_glideEase = std::min(g_glideEase + a_delta * kEase, 1.0f);
-			const float down = -std::abs(Dial("Protean_GlideFallSpeed", 300.0f));
+			const float down = -std::abs(Dial("Protean_GlideFallSpeed", 250.0f));
 			// forward where the player faces, at least the glide's speed (a faster run going in keeps its speed)
 			const float across = std::max(g_glideStartAcross, Dial("Protean_GlideSpeed", 900.0f));
 			const float speed = g_glideStartAcross + (across - g_glideStartAcross) * g_glideEase;

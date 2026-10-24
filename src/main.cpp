@@ -88,12 +88,26 @@ namespace
 			return RE::BSEventNotifyControl::kContinue;
 		}
 
-		// a kill by the player: a stack of the Unbound Form boost
+		// a kill by the player: a stack of the Unbound Form boost. Any animal's death: its heart
 		RE::BSEventNotifyControl ProcessEvent(const RE::TESDeathEvent* a_event, RE::BSTEventSource<RE::TESDeathEvent>*) override
 		{
-			if (a_event && a_event->dead && a_event->actorKiller && a_event->actorKiller->IsPlayerRef() && a_event->actorDying &&
-				!a_event->actorDying->IsPlayerRef()) {
-				SKSE::GetTaskInterface()->AddTask([]() { protean::Evolve::OnKill(); });
+			if (a_event && a_event->dead && a_event->actorDying && !a_event->actorDying->IsPlayerRef()) {
+				const auto id = a_event->actorDying->GetFormID();
+				SKSE::GetTaskInterface()->AddTask([id]() {
+					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
+						protean::Shift::AddHeart(a);
+					}
+				});
+			}
+			if (a_event && a_event->dead && a_event->actorDying && !a_event->actorDying->IsPlayerRef()) {
+				const auto* dying = a_event->actorDying.get();
+				const auto* killer = a_event->actorKiller.get();
+				const bool  pulled = !killer && protean::Tendril::PulledRecently(dying->GetFormID());
+				logger::info("death: '{}' {:08X}, killer '{}'{}", dying->GetName(), dying->GetFormID(), killer ? killer->GetName() : "none",
+					pulled ? " (landed from a Tendril pull: the player's kill)" : "");
+				if ((killer && killer->IsPlayerRef()) || pulled) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Evolve::OnKill(); });
+				}
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
