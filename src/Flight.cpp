@@ -32,6 +32,7 @@ namespace protean::Flight
 		float g_glideEase = 0.0f;
 		int   g_fallSent = 0;  // log lines so far for the glide's fall pose
 		bool  g_diving = false;
+		std::atomic<bool> g_landedInGlide{ false };  // the graph landed while still gliding (set from its event)
 		float g_stuck = 0.0f;  // seconds on the ground with the game's jumping flag still up
 
 		std::string g_sound = "NPCDragonLandCrashShortSD";
@@ -110,6 +111,30 @@ namespace protean::Flight
 			}
 			g_marker = want;
 		}
+
+		// test aid: the animation events while gliding, to find what takes the graph out of its fall every few seconds
+		class GraphSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override
+			{
+				if (a_event && g_gliding && a_event->holder && a_event->holder->IsPlayerRef()) {
+					// the game's fall fail-safe lands the player when the fall clip ends: back into the glide at once
+					if (std::string_view(a_event->tag.c_str()).starts_with("JumpLand")) {
+						g_landedInGlide = true;
+					}
+					if (_logged < 60) {
+						++_logged;
+						logger::info("flight: graph event '{}' ({}) while gliding", a_event->tag.c_str(), a_event->payload.c_str());
+					}
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+
+		private:
+			int _logged{ 0 };
+		};
+		GraphSink g_graphSink;
 
 		void Reset()
 		{
@@ -259,6 +284,9 @@ namespace protean::Flight
 				const float vx = v.quad.m128_f32[0] / kUnit;
 				const float vy = v.quad.m128_f32[1] / kUnit;
 				if (!g_gliding) {
+					a_p->RemoveAnimationGraphEventSink(&g_graphSink);
+					a_p->AddAnimationGraphEventSink(&g_graphSink);
+					g_landedInGlide = false;  // nothing left from before this glide
 					g_gliding = true;
 					g_glideStart = vz;
 					g_glideStartAcross = std::sqrt(vx * vx + vy * vy);
@@ -266,7 +294,10 @@ namespace protean::Flight
 				}
 				Spend(a_p, cost);
 				// the falling pose throughout: slowed, the fall sometimes read to the game as a run
-				if (bool inJump = true; a_p->GetGraphVariableBool("bInJumpState", inJump) && !inJump) {
+				if (g_landedInGlide.exchange(false)) {
+					a_p->NotifyAnimationGraph("JumpFall");
+					logger::info("flight: the graph landed mid-glide, back into the fall");
+				} else if (bool inJump = true; a_p->GetGraphVariableBool("bInJumpState", inJump) && !inJump) {
 					const bool took = a_p->NotifyAnimationGraph("JumpFall");
 					if (g_fallSent++ < 3) {
 						logger::info("flight: glide out of the falling pose, JumpFall sent (taken {})", took);

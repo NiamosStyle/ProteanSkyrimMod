@@ -9,8 +9,9 @@ packs it. Needs PyNifly's standalone HKX module (GPL-3.0, only run here, never s
 Pillow for --preview (a stick figure from the side, front and above).
 
 The pose is built upright on the skeleton's reference pose (model space: x right, y forward, z up), then the whole
-body is pitched forward at the COM; a slow sway loops twice over the clip. Timing, track layout and binding are the
-game's own fall's. Picked with the user 2026-10-24 (arms about where 25 deg past a borrowed flying pose looked right).
+body is pitched forward at the COM, with a slow sway. Track layout and binding are the game's own fall's, but the clip is
+LENGTH seconds: when the fall loop's clip ends without a landing the game lands the player anyway (a fail-safe; with
+the game's 5.3 s length the glide turned into a run for a moment every ~6 s, testing 2026-10-24). Picked with the user 2026-10-24 (arms about where 25 deg past a borrowed flying pose looked right).
 """
 import copy
 import json
@@ -43,6 +44,8 @@ POSE = dict(
     sway_roll=3.0,   # body roll each way
     sway_arm=2.5,    # arms flex up and down
 )
+SWAY = 8.0 / 3.0  # seconds per sway
+LENGTH = 24 * SWAY  # 64 s: longer than any glide on a full stamina bar
 X, Y = [1, 0, 0], [0, 1, 0]
 
 
@@ -155,8 +158,12 @@ def build(preview_path=None):
                 f.write(bsa.read(ANIMATIONS, inner))
         skel = hkx.load_skyrim_skeleton(os.path.join(tmp, "skeleton.hkx"))
         anim = copy.deepcopy(hkx.load_skyrim_animation(os.path.join(tmp, "mt_jumpfall.hkx")))
-        n = anim.num_frames
-        frames = [pose(skel, f / (n - 1) * 2.0) for f in range(n)]  # two sways; the last frame equals the first
+        n = int(round(LENGTH * 30)) + 1
+        anim.num_frames, anim.duration, anim.frame_duration = n, LENGTH, 1.0 / 30.0
+        anim.num_blocks, anim.block_duration = 0, 0.0  # worked out again by the writer
+        anim.max_frames_per_block = 256
+        sway = [pose(skel, f / 30.0 / SWAY) for f in range(int(round(SWAY * 30)))]  # one sway, repeated
+        frames = [sway[f % len(sway)] for f in range(n)]  # the last frame equals the first
         for ti, b in enumerate(anim.track_to_bone_indices or range(len(skel.bones))):
             tr = anim.tracks[ti]
             tr.translations = [list(frames[f][b][0]) for f in range(n)]
