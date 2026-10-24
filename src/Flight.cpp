@@ -30,7 +30,8 @@ namespace protean::Flight
 		float g_glideStart = 0.0f;  // the fall speed when the glide began, game units / s
 		float g_glideStartAcross = 0.0f;  // the speed across the ground when it began
 		float g_glideEase = 0.0f;
-		float g_easeOut = 0.0f;  // seconds left easing a glide that ended in the air into the fall
+		float g_easeOut = 0.0f;
+		bool  g_spent = false;   // the glide ran the bar dry while Jump stayed held  // seconds left easing a glide that ended in the air into the fall
 		constexpr float kEaseOut = 0.5f;
 		int   g_fallSent = 0;
 		float g_outOfFall = 0.0f;               // seconds the graph has been out of its fall while gliding
@@ -214,6 +215,7 @@ namespace protean::Flight
 		void Reset()
 		{
 			g_easeOut = 0.0f;
+			g_spent = false;
 			g_air = 0.0f;
 			g_doubleUsed = false;
 			g_doubleQueued = false;
@@ -356,7 +358,10 @@ namespace protean::Flight
 
 			// the glide: Jump held while falling
 			const float cost = Dial("Protean_GlideCost", 5.0f) * a_delta;
-			if (g_jumpHeld && vz < 0.0f && Stamina(a_p) > cost) {
+			if (!g_jumpHeld) {
+				g_spent = false;  // a new press may glide again
+			}
+			if (g_jumpHeld && !g_spent && vz < 0.0f && Stamina(a_p) > cost) {
 				const float vx = v.quad.m128_f32[0] / kUnit;
 				const float vy = v.quad.m128_f32[1] / kUnit;
 				if (!g_gliding) {
@@ -402,6 +407,7 @@ namespace protean::Flight
 					// (dropped at once, the body lurched)
 					a_p->NotifyAnimationGraph("JumpFall");
 					g_easeOut = kEaseOut;
+					g_spent = g_jumpHeld;  // the bar ran dry: no glide again on this press (a trickle back had restarted it)
 					logger::info("flight: glide ended in the air ({})", g_jumpHeld ? "stamina" : "Jump let go");
 				}
 				g_gliding = false;
