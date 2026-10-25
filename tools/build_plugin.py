@@ -43,11 +43,11 @@ PERKS = {
                      "90 seconds, stacks).", 0, 0,
                      ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
     # Beast
-    "keen": (0x961, "Keen", "In animal form, open Favorites to switch on night vision, Detect Life and Detect Dead. "
-             "The two detections cost Stamina while on.", 1.8, 0.8,
+    "keen": (0x961, "Keen", "Enhance your senses while wearing an animal's form. Open Favorites to access night vision, "
+             "Detect Life, and Detect Dead (the Detect spells drain Stamina while on).", 1.8, 0.8,
              ["survivor", "predator", "stalker"]),
-    "survivor": (0x962, "Survivor", "Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter "
-                 "of the difference when the animal is stronger than you.", 3.3, 1.9, ["apex"]),
+    "survivor": (0x962, "Survivor", "Increase the amount of Health you gain when wearing an animal's shape. Tougher "
+                 "animals give higher bonuses.", 3.3, 1.9, ["apex"]),
     "predator": (0x963, "Predator", "Your animal forms deal more damage, 2% more for each level you have (at most double).",
                  2.3, 2.1, ["apex"]),
     "stalker": (0x964, "Stalker", "In animal form, open Favorites to switch on Stalk: stand still or walk for a moment "
@@ -86,9 +86,9 @@ PERKS = {
 # Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
 # base id -> (local id, description)
 RANK2 = {
-    "survivor": (0x972, "Your animal forms gain still more health: 75% of your own, plus a quarter of the difference. "
-                 "Activate by a body (meat eaters) or a plant (plant eaters) to eat: a body heals 25% of your health, a plant 20%. "
-                 "Eating takes a few seconds standing still; anyone who sees you eat a person turns on you."),
+    "survivor": (0x972, "Increase the amount of Health you gain while wearing an animal's form by an even greater "
+                 "amount, and gain the ability to heal by eating (predators may feed on corpses, herbivores can feed on "
+                 "plants)."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Enemies lose track of your animal forms sooner."),

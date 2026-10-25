@@ -5,7 +5,7 @@ Name:
   Value: 'Survivor'
 Description:
   TargetLanguage: English
-  Value: 'Your animal forms gain more health: 50% of your own instead of 25%, plus a quarter of the difference when the animal is stronger than you.'
+  Value: 'Increase the amount of Health you gain when wearing an animal''s shape. Tougher animals give higher bonuses.'
 NumRanks: 1
 Playable: True
 NextPerk: 000972:Protean.esp
