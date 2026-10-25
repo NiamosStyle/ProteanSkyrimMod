@@ -5,6 +5,6 @@ Name:
   Value: 'Unbound Form'
 Description:
   TargetLanguage: English
-  Value: 'You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill speeds your stamina''s recovery for a while (the boosts stack).'
+  Value: 'Take the form of any animal whose heart you have consumed. Immunity to all diseases. Passively absorb the life force of recent kills to temporarily boost your Stamina recovery (15% boost for 90 seconds, stacks).'
 NumRanks: 1
 Playable: True

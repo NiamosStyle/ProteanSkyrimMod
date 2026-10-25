@@ -38,8 +38,9 @@ TREE_SCALE_X = 1.0
 TREE_SCALE_Y = 1.0
 PERKS = {
     "unbound_form": (0x960, "Unbound Form",
-                     "You can shapeshift. Hearts drop from animals you kill, disease cannot touch you, and every kill "
-                     "speeds your stamina's recovery for a while (the boosts stack).", 0, 0,
+                     "Take the form of any animal whose heart you have consumed. Immunity to all diseases. Passively "
+                     "absorb the life force of recent kills to temporarily boost your Stamina recovery (15% boost for "
+                     "90 seconds, stacks).", 0, 0,
                      ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
     # Beast
     "keen": (0x961, "Keen", "In animal form, open Favorites to switch on night vision, Detect Life and Detect Dead. "
