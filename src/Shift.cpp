@@ -328,8 +328,21 @@ namespace protean::Shift
 					}
 				}
 			}
+			if (forgiven > 0) {
+				// the bounty alone left the witnesses' memory: Riverwood went on attacking after a chicken's bounty was taken
+				// off (2026-10-24). Every alarm against the player ends too, as when a bounty is paid.
+				if (auto* pl = RE::ProcessLists::GetSingleton()) {
+					pl->StopCombatAndAlarmOnActor(a_p, false);
+				}
+				// and the animal's bounty comes off the lifetime total in General Stats (the user's wish)
+				if (auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton()) {
+					RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+					vm->DispatchStaticCall("Game", "IncrementStat",
+						RE::MakeFunctionArguments(RE::BSFixedString("Total Lifetime Bounty"), static_cast<std::int32_t>(-forgiven)), cb);
+				}
+			}
 			s.crime.clear();
-			logger::info("nobody saw the change: forgave {} gold of bounty, calmed {} actor(s)", forgiven, calmed);
+			logger::info("nobody saw the change: forgave {} gold of bounty, calmed {} actor(s), alarms ended {}", forgiven, calmed, forgiven > 0);
 			if (forgiven || calmed) {
 				Notify("Nobody connects you with what the beast did.");
 			}

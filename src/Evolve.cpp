@@ -252,7 +252,9 @@ namespace protean::Evolve
 		if ((sinceSync += a_delta) >= 0.25f) {
 			sinceSync = 0.0f;
 			Sync();
-			if (s.comboSpent && !p->IsInCombat()) {
+			// earned again out of combat and below the stacks it needs (kills outside a fight never start one)
+			if (s.comboSpent && !p->IsInCombat() &&
+				s.boosts.size() < static_cast<std::size_t>(std::max(Registry::Get().Dial("Protean_ComboStacks", 5.0f), 1.0f))) {
 				s.comboSpent = false;
 				logger::info("evolution: out of combat, the kill-boost point can be earned again");
 			}
