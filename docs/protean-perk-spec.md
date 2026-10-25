@@ -233,7 +233,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Unbound Form
 - **What it does:** Unlocks the face-stealer power.
 - **Stamina:** Costs the same amount of Stamina as changing into an animal.
-- **Status:** Mostly ready. Face stealing already works and was tested live on Ulfric, Lydia, and others. Right now it's unlocked by the same Instinct power as shapeshifting, so it needs its own unlock for this perk, plus the Stamina cost.
+- **Status:** Built (2026-10-24), not yet tested as a perk. Face stealing (tested live earlier on Ulfric, Lydia and others) now needs this perk instead of the Instinct power; owning it gives the Stolen Face power. Putting a face on (stealing one, or wearing the kept one) costs `Protean_ChangeStaminaCost`; taking it off is free.
 
 ### Metamorphosis (stamina)
 - **Requires:** Borrowed Visage

@@ -1,5 +1,7 @@
 #include "Face.h"
 
+#include "Evolve.h"
+
 #include "Registry.h"
 #include "Shift.h"
 #include "State.h"
@@ -731,7 +733,7 @@ namespace protean::Face
 			g_bypass = 0;  // our own loot request coming back through the activation event
 			return false;
 		}
-		if (!s.active.empty() || !p->HasSpell(Registry::Get().Starter()) || !p->IsSneaking() || !Eligible(a_corpse)) {
+		if (!s.active.empty() || !Evolve::Has("borrowed_visage") || !p->IsSneaking() || !Eligible(a_corpse)) {
 			return false;
 		}
 		{
@@ -748,6 +750,22 @@ namespace protean::Face
 		return true;
 	}
 
+	// Borrowed Visage: putting a face on costs the stamina of a change of form (taking it off is free)
+	bool PayForFace(RE::PlayerCharacter* a_p)
+	{
+		const float cost = Registry::Get().Dial("Protean_ChangeStaminaCost", 15.0f);
+		auto*       av = a_p->AsActorValueOwner();
+		if (cost > 0.0f && av->GetActorValue(RE::ActorValue::kStamina) < cost) {
+			Shift::Notify("You are too tired to change your face.");
+			logger::info("face: refused, stamina {:.0f} < {:.0f}", av->GetActorValue(RE::ActorValue::kStamina), cost);
+			return false;
+		}
+		if (cost > 0.0f) {
+			av->DamageActorValue(RE::ActorValue::kStamina, cost);
+		}
+		return true;
+	}
+
 	void Steal(RE::TESNPC* a_source, RE::Actor* a_corpse, bool a_witnessed)
 	{
 		auto* p = Player();
@@ -758,6 +776,9 @@ namespace protean::Face
 		}
 		if (!s.active.empty()) {
 			Shift::Notify("You must return to your own form first.");
+			return;
+		}
+		if (!PayForFace(p)) {
 			return;
 		}
 		logger::info("=== steal face of {:08X} '{}' (race '{}', witnessed check {}) ===", a_source->GetFormID(), a_source->GetName(),
@@ -825,6 +846,9 @@ namespace protean::Face
 		}
 		if (!s.bank.valid) {
 			Shift::Notify("You have no face kept. Sneak next to a body and activate it.");
+			return;
+		}
+		if (!PayForFace(Player())) {
 			return;
 		}
 		logger::info("=== wear the kept face ===");

@@ -106,6 +106,10 @@ namespace protean::Evolve
 			if (Has(kUnbound) && !p->HasSpell(reg.Starter())) {
 				p->AddSpell(reg.Starter());  // the Instinct power: shapeshifting, and hearts in corpses
 			}
+			if (auto* fp = reg.FacePower(); fp && Has("borrowed_visage") && !p->HasSpell(fp)) {
+				p->AddSpell(fp);  // Borrowed Visage: the Stolen Face power (face stealing itself asks for the perk)
+				logger::info("evolution: the Stolen Face power given");
+			}
 			SyncDisease(p);
 			const auto& s = State::Get();
 			if (auto* evo = reg.Evolution(); evo && !p->HasSpell(evo) && (s.evoTotal > 0 || s.facePoints > 0 || Bought() > 0)) {

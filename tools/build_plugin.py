@@ -73,7 +73,9 @@ PERKS = {
     "devastator": (0x96C, "Devastator", "Unleash a devastating attack all around you. Costs all your stamina and needs "
                    "two kill boosts. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.4, []),
     # Deceiver
-    "borrowed_visage": (0x96D, "Borrowed Visage", "Steal the face of a corpse and wear it.", -1.8, 0.8,
+    "borrowed_visage": (0x96D, "Borrowed Visage", "Sneak next to a body and activate it to copy its face, body and race, "
+                        "and join its factions. Cast Stolen Face to put the face on or take it off; putting it on costs "
+                        "Stamina, like changing form. Anyone who sees the theft turns hostile.", -1.8, 0.8,
                         ["metamorphosis", "inconspicuous"]),
     "metamorphosis": (0x96E, "Metamorphosis", "Make a stolen face and race your own, and leave your crimes behind. "
                       "Costs all your stamina.", -3.3, 1.9, []),
@@ -134,7 +136,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
-         "subtle_carapace", "stalker"}
+         "subtle_carapace", "stalker", "borrowed_visage"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = {"stalker"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
