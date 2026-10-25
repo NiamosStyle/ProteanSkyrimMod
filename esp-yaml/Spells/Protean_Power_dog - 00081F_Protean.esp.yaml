@@ -2,7 +2,7 @@ FormKey: 00081F:Protean.esp
 EditorID: Protean_Power_dog
 Name:
   TargetLanguage: English
-  Value: 'Dog'
+  Value: 'Shapeshift: Dog'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

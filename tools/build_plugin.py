@@ -460,7 +460,7 @@ def main():
           "You can learn the forms of animals by eating their hearts. Cast to recall the forms you know.")
     power(REVERT, "Protean_RevertForm", "Revert Form",
           "Return to your own form.")
-    power(FACE_POWER, "Protean_FacePower", "Stolen Face",
+    power(FACE_POWER, "Protean_FacePower", "Shapeshift: Stolen Face",
           "Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.")
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
@@ -718,7 +718,7 @@ def main():
               + "PickUpSound: 03EDBD:Skyrim.esm\nPutDownSound: 03EDC0:Skyrim.esm\nWeight: 0.5\nValue: 5\n"
               "Flags:\n- NoAutoCalc\n- FoodItem\nConsumeSound: 0B6435:Skyrim.esm\n"
               "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(HEART_EFFECT), PLUGIN))
-        power(pw, "Protean_Power_%s" % c["id"], c["name"],
+        power(pw, "Protean_Power_%s" % c["id"], "Shapeshift: %s" % c["name"],
               "Become a %s. Cast again, or use Revert Form, to return." % c["name"].lower())
 
         # The marker the player carries while in this form: a hidden ability whose effect has the keywords
