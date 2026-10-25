@@ -314,35 +314,42 @@ namespace protean::Shift
 				}
 				return;
 			}
+			// everyone after the player stands down, also those searching for it out of sight (a hunter who had lost the
+			// wolf went for the chicken the player changed into next, 2026-10-25) and those further off
 			if (auto* pl = RE::ProcessLists::GetSingleton()) {
-				for (auto& handle : pl->highActorHandles) {
-					auto actor = handle.get();
-					if (!actor || actor.get() == a_p || actor->IsDead()) {
-						continue;
-					}
-					auto target = actor->GetActorRuntimeData().currentCombatTarget.get();
-					if (target && target.get() == a_p) {
-						actor->StopCombat();
-						actor->StopAlarmOnActor();
-						++calmed;
+				const auto me = a_p->GetHandle();
+				for (auto* list : { &pl->highActorHandles, &pl->middleHighActorHandles }) {
+					for (auto& handle : *list) {
+						auto actor = handle.get();
+						if (!actor || actor.get() == a_p || actor->IsDead() || !actor->IsInCombat()) {
+							continue;
+						}
+						auto*      cc = actor->GetActorRuntimeData().combatController;
+						auto       target = actor->GetActorRuntimeData().currentCombatTarget.get();
+						const bool after = (target && target.get() == a_p) || (cc && (cc->targetHandle == me || cc->previousTargetHandle == me));
+						if (after) {
+							actor->StopCombat();
+							actor->StopAlarmOnActor();
+							++calmed;
+						}
 					}
 				}
 			}
-			if (forgiven > 0) {
+			if (forgiven > 0 || calmed > 0) {
 				// the bounty alone left the witnesses' memory: Riverwood went on attacking after a chicken's bounty was taken
 				// off (2026-10-24). Every alarm against the player ends too, as when a bounty is paid.
 				if (auto* pl = RE::ProcessLists::GetSingleton()) {
 					pl->StopCombatAndAlarmOnActor(a_p, false);
 				}
 				// and the animal's bounty comes off the lifetime total in General Stats (the user's wish)
-				if (auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton()) {
+				if (auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton(); vm && forgiven > 0) {
 					RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
 					vm->DispatchStaticCall("Game", "IncrementStat",
 						RE::MakeFunctionArguments(RE::BSFixedString("Total Lifetime Bounty"), static_cast<std::int32_t>(-forgiven)), cb);
 				}
 			}
 			s.crime.clear();
-			logger::info("nobody saw the change: forgave {} gold of bounty, calmed {} actor(s), alarms ended {}", forgiven, calmed, forgiven > 0);
+			logger::info("nobody saw the change: forgave {} gold of bounty, calmed {} actor(s), alarms ended {}", forgiven, calmed, forgiven > 0 || calmed > 0);
 			if (forgiven || calmed) {
 				Notify("Nobody connects you with what the beast did.");
 			}
