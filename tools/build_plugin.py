@@ -87,8 +87,8 @@ PERKS = {
 # base id -> (local id, description)
 RANK2 = {
     "survivor": (0x972, "Increase the amount of Health you gain while wearing an animal's form by an even greater "
-                 "amount, and gain the ability to heal by eating (predators may feed on corpses, herbivores can feed on "
-                 "plants)."),
+                 "amount, and gain the ability to heal by eating (predators may feed on corpses, herbivores may feed on "
+                 "plants, and omnivores may feed on either. Feeding on a person will cause witnesses to turn hostile)."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
