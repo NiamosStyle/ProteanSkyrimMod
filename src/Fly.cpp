@@ -126,6 +126,9 @@ namespace protean::Fly
 			const float yaw = p->GetAngleZ();
 			g_leap = { true, Clock::now(), { std::sin(yaw), std::cos(yaw), 0.0f }, dist / airtime, vz0, p->GetPositionZ(),
 				cc->gravity, p->GetPosition(), airtime };
+			// the game's fall mark is not reset while Protean holds the animal in the air: a hare whose leap struck a rock at
+			// once died of a fall counted from an old height (2026-10-24). Leaps count from where they start, then the apex.
+			cc->fallStartHeight = p->GetPositionZ();
 			logger::info("leap: {:.0f} units, {:.0f} high: {:.0f} u/s ahead, {:.0f} u/s up, {:.2f} s", dist, h, g_leap.speed, vz0, airtime);
 		}
 
@@ -152,6 +155,7 @@ namespace protean::Fly
 			const float t = std::chrono::duration<float>(Clock::now() - g_leap.since).count();
 			const auto  pos = a_p->GetPosition();
 			g_leap.apex = std::max(g_leap.apex, pos.z);
+			cc->fallStartHeight = g_leap.apex;
 			if (t > 0.2f && cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {
 				EndLeap(a_p, "landed");
 				return;
