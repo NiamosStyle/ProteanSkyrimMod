@@ -1090,6 +1090,9 @@ namespace protean::Shift
 	void BeforeLoad()
 	{
 		g_pending.reset();  // a change still on its way belongs to the game being left
+		// the control lock is not in the save: a load from an animal's death into a human save kept the menus locked
+		// (2026-10-24, stuck in a barter window); a save made as an animal locks them again after the load
+		SetControlsLocked(false);
 		// hand the player's own skin and height back, so a save loaded next does not inherit the animal's
 		if (auto* p = Player()) {
 			TakeOffBody(p);
