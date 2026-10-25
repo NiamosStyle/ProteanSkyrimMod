@@ -50,8 +50,8 @@ PERKS = {
     "predator": (0x963, "Predator", "Your animal forms deal more damage, 2% more for each level you have (at most double).",
                  2.3, 2.1, ["apex"]),
     "stalker": (0x964, "Stalker", "In animal form, open Favorites to switch on Stalk: stand still or walk for a moment "
-                "out of a fight to fade from sight. Staying hidden costs Stamina; running, being hit or attacking ends "
-                "it, and a bite from hiding does double damage.", 1.4, 1.9, ["apex"]),
+                "out of a fight to fade from sight. Moving while hidden costs Stamina (running twice as much), standing "
+                "still is free; sprinting, being hit or attacking ends it, and a bite from hiding does double damage.", 1.4, 1.9, ["apex"]),
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
@@ -205,8 +205,9 @@ GLOBALS = {
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a meal takes, standing still"),
     "Protean_FeedReach":           (0x9B1, 250,  "Float", "Survivor rank 2: how near a body or plant must be, game units"),
     "Protean_StalkerFadeSeconds":  (0x9B5, 2,    "Float", "Stalker: seconds still or walking before the animal fades"),
-    "Protean_StalkerDrain":        (0x9B6, 2,    "Float", "Stalker: stamina a second while faded"),
+    "Protean_StalkerDrain":        (0x9B6, 2,    "Float", "Stalker: stamina a second while faded and walking (standing is free)"),
     "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
+    "Protean_StalkerRunMult":      (0x9B9, 2,    "Float", "Stalker: running while faded costs this times the walking drain"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -618,7 +619,7 @@ def main():
     power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Keen: Detect Dead",
           "In animal form, sense the dead and undead through walls, at a steady cost in Stamina. Cast again to stop.")
     power(STALKER_POWER, "Protean_StalkPower", "Stalker: Stalk",
-          "In animal form, while on, keep still or walk to fade from sight; staying hidden costs Stamina. Cast again to stop.")
+          "In animal form, while on, keep still or walk to fade from sight; moving while hidden costs Stamina. Cast again to stop.")
     # Detect Dead as fire-and-forget: the game's held Detect Undead effects (DetectUndead*ConcSelf), same looks and
     # target conditions, with a duration.
     dead_kw = {"enemy": ("013797", "01397A", "0F82F4"), "friend": ("0F82F4", "013797", "01397A")}

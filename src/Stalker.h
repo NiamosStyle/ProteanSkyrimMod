@@ -6,8 +6,9 @@ namespace protean::Stalker
 	// user's call, 2026-10-24: fading whenever the animal stood still would cost stamina at every pause). While on, in
 	// animal form, out of combat, standing still or walking for Protean_StalkerFadeSeconds fades the
 	// player out (the game's own Invisibility effect, so it shimmers, and noise and touch still give the player away).
-	// Only the fade costs: Protean_StalkerDrain stamina a second; running, sprinting, jumping, eating, being hit, a fight or an empty
-	// Stamina bar end it, and so does attacking (the game's own rule). The bite thrown from hiding does
+	// Faded, only moving costs (the user's call, 2026-10-24): standing is free, walking costs Protean_StalkerDrain
+	// stamina a second and running Protean_StalkerRunMult times that (a run keeps the fade, but cannot start it).
+	// Sprinting, jumping, eating, being hit, a fight, an empty Stamina bar or attacking end it. The bite thrown from hiding does
 	// Protean_StalkerAmbushMult times the damage (a hidden perk held from the swing to its hit): animals cannot sneak, so
 	// the game's own sneak attacks never come to them.
 

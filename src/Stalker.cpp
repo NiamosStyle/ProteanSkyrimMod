@@ -66,6 +66,27 @@ namespace protean::Stalker
 			}
 		}
 
+		enum class Gait
+		{
+			kStill,
+			kWalk,
+			kRun,
+			kSprint
+		};
+
+		Gait Pace(RE::PlayerCharacter* a_p)
+		{
+			auto* pc = RE::PlayerControls::GetSingleton();
+			auto* st = a_p->AsActorState();
+			if (!pc || pc->data.moveInputVec.Length() <= 0.1f) {
+				return Gait::kStill;
+			}
+			if (Move::SprintHeld() || (st && st->IsSprinting())) {
+				return Gait::kSprint;
+			}
+			return st && st->IsRunning() ? Gait::kRun : Gait::kWalk;
+		}
+
 		// what keeps the player from fading now ("" = nothing)
 		std::string Blocker(RE::PlayerCharacter* a_p)
 		{
@@ -87,11 +108,8 @@ namespace protean::Stalker
 			if (a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) <= 0.0f) {
 				return "no stamina";
 			}
-			auto*      pc = RE::PlayerControls::GetSingleton();
-			auto*      st = a_p->AsActorState();
-			const bool moving = pc && pc->data.moveInputVec.Length() > 0.1f;
-			if (moving && (Move::SprintHeld() || (st && (st->IsSprinting() || st->IsRunning())))) {
-				return "running";
+			if (Pace(a_p) == Gait::kSprint) {
+				return "sprinting";
 			}
 			return "";
 		}
@@ -134,8 +152,12 @@ namespace protean::Stalker
 			End(a_p, why);
 			return;
 		}
+		const auto gait = Pace(a_p);
 		if (!g_faded) {
-			if ((g_still += a_delta) >= Dial("Protean_StalkerFadeSeconds", 2.0f)) {
+			// the fade starts only from a stand or a walk; once faded, a run keeps it
+			if (gait == Gait::kRun) {
+				g_still = 0.0f;
+			} else if ((g_still += a_delta) >= Dial("Protean_StalkerFadeSeconds", 2.0f)) {
 				auto* spell = Registry::Get().StalkerFade();
 				auto* caster = a_p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
 				if (spell && caster) {
@@ -146,8 +168,13 @@ namespace protean::Stalker
 			}
 			return;
 		}
+		// only moving costs (the user's call, 2026-10-24: a lion creeping up on its prey; waiting lets Stamina come back)
+		if (gait == Gait::kStill) {
+			return;
+		}
 		auto* av = a_p->AsActorValueOwner();
-		av->DamageActorValue(RE::ActorValue::kStamina, Dial("Protean_StalkerDrain", 2.0f) * a_delta);
+		av->DamageActorValue(RE::ActorValue::kStamina,
+			Dial("Protean_StalkerDrain", 2.0f) * (gait == Gait::kRun ? Dial("Protean_StalkerRunMult", 2.0f) : 1.0f) * a_delta);
 		if (av->GetActorValue(RE::ActorValue::kStamina) <= 0.0f) {
 			End(a_p, "no stamina");
 		}

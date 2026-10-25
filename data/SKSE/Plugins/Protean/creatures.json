@@ -143,7 +143,8 @@
   "Protean_FeedReach": 2481,
   "Protean_StalkerFadeSeconds": 2485,
   "Protean_StalkerDrain": 2486,
-  "Protean_StalkerAmbushMult": 2487
+  "Protean_StalkerAmbushMult": 2487,
+  "Protean_StalkerRunMult": 2489
  },
  "openInteriorKeywords": [
   {

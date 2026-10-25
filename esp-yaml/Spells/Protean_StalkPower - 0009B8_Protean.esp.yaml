@@ -7,7 +7,7 @@ MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:
   TargetLanguage: English
-  Value: 'In animal form, while on, keep still or walk to fade from sight; staying hidden costs Stamina. Cast again to stop.'
+  Value: 'In animal form, while on, keep still or walk to fade from sight; moving while hidden costs Stamina. Cast again to stop.'
 Type: LesserPower
 ChargeTime: 0.5
 CastType: FireAndForget
