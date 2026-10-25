@@ -315,21 +315,31 @@ namespace protean::Shift
 				return;
 			}
 			// everyone after the player stands down, also those searching for it out of sight (a hunter who had lost the
-			// wolf went for the chicken the player changed into next, 2026-10-25) and those further off
+			// wolf went for the chicken the player changed into next, 2026-10-25), and every person the game tracks, however
+			// far, who holds the player as an enemy (Talsgar and a Vigilant, met after the wolf, came already hostile;
+			// a fresh Talsgar was not). A person hostile by faction, a bandit, turns hostile again on seeing the player.
 			if (auto* pl = RE::ProcessLists::GetSingleton()) {
 				const auto me = a_p->GetHandle();
-				for (auto* list : { &pl->highActorHandles, &pl->middleHighActorHandles }) {
+				auto       person = [](RE::Actor* a) {
+					auto* r = a->GetRace();
+					return r && r->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) && !Registry::Get().ByRace(r);
+				};
+				for (auto* list : { &pl->highActorHandles, &pl->middleHighActorHandles, &pl->middleLowActorHandles, &pl->lowActorHandles }) {
 					for (auto& handle : *list) {
 						auto actor = handle.get();
-						if (!actor || actor.get() == a_p || actor->IsDead() || !actor->IsInCombat()) {
+						if (!actor || actor.get() == a_p || actor->IsDead()) {
 							continue;
 						}
 						auto*      cc = actor->GetActorRuntimeData().combatController;
 						auto       target = actor->GetActorRuntimeData().currentCombatTarget.get();
-						const bool after = (target && target.get() == a_p) || (cc && (cc->targetHandle == me || cc->previousTargetHandle == me));
+						const bool fighting = actor->IsInCombat() &&
+						                      ((target && target.get() == a_p) || (cc && (cc->targetHandle == me || cc->previousTargetHandle == me)));
+						const bool after = fighting || (person(actor.get()) && actor->IsHostileToActor(a_p));
 						if (after) {
 							actor->StopCombat();
 							actor->StopAlarmOnActor();
+							logger::info("  calmed {:08X} '{}' ({}, {:.0f} away)", actor->GetFormID(), actor->GetName(),
+								fighting ? "after the player" : "hostile", a_p->GetPosition().GetDistance(actor->GetPosition()));
 							++calmed;
 						}
 					}

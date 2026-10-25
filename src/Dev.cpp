@@ -394,10 +394,11 @@ namespace protean::Dev
 				if (!a_event || !a_event->cause || !a_event->target) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
-				if (a_event->target->IsPlayerRef() && Shift::ActiveCreature()) {
-					// the player in animal form being hit: how much each blow takes
+				if (a_event->target->IsPlayerRef()) {
+					// the player being hit (in any form: who struck first, 2026-10-25), and how much each blow takes
 					auto* source = RE::TESForm::LookupByID(a_event->source);
-					logger::info("player hit by '{}' with '{}'{}{}, health now {:.1f}", a_event->cause->GetName(),
+					logger::info("player{} hit by '{}' with '{}'{}{}, health now {:.1f}", Shift::ActiveCreature() ? "" : " (human)",
+						a_event->cause->GetName(),
 						source ? source->GetName() : "?", a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) ? " (power attack)" : "",
 						a_event->flags.any(RE::TESHitEvent::Flag::kSneakAttack) ? " (sneak attack)" : "",
 						RE::PlayerCharacter::GetSingleton()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
@@ -427,8 +428,9 @@ namespace protean::Dev
 					data = proc->high->attackData->event.c_str();
 					cone = proc->high->attackData->data.strikeAngle;
 				}
-				logger::info("hit: '{}' by {}{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
-					a_event->target->GetName(), kind, f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
+				auto* source = RE::TESForm::LookupByID(a_event->source);
+				logger::info("hit: '{}' by {} with '{}'{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
+					a_event->target->GetName(), kind, source ? source->GetName() : "?", f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
 					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f, data, cone,
 					p->GetRace() ? p->GetRace()->data.unarmedReach : 0.0f, p->GetPosition().GetDistance(a_event->target->GetPosition()));
 				return RE::BSEventNotifyControl::kContinue;
