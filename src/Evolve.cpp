@@ -230,6 +230,14 @@ namespace protean::Evolve
 		s.boosts.push_back(seconds);
 		SyncBoost(p);
 		logger::info("kill boost: {} stack(s), +{:.0f} stamina regeneration", s.boosts.size(), s.boostApplied);
+		// a run of kills feeds evolution: Protean_ComboStacks stacks at once give an evolution point, once a fight (it
+		// comes back after leaving combat; the user's design, 2026-10-24)
+		const auto combo = static_cast<std::size_t>(std::max(reg.Dial("Protean_ComboStacks", 5.0f), 0.0f));
+		if (combo > 0 && !s.comboSpent && s.boosts.size() >= combo) {
+			s.comboSpent = true;
+			Shift::Notify("The slaughter feeds your evolution.");
+			Add(1, std::format("{} kill boosts at once", s.boosts.size()));
+		}
 	}
 
 	void OnFrame(float a_delta)
@@ -244,6 +252,10 @@ namespace protean::Evolve
 		if ((sinceSync += a_delta) >= 0.25f) {
 			sinceSync = 0.0f;
 			Sync();
+			if (s.comboSpent && !p->IsInCombat()) {
+				s.comboSpent = false;
+				logger::info("evolution: out of combat, the kill-boost point can be earned again");
+			}
 		}
 		if (s.boosts.empty() && s.boostApplied == 0.0f) {
 			return;

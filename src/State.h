@@ -103,6 +103,7 @@ namespace protean
 		float                                rushApplied{ 0.0f };     // SpeedMult Predator's Rush added now
 		float                                carapaceApplied{ 0.0f };  // DamageResist Subtle Carapace added now
 		std::set<RE::FormID>                 eaten;                    // bodies already eaten (Survivor 2)
+		bool                                 comboSpent{ false };      // this fight's kill-boost point is taken (until out of combat)
 		// The temporary modifiers of the actor values Protean changes (kTempChecked), as they were at the save. A load
 		// lost some of them (2026-10-24: the health bonus and AttackDamageMult were gone after a load as the wolf,
 		// DamageResist was kept); Shift::OnGameLoaded puts back Protean's part when exactly that much is missing.

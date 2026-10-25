@@ -211,6 +211,7 @@ GLOBALS = {
     "Protean_StalkerDrain":        (0x9B6, 2,    "Float", "Stalker: stamina a second while faded and walking (standing is free)"),
     "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
     "Protean_StalkerRunMult":      (0x9B9, 2,    "Float", "Stalker: running while faded costs this times the walking drain"),
+    "Protean_ComboStacks":         (0x9BA, 5,    "Float", "kill boost stacks at once that give an evolution point, once per fight (0 = off)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
