@@ -4,6 +4,7 @@
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
+#include "Skills.h"
 #include "Stalker.h"
 
 namespace protean::Attacks
@@ -255,6 +256,7 @@ namespace protean::Attacks
 				SetAttackData(p, a->event, c->strikeAngle, angleMult);
 				RaiseReach(race, baseReach * reachMult);
 				Stalker::OnAttack(hidden);
+				Skills::OnAnimalAttack(a_power);
 			}
 			logger::info("attack: '{}' {} {} -> graph accepted: {}", c->id, a_power ? "power" : "normal", a->event, ok);
 		}

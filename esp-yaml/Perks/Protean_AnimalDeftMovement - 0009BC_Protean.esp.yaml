@@ -1,0 +1,17 @@
+FormKey: 0009BC:Protean.esp
+EditorID: Protean_AnimalDeftMovement
+Name:
+  TargetLanguage: English
+  Value: 'Animal Deft Movement'
+Description:
+  TargetLanguage: English
+  Value: ''
+NumRanks: 1
+Playable: False
+Hidden: True
+Effects:
+- MutagenObjectType: PerkEntryPointModifyValue
+  EntryPoint: ModIncomingDamage
+  PerkConditionTabCount: 3
+  Modification: Multiply
+  Value: 1

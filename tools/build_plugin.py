@@ -127,6 +127,10 @@ PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
 # xx9B2 was a test perk installed once (2026-10-24, never committed); not reused.
 STALKER_FADE_SPELL, STALKER_AMBUSH_PERK = 0x9B3, 0x9B4
 STALKER_POWER = 0x9B8  # Stalk: the toggle in the animal's Favorites menu, beside Keen's powers
+# Skills (src/Skills.cpp): hidden perks Protean holds and sets live. Bites have no weapon for the One-Handed perks to
+# check, so ANIMAL_ARMS (held in animal form) carries Armsman / Savage Strike (attack damage) and Fighting Stance (power
+# attack stamina); DEFT (held in animal form or with the carapace) is Deft Movement's no-damage chance, drawn by Protean.
+ANIMAL_ARMS_PERK, DEFT_PERK = 0x9BB, 0x9BC
 VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
@@ -212,6 +216,9 @@ GLOBALS = {
     "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
     "Protean_StalkerRunMult":      (0x9B9, 2,    "Float", "Stalker: running while faded costs this times the walking drain"),
     "Protean_ComboStacks":         (0x9BA, 5,    "Float", "kill boost stacks at once that give an evolution point, once per fight (0 = off)"),
+    "Protean_XpOneHanded":         (0x9BD, 1,    "Float", "One-Handed experience per point of damage a bite or claw hit does"),
+    "Protean_XpLightArmor":        (0x9BE, 1,    "Float", "Light Armor experience per point of damage taken as an animal or with the carapace"),
+    "Protean_XpSneak":             (0x9BF, 0.5,  "Float", "Sneak experience a second moving faded near someone unaware"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -492,6 +499,8 @@ def main():
           # the fist set Feral uses, the sabre cat's claw and a sword's slash)
           "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
           "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
+          # the game's sword keyword: the One-Handed perks for swords reach the claws (the user's design, 2026-10-25)
+          "Keywords:\n- 01E711:Skyrim.esm\n"
           "BasicStats:\n  Damage: 6\n"
           "Data:\n  Speed: 1.3\n  Reach: 0.7\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
           "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
@@ -584,6 +593,20 @@ def main():
           "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
           "- MutagenObjectType: PerkEntryPointModifyValue\n  EntryPoint: ModAttackDamage\n"
           "  PerkConditionTabCount: 3\n  Modification: Multiply\n  Value: %s\n" % GLOBALS["Protean_StalkerAmbushMult"][1])
+
+    # ---- the hidden skill perks (values set live by Protean)
+    def hidden_perk(local, editor_id, title, entries):
+        write(os.path.join(y, "Perks", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: %s\n" % (fid(local), PLUGIN, editor_id)
+              + name_block(title)
+              + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+              "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
+              + "".join("- MutagenObjectType: PerkEntryPointModifyValue\n  EntryPoint: %s\n"
+                        "  PerkConditionTabCount: %d\n  Modification: Multiply\n  Value: 1\n" % e for e in entries))
+
+    hidden_perk(ANIMAL_ARMS_PERK, "Protean_AnimalArms", "Animal One-Handed",
+                [("ModAttackDamage", 3), ("ModPowerAttackStamina", 1)])
+    hidden_perk(DEFT_PERK, "Protean_AnimalDeftMovement", "Animal Deft Movement", [("ModIncomingDamage", 3)])
 
     # ---- the glide markers (hidden): the Open Animation Replacer condition for the glide pose
     for i, (e, sp) in enumerate(zip(GLIDE_EFFECTS, GLIDE_SPELLS)):
@@ -791,6 +814,7 @@ def main():
                            "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),
                            "predatorPoison": PREDATOR_POISON_SPELL,
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
+                           "skills": {"arms": ANIMAL_ARMS_PERK, "deft": DEFT_PERK},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

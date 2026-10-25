@@ -87,6 +87,8 @@ Evolution points come from four sources:
 
 **Totals for this tree:** The tree has 18 perks and 22 purchasable ranks. Buying every rank costs 2 x (1 + 2 + ... + 11) = **132 evolution points** (hearts alone can give 35 kinds x 6 = 210).
 
+**Vanilla skills (2026-10-25, the user's design):** animal bites and claw hits count as one-handed swords for One-Handed experience and perks (claws carry the sword keyword; bites get Armsman, Savage Strike and Fighting Stance through a hidden perk). Hits taken as an animal, or with Subtle Carapace on, count as Light Armor for experience, Agile Defender (multiplies the carapace) and Deft Movement; fur, hide, leather, chitin and dragonscale light body armor no longer turns the carapace off. Moving faded with Stalk gives Sneak experience; Stealth and Silence quiet it; Light Foot already works in any form. No magic skills.
+
 ### Named faces that grant a perk point
 
 Stealing the face of any of these characters grants one automatic perk point. Not every character is reachable in every playthrough, which is intended: the player's choices decide which rewards they can collect.

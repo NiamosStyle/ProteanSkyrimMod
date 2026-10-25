@@ -5,6 +5,8 @@
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
+#include "Skills.h"
+#include "State.h"
 
 namespace protean::Stalker
 {
@@ -51,6 +53,21 @@ namespace protean::Stalker
 			}
 			g_faded = false;
 			g_still = 0.0f;
+		}
+
+		// Stealth and Silence while faded: the movement noise drops by Stealth's share, or to nothing with Silence (a
+		// temporary modifier whose size the co-save keeps, State::stalkerNoiseApplied)
+		void Quiet(RE::PlayerCharacter* a_p)
+		{
+			auto&       s = State::Get();
+			auto*       av = a_p->AsActorValueOwner();
+			const float own = av->GetActorValue(RE::ActorValue::kMovementNoiseMult) - s.stalkerNoiseApplied;
+			const float want = g_faded ? -Skills::StealthShare(a_p) * std::max(own, 0.0f) : 0.0f;
+			if (std::abs(want - s.stalkerNoiseApplied) > 0.001f) {
+				av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kMovementNoiseMult, want - s.stalkerNoiseApplied);
+				s.stalkerNoiseApplied = want;
+				logger::info("stalker: movement noise {:+.2f}", want);
+			}
 		}
 
 		void SetAmbush(RE::PlayerCharacter* a_p, bool a_on)
@@ -122,6 +139,7 @@ namespace protean::Stalker
 			SetAmbush(a_p, false);
 			logger::info("stalker: the ambush bite missed");
 		}
+		Quiet(a_p);
 		// the Stalk power is known only by an animal with the perk; stalking ends with the animal form
 		const bool stalker = Shift::ActiveCreature() && Evolve::Has("stalker");
 		if ((g_tick -= a_delta) <= 0.0f) {
@@ -273,5 +291,8 @@ namespace protean::Stalker
 			SetAmbush(p, false);
 		}
 		Reset();
+		if (auto* p = RE::PlayerCharacter::GetSingleton()) {
+			Quiet(p);  // not faded: whatever noise change the save held comes off
+		}
 	}
 }

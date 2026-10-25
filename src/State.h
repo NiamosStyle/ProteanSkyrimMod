@@ -104,6 +104,7 @@ namespace protean
 		float                                carapaceApplied{ 0.0f };  // DamageResist Subtle Carapace added now
 		std::set<RE::FormID>                 eaten;                    // bodies already eaten (Survivor 2)
 		bool                                 comboSpent{ false };      // this fight's kill-boost point is taken (until out of combat)
+		float                                stalkerNoiseApplied{ 0.0f };  // MovementNoiseMult Stalker's fade took off now
 		// The temporary modifiers of the actor values Protean changes (kTempChecked), as they were at the save. A load
 		// lost some of them (2026-10-24: the health bonus and AttackDamageMult were gone after a load as the wolf,
 		// DamageResist was kept); Shift::OnGameLoaded puts back Protean's part when exactly that much is missing.
@@ -116,7 +117,7 @@ namespace protean
 	// the actor values whose temporary modifier Protean changes, checked after a load
 	inline constexpr RE::ActorValue kTempChecked[] = { RE::ActorValue::kHealth, RE::ActorValue::kAttackDamageMult,
 		RE::ActorValue::kDamageResist, RE::ActorValue::kSpeedMult, RE::ActorValue::kStaminaRateMult,
-		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing };
+		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing, RE::ActorValue::kMovementNoiseMult };
 
 	namespace Persist
 	{

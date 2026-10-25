@@ -81,6 +81,10 @@
   "ambush": 2484,
   "power": 2488
  },
+ "skills": {
+  "arms": 2491,
+  "deft": 2492
+ },
  "globals": {
   "Protean_ActiveForm": 2368,
   "Protean_HealthBonusPct": 2369,
@@ -146,7 +150,10 @@
   "Protean_StalkerDrain": 2486,
   "Protean_StalkerAmbushMult": 2487,
   "Protean_StalkerRunMult": 2489,
-  "Protean_ComboStacks": 2490
+  "Protean_ComboStacks": 2490,
+  "Protean_XpOneHanded": 2493,
+  "Protean_XpLightArmor": 2494,
+  "Protean_XpSneak": 2495
  },
  "openInteriorKeywords": [
   {

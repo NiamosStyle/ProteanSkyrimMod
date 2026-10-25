@@ -11,6 +11,8 @@ ImpactDataSet: 0F23C4:Skyrim.esm
 AttackFailSound: 0C06D1:Skyrim.esm
 EquipSound: 0C06CF:Skyrim.esm
 UnequipSound: 0C06D0:Skyrim.esm
+Keywords:
+- 01E711:Skyrim.esm
 BasicStats:
   Damage: 6
 Data:

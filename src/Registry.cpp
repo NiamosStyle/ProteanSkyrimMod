@@ -112,6 +112,12 @@ namespace protean
 		_stalkerFade = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("fade", 0u), plugin);
 		_stalkerAmbush = dh->LookupForm<RE::BGSPerk>(j.value("stalker", nlohmann::json::object()).value("ambush", 0u), plugin);
 		_stalkerPower = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("power", 0u), plugin);
+		_animalArms = dh->LookupForm<RE::BGSPerk>(j.value("skills", nlohmann::json::object()).value("arms", 0u), plugin);
+		_deft = dh->LookupForm<RE::BGSPerk>(j.value("skills", nlohmann::json::object()).value("deft", 0u), plugin);
+		if (!_animalArms || !_deft || _animalArms->perkEntries.size() < 2 || _deft->perkEntries.empty()) {
+			logger::warn("the hidden skill perks are missing from {}", plugin);
+			_animalArms = _deft = nullptr;
+		}
 		if (!_stalkerFade || !_stalkerAmbush || !_stalkerPower) {
 			logger::warn("Stalker's fade, ambush perk or power missing from {}", plugin);
 		}

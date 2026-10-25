@@ -16,6 +16,7 @@
 #include "Flight.h"
 #include "Rush.h"
 #include "Predator.h"
+#include "Skills.h"
 #include "Stalker.h"
 
 namespace
@@ -155,6 +156,7 @@ namespace
 				protean::Flight::Install();
 				protean::Predator::Install();
 				protean::Stalker::Install();
+				protean::Skills::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
@@ -178,6 +180,7 @@ namespace
 				protean::Face::OnGameLoaded();
 				protean::Shift::OnGameLoaded();
 				protean::Stalker::OnGameLoaded();
+				protean::Skills::OnGameLoaded();
 				protean::Claws::Sync();
 			}
 			break;

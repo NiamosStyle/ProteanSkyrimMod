@@ -1,0 +1,22 @@
+FormKey: 0009BB:Protean.esp
+EditorID: Protean_AnimalArms
+Name:
+  TargetLanguage: English
+  Value: 'Animal One-Handed'
+Description:
+  TargetLanguage: English
+  Value: ''
+NumRanks: 1
+Playable: False
+Hidden: True
+Effects:
+- MutagenObjectType: PerkEntryPointModifyValue
+  EntryPoint: ModAttackDamage
+  PerkConditionTabCount: 3
+  Modification: Multiply
+  Value: 1
+- MutagenObjectType: PerkEntryPointModifyValue
+  EntryPoint: ModPowerAttackStamina
+  PerkConditionTabCount: 1
+  Modification: Multiply
+  Value: 1

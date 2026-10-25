@@ -1038,6 +1038,8 @@ namespace protean::Shift
 				return s.boostApplied;
 			case RE::ActorValue::kResistDisease:
 				return s.diseaseApplied;
+			case RE::ActorValue::kMovementNoiseMult:
+				return s.stalkerNoiseApplied;
 			case RE::ActorValue::kWaterBreathing: {
 				const auto* c = Active();
 				return c && c->swims ? 1.0f : 0.0f;
