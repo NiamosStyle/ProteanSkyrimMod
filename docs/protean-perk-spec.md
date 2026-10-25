@@ -77,15 +77,15 @@ Perks are not unlocked with normal Skyrim perk points. Instead, the player earns
 Evolution points come from four sources:
 
 - **A) First-time feeding:** eating the heart of a creature type the player has never eaten before.
-- **B) Repeat feeding milestones:** eating a growing number of hearts of the same type. The milestones are 5, then 10, then 20. The game has to track the count for each creature type.
+- **B) Repeat feeding milestones:** eating a growing number of hearts of the same type. The milestones are the 3rd, 5th, 10th, 15th and 20th heart (with the 1st, 6 points a kind; 2026-10-25, was 5, 10, 20). The game has to track the count for each creature type.
 - **C) Combat stacks:** having 5 or more Unbound Form kill stacks active during one combat. This may be too easy, and we'll test it.
 - **D) Face-taking:** killing and taking the face of an important named character from the list below. **This grants a full perk point right away, not just an evolution point.** It skips the rising cost entirely, which makes these kills a big reward.
 
-**Perk cost:** The first perk costs 1 evolution point, the second costs 2, the third costs 3, and so on. Each perk costs one more point than the last. This follows the pattern in the EnaiRim mods Sacrilege and Growl, which use a similar number of perks.
+**Perk cost:** Perk points cost 1, 1, 2, 2, 3, 3, ... evolution points (changed 2026-10-25 after the user's playtest: progress was far too slow, and the old costs of 1, 2, 3, ... totalled more than every heart in the game could give).
 
 **Ranks cost points:** Each rank is bought separately, just like vanilla perks with scaled abilities. Survivor 1 costs one point and Survivor 2 costs another. Survivor, Predator, Stalker, and Subtle Carapace each have two ranks.
 
-**Totals for this tree:** The tree has 18 perks and 22 purchasable ranks. Buying every rank costs 1 + 2 + ... + 22 = **253 evolution points**.
+**Totals for this tree:** The tree has 18 perks and 22 purchasable ranks. Buying every rank costs 2 x (1 + 2 + ... + 11) = **132 evolution points** (hearts alone can give 35 kinds x 6 = 210).
 
 ### Named faces that grant a perk point
 

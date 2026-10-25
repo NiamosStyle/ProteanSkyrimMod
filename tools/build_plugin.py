@@ -688,7 +688,7 @@ def main():
         "skills": [{
             "id": "protean",
             "name": "Protean",
-            "description": "New perks come with feeding. Each perk point takes one more feeding than the last.",
+            "description": "New perks come with feeding. Perk points take a little more feeding as you go.",
             "nodes": [{"id": pid, "perk": ref(local), "x": round(x * TREE_SCALE_X, 2), "y": round(yy * TREE_SCALE_Y, 2),
                        **({"links": links} if links else {})}
                       for pid, (local, _, _, x, yy, links) in PERKS.items()],

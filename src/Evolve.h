@@ -4,15 +4,15 @@
 
 namespace protean::Evolve
 {
-	// Evolution points are a running count of feedings: they only go up and are never spent. A perk point is earned
-	// each time the count reaches the next triangular number (1, 3, 6, 10, ...), like the werewolf's feedings, but each
-	// step is one feeding longer, not two. Named faces add perk points directly (they skip the count). Perk points
+	// Evolution points are a running count of feedings: they only go up and are never spent. Perk points cost 1, 1, 2,
+	// 2, 3, 3, ... of them (earned at totals 1, 2, 4, 6, 9, 12, 16, ...; the whole tree 132). Until 2026-10-25 each cost
+	// one more than the last (253 for the tree, more than all 35 kinds' hearts could give; the user: far too slow). Named faces add perk points directly (they skip the count). Perk points
 	// buy Protean perks only.
 
 	[[nodiscard]] std::uint32_t PointsEarned(std::uint32_t a_total);  // perk points the count has earned
 	[[nodiscard]] std::uint32_t PointsAvailable();                    // earned + face points - perks bought
 
-	// a heart was eaten: the first of a kind is worth a point, then the 5th, 10th and 20th of the same kind
+	// a heart was eaten: the 1st, 3rd, 5th, 10th, 15th and 20th of a kind are each worth a point (6 a kind)
 	void Feed(const Creature& a_creature);
 	void Add(std::uint32_t a_points, std::string_view a_why);
 	void AddFacePoint(std::string_view a_why);

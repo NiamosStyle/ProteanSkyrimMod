@@ -101,8 +101,9 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
   flying), danger line and top-up healing removed. A revert sets health first, so it never passes through zero
   (the engine killed the player mid-fight otherwise).
 - Gear put back after a revert no longer carries the prevent-removal lock.
-- Evolution points (`src/Evolve.cpp`): a running count of feedings; perk points at totals 1, 3, 6, 10...; first heart
-  of a kind and the 5th/10th/20th give points; named faces will add perk points directly. Co-save v11.
+- Evolution points (`src/Evolve.cpp`): a running count of feedings; perk points cost 1, 1, 2, 2, 3, 3... (totals 1, 2, 4,
+  6, 9, 12...; 2026-10-25, was 1, 2, 3...); the 1st/3rd/5th/10th/15th/20th heart of a kind give points; 5 kill boosts at
+  once give one a fight; named faces will add perk points directly.
 - Perk tree via Custom Skills Framework (user installs it): `data/SKSE/Plugins/CustomSkills/Protean.json` from the
   PERKS table in `tools/build_plugin.py`; points in `Protean_PerkPoints`; the Evolution power opens it. All 18 perks
   are placed; Unbound Form, Keen, Rending Claws and Tendril work (Unbound Form: Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,

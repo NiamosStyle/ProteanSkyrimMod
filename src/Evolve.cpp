@@ -121,9 +121,9 @@ namespace protean::Evolve
 
 	std::uint32_t PointsEarned(std::uint32_t a_total)
 	{
-		// the largest n with n (n + 1) / 2 <= total
-		std::uint32_t n = 0;
-		while ((n + 1) * (n + 2) / 2 <= a_total) {
+		// the n-th perk point costs (n + 1) / 2 evolution points: 1, 1, 2, 2, 3, 3, ...
+		std::uint32_t n = 0, need = 0;
+		while ((need += (n + 2) / 2) <= a_total) {
 			++n;
 		}
 		return n;
@@ -166,7 +166,7 @@ namespace protean::Evolve
 		const std::uint32_t n = ++s.feeds[a_c.id];
 		if (n == 1) {
 			Add(1, std::format("first heart of the {}", a_c.name));
-		} else if (n == 5 || n == 10 || n == 20) {
+		} else if (n == 3 || n == 5 || n == 10 || n == 15 || n == 20) {
 			Add(1, std::format("{} hearts of the {}", n, a_c.name));
 		} else {
 			logger::info("evolution: heart {} of the {}", n, a_c.name);

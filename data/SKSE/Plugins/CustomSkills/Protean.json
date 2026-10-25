@@ -11,7 +11,7 @@
     {
       "id": "protean",
       "name": "Protean",
-      "description": "New perks come with feeding. Each perk point takes one more feeding than the last.",
+      "description": "New perks come with feeding. Perk points take a little more feeding as you go.",
       "nodes": [
         {
           "id": "unbound_form",
