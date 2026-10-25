@@ -2,7 +2,7 @@ FormKey: 00084B:Protean.esp
 EditorID: Protean_Power_giant
 Name:
   TargetLanguage: English
-  Value: 'Shapeshift: Giant'
+  Value: 'Giant'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

@@ -2,7 +2,7 @@ FormKey: 00098A:Protean.esp
 EditorID: Protean_KeenNightPower
 Name:
   TargetLanguage: English
-  Value: 'Keen: Night Vision'
+  Value: 'Night Vision'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

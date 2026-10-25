@@ -458,9 +458,9 @@ def main():
 
     power(STARTER, "Protean_Instinct", "Shapeshifter's Instinct",
           "You can learn the forms of animals by eating their hearts. Cast to recall the forms you know.")
-    power(REVERT, "Protean_RevertForm", "Shapeshift: Revert Form",
+    power(REVERT, "Protean_RevertForm", "Revert Form",
           "Return to your own form.")
-    power(FACE_POWER, "Protean_FacePower", "Shapeshift: Stolen Face",
+    power(FACE_POWER, "Protean_FacePower", "Stolen Face",
           "Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.")
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
@@ -612,13 +612,13 @@ def main():
           "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 15\n" % (fid(KILL_BOOST_EFFECT), PLUGIN))
 
     # ---- Keen
-    power(KEEN_POWERS["night"], "Protean_KeenNightPower", "Keen: Night Vision",
+    power(KEEN_POWERS["night"], "Protean_KeenNightPower", "Night Vision",
           "In animal form, see in the dark. Cast again to stop.")
-    power(KEEN_POWERS["life"], "Protean_KeenLifePower", "Keen: Detect Life",
+    power(KEEN_POWERS["life"], "Protean_KeenLifePower", "Detect Life",
           "In animal form, sense the living through walls, at a steady cost in Stamina. Cast again to stop.")
-    power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Keen: Detect Dead",
+    power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Detect Dead",
           "In animal form, sense the dead and undead through walls, at a steady cost in Stamina. Cast again to stop.")
-    power(STALKER_POWER, "Protean_StalkPower", "Stalker: Stalk",
+    power(STALKER_POWER, "Protean_StalkPower", "Stalk",
           "In animal form, while on, keep still or walk to fade from sight; moving while hidden costs Stamina. Cast again to stop.")
     # Detect Dead as fire-and-forget: the game's held Detect Undead effects (DetectUndead*ConcSelf), same looks and
     # target conditions, with a duration.
@@ -718,7 +718,7 @@ def main():
               + "PickUpSound: 03EDBD:Skyrim.esm\nPutDownSound: 03EDC0:Skyrim.esm\nWeight: 0.5\nValue: 5\n"
               "Flags:\n- NoAutoCalc\n- FoodItem\nConsumeSound: 0B6435:Skyrim.esm\n"
               "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(HEART_EFFECT), PLUGIN))
-        power(pw, "Protean_Power_%s" % c["id"], "Shapeshift: %s" % c["name"],
+        power(pw, "Protean_Power_%s" % c["id"], c["name"],
               "Become a %s. Cast again, or use Revert Form, to return." % c["name"].lower())
 
         # The marker the player carries while in this form: a hidden ability whose effect has the keywords

@@ -2,7 +2,7 @@ FormKey: 00098B:Protean.esp
 EditorID: Protean_KeenLifePower
 Name:
   TargetLanguage: English
-  Value: 'Keen: Detect Life'
+  Value: 'Detect Life'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

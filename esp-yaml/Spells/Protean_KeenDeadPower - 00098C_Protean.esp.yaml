@@ -2,7 +2,7 @@ FormKey: 00098C:Protean.esp
 EditorID: Protean_KeenDeadPower
 Name:
   TargetLanguage: English
-  Value: 'Keen: Detect Dead'
+  Value: 'Detect Dead'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

@@ -2,7 +2,7 @@ FormKey: 00084D:Protean.esp
 EditorID: Protean_Power_werewolf
 Name:
   TargetLanguage: English
-  Value: 'Shapeshift: Werewolf'
+  Value: 'Werewolf'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

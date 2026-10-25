@@ -2,7 +2,7 @@ FormKey: 00083F:Protean.esp
 EditorID: Protean_Power_chaurus
 Name:
   TargetLanguage: English
-  Value: 'Shapeshift: Chaurus'
+  Value: 'Chaurus'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

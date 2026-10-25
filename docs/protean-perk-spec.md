@@ -138,7 +138,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 ### Unbound Form
 - **Requires:** nothing (starting perk)
 - **What it does:** Unlocks shapeshifting, makes you immune to disease, and gives a short stamina-recovery boost after every kill. The boosts stack. Each boost lasts 60 to 120 seconds before it expires.
-- **Heart items:** Taking this perk is the signal for the game to start placing a "[animal name] heart" item into each animal's loot when its corpse is searched. Consuming a heart teaches the player the "Shapeshift: [animal name]" power.
+- **Heart items:** Taking this perk is the signal for the game to start placing a "[animal name] heart" item into each animal's loot when its corpse is searched. Consuming a heart teaches the player the "[animal name]" power (names without a "Shapeshift:" prefix since 2026-10-24, the user's call).
 - **Shapeshift powers cost Stamina:** Right now, activating a form costs nothing. Each form should cost a small amount of Stamina, starting at 15 or 20. This can go higher if Stamina isn't draining enough during play.
 - **Status:** Mostly ready. Hearts already exist and already wait for the Instinct power, so this perk can grant Instinct. New work: the Stamina cost on changing form, disease immunity, and the stacking kill boost.
 

@@ -2,7 +2,7 @@ FormKey: 0009B8:Protean.esp
 EditorID: Protean_StalkPower
 Name:
   TargetLanguage: English
-  Value: 'Stalker: Stalk'
+  Value: 'Stalk'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:

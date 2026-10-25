@@ -2,7 +2,7 @@ FormKey: 00084F:Protean.esp
 EditorID: Protean_Power_werebear
 Name:
   TargetLanguage: English
-  Value: 'Shapeshift: Werebear'
+  Value: 'Werebear'
 MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:
