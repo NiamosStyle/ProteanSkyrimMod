@@ -11,6 +11,7 @@
 #include "Dev.h"
 #include "Fly.h"
 #include "Journal.h"
+#include "Provoke.h"
 #include "Hud.h"
 #include "Keen.h"
 #include "Move.h"
@@ -47,6 +48,7 @@ namespace protean::Hooks
 				Shift::OnFrame();
 				Evolve::OnFrame(a_delta);
 				Journal::OnFrame(a_delta);
+				Provoke::OnFrame(a_delta);
 				Claws::OnFrame(a_delta);
 				Face::OnFrame();
 				Hud::OnFrame(a_this);

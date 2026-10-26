@@ -105,6 +105,7 @@ namespace protean
 		std::set<RE::FormID>                 eaten;                    // bodies already eaten (Survivor 2)
 		bool                                 comboSpent{ false };      // this fight's kill-boost point is taken (until out of combat)
 		float                                stalkerNoiseApplied{ 0.0f };  // MovementNoiseMult Stalker's fade took off now
+		std::vector<std::pair<RE::FormID, float>> provoked;  // animals frenzied for biting back, and their own Aggression
 		// The temporary modifiers of the actor values Protean changes (kTempChecked), as they were at the save. A load
 		// lost some of them (2026-10-24: the health bonus and AttackDamageMult were gone after a load as the wolf,
 		// DamageResist was kept); Shift::OnGameLoaded puts back Protean's part when exactly that much is missing.

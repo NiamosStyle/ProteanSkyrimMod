@@ -8,6 +8,7 @@
 #include "Fly.h"
 #include "Hooks.h"
 #include "Journal.h"
+#include "Provoke.h"
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
@@ -159,6 +160,7 @@ namespace
 				protean::Predator::Install();
 				protean::Stalker::Install();
 				protean::Skills::Install();
+				protean::Provoke::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
