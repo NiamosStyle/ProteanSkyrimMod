@@ -14,6 +14,10 @@ namespace protean::Evolve
 
 	// a heart was eaten: the 1st, 3rd, 5th, 10th, 15th and 20th of a kind are each worth a point (6 a kind)
 	void Feed(const Creature& a_creature);
+	[[nodiscard]] std::uint32_t HeartPoints(std::uint32_t a_hearts);  // points so many hearts of a kind gave
+	[[nodiscard]] std::uint32_t HeartPointsMax();                     // the most a kind gives (6)
+	[[nodiscard]] std::uint32_t NextHeart(std::uint32_t a_hearts);    // the next heart that pays; 0 = none left
+	[[nodiscard]] std::uint32_t NextPointAt(std::uint32_t a_total);   // the count that earns the next perk point
 	void Add(std::uint32_t a_points, std::string_view a_why);
 	void AddFacePoint(std::string_view a_why);
 

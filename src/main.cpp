@@ -7,6 +7,7 @@
 #include "Face.h"
 #include "Fly.h"
 #include "Hooks.h"
+#include "Journal.h"
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
@@ -136,6 +137,7 @@ namespace
 		switch (a_msg->type) {
 		case SKSE::MessagingInterface::kPostLoad:
 			protean::Face::Register();
+			protean::Journal::Register();  // every plugin is loaded now, SKSEMenuFramework.dll among them
 			break;
 		case SKSE::MessagingInterface::kDataLoaded:
 			if (protean::Registry::Get().Load()) {

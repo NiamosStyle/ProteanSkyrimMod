@@ -160,14 +160,51 @@ namespace protean::Evolve
 		Shift::Notify(std::format("You have a new Protean perk point ({} available).", PointsAvailable()));
 	}
 
+	namespace
+	{
+		constexpr std::uint32_t kHeartMilestones[] = { 1, 3, 5, 10, 15, 20 };
+	}
+
+	std::uint32_t HeartPoints(std::uint32_t a_hearts)
+	{
+		return static_cast<std::uint32_t>(std::ranges::count_if(kHeartMilestones, [&](auto m) { return m <= a_hearts; }));
+	}
+
+	std::uint32_t HeartPointsMax() { return static_cast<std::uint32_t>(std::size(kHeartMilestones)); }
+
+	std::uint32_t NextHeart(std::uint32_t a_hearts)
+	{
+		for (auto m : kHeartMilestones) {
+			if (m > a_hearts) {
+				return m;
+			}
+		}
+		return 0;
+	}
+
+	std::uint32_t NextPointAt(std::uint32_t a_total)
+	{
+		// the count at which PointsEarned goes up by one
+		std::uint32_t n = 0, need = 0;
+		while ((need += (n + 2) / 2) <= a_total) {
+			++n;
+		}
+		return need;
+	}
+
 	void Feed(const Creature& a_c)
 	{
 		auto&               s = State::Get();
 		const std::uint32_t n = ++s.feeds[a_c.id];
-		if (n == 1) {
-			Add(1, std::format("first heart of the {}", a_c.name));
-		} else if (n == 3 || n == 5 || n == 10 || n == 15 || n == 20) {
-			Add(1, std::format("{} hearts of the {}", n, a_c.name));
+		const bool          pays = std::ranges::find(kHeartMilestones, n) != std::end(kHeartMilestones);
+		const std::uint32_t next = NextHeart(n);
+		// every heart says where the kind stands (the user asked to track hearts, 2026-10-26)
+		Shift::Notify(pays ? (next ? std::format("{} heart {}: +1 Evolution Point. Next at {}.", a_c.name, n, next) :
+		                             std::format("{} heart {}: +1 Evolution Point, the last from this kind.", a_c.name, n)) :
+		                     (next ? std::format("{} heart {}. Next Evolution Point at {}.", a_c.name, n, next) :
+		                             std::format("{} heart {}. No more Evolution Points from this kind.", a_c.name, n)));
+		if (pays) {
+			Add(1, n == 1 ? std::format("first heart of the {}", a_c.name) : std::format("{} hearts of the {}", n, a_c.name));
 		} else {
 			logger::info("evolution: heart {} of the {}", n, a_c.name);
 		}
