@@ -163,6 +163,16 @@ namespace protean::Evolve
 	namespace
 	{
 		constexpr std::uint32_t kHeartMilestones[] = { 1, 3, 5, 10, 15, 20 };
+
+		// "+1 Evolution Point" read as a perk point (2026-10-26): each says how far the next perk point is, counted
+		// after this point is added
+		std::string PointGained()
+		{
+			const std::uint32_t total = State::Get().evoTotal + 1;
+			const std::uint32_t left = NextPointAt(total) - total;
+			return left == 0 ? std::string("+1 Evolution Point") :
+			                   std::format("+1 Evolution Point ({} more to your next perk point)", left);
+		}
 	}
 
 	std::uint32_t HeartPoints(std::uint32_t a_hearts)
@@ -199,8 +209,8 @@ namespace protean::Evolve
 		const bool          pays = std::ranges::find(kHeartMilestones, n) != std::end(kHeartMilestones);
 		const std::uint32_t next = NextHeart(n);
 		// every heart says where the kind stands (the user asked to track hearts, 2026-10-26)
-		Shift::Notify(pays ? (next ? std::format("{} heart {}: +1 Evolution Point. Next at {}.", a_c.name, n, next) :
-		                             std::format("{} heart {}: +1 Evolution Point, the last from this kind.", a_c.name, n)) :
+		Shift::Notify(pays ? (next ? std::format("{} heart {}: {}. Next at {}.", a_c.name, n, PointGained(), next) :
+		                             std::format("{} heart {}: {}, the last from this kind.", a_c.name, n, PointGained())) :
 		                     (next ? std::format("{} heart {}. Next Evolution Point at {}.", a_c.name, n, next) :
 		                             std::format("{} heart {}. No more Evolution Points from this kind.", a_c.name, n)));
 		if (pays) {
@@ -272,7 +282,7 @@ namespace protean::Evolve
 		const auto combo = static_cast<std::size_t>(std::max(reg.Dial("Protean_ComboStacks", 5.0f), 0.0f));
 		if (combo > 0 && !s.comboSpent && s.boosts.size() >= combo) {
 			s.comboSpent = true;
-			Shift::Notify("The slaughter feeds your evolution.");
+			Shift::Notify(std::format("The slaughter feeds your evolution: {}.", PointGained()));
 			Add(1, std::format("{} kill boosts at once", s.boosts.size()));
 		}
 	}
