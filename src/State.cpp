@@ -6,7 +6,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 19;  // 3 to 16 are still read
+		constexpr std::uint32_t kVersion = 20;  // 3 to 16 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -240,6 +240,13 @@ namespace protean
 			Put(a, s.infectedUntil);
 			Put(a, s.infectedAssistance);
 			Put(a, s.infectedConfidence);
+			Put<std::uint8_t>(a, s.faceCrimeTaken ? 1 : 0);
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.faceCrime.size()));
+			for (const auto& c : s.faceCrime) {
+				PutForm(a, c.faction);
+				Put(a, c.violent);
+				Put(a, c.nonViolent);
+			}
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -434,6 +441,20 @@ namespace protean
 						Get(a, s.infectedUntil);
 						Get(a, s.infectedAssistance);
 						Get(a, s.infectedConfidence);
+					}
+					if (std::uint8_t taken = 0; version >= 20 && Get(a, taken)) {
+						s.faceCrimeTaken = taken != 0;
+						if (std::uint32_t m = 0; Get(a, m) && m <= 100000) {
+							for (std::uint32_t i = 0; i < m; ++i) {
+								State::CrimeSnap c;
+								c.faction = GetForm(a);
+								Get(a, c.violent);
+								Get(a, c.nonViolent);
+								if (c.faction) {
+									s.faceCrime.push_back(c);
+								}
+							}
+						}
 					}
 				}
 			}

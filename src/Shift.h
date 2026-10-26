@@ -20,6 +20,11 @@ namespace protean::Shift
 	// as witnesses of the change do
 	void SeenFeeding(RE::Actor* a_body);
 
+	// A stolen face (the user's wish, 2026-10-26): crimes committed while it is worn are forgiven, as an animal's are,
+	// when it comes off unseen. The bounties are noted when it goes on.
+	void SnapshotFaceCrime();  // a stolen face put on
+	void ForgiveFaceCrime();   // it came off: unseen, its crimes are forgiven; seen, they stay
+
 	// the creature the player is currently transformed into, or null
 	const Creature* ActiveCreature();
 

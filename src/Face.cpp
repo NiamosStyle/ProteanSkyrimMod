@@ -800,6 +800,9 @@ namespace protean::Face
 		if (auto* fp = Registry::Get().FacePower(); fp && !p->HasSpell(fp)) {
 			p->AddSpell(fp);
 		}
+		if (!s.disguised) {
+			Shift::SnapshotFaceCrime();  // a swap keeps the first face's snapshot
+		}
 		s.disguised = true;
 		Shift::Notify(std::format("You have taken the face of {}.", a_source->GetName()));
 		Dump();
@@ -824,6 +827,7 @@ namespace protean::Face
 			logger::error("no own look saved; cannot take the stolen face off cleanly");
 		}
 		s.disguised = false;
+		Shift::ForgiveFaceCrime();
 		Shift::Notify("You wear your own face again.");
 		Dump();
 	}
@@ -856,6 +860,9 @@ namespace protean::Face
 		Wear(s.bank);
 		if (auto* npc = RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc); npc && g_joinFactions) {
 			JoinFactions(npc);
+		}
+		if (!s.disguised) {
+			Shift::SnapshotFaceCrime();  // a swap keeps the first face's snapshot
 		}
 		s.disguised = true;
 		Shift::Notify("You wear the face you kept.");

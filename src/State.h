@@ -48,6 +48,8 @@ namespace protean
 			std::int32_t nonViolent{ 0 };
 		};
 		std::vector<CrimeSnap> crime;
+		std::vector<CrimeSnap> faceCrime;  // the bounties when the stolen face went on
+		bool                   faceCrimeTaken{ false };  // faceCrime holds a snapshot (a save from before it: none)
 
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and
 		// taken off with the Stolen Face power. The player's own look is kept here while a stolen one is worn.

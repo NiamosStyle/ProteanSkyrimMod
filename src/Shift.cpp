@@ -252,32 +252,33 @@ namespace protean::Shift
 
 		// ---- crime committed as the animal --------------------------------------------------------------
 
-		void SnapshotCrime()
+		std::vector<State::CrimeSnap> CrimeNow()
 		{
-			auto& s = State::Get();
-			s.crime.clear();
+			std::vector<State::CrimeSnap> out;
 			for (auto* f : RE::TESDataHandler::GetSingleton()->GetFormArray<RE::TESFaction>()) {
 				if (f && f->TracksCrimes()) {
 					const auto v = f->GetCrimeGoldViolent(), nv = f->GetCrimeGoldNonViolent();
 					if (v || nv) {
-						s.crime.push_back({ f->GetFormID(), v, nv });
+						out.push_back({ f->GetFormID(), v, nv });
 					}
 				}
 			}
+			return out;
 		}
 
-		// Nobody saw the person change into the animal, so what the animal did is not held against the person:
-		// bounties gained since the change are removed and anyone fighting the player stands down.
-		void ForgiveAnimalCrimes(RE::PlayerCharacter* a_p, bool a_forgive)
+		void SnapshotCrime() { State::Get().crime = CrimeNow(); }
+
+		// Nobody saw the person change into the animal (or take a stolen face off), so what the animal (the face) did is
+		// not held against the person: bounties gained since a_snap are removed and anyone fighting the player stands down.
+		void ForgiveSince(RE::PlayerCharacter* a_p, const std::vector<State::CrimeSnap>& a_snap, bool a_forgive, const char* a_note)
 		{
-			auto& s = State::Get();
-			int   forgiven = 0;
+			int forgiven = 0;
 			for (auto* f : RE::TESDataHandler::GetSingleton()->GetFormArray<RE::TESFaction>()) {
 				if (!f || !f->TracksCrimes()) {
 					continue;
 				}
 				std::int32_t sv = 0, snv = 0;
-				for (const auto& c : s.crime) {
+				for (const auto& c : a_snap) {
 					if (c.faction == f->GetFormID()) {
 						sv = c.violent;
 						snv = c.nonViolent;
@@ -358,10 +359,9 @@ namespace protean::Shift
 						RE::MakeFunctionArguments(RE::BSFixedString("Total Lifetime Bounty"), static_cast<std::int32_t>(-forgiven)), cb);
 				}
 			}
-			s.crime.clear();
 			logger::info("nobody saw the change: forgave {} gold of bounty, calmed {} actor(s), alarms ended {}", forgiven, calmed, forgiven > 0 || calmed > 0);
 			if (forgiven || calmed) {
-				Notify("Nobody connects you with what the beast did.");
+				Notify(a_note);
 			}
 		}
 
@@ -477,6 +477,40 @@ namespace protean::Shift
 				av->GetActorValue(RE::ActorValue::kHealth), av->GetBaseActorValue(RE::ActorValue::kHealth),
 				av->GetPermanentActorValue(RE::ActorValue::kHealth));
 		}
+	}
+
+	void SnapshotFaceCrime()
+	{
+		auto& s = State::Get();
+		s.faceCrime = CrimeNow();
+		s.faceCrimeTaken = true;
+	}
+
+	void ForgiveFaceCrime()
+	{
+		auto& s = State::Get();
+		auto* p = Player();
+		if (!p || !s.faceCrimeTaken) {
+			return;
+		}
+		// a person who can see the face come off knows who did it
+		bool seen = false;
+		if (auto* pl = RE::ProcessLists::GetSingleton()) {
+			for (auto& handle : pl->highActorHandles) {
+				auto  actor = handle.get();
+				auto* race = actor ? actor->GetRace() : nullptr;
+				if (actor && actor.get() != p && !actor->IsDead() && !actor->IsPlayerTeammate() && race &&
+					race->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) &&
+					p->GetPosition().GetDistance(actor->GetPosition()) <= kWitnessRange && actor->RequestDetectionLevel(p) > 0) {
+					logger::info("  {:08X} '{}' sees the stolen face come off", actor->GetFormID(), actor->GetName());
+					seen = true;
+					break;
+				}
+			}
+		}
+		ForgiveSince(p, s.faceCrime, !seen, "Nobody connects you with what the stolen face did.");
+		s.faceCrime.clear();
+		s.faceCrimeTaken = false;
 	}
 
 	const Creature* ActiveCreature()
@@ -781,7 +815,8 @@ namespace protean::Shift
 					}
 				}
 			}
-			ForgiveAnimalCrimes(p, !seen);
+			ForgiveSince(p, s.crime, !seen, "Nobody connects you with what the beast did.");
+			s.crime.clear();
 		}
 
 		TakeOffBody(p);
