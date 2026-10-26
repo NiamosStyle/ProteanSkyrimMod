@@ -43,17 +43,28 @@ namespace protean::Skills
 			return v;
 		}
 
-		// a hidden perk's entry value (its one OneValue datum), live data
-		void SetEntry(RE::BGSPerk* a_perk, std::size_t a_index, float a_value)
+		using EntryPoint = RE::BGSEntryPoint::ENTRY_POINT;
+
+		// a hidden perk's entry value (its one OneValue datum), live data. Found by its entry point: the record's entries
+		// need not come back in the order the plugin builder wrote them (Armsman's bonus never reached bites, 2026-10-25)
+		void SetEntry(RE::BGSPerk* a_perk, EntryPoint a_point, float a_value)
 		{
-			if (!a_perk || a_index >= a_perk->perkEntries.size()) {
+			if (!a_perk) {
 				return;
 			}
-			if (auto* entry = static_cast<RE::BGSEntryPointPerkEntry*>(a_perk->perkEntries[static_cast<std::uint32_t>(a_index)]); entry && entry->functionData) {
-				if (auto* one = skyrim_cast<RE::BGSEntryPointFunctionDataOneValue*>(entry->functionData)) {
-					one->data = a_value;
+			for (auto* e : a_perk->perkEntries) {
+				if (!e || e->GetType() != RE::PERK_ENTRY_TYPE::kEntryPoint) {
+					continue;
+				}
+				auto* entry = static_cast<RE::BGSEntryPointPerkEntry*>(e);
+				if (entry->IsEntryPoint(a_point) && entry->functionData) {
+					if (auto* one = skyrim_cast<RE::BGSEntryPointFunctionDataOneValue*>(entry->functionData)) {
+						one->data = a_value;
+						return;
+					}
 				}
 			}
+			logger::warn("skills: perk {:08X} has no entry {}", a_perk->GetFormID(), std::to_underlying(a_point));
 		}
 
 		void Hold(RE::PlayerCharacter* a_p, RE::BGSPerk* a_perk, bool a_on)
@@ -87,7 +98,7 @@ namespace protean::Skills
 			// the chance is drawn ahead of each hit: the perk's multiplier for the next weapon hit is 0 (no damage) one time
 			// in ten (vanilla's perk asks GetRandomPercent at the hit; a hidden perk with no conditions cannot)
 			static std::mt19937 rng{ std::random_device{}() };
-			SetEntry(Registry::Get().DeftPerk(), 0, std::uniform_real_distribution<float>(0.0f, 1.0f)(rng) < kDeftChance ? 0.0f : 1.0f);
+			SetEntry(Registry::Get().DeftPerk(), EntryPoint::kModIncomingDamage, std::uniform_real_distribution<float>(0.0f, 1.0f)(rng) < kDeftChance ? 0.0f : 1.0f);
 		}
 
 		float g_armsMult = 1.0f;  // Armsman's multiplier, the base of each animal attack's
@@ -159,7 +170,7 @@ namespace protean::Skills
 			const bool animal = Shift::ActiveCreature() != nullptr;
 			g_armsMult = Best(a_p, kArmsman, 1.0f);
 			if (auto* arms = reg.AnimalArmsPerk()) {
-				SetEntry(arms, 1, Owns(a_p, kFightingStance) ? 0.75f : 1.0f);
+				SetEntry(arms, EntryPoint::kModPowerAttackStamina, Owns(a_p, kFightingStance) ? 0.75f : 1.0f);
 				Hold(a_p, arms, animal);
 			}
 			Hold(a_p, reg.DeftPerk(), (animal || CarapaceWorks()) && Owns(a_p, kDeftMovement));
@@ -208,7 +219,11 @@ namespace protean::Skills
 		}
 		const bool standing = !pc || pc->data.moveInputVec.Length() <= 0.1f;
 		const bool savage = a_power && standing && Owns(p, kSavageStrike);
-		SetEntry(Registry::Get().AnimalArmsPerk(), 0, g_armsMult * (savage ? 1.25f : 1.0f));
+		const float mult = g_armsMult * (savage ? 1.25f : 1.0f);
+		SetEntry(Registry::Get().AnimalArmsPerk(), EntryPoint::kModAttackDamage, mult);
+		if (mult != 1.0f) {
+			logger::info("skills: bite damage x{:.2f} (One-Handed perks{})", mult, savage ? ", Savage Strike" : "");
+		}
 	}
 
 	float AgileDefender(RE::PlayerCharacter* a_p) { return Best(a_p, kAgile, 1.0f); }
