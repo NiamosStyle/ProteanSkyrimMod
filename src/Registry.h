@@ -91,6 +91,7 @@ namespace protean
 		[[nodiscard]] RE::TESBoundObject* Infection() const { return _infection; }      // Infected: the item planted
 		[[nodiscard]] RE::SpellItem* InfectPower() const { return _infectPower; }       // Infected: grows one
 		[[nodiscard]] RE::TESFaction* InfectedFaction() const { return _infectedFaction; }  // Infected: the player's ally
+		[[nodiscard]] RE::SpellItem* MetamorphosisPower() const { return _metamorphosisPower; }  // opens the character menu
 		[[nodiscard]] RE::BGSPerk*   Perk(std::string_view a_id) const;          // a Protean perk by id, or null
 		[[nodiscard]] const std::map<std::string, RE::BGSPerk*, std::less<>>& Perks() const { return _perks; }
 		[[nodiscard]] bool PerkBuilt(std::string_view a_id) const { return _perksBuilt.contains(a_id); }  // else a placeholder
@@ -136,6 +137,7 @@ namespace protean
 		RE::TESBoundObject*   _infection{ nullptr };
 		RE::SpellItem*        _infectPower{ nullptr };
 		RE::TESFaction*       _infectedFaction{ nullptr };
+		RE::SpellItem*        _metamorphosisPower{ nullptr };
 		std::array<RE::SpellItem*, 3> _keenPowers{};
 		std::array<RE::SpellItem*, 3> _keenSenses{};
 		std::map<std::string, RE::BGSPerk*, std::less<>> _perks;

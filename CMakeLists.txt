@@ -50,6 +50,7 @@ add_commonlibsse_plugin(
 		src/Journal.cpp
 		src/Provoke.cpp
 		src/Deceiver.cpp
+		src/Metamorphosis.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 # SKSE Menu Framework API header (LGPL-2.1, header-only; resolves its DLL at runtime). See extern/SKSEMenuFramework/SOURCE.txt.

@@ -24,6 +24,7 @@ namespace protean::Shift
 	// when it comes off unseen. The bounties are noted when it goes on.
 	void SnapshotFaceCrime();  // a stolen face put on
 	void ForgiveFaceCrime();   // it came off: unseen, its crimes are forgiven; seen, they stay
+	void ForgiveAll(std::string_view a_note);  // Metamorphosis: every bounty cleared, the hunt called off
 
 	// the creature the player is currently transformed into, or null
 	const Creature* ActiveCreature();

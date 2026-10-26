@@ -77,8 +77,9 @@ PERKS = {
                         "and join its factions. Cast Stolen Face to put the face on or take it off; putting it on costs "
                         "Stamina, like changing form. Anyone who sees the theft turns hostile.", -1.8, 0.8,
                         ["metamorphosis", "inconspicuous"]),
-    "metamorphosis": (0x96E, "Metamorphosis", "Make a stolen face and race your own, and leave your crimes behind. "
-                      "Costs all your stamina.", -3.3, 1.9, []),
+    "metamorphosis": (0x96E, "Metamorphosis", "Out of a fight, in your own face and with full Stamina, reshape yourself: "
+                      "choose a new race, face and body, keeping your skills and perks. Every bounty on you is cleared. "
+                      "Uses all your Stamina.", -3.3, 1.9, []),
     "inconspicuous": (0x96F, "Inconspicuous", "In your own form, every friendly person within 15 meters adds 5 to your "
                       "Sneak, up to 30: the bigger the crowd, the harder you are to notice.",
                       -1.9, 2, ["infected", "assassin"]),
@@ -139,6 +140,7 @@ ANIMAL_ARMS_PERK, DEFT_PERK = 0x9BB, 0x9BC
 # one INFECTION in the pockets; planted on someone, Protean puts them in INFECTED_FACTION, the player's ally, for a day.
 ASSASSIN_MARK, ASSASSIN_PERK = 0x9C4, 0x9C5
 INFECTION, INFECT_POWER, INFECTED_FACTION = 0x9C7, 0x9C8, 0x9CA
+METAMORPHOSIS_POWER = 0x9CC  # opens the full character menu (src/Metamorphosis.cpp)
 VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
@@ -148,7 +150,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
-         "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected"}
+         "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = {"stalker"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -491,6 +493,9 @@ def main():
     power(INFECT_POWER, "Protean_InfectPower", "Infect",
           "Grow an infection to slip into someone's pocket: for a day they fight at your side. Costs %d Stamina."
           % GLOBALS["Protean_InfectCost"][1])
+    power(METAMORPHOSIS_POWER, "Protean_MetamorphosisPower", "Metamorphosis",
+          "Reshape yourself: a new race, face and body, keeping your skills and perks. Clears every bounty. Out of a "
+          "fight, in your own face, with full Stamina; uses all of it.")
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
 
@@ -864,7 +869,8 @@ def main():
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
                            "skills": {"arms": ANIMAL_ARMS_PERK, "deft": DEFT_PERK},
                            "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,
-                                        "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION},
+                                        "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION,
+                                        "metamorphosisPower": METAMORPHOSIS_POWER},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

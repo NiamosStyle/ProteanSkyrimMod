@@ -513,6 +513,13 @@ namespace protean::Shift
 		s.faceCrimeTaken = false;
 	}
 
+	void ForgiveAll(std::string_view a_note)
+	{
+		if (auto* p = Player()) {
+			ForgiveSince(p, {}, true, std::string(a_note).c_str());
+		}
+	}
+
 	const Creature* ActiveCreature()
 	{
 		return Active();

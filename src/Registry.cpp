@@ -125,7 +125,8 @@ namespace protean
 			_infection = dh->LookupForm<RE::TESBoundObject>(d.value("infection", 0u), plugin);
 			_infectPower = dh->LookupForm<RE::SpellItem>(d.value("infectPower", 0u), plugin);
 			_infectedFaction = dh->LookupForm<RE::TESFaction>(d.value("infectedFaction", 0u), plugin);
-			if (!_assassinMark || !_assassinPerk || !_infection || !_infectPower || !_infectedFaction) {
+			_metamorphosisPower = dh->LookupForm<RE::SpellItem>(d.value("metamorphosisPower", 0u), plugin);
+			if (!_assassinMark || !_assassinPerk || !_infection || !_infectPower || !_infectedFaction || !_metamorphosisPower) {
 				logger::warn("a Deceiver record (Assassin, Infected) is missing from {}", plugin);
 			}
 		}

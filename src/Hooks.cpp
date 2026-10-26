@@ -12,6 +12,7 @@
 #include "Dev.h"
 #include "Fly.h"
 #include "Journal.h"
+#include "Metamorphosis.h"
 #include "Provoke.h"
 #include "Hud.h"
 #include "Keen.h"
@@ -51,6 +52,7 @@ namespace protean::Hooks
 				Evolve::OnFrame(a_delta);
 				Journal::OnFrame(a_delta);
 				Provoke::OnFrame(a_delta);
+				Metamorphosis::OnFrame(a_delta);
 				Claws::OnFrame(a_delta);
 				Face::OnFrame();
 				Hud::OnFrame(a_this);

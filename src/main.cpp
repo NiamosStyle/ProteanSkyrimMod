@@ -9,6 +9,7 @@
 #include "Fly.h"
 #include "Hooks.h"
 #include "Journal.h"
+#include "Metamorphosis.h"
 #include "Provoke.h"
 #include "Move.h"
 #include "Registry.h"
@@ -69,6 +70,9 @@ namespace
 				}
 				if (spell && std::ranges::find(reg.KeenPowers(), spell) != reg.KeenPowers().end()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Keen::OnPowerCast(spell); });
+				}
+				if (spell && spell == reg.MetamorphosisPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Metamorphosis::OnCast(); });
 				}
 				if (spell && spell == reg.InfectPower()) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Deceiver::OnInfectCast(); });
@@ -166,6 +170,7 @@ namespace
 				protean::Skills::Install();
 				protean::Provoke::Install();
 				protean::Deceiver::Install();
+				protean::Metamorphosis::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}

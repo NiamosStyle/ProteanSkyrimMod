@@ -65,6 +65,7 @@
   "inconspicuous",
   "infected",
   "keen",
+  "metamorphosis",
   "predator",
   "predator_2",
   "predators_rush",
@@ -93,7 +94,8 @@
   "assassinPerk": 2501,
   "infection": 2503,
   "infectPower": 2504,
-  "infectedFaction": 2506
+  "infectedFaction": 2506,
+  "metamorphosisPower": 2508
  },
  "globals": {
   "Protean_ActiveForm": 2368,

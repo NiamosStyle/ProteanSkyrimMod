@@ -237,6 +237,10 @@ namespace protean::Deceiver
 		Inconspicuous(a_p);
 		Assassin(a_p);
 		Infected();
+		if (auto* power = Registry::Get().MetamorphosisPower(); power && Evolve::Has("metamorphosis") && !a_p->HasSpell(power)) {
+			a_p->AddSpell(power);
+			logger::info("metamorphosis: the power given");
+		}
 		if (auto* power = Registry::Get().InfectPower(); power && Evolve::Has("infected") && !a_p->HasSpell(power)) {
 			a_p->AddSpell(power);
 			logger::info("infected: the Infect power given");
