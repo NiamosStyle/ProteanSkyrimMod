@@ -1,0 +1,10 @@
+FormKey: 0009CA:Protean.esp
+EditorID: Protean_InfectedFaction
+Name:
+  TargetLanguage: English
+Relations:
+- Target: 000DB1:Skyrim.esm
+  Reaction: Ally
+Flags:
+- HiddenFromPC
+VendorValues: {}

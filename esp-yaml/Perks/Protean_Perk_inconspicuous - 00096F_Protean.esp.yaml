@@ -5,6 +5,6 @@ Name:
   Value: 'Inconspicuous'
 Description:
   TargetLanguage: English
-  Value: 'The more friendly people around you, the harder you are to notice.'
+  Value: 'In your own form, every friendly person within 15 meters adds 5 to your Sneak, up to 30: the bigger the crowd, the harder you are to notice.'
 NumRanks: 1
 Playable: True

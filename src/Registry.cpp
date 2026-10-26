@@ -118,6 +118,17 @@ namespace protean
 			logger::warn("the hidden skill perks are missing from {}", plugin);
 			_animalArms = _deft = nullptr;
 		}
+		{
+			const auto d = j.value("deceiver", nlohmann::json::object());
+			_assassinMark = dh->LookupForm<RE::TESFaction>(d.value("assassinMark", 0u), plugin);
+			_assassinPerk = dh->LookupForm<RE::BGSPerk>(d.value("assassinPerk", 0u), plugin);
+			_infection = dh->LookupForm<RE::TESBoundObject>(d.value("infection", 0u), plugin);
+			_infectPower = dh->LookupForm<RE::SpellItem>(d.value("infectPower", 0u), plugin);
+			_infectedFaction = dh->LookupForm<RE::TESFaction>(d.value("infectedFaction", 0u), plugin);
+			if (!_assassinMark || !_assassinPerk || !_infection || !_infectPower || !_infectedFaction) {
+				logger::warn("a Deceiver record (Assassin, Infected) is missing from {}", plugin);
+			}
+		}
 		if (!_stalkerFade || !_stalkerAmbush || !_stalkerPower) {
 			logger::warn("Stalker's fade, ambush perk or power missing from {}", plugin);
 		}

@@ -1,0 +1,14 @@
+FormKey: 0009C7:Protean.esp
+EditorID: Protean_Infection
+ObjectBounds:
+  First: -4, -4, 0
+  Second: 4, 4, 8
+Name:
+  TargetLanguage: English
+  Value: 'Infection'
+Model:
+  File: Clutter\ChaurusEggs\Eggs.nif
+PickUpSound: 0BFB1F:Skyrim.esm
+PutDownSound: 0519D1:Skyrim.esm
+Value: 0
+Weight: 0

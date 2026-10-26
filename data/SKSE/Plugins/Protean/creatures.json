@@ -60,7 +60,10 @@
   "subtle_carapace_2": 2421
  },
  "perksBuilt": [
+  "assassin",
   "borrowed_visage",
+  "inconspicuous",
+  "infected",
   "keen",
   "predator",
   "predator_2",
@@ -84,6 +87,13 @@
  "skills": {
   "arms": 2491,
   "deft": 2492
+ },
+ "deceiver": {
+  "assassinMark": 2500,
+  "assassinPerk": 2501,
+  "infection": 2503,
+  "infectPower": 2504,
+  "infectedFaction": 2506
  },
  "globals": {
   "Protean_ActiveForm": 2368,
@@ -154,7 +164,13 @@
   "Protean_XpOneHanded": 2493,
   "Protean_XpLightArmor": 2494,
   "Protean_XpSneak": 2495,
-  "Protean_RushSafeDrop": 2496
+  "Protean_RushSafeDrop": 2496,
+  "Protean_InconspicuousPerPerson": 2497,
+  "Protean_InconspicuousMax": 2498,
+  "Protean_InconspicuousRange": 2499,
+  "Protean_AssassinMult": 2502,
+  "Protean_InfectCost": 2505,
+  "Protean_InfectedHours": 2507
  },
  "openInteriorKeywords": [
   {

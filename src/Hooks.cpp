@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Carapace.h"
 #include "Claws.h"
+#include "Deceiver.h"
 #include "Dev.h"
 #include "Fly.h"
 #include "Journal.h"
@@ -41,6 +42,7 @@ namespace protean::Hooks
 				Feed::OnFrame(a_this, a_delta);
 				Stalker::OnFrame(a_this, a_delta);
 				Skills::OnFrame(a_this, a_delta);
+				Deceiver::OnFrame(a_this, a_delta);
 				Flight::OnFrame(a_this, a_delta);
 				Flight::KeepFall(a_this, a_delta);
 				Camera::OnFrame(a_this);

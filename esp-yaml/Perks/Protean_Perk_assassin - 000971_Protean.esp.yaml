@@ -5,6 +5,6 @@ Name:
   Value: 'Assassin'
 Description:
   TargetLanguage: English
-  Value: 'Sneak attacks are far deadlier against someone who trusts the face you wear.'
+  Value: 'While you wear a stolen face, your sneak attacks do ten times the damage against anyone who shares a faction with that face and is not hostile to you.'
 NumRanks: 1
 Playable: True

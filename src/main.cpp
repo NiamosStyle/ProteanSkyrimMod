@@ -1,6 +1,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Claws.h"
+#include "Deceiver.h"
 #include "Dev.h"
 #include "Evolve.h"
 #include "Feed.h"
@@ -68,6 +69,9 @@ namespace
 				}
 				if (spell && std::ranges::find(reg.KeenPowers(), spell) != reg.KeenPowers().end()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Keen::OnPowerCast(spell); });
+				}
+				if (spell && spell == reg.InfectPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Deceiver::OnInfectCast(); });
 				}
 				if (spell && spell == reg.StalkerPower()) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Stalker::OnPowerCast(); });
@@ -161,6 +165,7 @@ namespace
 				protean::Stalker::Install();
 				protean::Skills::Install();
 				protean::Provoke::Install();
+				protean::Deceiver::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}

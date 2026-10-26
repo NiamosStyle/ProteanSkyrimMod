@@ -242,21 +242,22 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **What it does:** Changes your face and race. Clears all bounties and crimes.
 - **Stamina:** Costs 100% of your maximum Stamina, so it can't be used during combat.
 - **Status:** Needs research. Protean already copies a face together with its race, but only as a disguise you can take off. Metamorphosis would make it permanent. Protean also already removes a bounty when nobody sees you change back from an animal, which is a useful starting point for clearing bounties.
+- **Research (2026-10-26):** No mod found that does exactly this on SE. Ones to learn from: RaceMenu (its source is public; Protean already uses the same calls to put a face on), Alternate Actors (original Skyrim: play as any NPC), and the tint-mask fix plugin (Nexus SE 122198: where the game drops face colour data). The game saves the player's own face record, so a permanent look may mostly mean not taking it back; faces drawn from a named NPC's finished face files would need putting on again after each load.
 
 ### Inconspicuous (stamina)
 - **Requires:** Borrowed Visage
 - **What it does:** Gives a stealth bonus that grows with the number of non-hostile people around you.
-- **Status:** Needs invention. The stealth bonus is standard, but counting nearby non-hostile people and scaling the bonus is custom work.
+- **Status:** Built (2026-10-26), untested. In your own form, +5 Sneak for each person within 15 m who is not hostile and not a follower, up to +30 (dials `Protean_InconspicuousPerPerson`, `Max`, `Range`).
 
 ### Infected
 - **Requires:** Inconspicuous
 - **What it does:** Reverse-pickpockets an infection onto someone. The infected fight for you.
-- **Status:** Needs invention. Making a target fight for you is possible, but the infection mechanic is untested.
+- **Status:** Built (2026-10-26), untested. The Infect power (50 Stamina) puts one Infection item in your pockets; planted by reverse pickpocket, the person joins `Protean_InfectedFaction` (allied to the player), helps allies and stands their ground for one game day (`Protean_InfectedHours`). One person at a time (user's choices: fight as an ally; a day and one at a time).
 
 ### Assassin
 - **Requires:** Inconspicuous
 - **What it does:** Gives a large sneak-attack bonus against a non-hostile target while you wear the face of someone from that target's faction.
-- **Status:** Needs research, easier than first thought. Wearing a stolen face already puts you in that person's factions, so checking whether you share the target's faction is mostly a matter of reading what Protean already does.
+- **Status:** Built (2026-10-26), untested. While a stolen face is worn, people near who share one of its factions and are not hostile are marked (`Protean_AssassinMark`); a hidden perk multiplies sneak attacks on them x10 (the user: it should kill one person outright before the rest react).
 
 ---
 

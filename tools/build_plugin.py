@@ -79,10 +79,13 @@ PERKS = {
                         ["metamorphosis", "inconspicuous"]),
     "metamorphosis": (0x96E, "Metamorphosis", "Make a stolen face and race your own, and leave your crimes behind. "
                       "Costs all your stamina.", -3.3, 1.9, []),
-    "inconspicuous": (0x96F, "Inconspicuous", "The more friendly people around you, the harder you are to notice.",
+    "inconspicuous": (0x96F, "Inconspicuous", "In your own form, every friendly person within 15 meters adds 5 to your "
+                      "Sneak, up to 30: the bigger the crowd, the harder you are to notice.",
                       -1.9, 2, ["infected", "assassin"]),
-    "infected": (0x970, "Infected", "Slip an infection into someone's pocket; the infected fight for you.", -1.4, 3.1, []),
-    "assassin": (0x971, "Assassin", "Sneak attacks are far deadlier against someone who trusts the face you wear.",
+    "infected": (0x970, "Infected", "Cast Infect to grow an infection (costs Stamina), then slip it into someone's "
+                 "pocket: for a day they fight at your side. Only one person carries it at a time.", -1.4, 3.1, []),
+    "assassin": (0x971, "Assassin", "While you wear a stolen face, your sneak attacks do ten times the damage against "
+                 "anyone who shares a faction with that face and is not hostile to you.",
                  -2.5, 3.3, []),
 }
 # Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
@@ -131,6 +134,11 @@ STALKER_POWER = 0x9B8  # Stalk: the toggle in the animal's Favorites menu, besid
 # check, so ANIMAL_ARMS (held in animal form) carries Armsman / Savage Strike (attack damage) and Fighting Stance (power
 # attack stamina); DEFT (held in animal form or with the carapace) is Deft Movement's no-damage chance, drawn by Protean.
 ANIMAL_ARMS_PERK, DEFT_PERK = 0x9BB, 0x9BC
+# Deceiver (src/Deceiver.cpp). Assassin: Protean puts the people who trust the worn face in ASSASSIN_MARK; the hidden
+# ASSASSIN_PERK, held while a stolen face is worn, multiplies sneak attacks on them. Infected: the Infect power puts
+# one INFECTION in the pockets; planted on someone, Protean puts them in INFECTED_FACTION, the player's ally, for a day.
+ASSASSIN_MARK, ASSASSIN_PERK = 0x9C4, 0x9C5
+INFECTION, INFECT_POWER, INFECTED_FACTION = 0x9C7, 0x9C8, 0x9CA
 VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
@@ -140,7 +148,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
-         "subtle_carapace", "stalker", "borrowed_visage"}
+         "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = {"stalker"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -220,6 +228,12 @@ GLOBALS = {
     "Protean_XpLightArmor":        (0x9BE, 0.38, "Float", "Light Armor skill uses per hit that hurts, as an animal or with the carapace (vanilla, measured)"),
     "Protean_XpSneak":             (0x9BF, 0.62, "Float", "Sneak skill uses a second moving faded near someone unaware (vanilla, measured)"),
     "Protean_RushSafeDrop":        (0x9C0, 300,  "Float", "Predator's Rush: a landing this far below the ground left in a boosted sprint does no harm"),
+    "Protean_InconspicuousPerPerson": (0x9C1, 5, "Float", "Inconspicuous: Sneak each friendly person nearby adds"),
+    "Protean_InconspicuousMax":    (0x9C2, 30,   "Float", "Inconspicuous: the most Sneak it adds"),
+    "Protean_InconspicuousRange":  (0x9C3, 1050, "Float", "Inconspicuous: how near a person counts, game units (1050 ~ 15 m)"),
+    "Protean_AssassinMult":        (0x9C6, 10,   "Float", "Assassin: sneak attack multiplier against someone who trusts the worn face"),
+    "Protean_InfectCost":          (0x9C9, 50,   "Float", "Infected: stamina the Infect power costs"),
+    "Protean_InfectedHours":       (0x9CB, 24,   "Float", "Infected: game hours the infected fight for the player"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -474,6 +488,9 @@ def main():
           "Return to your own form.")
     power(FACE_POWER, "Protean_FacePower", "Shapeshift: Stolen Face",
           "Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.")
+    power(INFECT_POWER, "Protean_InfectPower", "Infect",
+          "Grow an infection to slip into someone's pocket: for a day they fight at your side. Costs %d Stamina."
+          % GLOBALS["Protean_InfectCost"][1])
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
 
@@ -608,6 +625,36 @@ def main():
     hidden_perk(ANIMAL_ARMS_PERK, "Protean_AnimalArms", "Animal One-Handed",
                 [("ModAttackDamage", 3), ("ModPowerAttackStamina", 1)])
     hidden_perk(DEFT_PERK, "Protean_AnimalDeftMovement", "Animal Deft Movement", [("ModIncomingDamage", 3)])
+
+    # ---- Deceiver
+    write(os.path.join(y, "Factions", "Protean_AssassinMark - %s_%s.yaml" % (fid(ASSASSIN_MARK), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_AssassinMark\n" % (fid(ASSASSIN_MARK), PLUGIN)
+          + "Name:\n  TargetLanguage: English\nFlags:\n- HiddenFromPC\nVendorValues: {}\n")
+    # the infected are the player's allies: their faction's reaction to PlayerFaction
+    write(os.path.join(y, "Factions", "Protean_InfectedFaction - %s_%s.yaml" % (fid(INFECTED_FACTION), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_InfectedFaction\n" % (fid(INFECTED_FACTION), PLUGIN)
+          + "Name:\n  TargetLanguage: English\n"
+          "Relations:\n- Target: 000DB1:Skyrim.esm\n  Reaction: Ally\n"
+          "Flags:\n- HiddenFromPC\nVendorValues: {}\n")
+    # sneak attacks (entry point 18) on someone in ASSASSIN_MARK: the condition on the target tab (2), as the game's
+    # Assassin's Blade puts its dagger check on the weapon tab (1)
+    write(os.path.join(y, "Perks", "Protean_Assassin - %s_%s.yaml" % (fid(ASSASSIN_PERK), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_Assassin\n" % (fid(ASSASSIN_PERK), PLUGIN)
+          + name_block("Assassin")
+          + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
+          "- MutagenObjectType: PerkEntryPointModifyValue\n"
+          "  Conditions:\n  - RunOnTabIndex: 2\n    Conditions:\n"
+          "    - MutagenObjectType: ConditionFloat\n      Data:\n        MutagenObjectType: GetInFactionConditionData\n"
+          "        Faction: %s:%s\n      ComparisonValue: 1\n" % (fid(ASSASSIN_MARK), PLUGIN)
+          + "  EntryPoint: ModSneakAttackMult\n  PerkConditionTabCount: 3\n  Modification: Multiply\n  Value: %s\n"
+          % GLOBALS["Protean_AssassinMult"][1])
+    write(os.path.join(y, "MiscItems", "Protean_Infection - %s_%s.yaml" % (fid(INFECTION), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_Infection\n" % (fid(INFECTION), PLUGIN)
+          + "ObjectBounds:\n  First: -4, -4, 0\n  Second: 4, 4, 8\n"
+          + name_block("Infection")
+          + "Model:\n  File: Clutter\\ChaurusEggs\\Eggs.nif\n"
+          "PickUpSound: 0BFB1F:Skyrim.esm\nPutDownSound: 0519D1:Skyrim.esm\nValue: 0\nWeight: 0\n")
 
     # ---- the glide markers (hidden): the Open Animation Replacer condition for the glide pose
     for i, (e, sp) in enumerate(zip(GLIDE_EFFECTS, GLIDE_SPELLS)):
@@ -816,6 +863,8 @@ def main():
                            "predatorPoison": PREDATOR_POISON_SPELL,
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
                            "skills": {"arms": ANIMAL_ARMS_PERK, "deft": DEFT_PERK},
+                           "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,
+                                        "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

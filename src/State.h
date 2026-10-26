@@ -106,6 +106,11 @@ namespace protean
 		bool                                 comboSpent{ false };      // this fight's kill-boost point is taken (until out of combat)
 		float                                stalkerNoiseApplied{ 0.0f };  // MovementNoiseMult Stalker's fade took off now
 		std::vector<std::pair<RE::FormID, float>> provoked;  // animals frenzied for biting back, and their own Aggression
+		float                                inconspicuousApplied{ 0.0f };  // Sneak Inconspicuous added now
+		RE::FormID                           infected{ 0 };            // the one person infected (0 = none)
+		float                                infectedUntil{ 0.0f };    // game days passed when it runs its course
+		float                                infectedAssistance{ 0.0f };  // their own Assistance and Confidence, put back
+		float                                infectedConfidence{ 0.0f };
 		// The temporary modifiers of the actor values Protean changes (kTempChecked), as they were at the save. A load
 		// lost some of them (2026-10-24: the health bonus and AttackDamageMult were gone after a load as the wolf,
 		// DamageResist was kept); Shift::OnGameLoaded puts back Protean's part when exactly that much is missing.
@@ -118,7 +123,7 @@ namespace protean
 	// the actor values whose temporary modifier Protean changes, checked after a load
 	inline constexpr RE::ActorValue kTempChecked[] = { RE::ActorValue::kHealth, RE::ActorValue::kAttackDamageMult,
 		RE::ActorValue::kDamageResist, RE::ActorValue::kSpeedMult, RE::ActorValue::kStaminaRateMult,
-		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing, RE::ActorValue::kMovementNoiseMult };
+		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing, RE::ActorValue::kMovementNoiseMult, RE::ActorValue::kSneak };
 
 	namespace Persist
 	{
