@@ -104,7 +104,12 @@ namespace protean::Skills
 			}
 		}
 
-		// the damage of a hit is read as the target's health before the hit (the event comes first) less after it
+		float g_lastHealth = 0.0f;  // the player's health last frame: the hit event comes after the damage
+
+		// Vanilla's rates, measured on the player 2026-10-25: a weapon hit pays its listed damage in skill uses (an
+		// Imperial Sword, 8: 60.5 One-Handed XP, whatever it dealt); a hit on light armor that hurts pays about 0.38 uses
+		// whatever the damage, one that hurts nothing pays nothing; sneaking unseen pays about 0.62 uses a second, only
+		// while moving.
 		class Sink : public RE::BSTEventSink<RE::TESHitEvent>
 		{
 		public:
@@ -117,29 +122,28 @@ namespace protean::Skills
 				if (!target) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
-				const float before = target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
-				const auto  handle = target->GetHandle();
 				if (a_event->cause->IsPlayerRef() && !target->IsPlayerRef()) {
 					auto*      claws = Registry::Get().ClawWeapon();
 					const bool clawHit = claws && a_event->source == claws->GetFormID();
 					if (!clawHit && !Shift::ActiveCreature()) {
 						return RE::BSEventNotifyControl::kContinue;
 					}
-					SKSE::GetTaskInterface()->AddTask([handle, before, clawHit] {
-						if (auto t = handle.get()) {
-							const float dealt = std::min(before, before - t->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
-							AddXp(RE::ActorValue::kOneHanded, dealt * Dial("Protean_XpOneHanded", 1.0f), clawHit ? "claws" : "bite");
-						}
+					// the listed damage: the claws' (it grows with the level), or the animal's own bite before Protean's boosts
+					auto*       p = RE::PlayerCharacter::GetSingleton();
+					const float listed = clawHit ? static_cast<float>(claws->GetAttackDamage()) :
+					                               (p && p->GetRace() ? p->GetRace()->data.unarmedDamage : 0.0f);
+					SKSE::GetTaskInterface()->AddTask([listed, clawHit] {
+						AddXp(RE::ActorValue::kOneHanded, listed * Dial("Protean_XpOneHanded", 1.0f), clawHit ? "claws" : "bite");
 					});
 				} else if (target->IsPlayerRef() && !a_event->cause->IsPlayerRef()) {
+					const float before = g_lastHealth;
 					SKSE::GetTaskInterface()->AddTask([before] {
 						auto* p = RE::PlayerCharacter::GetSingleton();
 						if (!p) {
 							return;
 						}
-						if (LightArmorHit(p)) {
-							const float taken = std::max(before - p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth), 0.0f);
-							AddXp(RE::ActorValue::kLightArmor, taken * Dial("Protean_XpLightArmor", 1.0f),
+						if (LightArmorHit(p) && p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < before - 0.01f) {
+							AddXp(RE::ActorValue::kLightArmor, Dial("Protean_XpLightArmor", 0.38f),
 								Shift::ActiveCreature() ? "hit as an animal" : "hit with the carapace");
 						}
 						Deft();  // the next hit's chance
@@ -164,6 +168,7 @@ namespace protean::Skills
 
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
 	{
+		g_lastHealth = a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
 		static float tick = 0.0f;
 		if ((tick -= a_delta) <= 0.0f) {
 			tick = 0.25f;
@@ -188,7 +193,7 @@ namespace protean::Skills
 			auto a = h.get();
 			if (a && a.get() != a_p && !a->IsDead() && !a->IsPlayerTeammate() &&
 				a_p->GetPosition().GetDistance(a->GetPosition()) <= kSneakRange && a->RequestDetectionLevel(a_p) <= 0) {
-				AddXp(RE::ActorValue::kSneak, Dial("Protean_XpSneak", 0.5f) * seconds, std::format("unseen by '{}'", a->GetName()));
+				AddXp(RE::ActorValue::kSneak, Dial("Protean_XpSneak", 0.62f) * seconds, std::format("unseen by '{}'", a->GetName()));
 				return;
 			}
 		}

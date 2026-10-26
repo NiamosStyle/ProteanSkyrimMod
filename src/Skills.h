@@ -3,12 +3,12 @@
 namespace protean::Skills
 {
 	// Protean's fighting counts toward the game's own skills and perks (the user's design, 2026-10-25):
-	// - One-Handed: animal bites and Rending Claws hits give One-Handed experience (Protean_XpOneHanded per point of
-	//   damage). The claws carry the game's sword keyword, so the game's own One-Handed perks reach them; bites have no
-	//   weapon for those perks to check, so a hidden perk held in animal form copies Armsman, Fighting Stance and
-	//   Savage Strike.
+	// - One-Handed: animal bites and Rending Claws hits give One-Handed experience as vanilla weapon hits do, by their
+	//   listed damage (times Protean_XpOneHanded). The claws carry the game's sword keyword, so the game's own One-Handed
+	//   perks reach them; bites have no weapon for those perks to check, so a hidden perk held in animal form copies
+	//   Armsman, Fighting Stance and Savage Strike.
 	// - Light Armor: hits taken in animal form, or in the player's own form while Subtle Carapace works and no light
-	//   body armor is worn (that gives its own), give Light Armor experience (Protean_XpLightArmor per point of damage).
+	//   body armor is worn (that gives its own), give Light Armor experience when they hurt (Protean_XpLightArmor uses).
 	//   Agile Defender multiplies the carapace; Deft Movement's 10% chance to take no damage from a weapon hit is copied
 	//   onto a hidden perk held in animal form or while the carapace works.
 	// - Sneak: moving while faded (Stalker) near someone who has not noticed the player gives Sneak experience

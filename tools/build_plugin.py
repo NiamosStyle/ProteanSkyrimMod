@@ -216,9 +216,9 @@ GLOBALS = {
     "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
     "Protean_StalkerRunMult":      (0x9B9, 2,    "Float", "Stalker: running while faded costs this times the walking drain"),
     "Protean_ComboStacks":         (0x9BA, 5,    "Float", "kill boost stacks at once that give an evolution point, once per fight (0 = off)"),
-    "Protean_XpOneHanded":         (0x9BD, 1,    "Float", "One-Handed experience per point of damage a bite or claw hit does"),
-    "Protean_XpLightArmor":        (0x9BE, 1,    "Float", "Light Armor experience per point of damage taken as an animal or with the carapace"),
-    "Protean_XpSneak":             (0x9BF, 0.5,  "Float", "Sneak experience a second moving faded near someone unaware"),
+    "Protean_XpOneHanded":         (0x9BD, 1,    "Float", "multiplies the One-Handed skill uses of a bite or claw hit (vanilla: its listed damage)"),
+    "Protean_XpLightArmor":        (0x9BE, 0.38, "Float", "Light Armor skill uses per hit that hurts, as an animal or with the carapace (vanilla, measured)"),
+    "Protean_XpSneak":             (0x9BF, 0.62, "Float", "Sneak skill uses a second moving faded near someone unaware (vanilla, measured)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {

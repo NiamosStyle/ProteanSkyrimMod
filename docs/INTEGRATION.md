@@ -59,9 +59,9 @@ script or the console can change them at any time.
 | `Protean_KillBoostPct` | xx94F | Float | 15 | stamina regeneration each stack adds, percentage points of the normal rate |
 | `Protean_KillBoostMax` | xx950 | Float | 0 | most stacks at once; 0 = no limit |
 | `Protean_ComboStacks` | xx9BA | Float | 5 | kill boost stacks at once that give one evolution point; once per fight, earned again after leaving combat (0 = off; never reached if `Protean_KillBoostMax` is lower) |
-| `Protean_XpOneHanded` | xx9BD | Float | 1 | One-Handed experience per point of damage a bite or Rending Claws hit does |
-| `Protean_XpLightArmor` | xx9BE | Float | 1 | Light Armor experience per point of damage taken in animal form, or with Subtle Carapace on and no light body armor |
-| `Protean_XpSneak` | xx9BF | Float | 0.5 | Sneak experience a second while moving faded (Stalker) near someone who has not noticed the player |
+| `Protean_XpOneHanded` | xx9BD | Float | 1 | multiplies the One-Handed skill uses of a bite or Rending Claws hit (as vanilla: the listed damage; the bite's is the race's own) |
+| `Protean_XpLightArmor` | xx9BE | Float | 0.38 | Light Armor skill uses per hit that hurts, in animal form or with Subtle Carapace on and no light body armor (vanilla's, measured) |
+| `Protean_XpSneak` | xx9BF | Float | 0.62 | Sneak skill uses a second while moving faded (Stalker) near someone who has not noticed the player (vanilla's, measured) |
 | `Protean_StalkerFadeSeconds` / `Protean_StalkerDrain` / `Protean_StalkerAmbushMult` / `Protean_StalkerRunMult` | xx9B5 / xx9B6 / xx9B7 / xx9B9 | Float | 2 / 2 / 2 / 2 | Stalker: seconds still or walking to fade; stamina a second walking faded (standing free); damage of the bite from hiding; running's drain multiplier |
 | `Protean_ClawDamageMin` | xx953 | Float | 6 | Rending Claws damage never goes below this |
 | `Protean_ClawDamageMax` | xx954 | Float | 10 | Rending Claws damage on a full stamina bar, before the level parts (full bar = this + PerLevel x level + PerLevelSq x level²: 11 at 1, 19 at 10, 49 at 30, 95 at 50) |
