@@ -219,6 +219,7 @@ GLOBALS = {
     "Protean_XpOneHanded":         (0x9BD, 1,    "Float", "multiplies the One-Handed skill uses of a bite or claw hit (vanilla: its listed damage)"),
     "Protean_XpLightArmor":        (0x9BE, 0.38, "Float", "Light Armor skill uses per hit that hurts, as an animal or with the carapace (vanilla, measured)"),
     "Protean_XpSneak":             (0x9BF, 0.62, "Float", "Sneak skill uses a second moving faded near someone unaware (vanilla, measured)"),
+    "Protean_RushSafeDrop":        (0x9C0, 300,  "Float", "Predator's Rush: a landing this far below the ground left in a boosted sprint does no harm"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {

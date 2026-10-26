@@ -153,7 +153,8 @@
   "Protean_ComboStacks": 2490,
   "Protean_XpOneHanded": 2493,
   "Protean_XpLightArmor": 2494,
-  "Protean_XpSneak": 2495
+  "Protean_XpSneak": 2495,
+  "Protean_RushSafeDrop": 2496
  },
  "openInteriorKeywords": [
   {

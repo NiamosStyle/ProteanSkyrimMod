@@ -35,6 +35,13 @@ namespace protean::Rush
 		SprintJump g_jump;
 		float      g_keepRamp = 0.0f;  // > 0: the build-up survives a moment without sprinting
 
+		// Falls at speed (the user died running fast over rocks, 2026-10-25): the ground height last stood on, and
+		// whether the player left it during a boosted sprint. Landing no more than Protean_RushSafeDrop below it counts as
+		// no fall; a deeper drop is left to the game.
+		float g_groundZ = 0.0f;
+		bool  g_fastAir = false;
+		bool  g_deathLogged = false;
+
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
 		// SpeedMult points added on top of the player's own; the engine takes a new speed only when something makes
@@ -68,6 +75,9 @@ namespace protean::Rush
 			const float h = Dial("Protean_RushJumpHeight", 400.0f);
 			g_jump = { true, 0.0f, std::sqrt(2.0f * kGravity * h), v.quad.m128_f32[0], v.quad.m128_f32[1] };
 			g_keepRamp = 1000.0f;
+			// the game's fall mark is not reset when Protean launches the jump (as the hare's leap, which died of a fall
+			// counted from an old height): the jump counts from where it starts
+			cc->fallStartHeight = p->GetPositionZ();
 			logger::info("sprint jump: graph took JumpDirectionalStart {} / JumpStandingStart {}; {:.0f} u/s up", dir, standing,
 				g_jump.vz0);
 		}
@@ -125,6 +135,36 @@ namespace protean::Rush
 		}
 	}
 
+	namespace
+	{
+		void GuardFall(RE::PlayerCharacter* a_p, bool a_boosted)
+		{
+			auto* cc = a_p->GetCharController();
+			if (a_p->IsDead()) {
+				if (!g_deathLogged && !Shift::ActiveCreature()) {
+					g_deathLogged = true;
+					logger::info("player died in human form at z {:.0f} (ground {:.0f}, fall mark {:.0f}), Rush speed +{:.0f}, in the air {}",
+						a_p->GetPositionZ(), g_groundZ, cc ? cc->fallStartHeight : 0.0f, State::Get().rushApplied, a_p->IsInMidair());
+				}
+				return;
+			}
+			g_deathLogged = false;
+			if (!cc) {
+				return;
+			}
+			const float z = a_p->GetPositionZ();
+			if (cc->flags.all(RE::CHARACTER_FLAGS::kSupport)) {
+				g_groundZ = z;
+				g_fastAir = false;
+				return;
+			}
+			g_fastAir = g_fastAir || a_boosted;
+			if (g_fastAir && g_groundZ - z <= Dial("Protean_RushSafeDrop", 300.0f)) {
+				cc->fallStartHeight = z;  // landing here would be a hop, not a fall
+			}
+		}
+	}
+
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
 	{
 		const bool works = Works(a_p);
@@ -153,6 +193,7 @@ namespace protean::Rush
 		}
 		Apply(a_p, want);
 		SetJump(works);
+		GuardFall(a_p, works && (sprinting || g_keepRamp > 0.0f));
 	}
 
 	void Install()

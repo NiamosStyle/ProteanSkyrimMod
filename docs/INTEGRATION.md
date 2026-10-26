@@ -61,6 +61,7 @@ script or the console can change them at any time.
 | `Protean_ComboStacks` | xx9BA | Float | 5 | kill boost stacks at once that give one evolution point; once per fight, earned again after leaving combat (0 = off; never reached if `Protean_KillBoostMax` is lower) |
 | `Protean_XpOneHanded` | xx9BD | Float | 1 | multiplies the One-Handed skill uses of a bite or Rending Claws hit (as vanilla: the listed damage; the bite's is the race's own) |
 | `Protean_XpLightArmor` | xx9BE | Float | 0.38 | Light Armor skill uses per hit that hurts, in animal form or with Subtle Carapace on and no light body armor (vanilla's, measured) |
+| `Protean_RushSafeDrop` | xx9C0 | Float | 300 | Predator's Rush: a landing no more than this below the ground left during a boosted sprint does no harm (deeper drops are the game's) |
 | `Protean_XpSneak` | xx9BF | Float | 0.62 | Sneak skill uses a second while moving faded (Stalker) near someone who has not noticed the player (vanilla's, measured) |
 | `Protean_StalkerFadeSeconds` / `Protean_StalkerDrain` / `Protean_StalkerAmbushMult` / `Protean_StalkerRunMult` | xx9B5 / xx9B6 / xx9B7 / xx9B9 | Float | 2 / 2 / 2 / 2 | Stalker: seconds still or walking to fade; stamina a second walking faded (standing free); damage of the bite from hiding; running's drain multiplier |
 | `Protean_ClawDamageMin` | xx953 | Float | 6 | Rending Claws damage never goes below this |
