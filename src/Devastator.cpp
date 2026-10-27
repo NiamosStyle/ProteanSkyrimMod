@@ -21,9 +21,10 @@ namespace protean::Devastator
 		// red copy of Dragonborn's tentacle shader); at the burst the red lurker splash and the Vampire Lord's blood burst
 		// (the one a change of form shows)
 		constexpr RE::FormID kBloodBurst = 0x015373;  // DLC1VampChangeExplosion (Dawnguard.esm)
-		constexpr float      kShaderAfter = 1.5f;     // seconds the tentacles stay after the burst
-		constexpr float            kSlowSeconds = 0.5f;   // real seconds of slow motion at the burst
-		constexpr float            kAfterSeconds = 2.0f;  // real seconds the camera keeps circling after the burst
+		// the moment after the burst is held (the user, 2026-10-27: the pose kept, the tendrils out, the camera circling in
+		// slow motion): Protean_DevastatorHold real seconds, slow for Protean_DevastatorSlowSeconds of them, the tendrils
+		// thrown again every Protean_DevastatorRethrow so they stay out
+		float g_rethrow{ 0.0f };
 		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
 
 		enum class Phase
@@ -196,12 +197,12 @@ namespace protean::Devastator
 			vm->DispatchMethodCall2(handle, "ObjectReference", "PushActorAway", RE::MakeFunctionArguments(std::move(a_target), std::move(a_force)), cb);
 		}
 
-		void Tendrils(RE::PlayerCharacter* a_p)
+		int Tendrils(RE::PlayerCharacter* a_p)
 		{
 			auto* spell = Registry::Get().DevastatorTendril();
 			auto* caster = a_p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
 			if (!spell || !caster) {
-				return;
+				return 0;
 			}
 			int cast = 0;
 			for (auto& h : g_marks) {
@@ -210,7 +211,7 @@ namespace protean::Devastator
 					++cast;
 				}
 			}
-			logger::info("devastator: {} tendril(s) cast", cast);
+			return cast;
 		}
 
 		void Burst(RE::PlayerCharacter* a_p)
@@ -218,7 +219,7 @@ namespace protean::Devastator
 			const float radius = Dial("Protean_DevastatorRadius", 1050.0f);
 			const float damage = Dial("Protean_DevastatorDamage", 100.0f) + Dial("Protean_DevastatorDamagePerLevel", 8.0f) * a_p->GetLevel();
 			const float force = Dial("Protean_DevastatorForce", 10.0f);
-			Tendrils(a_p);
+			logger::info("devastator: {} tendril(s) cast", Tendrils(a_p));
 			if (auto* splash = Registry::Get().DevastatorSplash()) {
 				a_p->PlaceObjectAtMe(splash, false);
 			}
@@ -289,7 +290,7 @@ namespace protean::Devastator
 		const bool took = p->NotifyAnimationGraph(kRise);
 		Play(p, kWindupSound);
 		if (auto* fx = Registry::Get().DevastatorShader()) {
-			p->ApplyEffectShader(fx, Dial("Protean_DevastatorWindup", 1.0f) + kShaderAfter);
+			p->ApplyEffectShader(fx, Dial("Protean_DevastatorWindup", 2.0f) + Dial("Protean_DevastatorHold", 4.5f));
 		}
 		CameraStart();
 		PlaceMarks(p);
@@ -316,14 +317,20 @@ namespace protean::Devastator
 			Burst(a_p);
 			g_phase = Phase::kAfter;
 			g_start = Clock::now();
+			g_rethrow = 0.0f;
 			return;
 		}
 		if (g_phase == Phase::kAfter) {
-			if (t >= kSlowSeconds) {
+			if (t >= Dial("Protean_DevastatorSlowSeconds", 3.5f)) {
 				Slow(false);
 			}
-			if (t >= kAfterSeconds) {
+			if (t >= Dial("Protean_DevastatorHold", 4.5f)) {
 				Finish(a_p);
+				return;
+			}
+			if (t >= g_rethrow + Dial("Protean_DevastatorRethrow", 0.25f)) {
+				g_rethrow = t;
+				Tendrils(a_p);
 			}
 		}
 	}

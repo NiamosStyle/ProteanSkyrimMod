@@ -192,7 +192,10 @@
   "Protean_RegenPerSecond": 2520,
   "Protean_DevastatorTendrils": 2521,
   "Protean_DevastatorOrbitMult": 2525,
-  "Protean_DevastatorZoomMult": 2526
+  "Protean_DevastatorZoomMult": 2526,
+  "Protean_DevastatorHold": 2527,
+  "Protean_DevastatorSlowSeconds": 2528,
+  "Protean_DevastatorRethrow": 2529
  },
  "openInteriorKeywords": [
   {

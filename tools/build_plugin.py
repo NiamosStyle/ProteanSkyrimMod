@@ -253,12 +253,15 @@ GLOBALS = {
     "Protean_DevastatorDamagePerLevel": (0x9D3, 8, "Float", "Devastator: damage added per player level"),
     "Protean_DevastatorStacks":    (0x9D4, 2,    "Float", "Devastator: kill boosts it needs"),
     "Protean_DevastatorWindup":    (0x9D5, 2.0,  "Float", "Devastator: real seconds of the ritual pose before the burst (1 ended before the pose, user 2026-10-27)"),
-    "Protean_DevastatorSlowMo":    (0x9D6, 0.15, "Float", "Devastator: game speed during the half second after the burst (1 = none; 0.33 was hard to see)"),
+    "Protean_DevastatorSlowMo":    (0x9D6, 0.15, "Float", "Devastator: game speed in the slow motion after the burst (1 = none; 0.33 was hard to see)"),
     "Protean_DevastatorForce":     (0x9D7, 10,   "Float", "Devastator: how hard enemies are thrown down (PushActorAway force)"),
     "Protean_RegenPerSecond":      (0x9D8, 8,    "Float", "Regeneration: Stamina turned into Health a second"),
     "Protean_DevastatorTendrils":  (0x9D9, 8,    "Float", "Devastator: tendrils thrown for the look"),
     "Protean_DevastatorOrbitMult": (0x9DD, 3,    "Float", "Devastator: the circling camera turns this many times faster from the burst on"),
     "Protean_DevastatorZoomMult":  (0x9DE, 2,    "Float", "Devastator: the circling camera stands this many times farther out from the burst on"),
+    "Protean_DevastatorHold":      (0x9DF, 4.5,  "Float", "Devastator: real seconds the moment after the burst is held (pose, tendrils, circling camera)"),
+    "Protean_DevastatorSlowSeconds": (0x9E0, 3.5, "Float", "Devastator: real seconds of slow motion from the burst"),
+    "Protean_DevastatorRethrow":   (0x9E1, 0.25, "Float", "Devastator: real seconds between throws of the tendrils while held, so they stay out"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
