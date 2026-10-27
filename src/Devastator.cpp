@@ -175,7 +175,7 @@ namespace protean::Devastator
 				auto src = a_p->PlaceObjectAtMe(base, false);
 				if (m && src) {
 					m->SetPosition(RE::NiPoint3(at.x + 700.0f * std::sin(a), at.y + 700.0f * std::cos(a), at.z + (i % 2 ? 40.0f : 220.0f)));
-					src->SetPosition(RE::NiPoint3(at.x + 45.0f * std::sin(a), at.y + 45.0f * std::cos(a), at.z + 110.0f));
+					src->SetPosition(RE::NiPoint3(at.x + 45.0f * std::sin(a), at.y + 45.0f * std::cos(a), at.z + Dial("Protean_DevastatorTendrilHeight", 60.0f)));
 					g_marks.push_back(m->GetHandle());
 					g_sources.push_back(src->GetHandle());
 				}
