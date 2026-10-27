@@ -1456,8 +1456,8 @@
    "reach": 120,
    "strike_angle": 50,
    "taps": [
-    "attackStart_Attack1",
-    "attackStart_Attack2"
+    "attackStart_AttackLeft2",
+    "attackStart_AttackRight2"
    ],
    "diet": "meat",
    "feed_event": ""
@@ -1565,8 +1565,8 @@
    "reach": 120,
    "strike_angle": 50,
    "taps": [
-    "attackStart_Attack1",
-    "attackStart_Attack2"
+    "attackStart_AttackLeft2",
+    "attackStart_AttackRight2"
    ],
    "diet": "meat",
    "feed_event": ""
@@ -1674,8 +1674,8 @@
    "reach": 120,
    "strike_angle": 50,
    "taps": [
-    "attackStart_Attack1",
-    "attackStart_Attack2"
+    "attackStart_AttackLeft2",
+    "attackStart_AttackRight2"
    ],
    "diet": "meat",
    "feed_event": ""

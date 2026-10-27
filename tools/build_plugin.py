@@ -296,8 +296,10 @@ MELEE = {
         "mudcrab", "ash_hopper", "chaurus", "troll", "frost_troll", "horker", "horse", "boar")},
     # taps go straight ahead (user: they swiped left/right); their side swipes stay unused
     **{c: {"reach": 120, "strike_angle": 50, "taps": ["attackStart_Attack1", "attackStart_Attack2"]} for c in (
-        "bear", "cave_bear", "snow_bear",
-        # the same for the sabre cats (user 2026-10-27: "attacks are to the side")
+        "bear", "cave_bear", "snow_bear")},
+    # the sabre cats' taps: their second swipes, which strike forward (user 2026-10-27: the first ones went to the side,
+    # and Attack1/Attack2 are its power lunges)
+    **{c: {"reach": 120, "strike_angle": 50, "taps": ["attackStart_AttackLeft2", "attackStart_AttackRight2"]} for c in (
         "sabre_cat", "snowy_sabre_cat", "vale_sabre_cat")},
     # Jump leaps far (user: "leap great distances"); its own lunges are refused for the player. ~14 m, ~3.5 m up
     "ash_hopper": {"reach": 120, "strike_angle": 50, "taps": ["attackStart_Attack1", "attackStart_Attack2"],
