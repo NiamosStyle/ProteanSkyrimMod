@@ -135,7 +135,9 @@ namespace protean
 			_devastatorPower = dh->LookupForm<RE::SpellItem>(d.value("power", 0u), plugin);
 			_devastatorTendril = dh->LookupForm<RE::SpellItem>(d.value("tendril", 0u), plugin);
 			_regenPower = dh->LookupForm<RE::SpellItem>(d.value("regen", 0u), plugin);
-			if (!_devastatorPower || !_devastatorTendril || !_regenPower) {
+			_devastatorShader = dh->LookupForm<RE::TESEffectShader>(d.value("shader", 0u), plugin);
+			_devastatorSplash = dh->LookupForm<RE::BGSExplosion>(d.value("splash", 0u), plugin);
+			if (!_devastatorPower || !_devastatorTendril || !_regenPower || !_devastatorShader || !_devastatorSplash) {
 				logger::warn("Devastator or Regeneration records missing from {}", plugin);
 			}
 		}

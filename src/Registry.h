@@ -95,6 +95,8 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* DevastatorPower() const { return _devastatorPower; }
 		[[nodiscard]] RE::SpellItem* DevastatorTendril() const { return _devastatorTendril; }  // the burst's tendrils, for the look
 		[[nodiscard]] RE::SpellItem* RegenPower() const { return _regenPower; }
+		[[nodiscard]] RE::TESEffectShader* DevastatorShader() const { return _devastatorShader; }  // red tentacles over the body
+		[[nodiscard]] RE::BGSExplosion* DevastatorSplash() const { return _devastatorSplash; }      // the red splash at the burst
 		[[nodiscard]] RE::BGSPerk*   Perk(std::string_view a_id) const;          // a Protean perk by id, or null
 		[[nodiscard]] const std::map<std::string, RE::BGSPerk*, std::less<>>& Perks() const { return _perks; }
 		[[nodiscard]] bool PerkBuilt(std::string_view a_id) const { return _perksBuilt.contains(a_id); }  // else a placeholder
@@ -144,6 +146,8 @@ namespace protean
 		RE::SpellItem*        _devastatorPower{ nullptr };
 		RE::SpellItem*        _devastatorTendril{ nullptr };
 		RE::SpellItem*        _regenPower{ nullptr };
+		RE::TESEffectShader*  _devastatorShader{ nullptr };
+		RE::BGSExplosion*     _devastatorSplash{ nullptr };
 		std::array<RE::SpellItem*, 3> _keenPowers{};
 		std::array<RE::SpellItem*, 3> _keenSenses{};
 		std::map<std::string, RE::BGSPerk*, std::less<>> _perks;

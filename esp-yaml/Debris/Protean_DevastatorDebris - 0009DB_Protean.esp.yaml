@@ -1,0 +1,17 @@
+FormKey: 0009DB:Protean.esp
+EditorID: Protean_DevastatorDebris
+Models:
+- Percentage: 100
+  ModelFilename: Protean\Devastator\TentacleDebris01.nif
+- Percentage: 10
+  ModelFilename: Protean\Devastator\TentacleDebris01.nif
+- Percentage: 10
+  ModelFilename: Protean\Devastator\TentacleDebris01.nif
+- Percentage: 10
+  ModelFilename: Protean\Devastator\TentacleDebris01.nif
+- Percentage: 10
+  ModelFilename: Protean\Devastator\TentacleDebris01.nif
+- Percentage: 10
+  ModelFilename: Protean\Devastator\TentacleDebris02.nif
+- Percentage: 10
+  ModelFilename: Protean\Devastator\TentacleDebris02.nif

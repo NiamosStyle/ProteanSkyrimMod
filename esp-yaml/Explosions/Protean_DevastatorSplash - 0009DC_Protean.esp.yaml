@@ -1,0 +1,12 @@
+FormKey: 0009DC:Protean.esp
+EditorID: Protean_DevastatorSplash
+ObjectBounds:
+  First: -163, -146, -182
+  Second: 145, 164, 139
+Model:
+  File: Protean\Devastator\RedSplash.nif
+Radius: 150
+Flags:
+- 0x1
+- IgnoreImageSpaceSwap
+SoundLevel: Normal

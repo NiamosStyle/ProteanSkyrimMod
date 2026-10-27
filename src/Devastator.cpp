@@ -17,6 +17,11 @@ namespace protean::Devastator
 		// stab with Unrelenting Force's thunder as the tendrils burst out
 		constexpr const char* kWindupSound = "NPCWerewolfTransformationSD";
 		constexpr const char* kBurstSounds[] = { "QSTMiraakDeathTentacleStab", "VOCShoutFXUnrelentingForceThunderA" };
+		// the look, picked in game the same day: red tentacles writhe over the body from the start of the pose (Protean's
+		// red copy of Dragonborn's tentacle shader); at the burst the red lurker splash and the Vampire Lord's blood burst
+		// (the one a change of form shows)
+		constexpr RE::FormID kBloodBurst = 0x015373;  // DLC1VampChangeExplosion (Dawnguard.esm)
+		constexpr float      kShaderAfter = 1.5f;     // seconds the tentacles stay after the burst
 		constexpr float            kSlowSeconds = 0.5f;   // real seconds of slow motion at the burst
 		constexpr float            kAfterSeconds = 2.0f;  // real seconds the camera keeps circling after the burst
 		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
@@ -178,6 +183,14 @@ namespace protean::Devastator
 			const float damage = Dial("Protean_DevastatorDamage", 100.0f) + Dial("Protean_DevastatorDamagePerLevel", 8.0f) * a_p->GetLevel();
 			const float force = Dial("Protean_DevastatorForce", 10.0f);
 			Tendrils(a_p);
+			if (auto* splash = Registry::Get().DevastatorSplash()) {
+				a_p->PlaceObjectAtMe(splash, false);
+			}
+			if (auto* dh = RE::TESDataHandler::GetSingleton()) {
+				if (auto* blood = dh->LookupForm<RE::BGSExplosion>(kBloodBurst, "Dawnguard.esm")) {
+					a_p->PlaceObjectAtMe(blood, false);
+				}
+			}
 			for (const auto* sound : kBurstSounds) {
 				Play(a_p, sound);
 			}
@@ -239,6 +252,9 @@ namespace protean::Devastator
 		Lock(true);
 		const bool took = p->NotifyAnimationGraph(kRise);
 		Play(p, kWindupSound);
+		if (auto* fx = Registry::Get().DevastatorShader()) {
+			p->ApplyEffectShader(fx, Dial("Protean_DevastatorWindup", 1.0f) + kShaderAfter);
+		}
 		CameraStart();
 		PlaceMarks(p);
 		g_phase = Phase::kWindup;

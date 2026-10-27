@@ -35,6 +35,10 @@ for rel in build_claw_anims.build():
 import build_glide_anim  # noqa: E402
 for rel in build_glide_anim.build():
     files[rel] = os.path.join(ROOT, "data", rel)
+# Devastator's red tentacles and splash (from the game's archive by tools/build_devastator_fx.py)
+import build_devastator_fx  # noqa: E402
+for rel in build_devastator_fx.build():
+    files[rel] = os.path.join(ROOT, "data", rel)
 for name, path in files.items():
     if not os.path.isfile(path):
         sys.exit("missing " + path)

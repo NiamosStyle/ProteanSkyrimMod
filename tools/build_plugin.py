@@ -147,6 +147,11 @@ METAMORPHOSIS_POWER = 0x9CC  # opens the full character menu (src/Metamorphosis.
 # Devastator and Regeneration (src/Devastator.cpp): the two powers, and the tendrils the burst throws for the look (an
 # effect with no hostile part on the Tendril's projectile; Protean launches them in a ring)
 DEVASTATOR_POWER, REGEN_POWER, DEVASTATOR_TENDRIL_EFFECT, DEVASTATOR_TENDRIL = 0x9CD, 0x9CE, 0x9CF, 0x9D0
+# Devastator's look in red (tools/build_devastator_fx.py makes the textures and models): Dragonborn's tentacle
+# shader over the body from the start of the pose, and the Benthic Lurker's splash at the burst. The shader's fields
+# are Dragonborn's DLC2mkTentacleFXShader as Spriggit wrote them, with the red tile and Protean's own tentacles.
+DEVASTATOR_SHADER, DEVASTATOR_DEBRIS, DEVASTATOR_SPLASH = 0x9DA, 0x9DB, 0x9DC
+DEVASTATOR_SHADER_FIELDS = "FillTexture: Protean\\Devastator\\TentacleTileRed.dds\nParticleShaderTexture: Effects\\FluidSplatSub01.dds\nHolesTexture: ''\nMembranePaletteTexture: Effects\\Gradients\\GradBlood.dds\nParticlePaletteTexture: Effects\\Gradients\\GradBloodBlack.dds\nUnknown: 1049003520\nMembraneSourceBlendMode: SourceAlpha\nMembraneZTest: EqualTo\nFillColorKey1: '#00000000'\nFillAlphaFadeInTime: 0.1\nFillFullAlphaTime: 0.075\nFillFadeOutTime: 1.5\nFillPersistentAlphaRatio: 1\nFillAlphaPulseFrequency: 1\nFillTextureAnimationSpeedU: 0.03\nFillTextureAnimationSpeedV: 0.05\nEdgeEffectFallOff: 2\nEdgeEffectColor: '#00000000'\nEdgeEffectAlphaFadeInTime: 0.1\nEdgeEffectFullAlphaTime: 0.075\nEdgeEffectAlphaFadeOutTime: 1.5\nEdgeEffectPersistentAlphaRatio: 1\nEdgeEffectAlphaPulseAmplitude: 1\nEdgeEffectAlphaPulseFrequency: 1\nFillFullAlphaRatio: 1\nEdgeEffectFullAlphaRatio: 1\nMembraneDestBlendMode: SourceInvertedAlpha\nParticleSourceBlendMode: SourceAlpha\nParticleDestBlendMode: SourceInvertedAlpha\nParticleBirthRampUpTime: 0.1\nParticleFullBirthTime: 0.75\nParticleBirthRampDownTime: 1\nParticleFullBirthRatio: 15\nParticlePeristentCount: 5\nParticleLifetime: 0.5\nParticleLifetimePlusMinus: 0.1\nParticleInitialSpeedAlongNormal: 5\nParticleAcceleration3: 60\nParticleScaleKey1: 5\nParticleScaleKey2: 20\nParticleScaleKey2Time: 1\nColorKey1: '#00000000'\nColorKey2: '#00000000'\nColorKey3: '#00000000'\nColorKey2Alpha: 0.8\nColorKey3Alpha: 0.5\nColorKey2Time: 0.1\nColorKey3Time: 0.8\nParticleInitialSpeedAlongNormalPlusMinus: 5\nParticleInitialRotationDegreePlusMinus: 180\nParticleRotationSpeedDegreePerSecPlusMinus: 20\nAddonModels: @DEBRIS@\nHolesEndTime: 10\nHolesStartValue: 255\nEdgeColor: '#00FFFFFF'\nTextureCountU: 4\nTextureCountV: 2\nAddonModelsFadeInTime: 0.25\nAddonModelsFadeOutTime: 0.75\nAddonModelsScaleStart: 0.1\nAddonModelsScaleEnd: 0.1\nAddonModelsScaleInTime: 0.25\nAddonModelsScaleOutTime: 0.75\nFillColorKey2: '#00000000'\nFillColorKey3: '#00000000'\nFillColorKey1Scale: 1\nFillColorKey2Scale: 1\nFillColorKey3Scale: 1\nFillColorKey2Time: 0.17999999\nFillColorKey3Time: 1\nColorScale: 1\nFlags:\n- MembraneGrayscaleAlpha\n- ParticleGrayscaleAlpha\nFillTextureScaleU: 2.5\nFillTextureScaleV: 2.5\n"
 VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
@@ -532,6 +537,18 @@ def main():
           "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
           "CastType: FireAndForget\nTargetType: Aimed\n"
           "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(DEVASTATOR_TENDRIL_EFFECT), PLUGIN))
+    write(os.path.join(y, "Debris", "Protean_DevastatorDebris - %s_%s.yaml" % (fid(DEVASTATOR_DEBRIS), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_DevastatorDebris\nModels:\n" % (fid(DEVASTATOR_DEBRIS), PLUGIN)
+          + "".join("- Percentage: %d\n  ModelFilename: Protean\\Devastator\\TentacleDebris0%d.nif\n" % (pc, m)
+                    for pc, m in ((100, 1), (10, 1), (10, 1), (10, 1), (10, 1), (10, 2), (10, 2))))
+    write(os.path.join(y, "EffectShaders", "Protean_DevastatorShader - %s_%s.yaml" % (fid(DEVASTATOR_SHADER), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_DevastatorShader\n" % (fid(DEVASTATOR_SHADER), PLUGIN)
+          + DEVASTATOR_SHADER_FIELDS.replace("@DEBRIS@", "%s:%s" % (fid(DEVASTATOR_DEBRIS), PLUGIN)))
+    write(os.path.join(y, "Explosions", "Protean_DevastatorSplash - %s_%s.yaml" % (fid(DEVASTATOR_SPLASH), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_DevastatorSplash\n" % (fid(DEVASTATOR_SPLASH), PLUGIN)
+          + "ObjectBounds:\n  First: -163, -146, -182\n  Second: 145, 164, 139\n"
+          "Model:\n  File: Protean\\Devastator\\RedSplash.nif\n"
+          "Radius: 150\nFlags:\n- 0x1\n- IgnoreImageSpaceSwap\nSoundLevel: Normal\n")
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
 
@@ -907,7 +924,8 @@ def main():
                            "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,
                                         "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION,
                                         "metamorphosisPower": METAMORPHOSIS_POWER},
-                           "devastator": {"power": DEVASTATOR_POWER, "tendril": DEVASTATOR_TENDRIL, "regen": REGEN_POWER},
+                           "devastator": {"power": DEVASTATOR_POWER, "tendril": DEVASTATOR_TENDRIL, "regen": REGEN_POWER,
+                                          "shader": DEVASTATOR_SHADER, "splash": DEVASTATOR_SPLASH},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

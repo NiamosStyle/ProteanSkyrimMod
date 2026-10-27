@@ -102,7 +102,9 @@
  "devastator": {
   "power": 2509,
   "tendril": 2512,
-  "regen": 2510
+  "regen": 2510,
+  "shader": 2522,
+  "splash": 2524
  },
  "globals": {
   "Protean_ActiveForm": 2368,
