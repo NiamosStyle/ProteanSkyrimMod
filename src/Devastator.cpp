@@ -113,8 +113,44 @@ namespace protean::Devastator
 			}
 		}
 
+		// From the burst on the circling turns faster and stands farther out (the user, 2026-10-27): the game's own settings
+		// for the idle camera, raised for the moment and put back after
+		struct Boost
+		{
+			const char* name;
+			float       was{ 0.0f };
+			bool        on{ false };
+		};
+		Boost g_boost[] = { { "fAutoVanityIncrement:Camera" }, { "fVanityModeMaxDist:Camera" }, { "fDefaultAutoVanityZoom:Camera" } };
+
+		void CameraBoost(bool a_on)
+		{
+			auto* ini = RE::INISettingCollection::GetSingleton();
+			if (!ini) {
+				return;
+			}
+			const float mult[] = { Dial("Protean_DevastatorOrbitMult", 3.0f), Dial("Protean_DevastatorZoomMult", 2.0f),
+				Dial("Protean_DevastatorZoomMult", 2.0f) };
+			for (std::size_t i = 0; i < std::size(g_boost); ++i) {
+				auto& b = g_boost[i];
+				auto* s = ini->GetSetting(b.name);
+				if (!s || s->GetType() != RE::Setting::Type::kFloat || b.on == a_on) {
+					continue;
+				}
+				if (a_on) {
+					b.was = s->GetFloat();
+					s->data.f = b.was * mult[i];
+					logger::info("devastator: camera {} {:.2f} -> {:.2f}", b.name, b.was, s->data.f);
+				} else {
+					s->data.f = b.was;
+				}
+				b.on = a_on;
+			}
+		}
+
 		void CameraEnd()
 		{
+			CameraBoost(false);
 			if (auto* cam = RE::PlayerCamera::GetSingleton()) {
 				cam->ForceThirdPerson();
 			}
@@ -276,6 +312,7 @@ namespace protean::Devastator
 		}
 		if (g_phase == Phase::kWindup && t >= Dial("Protean_DevastatorWindup", 1.0f)) {
 			Slow(true);
+			CameraBoost(true);
 			Burst(a_p);
 			g_phase = Phase::kAfter;
 			g_start = Clock::now();
@@ -301,6 +338,7 @@ namespace protean::Devastator
 	{
 		if (g_phase != Phase::kNone) {
 			Slow(false);
+			CameraBoost(false);
 			Lock(false);
 			g_marks.clear();
 			g_phase = Phase::kNone;

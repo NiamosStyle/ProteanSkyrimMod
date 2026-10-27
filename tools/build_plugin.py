@@ -252,11 +252,13 @@ GLOBALS = {
     "Protean_DevastatorDamage":    (0x9D2, 100,  "Float", "Devastator: damage before the level part"),
     "Protean_DevastatorDamagePerLevel": (0x9D3, 8, "Float", "Devastator: damage added per player level"),
     "Protean_DevastatorStacks":    (0x9D4, 2,    "Float", "Devastator: kill boosts it needs"),
-    "Protean_DevastatorWindup":    (0x9D5, 1.0,  "Float", "Devastator: real seconds of the crouch and rise before the burst"),
-    "Protean_DevastatorSlowMo":    (0x9D6, 0.33, "Float", "Devastator: game speed during the half second after the burst (1 = none)"),
+    "Protean_DevastatorWindup":    (0x9D5, 2.0,  "Float", "Devastator: real seconds of the ritual pose before the burst (1 ended before the pose, user 2026-10-27)"),
+    "Protean_DevastatorSlowMo":    (0x9D6, 0.15, "Float", "Devastator: game speed during the half second after the burst (1 = none; 0.33 was hard to see)"),
     "Protean_DevastatorForce":     (0x9D7, 10,   "Float", "Devastator: how hard enemies are thrown down (PushActorAway force)"),
     "Protean_RegenPerSecond":      (0x9D8, 8,    "Float", "Regeneration: Stamina turned into Health a second"),
     "Protean_DevastatorTendrils":  (0x9D9, 8,    "Float", "Devastator: tendrils thrown for the look"),
+    "Protean_DevastatorOrbitMult": (0x9DD, 3,    "Float", "Devastator: the circling camera turns this many times faster from the burst on"),
+    "Protean_DevastatorZoomMult":  (0x9DE, 2,    "Float", "Devastator: the circling camera stands this many times farther out from the burst on"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
