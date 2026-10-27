@@ -34,6 +34,27 @@ namespace protean
 		}
 	}
 
+	void Registry::SettleDials(const std::map<std::string, float>& a_saved) const
+	{
+		// globals that hold Protean's state, not settings
+		static const std::set<std::string_view> kState{ "Protean_ActiveForm", "Protean_PerkPoints", "Protean_ShowPerkMenu" };
+		int moved = 0;
+		for (const auto& [name, g] : _globals) {
+			const auto def = _defaults.find(name);
+			if (kState.contains(name) || def == _defaults.end() || g->value == def->second) {
+				continue;
+			}
+			// a save from before they were recorded: every dial takes Protean.esp's value, once
+			const auto was = a_saved.find(name);
+			if (a_saved.empty() || (was != a_saved.end() && was->second != def->second && g->value == was->second)) {
+				logger::info("dials: {} {} -> {} (Protean.esp's value)", name, g->value, def->second);
+				g->value = def->second;
+				++moved;
+			}
+		}
+		logger::info("dials: {} brought to Protean.esp's values", moved);
+	}
+
 	Registry& Registry::Get()
 	{
 		static Registry r;
@@ -172,9 +193,11 @@ namespace protean
 		logger::info("registry: {} perk(s) ({} working), evolution power {}", _perks.size(), _perksBuilt.size(),
 			_evolution ? "found" : "MISSING");
 		_globals.clear();
+		_defaults.clear();
 		for (const auto& [name, local] : j.value("globals", nlohmann::json::object()).items()) {
 			if (auto* g = dh->LookupForm<RE::TESGlobal>(local.get<RE::FormID>(), plugin)) {
 				_globals[name] = g;
+				_defaults[name] = g->value;
 			}
 		}
 		logger::info("registry: {} global setting(s)", _globals.size());

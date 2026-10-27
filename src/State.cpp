@@ -1,12 +1,14 @@
 #include "State.h"
 
+#include "Registry.h"
+
 namespace protean
 {
 	namespace
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 21;  // 3 to 16 are still read
+		constexpr std::uint32_t kVersion = 22;  // 3 to 16 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -248,6 +250,12 @@ namespace protean
 				Put(a, c.violent);
 				Put(a, c.nonViolent);
 			}
+			const auto& dials = Registry::Get().DialDefaults();
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(dials.size()));
+			for (const auto& [name, value] : dials) {
+				PutStr(a, name);
+				Put(a, value);
+			}
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -457,6 +465,16 @@ namespace protean
 								if (c.faction) {
 									s.faceCrime.push_back(c);
 								}
+							}
+						}
+						if (std::uint32_t m = 0; version >= 22 && Get(a, m) && m <= 10000) {
+							for (std::uint32_t i = 0; i < m; ++i) {
+								std::string name;
+								float       value = 0.0f;
+								if (!GetStr(a, name) || !Get(a, value)) {
+									break;
+								}
+								s.dialDefaults[name] = value;
 							}
 						}
 					}

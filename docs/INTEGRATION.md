@@ -39,6 +39,10 @@ changes. Forced changes (death, loading a save, too big for an interior) are imm
 Globals in `Protean.esp`, read live every time they are used, so a perk's script fragment, a quest
 script or the console can change them at any time.
 
+A save keeps every global's value. So that a new version of `Protean.esp` still reaches old saves, a dial
+that still holds the value the previous `Protean.esp` gave it takes the new one on load; a dial you changed keeps
+your value.
+
 | Global | ID | Type | Default | Effect |
 |---|---|---|---|---|
 | `Protean_ActiveForm` | xx940 | Short | 0 | 0 = human; otherwise the form's index + 1 (set by Protean, read-only) |

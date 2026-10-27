@@ -248,7 +248,7 @@ GLOBALS = {
     "Protean_AssassinMult":        (0x9C6, 10,   "Float", "Assassin: sneak attack multiplier against someone who trusts the worn face"),
     "Protean_InfectCost":          (0x9C9, 50,   "Float", "Infected: stamina the Infect power costs"),
     "Protean_InfectedHours":       (0x9CB, 24,   "Float", "Infected: game hours the infected fight for the player"),
-    "Protean_DevastatorRadius":    (0x9D1, 1050, "Float", "Devastator: enemies this near are struck, game units (1050 ~ 15 m)"),
+    "Protean_DevastatorRadius":    (0x9D1, 2100, "Float", "Devastator: enemies this near are struck, game units (2100 ~ 30 m, the user's pick; 1050 missed a bandit on a ledge)"),
     "Protean_DevastatorDamage":    (0x9D2, 100,  "Float", "Devastator: damage before the level part"),
     "Protean_DevastatorDamagePerLevel": (0x9D3, 8, "Float", "Devastator: damage added per player level"),
     "Protean_DevastatorStacks":    (0x9D4, 2,    "Float", "Devastator: kill boosts it needs"),

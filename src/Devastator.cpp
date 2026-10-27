@@ -30,10 +30,12 @@ namespace protean::Devastator
 		// thrown again every Protean_DevastatorRethrow so they stay out
 		float g_rethrow{ 0.0f };
 		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
+		constexpr float            kSheatheMax = 2.0f;     // seconds the weapons get to go away before the pose is tried anyway
 
 		enum class Phase
 		{
 			kNone,
+			kSheathe,  // the weapons going away first: the ritual pose is refused with them out (in a fight, 2026-10-27)
 			kWindup,
 			kAfter
 		};
@@ -77,7 +79,7 @@ namespace protean::Devastator
 		void Slow(bool a_on)
 		{
 			if (auto* t = RE::BSTimer::GetSingleton(); t && g_slow != a_on) {
-				t->SetGlobalTimeMultiplier(a_on ? Dial("Protean_DevastatorSlowMo", 0.33f) : 1.0f, true);
+				t->SetGlobalTimeMultiplier(a_on ? Dial("Protean_DevastatorSlowMo", 0.15f) : 1.0f, true);
 				g_slow = a_on;
 			}
 		}
@@ -232,7 +234,7 @@ namespace protean::Devastator
 
 		void Burst(RE::PlayerCharacter* a_p)
 		{
-			const float radius = Dial("Protean_DevastatorRadius", 1050.0f);
+			const float radius = Dial("Protean_DevastatorRadius", 2100.0f);
 			const float damage = Dial("Protean_DevastatorDamage", 100.0f) + Dial("Protean_DevastatorDamagePerLevel", 8.0f) * a_p->GetLevel();
 			const float force = Dial("Protean_DevastatorForce", 10.0f);
 			logger::info("devastator: {} tendril(s) cast", Tendrils(a_p));
@@ -253,8 +255,20 @@ namespace protean::Devastator
 				const auto here = a_p->GetPosition();
 				for (auto& h : pl->highActorHandles) {
 					auto a = h.get();
-					if (!a || a.get() == a_p || a->IsDead() || a->IsPlayerTeammate() || !a->IsHostileToActor(a_p) ||
-						here.GetDistance(a->GetPosition()) > radius) {
+					if (!a || a.get() == a_p || a->IsDead()) {
+						continue;
+					}
+					// the ones passed over near enough to matter are logged with the reason (a bandit on a ledge was
+					// missed, 2026-10-27, and the log could not say why)
+					const float dist = here.GetDistance(a->GetPosition());
+					const char* skip = a->IsPlayerTeammate()      ? "a follower" :
+					                   !a->IsHostileToActor(a_p) ? "not hostile" :
+					                   dist > radius             ? "too far" :
+					                                               nullptr;
+					if (skip) {
+						if (dist <= radius * 2.0f && (a->IsInCombat() || a->IsHostileToActor(a_p))) {
+							logger::info("devastator: '{}' {:08X} at {:.0f} passed over ({})", a->GetName(), a->GetFormID(), dist, skip);
+						}
 						continue;
 					}
 					g_struck[a->GetFormID()] = Clock::now();
@@ -301,6 +315,22 @@ namespace protean::Devastator
 			g_phase = Phase::kNone;
 			logger::info("devastator: over");
 		}
+
+		// the pose, its sound, the red tentacles, the circling camera and the tendrils' markers
+		void Begin(RE::PlayerCharacter* a_p)
+		{
+			const bool took = a_p->NotifyAnimationGraph(kRise);
+			Play(a_p, kWindupSound);
+			if (auto* fx = Registry::Get().DevastatorShader()) {
+				a_p->ApplyEffectShader(fx, Dial("Protean_DevastatorWindup", 2.0f) + Dial("Protean_DevastatorHold", 4.5f));
+			}
+			CameraStart();
+			PlaceMarks(a_p);
+			g_phase = Phase::kWindup;
+			g_start = g_last = Clock::now();
+			logger::info("devastator: wind-up (the rise {}, weapon state {})", took ? "playing" : "refused by the graph",
+				std::to_underlying(a_p->AsActorState()->GetWeaponState()));
+		}
 	}
 
 	void OnCast()
@@ -326,16 +356,14 @@ namespace protean::Devastator
 		}
 		av->DamageActorValue(RE::ActorValue::kStamina, stamina);
 		Lock(true);
-		const bool took = p->NotifyAnimationGraph(kRise);
-		Play(p, kWindupSound);
-		if (auto* fx = Registry::Get().DevastatorShader()) {
-			p->ApplyEffectShader(fx, Dial("Protean_DevastatorWindup", 2.0f) + Dial("Protean_DevastatorHold", 4.5f));
-		}
-		CameraStart();
-		PlaceMarks(p);
-		g_phase = Phase::kWindup;
 		g_start = g_last = Clock::now();
-		logger::info("devastator: wind-up (the rise {})", took ? "playing" : "refused by the graph");
+		if (p->AsActorState()->GetWeaponState() != RE::WEAPON_STATE::kSheathed) {
+			p->DrawWeaponMagicHands(false);
+			g_phase = Phase::kSheathe;
+			logger::info("devastator: the weapons put away first");
+			return;
+		}
+		Begin(p);
 	}
 
 	void OnFrame(RE::PlayerCharacter* a_p)
@@ -344,13 +372,22 @@ namespace protean::Devastator
 			return;
 		}
 		g_last = Clock::now();
-		CameraKeep();
 		const float t = Seconds(g_start);
+		if (g_phase == Phase::kSheathe) {
+			if (a_p->IsDead()) {
+				Lock(false);
+				g_phase = Phase::kNone;
+			} else if (a_p->AsActorState()->GetWeaponState() == RE::WEAPON_STATE::kSheathed || t >= kSheatheMax) {
+				Begin(a_p);
+			}
+			return;
+		}
+		CameraKeep();
 		if (a_p->IsDead()) {
 			Finish(a_p);
 			return;
 		}
-		if (g_phase == Phase::kWindup && t >= Dial("Protean_DevastatorWindup", 1.0f)) {
+		if (g_phase == Phase::kWindup && t >= Dial("Protean_DevastatorWindup", 2.0f)) {
 			Slow(true);
 			CameraBoost(true);
 			Burst(a_p);

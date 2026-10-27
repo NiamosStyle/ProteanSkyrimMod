@@ -203,6 +203,7 @@ namespace
 				protean::Shift::OnGameLoaded();
 				protean::Stalker::OnGameLoaded();
 				protean::Skills::OnGameLoaded();
+				protean::Registry::Get().SettleDials(protean::State::Get().dialDefaults);
 				protean::Claws::Sync();
 			}
 			break;

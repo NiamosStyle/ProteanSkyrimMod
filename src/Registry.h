@@ -116,9 +116,15 @@ namespace protean
 		// can change it; the fallback when it is missing. See docs/INTEGRATION.md.
 		[[nodiscard]] float Dial(std::string_view a_name, float a_fallback) const;
 		void                SetGlobal(std::string_view a_name, float a_value) const;
+		// the dials' values in Protean.esp (a save keeps every global's value, and so kept old ones over a new
+		// Protean.esp, 2026-10-27): the co-save records these, and on a load a dial still at the value its old
+		// Protean.esp gave takes the new one (one changed by a mod, a script or the console stays)
+		[[nodiscard]] const std::map<std::string, float>& DialDefaults() const { return _defaults; }
+		void                SettleDials(const std::map<std::string, float>& a_saved) const;
 
 	private:
 		std::map<std::string, RE::TESGlobal*> _globals;
+		std::map<std::string, float>          _defaults;
 		RE::SpellItem*        _starter{ nullptr };
 		RE::SpellItem*        _revert{ nullptr };
 		RE::TESFaction*       _beast{ nullptr };
