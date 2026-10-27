@@ -225,7 +225,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **What it does:** Unleashes bloody, powerful area attacks, inspired by Prototype.
 - **Stamina:** Costs a full Stamina bar.
 - **Activation rule:** Requires at least two stacks of the Unbound Form kill boost, so it can't be used to start a fight.
-- **Status:** Built (2026-10-27), untested. The Devastator power: own form, full Stamina, two kill boosts. A crouch and rise (the change into a beast) while the camera pulls out and circles; then half a second of slow motion, 8 tendrils thrown in a ring for the look, and every hostile actor within 15 m knocked down (PushActorAway) for 100 + 8 per level damage. Its kills feed no kill boost (user's choices).
+- **Status:** Built and tested in game (2026-10-27). The Devastator power: own form, full Stamina, two kill boosts. Weapons are put away, then the ritual pose (2 s) with the change-into-a-beast sound and red tentacles over the body while the camera circles; at the burst slow motion (0.15, 3.5 s), the camera pulls farther out and circles faster, 8 red tendrils from the body (thrown again through a 4.5 s hold), the red lurker splash and blood burst, a stab, thunder and explosion sounds, and every hostile actor within 30 m knocked down (PushActorAway) for 100 + 8 per level damage. Its kills feed no kill boost (user's choices).
 
 ---
 
