@@ -11,7 +11,12 @@ namespace protean::Devastator
 	{
 		using Clock = std::chrono::steady_clock;
 
-		constexpr std::string_view kRise = "IdleWerewolfTransformation";  // the hunched crouch and rise of the change into a beast
+		// the ritual pose (picked by the user from four, 2026-10-27; the change into a beast stretched the arms and neck)
+		constexpr std::string_view kRise = "IdleRitualStart";
+		// sounds picked by ear in game (2026-10-27): the change into a beast as the pose builds, then Miraak's tentacle
+		// stab with Unrelenting Force's thunder as the tendrils burst out
+		constexpr const char* kWindupSound = "NPCWerewolfTransformationSD";
+		constexpr const char* kBurstSounds[] = { "QSTMiraakDeathTentacleStab", "VOCShoutFXUnrelentingForceThunderA" };
 		constexpr float            kSlowSeconds = 0.5f;   // real seconds of slow motion at the burst
 		constexpr float            kAfterSeconds = 2.0f;  // real seconds the camera keeps circling after the burst
 		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
@@ -37,6 +42,20 @@ namespace protean::Devastator
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
 		float Seconds(Clock::time_point a_from) { return std::chrono::duration<float>(Clock::now() - a_from).count(); }
+
+		void Play(RE::PlayerCharacter* a_p, const char* a_name)
+		{
+			RE::BSSoundHandle h;
+			if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+				audio->GetSoundHandleByName(h, a_name, 0x1A);
+			}
+			if (h.IsValid()) {
+				h.SetPosition(a_p->GetPosition());
+				h.Play();
+			} else {
+				logger::warn("devastator: no sound '{}'", a_name);
+			}
+		}
 
 		void Lock(bool a_on)
 		{
@@ -159,6 +178,9 @@ namespace protean::Devastator
 			const float damage = Dial("Protean_DevastatorDamage", 100.0f) + Dial("Protean_DevastatorDamagePerLevel", 8.0f) * a_p->GetLevel();
 			const float force = Dial("Protean_DevastatorForce", 10.0f);
 			Tendrils(a_p);
+			for (const auto* sound : kBurstSounds) {
+				Play(a_p, sound);
+			}
 			int  hit = 0;
 			auto* pl = RE::ProcessLists::GetSingleton();
 			if (pl) {
@@ -216,6 +238,7 @@ namespace protean::Devastator
 		av->DamageActorValue(RE::ActorValue::kStamina, stamina);
 		Lock(true);
 		const bool took = p->NotifyAnimationGraph(kRise);
+		Play(p, kWindupSound);
 		CameraStart();
 		PlaceMarks(p);
 		g_phase = Phase::kWindup;
