@@ -158,8 +158,11 @@ namespace protean::Devastator
 		}
 
 		// The tendrils thrown for the look: cast the ordinary way (Protean's own launch showed nothing, 2026-10-27), each
-		// at an unseen marker placed on a ring around the player, slightly up and down in turn
+		// at an unseen marker placed on a ring around the player, slightly up and down in turn. Each from its own unseen
+		// caster at the chest, as fire traps cast: the tendril is a stream, and one caster keeps one stream (cast 8 times by
+		// the player, only the last showed)
 		std::vector<RE::ObjectRefHandle> g_marks;
+		std::vector<RE::ObjectRefHandle> g_sources;
 
 		void PlaceMarks(RE::PlayerCharacter* a_p)
 		{
@@ -168,22 +171,28 @@ namespace protean::Devastator
 			const auto at = a_p->GetPosition();
 			for (int i = 0; base && i < n; ++i) {
 				const float a = a_p->GetAngleZ() + 6.2831853f * i / n;
-				if (auto m = a_p->PlaceObjectAtMe(base, false)) {
+				auto m = a_p->PlaceObjectAtMe(base, false);
+				auto src = a_p->PlaceObjectAtMe(base, false);
+				if (m && src) {
 					m->SetPosition(RE::NiPoint3(at.x + 700.0f * std::sin(a), at.y + 700.0f * std::cos(a), at.z + (i % 2 ? 40.0f : 220.0f)));
+					src->SetPosition(RE::NiPoint3(at.x + 45.0f * std::sin(a), at.y + 45.0f * std::cos(a), at.z + 110.0f));
 					g_marks.push_back(m->GetHandle());
+					g_sources.push_back(src->GetHandle());
 				}
 			}
 		}
 
 		void ClearMarks()
 		{
-			for (auto& h : g_marks) {
-				if (auto m = h.get()) {
-					m->Disable();
-					m->SetDelete(true);
+			for (auto* list : { &g_marks, &g_sources }) {
+				for (auto& h : *list) {
+					if (auto m = h.get()) {
+						m->Disable();
+						m->SetDelete(true);
+					}
 				}
+				list->clear();
 			}
-			g_marks.clear();
 		}
 
 		void Push(RE::PlayerCharacter* a_p, RE::Actor* a_target, float a_force)
@@ -200,13 +209,15 @@ namespace protean::Devastator
 		int Tendrils(RE::PlayerCharacter* a_p)
 		{
 			auto* spell = Registry::Get().DevastatorTendril();
-			auto* caster = a_p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
-			if (!spell || !caster) {
+			if (!spell) {
 				return 0;
 			}
 			int cast = 0;
-			for (auto& h : g_marks) {
-				if (auto m = h.get()) {
+			for (std::size_t i = 0; i < g_marks.size() && i < g_sources.size(); ++i) {
+				auto m = g_marks[i].get();
+				auto src = g_sources[i].get();
+				auto* caster = src ? src->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant) : nullptr;
+				if (m && caster) {
 					caster->CastSpellImmediate(spell, false, m.get(), 1.0f, false, 0.0f, a_p);
 					++cast;
 				}
@@ -348,6 +359,7 @@ namespace protean::Devastator
 			CameraBoost(false);
 			Lock(false);
 			g_marks.clear();
+			g_sources.clear();
 			g_phase = Phase::kNone;
 		}
 		g_struck.clear();
