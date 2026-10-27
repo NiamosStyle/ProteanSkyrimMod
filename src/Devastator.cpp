@@ -30,12 +30,13 @@ namespace protean::Devastator
 		// thrown again every Protean_DevastatorRethrow so they stay out
 		float g_rethrow{ 0.0f };
 		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
-		constexpr float            kSheatheMax = 2.0f;     // seconds the weapons get to go away before the pose is tried anyway
+		constexpr float            kSheatheMax = 2.0f;     // seconds the pose is asked for before going on without it
 
 		enum class Phase
 		{
 			kNone,
-			kSheathe,  // the weapons going away first: the ritual pose is refused with them out (in a fight, 2026-10-27)
+			kSheathe,  // asking for the pose each frame until it plays: it is refused with weapons out, and still while
+			           // they are being put away (their state reads put away at once, 2026-10-27)
 			kWindup,
 			kAfter
 		};
@@ -317,9 +318,9 @@ namespace protean::Devastator
 		}
 
 		// the pose, its sound, the red tentacles, the circling camera and the tendrils' markers
-		void Begin(RE::PlayerCharacter* a_p)
+		void Begin(RE::PlayerCharacter* a_p, bool a_took)
 		{
-			const bool took = a_p->NotifyAnimationGraph(kRise);
+			const float waited = Seconds(g_start);
 			Play(a_p, kWindupSound);
 			if (auto* fx = Registry::Get().DevastatorShader()) {
 				a_p->ApplyEffectShader(fx, Dial("Protean_DevastatorWindup", 2.0f) + Dial("Protean_DevastatorHold", 4.5f));
@@ -328,8 +329,8 @@ namespace protean::Devastator
 			PlaceMarks(a_p);
 			g_phase = Phase::kWindup;
 			g_start = g_last = Clock::now();
-			logger::info("devastator: wind-up (the rise {}, weapon state {})", took ? "playing" : "refused by the graph",
-				std::to_underlying(a_p->AsActorState()->GetWeaponState()));
+			logger::info("devastator: wind-up (the rise {} after {:.2f} s, weapon state {})", a_took ? "playing" : "refused by the graph",
+				waited, std::to_underlying(a_p->AsActorState()->GetWeaponState()));
 		}
 	}
 
@@ -359,11 +360,9 @@ namespace protean::Devastator
 		g_start = g_last = Clock::now();
 		if (p->AsActorState()->GetWeaponState() != RE::WEAPON_STATE::kSheathed) {
 			p->DrawWeaponMagicHands(false);
-			g_phase = Phase::kSheathe;
 			logger::info("devastator: the weapons put away first");
-			return;
 		}
-		Begin(p);
+		g_phase = Phase::kSheathe;
 	}
 
 	void OnFrame(RE::PlayerCharacter* a_p)
@@ -377,8 +376,10 @@ namespace protean::Devastator
 			if (a_p->IsDead()) {
 				Lock(false);
 				g_phase = Phase::kNone;
-			} else if (a_p->AsActorState()->GetWeaponState() == RE::WEAPON_STATE::kSheathed || t >= kSheatheMax) {
-				Begin(a_p);
+			} else if (a_p->NotifyAnimationGraph(kRise)) {
+				Begin(a_p, true);
+			} else if (t >= kSheatheMax) {
+				Begin(a_p, false);
 			}
 			return;
 		}
