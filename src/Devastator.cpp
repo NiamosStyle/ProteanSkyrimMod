@@ -263,8 +263,24 @@ namespace protean::Devastator
 			logger::info("devastator: burst, {} enemy(ies) within {:.0f}", hit, radius);
 		}
 
+		// The tentacles end with the rest: their time runs in game time, which the slow motion stretches (they stayed 3-4 s
+		// after everything else, 2026-10-27), so they are stopped here and only their own fade is left
+		void StopShader(RE::PlayerCharacter* a_p)
+		{
+			auto* fx = Registry::Get().DevastatorShader();
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			if (!fx || !vm) {
+				return;
+			}
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(fx->GetFormType(), fx);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			RE::TESObjectREFR* who = a_p;
+			vm->DispatchMethodCall2(handle, "EffectShader", "Stop", RE::MakeFunctionArguments(std::move(who)), cb);
+		}
+
 		void Finish(RE::PlayerCharacter* a_p)
 		{
+			StopShader(a_p);
 			Slow(false);
 			CameraEnd();
 			ClearMarks();
