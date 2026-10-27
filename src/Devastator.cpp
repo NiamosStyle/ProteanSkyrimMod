@@ -261,6 +261,11 @@ namespace protean::Regeneration
 			a_p->AddSpell(power);
 			logger::info("regeneration: the power given");
 		}
+		// Devastator's power comes with the perk, so it can sit in Favorites before the moment comes (it was missing, 2026-10-27)
+		if (auto* power = Registry::Get().DevastatorPower(); power && Evolve::Has("devastator") && !a_p->HasSpell(power)) {
+			a_p->AddSpell(power);
+			logger::info("devastator: the power given");
+		}
 		if (!s.regenOn || a_p->IsDead() || a_delta <= 0.0f) {
 			return;
 		}
