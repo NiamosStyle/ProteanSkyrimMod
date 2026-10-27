@@ -14,7 +14,6 @@ namespace protean::Devastator
 		constexpr std::string_view kRise = "IdleWerewolfTransformation";  // the hunched crouch and rise of the change into a beast
 		constexpr float            kSlowSeconds = 0.5f;   // real seconds of slow motion at the burst
 		constexpr float            kAfterSeconds = 2.0f;  // real seconds the camera keeps circling after the burst
-		constexpr float            kOrbit = 0.6f;          // radians a real second the camera circles
 		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
 
 		enum class Phase
@@ -28,7 +27,6 @@ namespace protean::Devastator
 		Clock::time_point g_start{};
 		Clock::time_point g_last{};
 		bool              g_slow{ false };
-		float             g_zoom{ -1.0f };
 		std::map<RE::FormID, Clock::time_point> g_struck;
 
 		using Flag = RE::ControlMap::UEFlag;
@@ -39,15 +37,6 @@ namespace protean::Devastator
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
 		float Seconds(Clock::time_point a_from) { return std::chrono::duration<float>(Clock::now() - a_from).count(); }
-
-		RE::ThirdPersonState* Tps()
-		{
-			auto* cam = RE::PlayerCamera::GetSingleton();
-			if (!cam || !cam->IsInThirdPerson()) {
-				return nullptr;
-			}
-			return static_cast<RE::ThirdPersonState*>(cam->GetRuntimeData().cameraStates[RE::CameraStates::kThirdPerson].get());
-		}
 
 		void Lock(bool a_on)
 		{
@@ -64,37 +53,76 @@ namespace protean::Devastator
 			}
 		}
 
-		void CameraStart()
+		// The circling: the game's own idle camera, which slowly orbits a player left alone (the free rotation of the
+		// third-person camera did nothing under the crouch and rise's own camera, 2026-10-27)
+		RE::TESCameraState* State(RE::CameraStates::CameraState a_id)
 		{
-			if (auto* cam = RE::PlayerCamera::GetSingleton(); cam && !cam->IsInThirdPerson()) {
-				cam->ForceThirdPerson();
-			}
-			if (auto* tps = Tps()) {
-				g_zoom = tps->targetZoomOffset;
-				tps->targetZoomOffset = 1.0f;  // as far out as the game's camera goes
-				tps->freeRotationEnabled = true;
-			}
+			auto* cam = RE::PlayerCamera::GetSingleton();
+			return cam ? cam->GetRuntimeData().cameraStates[a_id].get() : nullptr;
 		}
 
-		void CameraTurn(float a_dt)
+		int CameraNow()
 		{
-			if (auto* tps = Tps()) {
-				tps->freeRotationEnabled = true;
-				tps->freeRotation.x += kOrbit * a_dt;
-				tps->targetZoomOffset = 1.0f;
+			auto* cam = RE::PlayerCamera::GetSingleton();
+			auto* st = cam ? cam->currentState.get() : nullptr;
+			return st ? static_cast<int>(st->id) : -1;
+		}
+
+		void CameraStart()
+		{
+			auto* cam = RE::PlayerCamera::GetSingleton();
+			if (auto* vanity = State(RE::CameraStates::kAutoVanity); cam && vanity) {
+				cam->SetState(vanity);
+			}
+			logger::info("devastator: camera state {} (auto vanity is {})", CameraNow(), static_cast<int>(RE::CameraStates::kAutoVanity));
+		}
+
+		void CameraKeep()
+		{
+			auto* cam = RE::PlayerCamera::GetSingleton();
+			if (auto* vanity = State(RE::CameraStates::kAutoVanity); cam && vanity && cam->currentState.get() != vanity) {
+				static int logged = 0;
+				if (logged++ < 3) {
+					logger::info("devastator: camera went to state {}; back to the orbit", CameraNow());
+				}
+				cam->SetState(vanity);
 			}
 		}
 
 		void CameraEnd()
 		{
-			if (auto* tps = Tps()) {
-				tps->ResetFreeRotation();
-				tps->freeRotationEnabled = false;
-				if (g_zoom >= 0.0f) {
-					tps->targetZoomOffset = g_zoom;
+			if (auto* cam = RE::PlayerCamera::GetSingleton()) {
+				cam->ForceThirdPerson();
+			}
+		}
+
+		// The tendrils thrown for the look: cast the ordinary way (Protean's own launch showed nothing, 2026-10-27), each
+		// at an unseen marker placed on a ring around the player, slightly up and down in turn
+		std::vector<RE::ObjectRefHandle> g_marks;
+
+		void PlaceMarks(RE::PlayerCharacter* a_p)
+		{
+			auto* base = RE::TESForm::LookupByID<RE::TESBoundObject>(0x3B);  // XMarker, Skyrim.esm
+			const int n = std::max(static_cast<int>(Dial("Protean_DevastatorTendrils", 8.0f)), 1);
+			const auto at = a_p->GetPosition();
+			for (int i = 0; base && i < n; ++i) {
+				const float a = a_p->GetAngleZ() + 6.2831853f * i / n;
+				if (auto m = a_p->PlaceObjectAtMe(base, false)) {
+					m->SetPosition(RE::NiPoint3(at.x + 700.0f * std::sin(a), at.y + 700.0f * std::cos(a), at.z + (i % 2 ? 40.0f : 220.0f)));
+					g_marks.push_back(m->GetHandle());
 				}
 			}
-			g_zoom = -1.0f;
+		}
+
+		void ClearMarks()
+		{
+			for (auto& h : g_marks) {
+				if (auto m = h.get()) {
+					m->Disable();
+					m->SetDelete(true);
+				}
+			}
+			g_marks.clear();
 		}
 
 		void Push(RE::PlayerCharacter* a_p, RE::Actor* a_target, float a_force)
@@ -108,21 +136,21 @@ namespace protean::Devastator
 			vm->DispatchMethodCall2(handle, "ObjectReference", "PushActorAway", RE::MakeFunctionArguments(std::move(a_target), std::move(a_force)), cb);
 		}
 
-		// the look: tendrils thrown from the chest in a ring, slightly up and down in turn
 		void Tendrils(RE::PlayerCharacter* a_p)
 		{
 			auto* spell = Registry::Get().DevastatorTendril();
-			if (!spell) {
+			auto* caster = a_p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant);
+			if (!spell || !caster) {
 				return;
 			}
-			const int  n = std::max(static_cast<int>(Dial("Protean_DevastatorTendrils", 8.0f)), 1);
-			auto       from = a_p->GetPosition();
-			from.z += 90.0f;
-			for (int i = 0; i < n; ++i) {
-				RE::Projectile::ProjectileRot rot{ (i % 2 ? -0.25f : 0.15f), a_p->GetAngleZ() + 6.2831853f * i / n };
-				RE::ProjectileHandle h;
-				RE::Projectile::LaunchSpell(&h, a_p, spell, from, rot);
+			int cast = 0;
+			for (auto& h : g_marks) {
+				if (auto m = h.get()) {
+					caster->CastSpellImmediate(spell, false, m.get(), 1.0f, false, 0.0f, a_p);
+					++cast;
+				}
 			}
+			logger::info("devastator: {} tendril(s) cast", cast);
 		}
 
 		void Burst(RE::PlayerCharacter* a_p)
@@ -156,6 +184,7 @@ namespace protean::Devastator
 		{
 			Slow(false);
 			CameraEnd();
+			ClearMarks();
 			Lock(false);
 			a_p->NotifyAnimationGraph("IdleForceDefaultState");
 			g_phase = Phase::kNone;
@@ -186,8 +215,9 @@ namespace protean::Devastator
 		}
 		av->DamageActorValue(RE::ActorValue::kStamina, stamina);
 		Lock(true);
-		CameraStart();
 		const bool took = p->NotifyAnimationGraph(kRise);
+		CameraStart();
+		PlaceMarks(p);
 		g_phase = Phase::kWindup;
 		g_start = g_last = Clock::now();
 		logger::info("devastator: wind-up (the rise {})", took ? "playing" : "refused by the graph");
@@ -198,9 +228,8 @@ namespace protean::Devastator
 		if (g_phase == Phase::kNone) {
 			return;
 		}
-		const float dt = Seconds(g_last);
 		g_last = Clock::now();
-		CameraTurn(dt);
+		CameraKeep();
 		const float t = Seconds(g_start);
 		if (a_p->IsDead()) {
 			Finish(a_p);
@@ -234,7 +263,7 @@ namespace protean::Devastator
 		if (g_phase != Phase::kNone) {
 			Slow(false);
 			Lock(false);
-			g_zoom = -1.0f;
+			g_marks.clear();
 			g_phase = Phase::kNone;
 		}
 		g_struck.clear();
