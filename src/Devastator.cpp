@@ -168,14 +168,15 @@ namespace protean::Devastator
 		{
 			auto* base = RE::TESForm::LookupByID<RE::TESBoundObject>(0x3B);  // XMarker, Skyrim.esm
 			const int n = std::max(static_cast<int>(Dial("Protean_DevastatorTendrils", 8.0f)), 1);
-			const auto at = a_p->GetPosition();
+			const auto  at = a_p->GetPosition();
+			const float out = Dial("Protean_DevastatorTendrilOut", 15.0f);
 			for (int i = 0; base && i < n; ++i) {
 				const float a = a_p->GetAngleZ() + 6.2831853f * i / n;
 				auto m = a_p->PlaceObjectAtMe(base, false);
 				auto src = a_p->PlaceObjectAtMe(base, false);
 				if (m && src) {
 					m->SetPosition(RE::NiPoint3(at.x + 700.0f * std::sin(a), at.y + 700.0f * std::cos(a), at.z + (i % 2 ? 40.0f : 220.0f)));
-					src->SetPosition(RE::NiPoint3(at.x + 45.0f * std::sin(a), at.y + 45.0f * std::cos(a), at.z + Dial("Protean_DevastatorTendrilHeight", 60.0f)));
+					src->SetPosition(RE::NiPoint3(at.x + out * std::sin(a), at.y + out * std::cos(a), at.z + Dial("Protean_DevastatorTendrilHeight", 60.0f)));
 					g_marks.push_back(m->GetHandle());
 					g_sources.push_back(src->GetHandle());
 				}
@@ -264,18 +265,25 @@ namespace protean::Devastator
 		}
 
 		// The tentacles end with the rest: their time runs in game time, which the slow motion stretches (they stayed 3-4 s
-		// after everything else, 2026-10-27), so they are stopped here and only their own fade is left
+		// after everything else, 2026-10-27), so they are stopped here and only their own fade is left. Papyrus's
+		// EffectShader.Stop did not stop them (still 4 s, the same day): the running effect is ended directly
 		void StopShader(RE::PlayerCharacter* a_p)
 		{
 			auto* fx = Registry::Get().DevastatorShader();
-			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!fx || !vm) {
+			auto* lists = RE::ProcessLists::GetSingleton();
+			if (!fx || !lists) {
 				return;
 			}
-			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(fx->GetFormType(), fx);
-			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
-			RE::TESObjectREFR* who = a_p;
-			vm->DispatchMethodCall2(handle, "EffectShader", "Stop", RE::MakeFunctionArguments(std::move(who)), cb);
+			int stopped = 0;
+			lists->ForEachShaderEffect([&](RE::ShaderReferenceEffect* a_e) {
+				if (a_e && a_e->effectData == fx && a_e->target.get().get() == a_p) {
+					a_e->lifetime = a_e->age;
+					a_e->finished = true;
+					++stopped;
+				}
+				return RE::BSContainer::ForEachResult::kContinue;
+			});
+			logger::info("devastator: {} tentacle effect(s) stopped", stopped);
 		}
 
 		void Finish(RE::PlayerCharacter* a_p)

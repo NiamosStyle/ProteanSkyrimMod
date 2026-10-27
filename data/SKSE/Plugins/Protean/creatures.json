@@ -196,7 +196,8 @@
   "Protean_DevastatorHold": 2527,
   "Protean_DevastatorSlowSeconds": 2528,
   "Protean_DevastatorRethrow": 2529,
-  "Protean_DevastatorTendrilHeight": 2530
+  "Protean_DevastatorTendrilHeight": 2530,
+  "Protean_DevastatorTendrilOut": 2531
  },
  "openInteriorKeywords": [
   {
