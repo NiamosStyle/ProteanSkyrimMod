@@ -68,10 +68,13 @@ PERKS = {
     "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: 50 armor plus 4 per level, in animal "
                         "form, or in your own when you wear no body armor (clothes and robes are fine).", -0.8, 0.9,
                         ["regeneration", "devastator"]),
-    "regeneration": (0x96B, "Regeneration", "A toggle: while on, stamina drains and health returns by the same amount.",
+    "regeneration": (0x96B, "Regeneration", "Cast Regeneration to switch it on or off: while on, Stamina drains and "
+                     "Health returns by the same amount.",
                      -0.9, 2, []),
-    "devastator": (0x96C, "Devastator", "Unleash a devastating attack all around you. Costs all your stamina and needs "
-                   "two kill boosts. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.4, []),
+    "devastator": (0x96C, "Devastator", "In your own form, with full Stamina and at least two kill boosts, cast "
+                   "Devastator: tendrils burst from your body, knocking down and tearing into every enemy within 15 "
+                   "meters. Uses all your Stamina; its kills feed no kill boost. Requires Rending Claws, Prey's Flight "
+                   "and Subtle Carapace.", 0, 3.4, []),
     # Deceiver
     "borrowed_visage": (0x96D, "Borrowed Visage", "Sneak next to a body and activate it to copy its face, body and race, "
                         "and join its factions. Cast Stolen Face to put the face on or take it off; putting it on costs "
@@ -141,6 +144,9 @@ ANIMAL_ARMS_PERK, DEFT_PERK = 0x9BB, 0x9BC
 ASSASSIN_MARK, ASSASSIN_PERK = 0x9C4, 0x9C5
 INFECTION, INFECT_POWER, INFECTED_FACTION = 0x9C7, 0x9C8, 0x9CA
 METAMORPHOSIS_POWER = 0x9CC  # opens the full character menu (src/Metamorphosis.cpp)
+# Devastator and Regeneration (src/Devastator.cpp): the two powers, and the tendrils the burst throws for the look (an
+# effect with no hostile part on the Tendril's projectile; Protean launches them in a ring)
+DEVASTATOR_POWER, REGEN_POWER, DEVASTATOR_TENDRIL_EFFECT, DEVASTATOR_TENDRIL = 0x9CD, 0x9CE, 0x9CF, 0x9D0
 VANILLA_INVISIBILITY = "01EA6A:Skyrim.esm"  # InvisibillityFFSelf, the Invisibility spell's effect
 # the playable races and their vampire versions (Feral's list, without the two DLC races: Protean.esp masters only Skyrim.esm)
 CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08883C:Skyrim.esm", "097A3D:Skyrim.esm",
@@ -150,7 +156,8 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
               "013748:Skyrim.esm", "088846:Skyrim.esm", "013749:Skyrim.esm", "088884:Skyrim.esm"]
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
-         "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis"}
+         "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis",
+         "regeneration", "devastator"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = {"stalker"}
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -236,6 +243,15 @@ GLOBALS = {
     "Protean_AssassinMult":        (0x9C6, 10,   "Float", "Assassin: sneak attack multiplier against someone who trusts the worn face"),
     "Protean_InfectCost":          (0x9C9, 50,   "Float", "Infected: stamina the Infect power costs"),
     "Protean_InfectedHours":       (0x9CB, 24,   "Float", "Infected: game hours the infected fight for the player"),
+    "Protean_DevastatorRadius":    (0x9D1, 1050, "Float", "Devastator: enemies this near are struck, game units (1050 ~ 15 m)"),
+    "Protean_DevastatorDamage":    (0x9D2, 100,  "Float", "Devastator: damage before the level part"),
+    "Protean_DevastatorDamagePerLevel": (0x9D3, 8, "Float", "Devastator: damage added per player level"),
+    "Protean_DevastatorStacks":    (0x9D4, 2,    "Float", "Devastator: kill boosts it needs"),
+    "Protean_DevastatorWindup":    (0x9D5, 1.0,  "Float", "Devastator: real seconds of the crouch and rise before the burst"),
+    "Protean_DevastatorSlowMo":    (0x9D6, 0.33, "Float", "Devastator: game speed during the half second after the burst (1 = none)"),
+    "Protean_DevastatorForce":     (0x9D7, 10,   "Float", "Devastator: how hard enemies are thrown down (PushActorAway force)"),
+    "Protean_RegenPerSecond":      (0x9D8, 8,    "Float", "Regeneration: Stamina turned into Health a second"),
+    "Protean_DevastatorTendrils":  (0x9D9, 8,    "Float", "Devastator: tendrils thrown for the look"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -496,6 +512,26 @@ def main():
     power(METAMORPHOSIS_POWER, "Protean_MetamorphosisPower", "Metamorphosis",
           "Reshape yourself: a new race, face and body, keeping your skills and perks. Clears every bounty. Out of a "
           "fight, in your own face, with full Stamina; uses all of it.")
+    power(DEVASTATOR_POWER, "Protean_DevastatorPower", "Devastator",
+          "Tendrils burst from your body, knocking down and tearing into every enemy within 15 meters. Your own form, "
+          "full Stamina (all of it is used) and two kill boosts.")
+    power(REGEN_POWER, "Protean_RegenerationPower", "Regeneration",
+          "While on, Stamina drains and Health returns by the same amount. Cast again to stop.")
+    write(os.path.join(y, "MagicEffects", "Protean_DevastatorTendrilEffect - %s_%s.yaml" % (fid(DEVASTATOR_TENDRIL_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_DevastatorTendrilEffect\n" % (fid(DEVASTATOR_TENDRIL_EFFECT), PLUGIN)
+          + name_block("Devastator")
+          + "Flags:\n- NoDuration\n- NoArea\n- HideInUI\n- Painless\n- NoHitEffect\nBaseCost: 0\nMagicSkill: Alteration\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\n"
+          + "Projectile: %s:%s\n" % (fid(TENDRIL_PROJECTILE), PLUGIN)
+          + "CastType: FireAndForget\nTargetType: Aimed\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: ''\n")
+    write(os.path.join(y, "Spells", "Protean_DevastatorTendril - %s_%s.yaml" % (fid(DEVASTATOR_TENDRIL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_DevastatorTendril\n" % (fid(DEVASTATOR_TENDRIL), PLUGIN)
+          + name_block("Devastator")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "CastType: FireAndForget\nTargetType: Aimed\n"
+          "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(DEVASTATOR_TENDRIL_EFFECT), PLUGIN))
     power(EVOLUTION, "Protean_Evolution", "Evolution",
           "Look into what you are becoming: spend Protean perk points, earned by feeding.")
 
@@ -871,6 +907,7 @@ def main():
                            "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,
                                         "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION,
                                         "metamorphosisPower": METAMORPHOSIS_POWER},
+                           "devastator": {"power": DEVASTATOR_POWER, "tendril": DEVASTATOR_TENDRIL, "regen": REGEN_POWER},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},
                            "openInteriorKeywords": open_kw, "creatures": runtime}, indent=1))
     print("yaml written; creatures enabled:", ", ".join(enabled))

@@ -130,6 +130,15 @@ namespace protean
 				logger::warn("a Deceiver record (Assassin, Infected) is missing from {}", plugin);
 			}
 		}
+		{
+			const auto d = j.value("devastator", nlohmann::json::object());
+			_devastatorPower = dh->LookupForm<RE::SpellItem>(d.value("power", 0u), plugin);
+			_devastatorTendril = dh->LookupForm<RE::SpellItem>(d.value("tendril", 0u), plugin);
+			_regenPower = dh->LookupForm<RE::SpellItem>(d.value("regen", 0u), plugin);
+			if (!_devastatorPower || !_devastatorTendril || !_regenPower) {
+				logger::warn("Devastator or Regeneration records missing from {}", plugin);
+			}
+		}
 		if (!_stalkerFade || !_stalkerAmbush || !_stalkerPower) {
 			logger::warn("Stalker's fade, ambush perk or power missing from {}", plugin);
 		}

@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Claws.h"
 #include "Deceiver.h"
+#include "Devastator.h"
 #include "Dev.h"
 #include "Evolve.h"
 #include "Feed.h"
@@ -71,6 +72,12 @@ namespace
 				if (spell && std::ranges::find(reg.KeenPowers(), spell) != reg.KeenPowers().end()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Keen::OnPowerCast(spell); });
 				}
+				if (spell && spell == reg.DevastatorPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Devastator::OnCast(); });
+				}
+				if (spell && spell == reg.RegenPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Regeneration::OnCast(); });
+				}
 				if (spell && spell == reg.MetamorphosisPower()) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Metamorphosis::OnCast(); });
 				}
@@ -115,7 +122,7 @@ namespace
 				if (pulled) {
 					logger::info("death: '{}' landed from a Tendril pull: the player's kill", dying->GetName());
 				}
-				if ((killer && killer->IsPlayerRef()) || pulled) {
+				if (((killer && killer->IsPlayerRef()) || pulled) && !protean::Devastator::Struck(dying->GetFormID())) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Evolve::OnKill(); });
 				}
 			}
@@ -184,6 +191,7 @@ namespace
 			protean::Keen::Reset();
 			protean::Feed::Cancel();
 			protean::Stalker::Reset();
+			protean::Devastator::Reset();
 			break;
 		case SKSE::MessagingInterface::kNewGame:
 			protean::Face::BeforeLoad();

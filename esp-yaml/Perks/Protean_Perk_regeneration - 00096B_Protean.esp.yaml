@@ -5,6 +5,6 @@ Name:
   Value: 'Regeneration'
 Description:
   TargetLanguage: English
-  Value: 'A toggle: while on, stamina drains and health returns by the same amount.'
+  Value: 'Cast Regeneration to switch it on or off: while on, Stamina drains and Health returns by the same amount.'
 NumRanks: 1
 Playable: True

@@ -9,6 +9,7 @@
 #include "Carapace.h"
 #include "Claws.h"
 #include "Deceiver.h"
+#include "Devastator.h"
 #include "Dev.h"
 #include "Fly.h"
 #include "Journal.h"
@@ -44,6 +45,8 @@ namespace protean::Hooks
 				Stalker::OnFrame(a_this, a_delta);
 				Skills::OnFrame(a_this, a_delta);
 				Deceiver::OnFrame(a_this, a_delta);
+				Devastator::OnFrame(a_this);
+				Regeneration::OnFrame(a_this, a_delta);
 				Flight::OnFrame(a_this, a_delta);
 				Flight::KeepFall(a_this, a_delta);
 				Camera::OnFrame(a_this);

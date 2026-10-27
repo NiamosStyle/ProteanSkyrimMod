@@ -62,6 +62,7 @@
  "perksBuilt": [
   "assassin",
   "borrowed_visage",
+  "devastator",
   "inconspicuous",
   "infected",
   "keen",
@@ -70,6 +71,7 @@
   "predator_2",
   "predators_rush",
   "preys_flight",
+  "regeneration",
   "rending_claws",
   "stalker",
   "subtle_carapace",
@@ -96,6 +98,11 @@
   "infectPower": 2504,
   "infectedFaction": 2506,
   "metamorphosisPower": 2508
+ },
+ "devastator": {
+  "power": 2509,
+  "tendril": 2512,
+  "regen": 2510
  },
  "globals": {
   "Protean_ActiveForm": 2368,
@@ -172,7 +179,16 @@
   "Protean_InconspicuousRange": 2499,
   "Protean_AssassinMult": 2502,
   "Protean_InfectCost": 2505,
-  "Protean_InfectedHours": 2507
+  "Protean_InfectedHours": 2507,
+  "Protean_DevastatorRadius": 2513,
+  "Protean_DevastatorDamage": 2514,
+  "Protean_DevastatorDamagePerLevel": 2515,
+  "Protean_DevastatorStacks": 2516,
+  "Protean_DevastatorWindup": 2517,
+  "Protean_DevastatorSlowMo": 2518,
+  "Protean_DevastatorForce": 2519,
+  "Protean_RegenPerSecond": 2520,
+  "Protean_DevastatorTendrils": 2521
  },
  "openInteriorKeywords": [
   {
