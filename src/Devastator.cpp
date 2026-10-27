@@ -19,7 +19,8 @@ namespace protean::Devastator
 		// the burst with more weight (picked in game, 2026-10-27): the Storm Atronach's thunder blast, the Serpent Stone's
 		// explosion and Alduin's death explosion over the stab and Unrelenting Force
 		constexpr const char* kBurstSounds[] = { "QSTMiraakDeathTentacleStab", "VOCShoutFXUnrelentingForceThunderA",
-			"NPCAtronachStormAttackPowerForwardBombThunder2D", "MAGPowerSerpentStoneExplosion", "QSTAlduinDeathExplosionASD" };
+			"NPCAtronachStormAttackPowerForwardBombThunder2D", "MAGPowerSerpentStoneExplosion", "QSTAlduinDeathExplosionASD",
+			"AMBWeatherThunderExtra" };  // and storm thunder rolling on after it
 		// the look, picked in game the same day: red tentacles writhe over the body from the start of the pose (Protean's
 		// red copy of Dragonborn's tentacle shader); at the burst the red lurker splash and the Vampire Lord's blood burst
 		// (the one a change of form shows)
