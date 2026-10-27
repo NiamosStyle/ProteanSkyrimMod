@@ -263,7 +263,7 @@ GLOBALS = {
     "Protean_DevastatorSlowSeconds": (0x9E0, 3.5, "Float", "Devastator: real seconds of slow motion from the burst"),
     "Protean_DevastatorRethrow":   (0x9E1, 0.25, "Float", "Devastator: real seconds between throws of the tendrils while held, so they stay out"),
     "Protean_DevastatorTendrilHeight": (0x9E2, 60, "Float", "Devastator: height of the tendrils' casters above the feet (110 threw them from above the head)"),
-    "Protean_DevastatorTendrilOut": (0x9E3, 15, "Float", "Devastator: distance of the tendrils' casters from the body's middle (45 threw them from too far out)"),
+    "Protean_DevastatorTendrilOut": (0x9E3, 0, "Float", "Devastator: distance of the tendrils' casters from the body's middle (45 and 15 threw some from too far out)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {

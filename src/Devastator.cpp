@@ -16,7 +16,10 @@ namespace protean::Devastator
 		// sounds picked by ear in game (2026-10-27): the change into a beast as the pose builds, then Miraak's tentacle
 		// stab with Unrelenting Force's thunder as the tendrils burst out
 		constexpr const char* kWindupSound = "NPCWerewolfTransformationSD";
-		constexpr const char* kBurstSounds[] = { "QSTMiraakDeathTentacleStab", "VOCShoutFXUnrelentingForceThunderA" };
+		// the burst with more weight (picked in game, 2026-10-27): the Storm Atronach's thunder blast, the Serpent Stone's
+		// explosion and Alduin's death explosion over the stab and Unrelenting Force
+		constexpr const char* kBurstSounds[] = { "QSTMiraakDeathTentacleStab", "VOCShoutFXUnrelentingForceThunderA",
+			"NPCAtronachStormAttackPowerForwardBombThunder2D", "MAGPowerSerpentStoneExplosion", "QSTAlduinDeathExplosionASD" };
 		// the look, picked in game the same day: red tentacles writhe over the body from the start of the pose (Protean's
 		// red copy of Dragonborn's tentacle shader); at the burst the red lurker splash and the Vampire Lord's blood burst
 		// (the one a change of form shows)
@@ -169,7 +172,7 @@ namespace protean::Devastator
 			auto* base = RE::TESForm::LookupByID<RE::TESBoundObject>(0x3B);  // XMarker, Skyrim.esm
 			const int n = std::max(static_cast<int>(Dial("Protean_DevastatorTendrils", 8.0f)), 1);
 			const auto  at = a_p->GetPosition();
-			const float out = Dial("Protean_DevastatorTendrilOut", 15.0f);
+			const float out = Dial("Protean_DevastatorTendrilOut", 0.0f);
 			for (int i = 0; base && i < n; ++i) {
 				const float a = a_p->GetAngleZ() + 6.2831853f * i / n;
 				auto m = a_p->PlaceObjectAtMe(base, false);
