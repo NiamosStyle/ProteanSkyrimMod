@@ -681,7 +681,7 @@ namespace protean::Face
 		if (auto* fp = Registry::Get().FacePower(); fp && !p->HasSpell(fp)) {
 			p->AddSpell(fp);
 		}
-		if (!s.disguised) {
+		if (!s.disguised || !s.faceCrimeTaken) {  // (not taken: Assassin just forgave the last face's)
 			Shift::SnapshotFaceCrime();  // a swap keeps the first face's snapshot
 		}
 		s.disguised = true;
@@ -771,7 +771,7 @@ namespace protean::Face
 		if (auto* npc = RE::TESForm::LookupByID<RE::TESNPC>(s.bankedNpc); npc && g_joinFactions) {
 			JoinFactions(npc);
 		}
-		if (!s.disguised) {
+		if (!s.disguised || !s.faceCrimeTaken) {  // (not taken: Assassin just forgave the last face's)
 			Shift::SnapshotFaceCrime();  // a swap keeps the first face's snapshot
 		}
 		s.disguised = true;
