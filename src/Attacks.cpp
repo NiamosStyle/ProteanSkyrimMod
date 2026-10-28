@@ -291,6 +291,15 @@ namespace protean::Attacks
 				if (!g_enabled || !a_event || !Shift::ActiveCreature()) {
 					return RE::BSEventNotifyControl::kContinue;
 				}
+				// a menu holds the keys (the Favorites, the inventory, the console...): its clicks are no attacks, and a
+				// press it caught is forgotten (user 2026-10-28: opening or closing the Favorites always struck out)
+				if (auto* cm = RE::ControlMap::GetSingleton()) {
+					const auto& stack = cm->GetRuntimeData().contextPriorityStack;
+					if (!stack.empty() && stack.back() != RE::UserEvents::INPUT_CONTEXT_ID::kGameplay) {
+						g_press = Press{};
+						return RE::BSEventNotifyControl::kContinue;
+					}
+				}
 				const auto* ue = RE::UserEvents::GetSingleton();
 				for (auto* e = *a_event; e; e = e->next) {
 					auto* b = e->AsButtonEvent();
