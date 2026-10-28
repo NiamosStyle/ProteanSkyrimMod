@@ -55,6 +55,7 @@ namespace protean
 		std::map<std::string, std::uint32_t> consumed;   // bodies consumed per kind: creature id, "people" or "other"
 		bool                   consumeWarned{ false };   // the first-time warning was shown
 		bool                   consumeLoot{ false };     // the Protean page's "Take the loot when consuming"
+		bool                   consumeAsk{ true };       // the Protean page's "Ask first" (Loot / Consume / Cancel, own form)
 		std::set<std::string>  renowned;                 // renowned people consumed (Registry::Renowned's matches)
 
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and

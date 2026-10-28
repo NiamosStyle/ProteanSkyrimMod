@@ -29,6 +29,8 @@ namespace protean::Journal
 		// the loot switch: the page shows g_loot and leaves a click in g_lootSet (-1 = none) for the main thread
 		std::atomic<bool> g_loot{ false };
 		std::atomic<int>  g_lootSet{ -1 };
+		std::atomic<bool> g_ask{ true };  // the same for "Ask first"
+		std::atomic<int>  g_askSet{ -1 };
 
 		void __stdcall Render()
 		{
@@ -50,6 +52,13 @@ namespace protean::Journal
 				g_lootSet = loot ? 1 : 0;
 			}
 			ui::TextWrapped("%s", "Off, a consumed body's belongings are destroyed with it (quest items are always kept).");
+			const int askPending = g_askSet.load();
+			bool      ask = askPending >= 0 ? askPending == 1 : g_ask.load();
+			if (ui::Checkbox("Ask first: Loot / Consume / Cancel", &ask)) {
+				g_askSet = ask ? 1 : 0;
+			}
+			ui::TextWrapped("%s", "In your own form, sneaking and activating a body asks what to do. Off, it is consumed at once. "
+			                      "(In animal form a body is always consumed at once.)");
 			ui::SeparatorText("Bodies consumed");
 			ui::TextWrapped("%s", "Every body gives Evolution Points by its size: small creatures 1, people and middling animals 2, "
 			                      "large creatures 3, giants and mammoths 5. Each perk point needs one more than the last. "
@@ -111,6 +120,11 @@ namespace protean::Journal
 			logger::info("menu: take the loot when consuming {}", s.consumeLoot ? "on" : "off");
 		}
 		g_loot = s.consumeLoot;
+		if (const int set = g_askSet.exchange(-1); set >= 0) {
+			s.consumeAsk = set == 1;
+			logger::info("menu: ask before consuming {}", s.consumeAsk ? "on" : "off");
+		}
+		g_ask = s.consumeAsk;
 		static float tick = 0.0f;
 		if ((tick -= a_delta) <= 0.0f) {
 			tick = 0.5f;

@@ -321,22 +321,32 @@ namespace protean::Consume
 			body->Disable();
 		}
 
-		// the warning before the first one (user, 2026-10-28)
-		class Warning : public RE::IMessageBoxCallback
+		RE::FormID g_loot{ 0 };  // a body the player chose to loot: its activation comes back through the hook
+
+		// the box before consuming: in the player's own form, Loot / Consume / Cancel as Stolen Face's box was (user,
+		// 2026-10-28; the Protean page can turn it off), and the first time ever, the warning that the loot goes too
+		class Box : public RE::IMessageBoxCallback
 		{
 		public:
-			explicit Warning(RE::FormID a_id) :
-				_id(a_id) {}
+			Box(RE::FormID a_id, bool a_loot) :
+				_id(a_id), _loot(a_loot) {}
 
 			void Run(std::uint8_t a_button) override
 			{
 				const auto id = _id;
-				SKSE::GetTaskInterface()->AddTask([id, a_button]() {
-					State::Get().consumeWarned = true;
+				const int  pick = _loot ? a_button : a_button + 1;  // 0 loot, 1 consume, 2 cancel
+				SKSE::GetTaskInterface()->AddTask([id, pick]() {
 					auto* p = Player();
 					auto* a = RE::TESForm::LookupByID<RE::Actor>(id);
-					logger::info("consume: the warning answered with button {}", a_button);
-					if (a_button == 0 && p && a && !g_meal.on && Edible(a)) {
+					logger::info("consume: the box answered: {}", pick == 0 ? "loot" : pick == 1 ? "consume" : "cancel");
+					if (!p || !a || g_meal.on) {
+						return;
+					}
+					if (pick == 0) {
+						g_loot = id;
+						a->ActivateRef(p, 0, nullptr, 1, false);
+					} else if (pick == 1 && Edible(a)) {
+						State::Get().consumeWarned = true;
 						Start(p, a);
 					}
 				});
@@ -344,11 +354,14 @@ namespace protean::Consume
 
 		private:
 			RE::FormID _id;
+			bool       _loot;
 		};
 
-		void Ask(RE::PlayerCharacter* a_p, RE::Actor* a_body)
+		void Ask(RE::PlayerCharacter* a_p, RE::Actor* a_body, bool a_own)
 		{
-			if (State::Get().consumeWarned) {
+			const bool choose = a_own && State::Get().consumeAsk;
+			const bool warn = !State::Get().consumeWarned;
+			if (!choose && !warn) {
 				Start(a_p, a_body);
 				return;
 			}
@@ -357,16 +370,24 @@ namespace protean::Consume
 				Start(a_p, a_body);
 				return;
 			}
-			box->bodyText = "Consuming destroys the body and everything it carries (quest items are kept).\n\nTo keep the loot, "
-			                "turn on \"Take the loot when consuming\" on the Protean page of the SKSE Menu Framework (F1).\n\n"
-			                "This warning will not show again.";
+			std::string text = std::format("Body of {}", a_body->GetDisplayFullName());
+			if (warn) {
+				text += "\n\nConsuming destroys the body and everything it carries (quest items are kept). To keep the loot, "
+				        "turn on \"Take the loot when consuming\" on the Protean page of the SKSE Menu Framework (F1).\n\n"
+				        "This warning will not show again.";
+			}
+			box->bodyText = text.c_str();
+			if (choose) {
+				box->buttonText.push_back(RE::BSString("Loot"));
+			}
 			box->buttonText.push_back(RE::BSString("Consume"));
 			box->buttonText.push_back(RE::BSString("Cancel"));
-			box->cancelButtonIndex = 1;
+			box->cancelButtonIndex = choose ? 2 : 1;
 			box->isCancellable = true;
-			box->callback = RE::BSTSmartPointer<RE::IMessageBoxCallback>(new Warning(a_body->GetFormID()));
+			box->callback = RE::BSTSmartPointer<RE::IMessageBoxCallback>(new Box(a_body->GetFormID(), choose));
 			RE::MessageBoxMenu::QueueMessage(box);
-			logger::info("consume: the first-time warning shown");
+			logger::info("consume: the box shown ({}{})", choose ? "loot, consume, cancel" : "consume, cancel",
+				warn ? ", with the first-time warning" : "");
 		}
 
 		// the checks both ways in share; true = go ahead
@@ -389,13 +410,17 @@ namespace protean::Consume
 		if (!p || !a_body) {
 			return false;
 		}
+		if (g_loot == a_body->GetFormID()) {
+			g_loot = 0;
+			return false;  // Loot picked in the box: the game's loot window
+		}
 		if (g_meal.on) {
 			return g_meal.body.get().get() == a_body;  // the body going: no loot window
 		}
 		if (Shift::ActiveCreature() || !p->IsSneaking() || !Allowed(p, a_body)) {
 			return false;
 		}
-		Ask(p, a_body);
+		Ask(p, a_body, true);
 		return true;
 	}
 
@@ -437,7 +462,7 @@ namespace protean::Consume
 		}
 		const auto to = best->GetPosition() - here;
 		p->SetAngle(RE::NiPoint3{ p->GetAngleX(), p->GetAngleY(), std::atan2(to.x, to.y) });
-		Ask(p, best);
+		Ask(p, best, false);
 		return true;
 	}
 
