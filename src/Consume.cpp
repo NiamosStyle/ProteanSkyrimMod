@@ -199,8 +199,9 @@ namespace protean::Consume
 			}
 		}
 
-		// from every part of the body the race names (with no node the game plays nothing), up and out all round, and
-		// down for the splashes on the ground
+		// from every part of the body the race names (with no node the game plays nothing), down onto the body and the
+		// ground: the game plays a splash where the direction first meets something, and sprays up and sideways landed
+		// on walls (user, 2026-10-28)
 		void Blood(RE::Actor* a_body, bool a_log = false)
 		{
 			auto* set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(kBlood);
@@ -210,15 +211,15 @@ namespace protean::Consume
 			if (!set || !im || !parts) {
 				return;
 			}
-			const RE::NiPoint3 ways[] = { { 0.0f, 0.0f, 1.0f }, { 0.7f, 0.0f, 0.7f }, { -0.7f, 0.0f, 0.7f }, { 0.0f, 0.7f, 0.7f },
-				{ 0.0f, -0.7f, 0.7f }, { 0.0f, 0.0f, -1.0f } };
+			const RE::NiPoint3 ways[] = { { 0.0f, 0.0f, -1.0f }, { 0.3f, 0.0f, -0.95f }, { -0.3f, 0.0f, -0.95f },
+				{ 0.0f, 0.3f, -0.95f }, { 0.0f, -0.3f, -0.95f } };
 			int                played = 0;
 			for (const auto* part : parts->parts) {
 				if (!part || part->targetName.empty()) {
 					continue;
 				}
 				for (auto way : ways) {
-					played += im->PlayImpactEffect(a_body, set, part->targetName.c_str(), way, 512.0f, false, false) ? 1 : 0;
+					played += im->PlayImpactEffect(a_body, set, part->targetName.c_str(), way, 200.0f, false, false) ? 1 : 0;
 				}
 			}
 			if (a_log) {
