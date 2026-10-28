@@ -381,6 +381,45 @@ namespace protean::Dev
 
 	namespace
 	{
+		float g_hp{ -1.0f };  // the player's health last frame: what a hit took
+
+		float Setting(const char* a_name, float a_fallback)
+		{
+			auto* gs = RE::GameSettingCollection::GetSingleton();
+			auto* s = gs ? gs->GetSetting(a_name) : nullptr;
+			return s ? s->GetFloat() : a_fallback;
+		}
+
+		// the player's armor as the game counts it in a fight, and what it should take off a weapon's blow (the user
+		// asked why 316 armor still let damage through, 2026-10-28)
+		void ArmorReport(RE::TESForm* a_source, float a_before)
+		{
+			auto*       p = RE::PlayerCharacter::GetSingleton();
+			auto*       av = p->AsActorValueOwner();
+			const float armor = av->GetActorValue(RE::ActorValue::kDamageResist);
+			const float scale = Setting("fArmorScalingFactor", 0.12f);
+			const float cap = Setting("fMaxArmorRating", 80.0f);
+			const float cut = (std::min)(armor * scale, cap);
+			const char* kind = !a_source                         ? "unknown" :
+			                   a_source->Is(RE::FormType::Weapon) ? "weapon (armor counts)" :
+			                   a_source->Is(RE::FormType::Spell) || a_source->Is(RE::FormType::Enchantment) ?
+			                                                        "spell (armor does not count)" :
+			                                                        "other";
+			int         difficulty = -1;
+			if (auto* ini = RE::INIPrefSettingCollection::GetSingleton()) {
+				if (auto* s = ini->GetSetting("iDifficulty:GamePlay")) {
+					difficulty = s->GetInteger();
+				}
+			}
+			SKSE::GetTaskInterface()->AddTask([a_before, armor, cut, kind, difficulty] {
+				auto*       pl = RE::PlayerCharacter::GetSingleton();
+				const float after = pl->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
+				logger::info("  armor check: {} hit; armor {:.0f} -> {:.0f}% off physical damage; health {:.1f} -> {:.1f} "
+				             "(took {:.1f}); difficulty {} (0 Novice .. 5 Legendary)",
+					kind, armor, cut, a_before, after, a_before - after, difficulty);
+			});
+		}
+
 		// test-only: one log line per hit the player lands, so attacks can be matched to hits
 		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
 		{
@@ -398,6 +437,7 @@ namespace protean::Dev
 						source ? source->GetName() : "?", a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) ? " (power attack)" : "",
 						a_event->flags.any(RE::TESHitEvent::Flag::kSneakAttack) ? " (sneak attack)" : "",
 						RE::PlayerCharacter::GetSingleton()->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
+					ArmorReport(source, g_hp);
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				if (!a_event->cause->IsPlayerRef()) {
@@ -465,7 +505,13 @@ namespace protean::Dev
 
 	void Poll()
 	{
-		if (!g_enabled || ++g_frames % 20 != 0) {
+		if (!g_enabled) {
+			return;
+		}
+		if (auto* p = RE::PlayerCharacter::GetSingleton()) {
+			g_hp = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
+		}
+		if (++g_frames % 20 != 0) {
 			return;
 		}
 		std::ifstream f(kCmd);
