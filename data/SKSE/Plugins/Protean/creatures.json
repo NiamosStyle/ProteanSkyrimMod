@@ -91,6 +91,29 @@
   "arms": 2491,
   "deft": 2492
  },
+ "renowned": [
+  "ulfric stormcloak",
+  "galmar",
+  "general tullius",
+  "legate rikke",
+  "mercer frey",
+  "titus mede",
+  "astrid",
+  "krev the skinner",
+  "ancano",
+  "madanach",
+  "thonar",
+  "calixto",
+  "movarth",
+  "sinding",
+  "silus vesuius",
+  "tyranus",
+  "harkon",
+  "vyrthur",
+  "ebony warrior",
+  "ralis sedarys",
+  "ildari"
+ ],
  "deceiver": {
   "assassinMark": 2500,
   "assassinPerk": 2501,
@@ -203,7 +226,10 @@
   "Protean_ConsumeHealSurvivor": 2534,
   "Protean_ConsumeBounty": 2535,
   "Protean_ConsumeWitnessRange": 2536,
-  "Protean_AssassinConsumeSeconds": 2537
+  "Protean_AssassinConsumeSeconds": 2537,
+  "Protean_Level": 2538,
+  "Protean_LevelRatio": 2539,
+  "Protean_ShowLevelup": 2540
  },
  "openInteriorKeywords": [
   {

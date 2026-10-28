@@ -37,7 +37,8 @@ namespace protean
 	void Registry::SettleDials(const std::map<std::string, float>& a_saved) const
 	{
 		// globals that hold Protean's state, not settings
-		static const std::set<std::string_view> kState{ "Protean_ActiveForm", "Protean_PerkPoints", "Protean_ShowPerkMenu" };
+		static const std::set<std::string_view> kState{ "Protean_ActiveForm", "Protean_PerkPoints", "Protean_ShowPerkMenu",
+			"Protean_Level", "Protean_LevelRatio", "Protean_ShowLevelup" };
 		int moved = 0;
 		for (const auto& [name, g] : _globals) {
 			const auto def = _defaults.find(name);
@@ -119,6 +120,7 @@ namespace protean
 			_tendril = nullptr;
 		}
 		_killBoost = dh->LookupForm<RE::SpellItem>(j.value("killBoost", 0u), plugin);
+		_renowned = j.value("renowned", std::vector<std::string>{});
 		_glideMarkers.clear();
 		for (const auto id : j.value("glideMarkers", std::vector<RE::FormID>{})) {
 			if (auto* sp = dh->LookupForm<RE::SpellItem>(id, plugin)) {
@@ -293,6 +295,18 @@ namespace protean
 			}
 		}
 		return nullptr;
+	}
+
+	std::string Registry::Renowned(std::string_view a_name) const
+	{
+		std::string name(a_name);
+		std::ranges::transform(name, name.begin(), [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+		for (const auto& r : _renowned) {
+			if (!r.empty() && name.find(r) != std::string::npos) {
+				return r;
+			}
+		}
+		return {};
 	}
 
 	const Creature* Registry::ByRace(const RE::TESRace* a_race) const

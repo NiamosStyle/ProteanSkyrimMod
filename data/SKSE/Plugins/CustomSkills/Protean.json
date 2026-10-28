@@ -10,6 +10,9 @@
   "skills": [
     {
       "id": "protean",
+      "level": "Protean.esp|9EA",
+      "ratio": "Protean.esp|9EB",
+      "showLevelup": "Protean.esp|9EC",
       "name": "Protean",
       "description": "New perks come with consuming. Perk points take a little more biomass as you go.",
       "nodes": [

@@ -72,6 +72,32 @@ namespace protean::Evolve
 			}
 		}
 
+		// the perk screen's level and bar (Custom Skills Framework reads the globals when it shows them)
+		void SyncLevel()
+		{
+			auto&               reg = Registry::Get();
+			const auto&         s = State::Get();
+			const std::uint32_t earned = PointsEarned(s.evoTotal);
+			const std::uint32_t from = earned * (earned + 1) / 2;  // the total that earned the last one
+			const std::uint32_t to = NextPointAt(s.evoTotal);
+			const float         level = static_cast<float>(earned + s.facePoints);
+			const float         ratio = to > from ? static_cast<float>(s.evoTotal - from) / static_cast<float>(to - from) : 0.0f;
+			if (reg.Dial("Protean_Level", -1.0f) != level) {
+				reg.SetGlobal("Protean_Level", level);
+			}
+			if (std::abs(reg.Dial("Protean_LevelRatio", -1.0f) - ratio) > 0.0001f) {
+				reg.SetGlobal("Protean_LevelRatio", ratio);
+			}
+		}
+
+		// "Protean increased to N" on the HUD: the framework shows the number written and clears it
+		void LevelUp()
+		{
+			const auto& s = State::Get();
+			SyncLevel();
+			Registry::Get().SetGlobal("Protean_ShowLevelup", static_cast<float>(PointsEarned(s.evoTotal) + s.facePoints));
+		}
+
 		// Everything that follows from the points and the perks, however they changed (feeding, the menu, a load):
 		// the points left in the menu's global, Unbound Form's gifts, and the Evolution power once there is
 		// anything to spend or show.
@@ -103,6 +129,7 @@ namespace protean::Evolve
 			if (const auto left = static_cast<float>(PointsAvailable()); reg.Dial("Protean_PerkPoints", -1.0f) != left) {
 				reg.SetGlobal("Protean_PerkPoints", left);
 			}
+			SyncLevel();
 			if (Has(kUnbound) && !p->HasSpell(reg.Starter())) {
 				p->AddSpell(reg.Starter());  // the Instinct power: shapeshifting and consuming
 			}
@@ -121,9 +148,9 @@ namespace protean::Evolve
 
 	std::uint32_t PointsEarned(std::uint32_t a_total)
 	{
-		// the n-th perk point costs (n + 1) / 2 evolution points: 1, 1, 2, 2, 3, 3, ...
+		// the n-th perk point costs n evolution points: 1, 2, 3, ... (Growl's feedings)
 		std::uint32_t n = 0, need = 0;
-		while ((need += (n + 2) / 2) <= a_total) {
+		while ((need += n + 1) <= a_total) {
 			++n;
 		}
 		return n;
@@ -147,6 +174,7 @@ namespace protean::Evolve
 			PointsAvailable());
 		Sync();
 		if (after > before) {
+			LevelUp();
 			Shift::Notify(std::format("You have a new Protean perk point ({} available).", PointsAvailable()));
 		}
 	}
@@ -155,8 +183,9 @@ namespace protean::Evolve
 	{
 		auto& s = State::Get();
 		++s.facePoints;
-		logger::info("evolution: +1 perk point from a face ({}), available {}", a_why, PointsAvailable());
+		logger::info("evolution: +1 perk point given directly ({}), available {}", a_why, PointsAvailable());
 		Sync();
+		LevelUp();
 		Shift::Notify(std::format("You have a new Protean perk point ({} available).", PointsAvailable()));
 	}
 
@@ -164,10 +193,27 @@ namespace protean::Evolve
 	{
 		// the count at which PointsEarned goes up by one
 		std::uint32_t n = 0, need = 0;
-		while ((need += (n + 2) / 2) <= a_total) {
+		while ((need += n + 1) <= a_total) {
 			++n;
 		}
 		return need;
+	}
+
+	void OnRenowned(RE::Actor* a_body)
+	{
+		auto*       npc = a_body ? a_body->GetActorBase() : nullptr;
+		const char* name = npc ? npc->GetName() : nullptr;
+		const auto  match = name ? Registry::Get().Renowned(name) : std::string{};
+		auto&       s = State::Get();
+		if (match.empty()) {
+			return;
+		}
+		if (!s.renowned.insert(match).second) {
+			logger::info("evolution: renowned '{}' ({}) consumed again: nothing more", name, match);
+			return;
+		}
+		Shift::Notify(std::format("You have consumed {}, one of the renowned.", name));
+		AddFacePoint(std::format("renowned '{}' {:08X} ({})", name, npc->GetFormID(), match));
 	}
 
 	void OnConsume(std::string_view a_kind, std::string_view a_label, std::uint32_t a_points)

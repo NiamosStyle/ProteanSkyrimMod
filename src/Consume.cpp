@@ -259,6 +259,9 @@ namespace protean::Consume
 			if (person && Evolve::Has("borrowed_visage")) {
 				Face::FromBody(body, !m.animal, m.silent, !m.seen.empty());
 			}
+			if (person) {
+				Evolve::OnRenowned(body);
+			}
 			auto*       av = a_p->AsActorValueOwner();
 			const float max = av->GetPermanentActorValue(RE::ActorValue::kHealth) +
 			                  a_p->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth);

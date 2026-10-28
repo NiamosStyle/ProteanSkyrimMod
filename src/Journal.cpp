@@ -52,7 +52,9 @@ namespace protean::Journal
 			ui::TextWrapped("%s", "Off, a consumed body's belongings are destroyed with it (quest items are always kept).");
 			ui::SeparatorText("Bodies consumed");
 			ui::TextWrapped("%s", "Every body gives Evolution Points by its size: small creatures 1, people and middling animals 2, "
-			                      "large creatures 3, giants and mammoths 5.");
+			                      "large creatures 3, giants and mammoths 5. Each perk point needs one more than the last. "
+			                      "Consuming one of the renowned (Ulfric, Tullius, Mercer Frey, the Ebony Warrior...) "
+			                      "gives a perk point at once.");
 			ui::TextUnformatted(total.c_str());
 			if (!rows.empty() && ui::BeginTable("bodies", 2, ui::ImGuiTableFlags_RowBg | ui::ImGuiTableFlags_Borders | ui::ImGuiTableFlags_SizingStretchProp)) {
 				ui::TableSetupColumn("Kind", ui::ImGuiTableColumnFlags_WidthStretch, 2.0f);

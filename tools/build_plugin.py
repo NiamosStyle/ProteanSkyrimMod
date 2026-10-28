@@ -95,6 +95,12 @@ PERKS = {
                  "face goes on at once at no Stamina cost.",
                  -2.5, 3.3, []),
 }
+# Renowned victims (Sacrosanct's "feed on the powerful", the user's pick 2026-10-28; the list from the perk spec):
+# consuming one gives a perk point at once, once per person. Matched by a part of the name, lower case, so every record
+# of the person counts (Protean logs each match).
+RENOWNED = ["ulfric stormcloak", "galmar", "general tullius", "legate rikke", "mercer frey", "titus mede", "astrid",
+            "krev the skinner", "ancano", "madanach", "thonar", "calixto", "movarth", "sinding", "silus vesuius",
+            "tyranus", "harkon", "vyrthur", "ebony warrior", "ralis sedarys", "ildari"]
 # Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
 # base id -> (local id, description)
 RANK2 = {
@@ -274,6 +280,12 @@ GLOBALS = {
     "Protean_ConsumeBounty":       (0x9E7, 1000, "Float", "consuming a person in sight of people: bounty with each witness's crime faction (murder's is 1000)"),
     "Protean_ConsumeWitnessRange": (0x9E8, 3000, "Float", "consuming: how far a person who can see the player counts as a witness, game units"),
     "Protean_AssassinConsumeSeconds": (0x9E9, 1, "Float", "Assassin: seconds an unnoticed consumption takes"),
+    # The perk screen's level bar, like the werewolf tree (Custom Skills Framework reads them; kept by Protean): the
+    # level is the perk points earned, the ratio the way to the next one; the level-up message shows the number
+    # written to ShowLevelup (the framework clears it). Float, not Short: a Short level is put under skill decay.
+    "Protean_Level":               (0x9EA, 0,    "Float", "Protean's level in the perk screen: perk points earned (kept by Protean)"),
+    "Protean_LevelRatio":          (0x9EB, 0,    "Float", "the perk screen's bar: progress to the next perk point, 0 to 1 (kept by Protean)"),
+    "Protean_ShowLevelup":         (0x9EC, 0,    "Short", "set to a level to show 'Protean increased to <level>' (Custom Skills Framework clears it)"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -828,6 +840,9 @@ def main():
         "perkPoints": ref(GLOBALS["Protean_PerkPoints"][0]),
         "skills": [{
             "id": "protean",
+            "level": ref(GLOBALS["Protean_Level"][0]),
+            "ratio": ref(GLOBALS["Protean_LevelRatio"][0]),
+            "showLevelup": ref(GLOBALS["Protean_ShowLevelup"][0]),
             "name": "Protean",
             "description": "New perks come with consuming. Perk points take a little more biomass as you go.",
             "nodes": [{"id": pid, "perk": ref(local), "x": round(x * TREE_SCALE_X, 2), "y": round(yy * TREE_SCALE_Y, 2),
@@ -922,6 +937,7 @@ def main():
                            "predatorPoison": PREDATOR_POISON_SPELL,
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
                            "skills": {"arms": ANIMAL_ARMS_PERK, "deft": DEFT_PERK},
+                           "renowned": RENOWNED,
                            "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,
                                         "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION,
                                         "metamorphosisPower": METAMORPHOSIS_POWER},

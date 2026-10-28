@@ -8,7 +8,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 23;  // 3 to 16 are still read
+		constexpr std::uint32_t kVersion = 24;  // 3 to 16 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -263,6 +263,10 @@ namespace protean
 			}
 			Put<std::uint8_t>(a, s.consumeWarned ? 1 : 0);
 			Put<std::uint8_t>(a, s.consumeLoot ? 1 : 0);
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.renowned.size()));
+			for (const auto& r : s.renowned) {
+				PutStr(a, r);
+			}
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -497,6 +501,15 @@ namespace protean
 							if (Get(a, warned) && Get(a, loot)) {
 								s.consumeWarned = warned != 0;
 								s.consumeLoot = loot != 0;
+							}
+							if (std::uint32_t r = 0; version >= 24 && Get(a, r) && r <= 1000) {
+								for (std::uint32_t i = 0; i < r; ++i) {
+									std::string name;
+									if (!GetStr(a, name)) {
+										break;
+									}
+									s.renowned.insert(name);
+								}
 							}
 						}
 					}

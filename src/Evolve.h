@@ -5,10 +5,12 @@
 namespace protean::Evolve
 {
 	// Evolution points are a running count of the biomass consumed (Consume; the user's design, 2026-10-28: earned
-	// solely that way, hearts and kills give none): they only go up and are never spent. Perk points cost 1, 1, 2, 2,
-	// 3, 3, ... of them (earned at totals 1, 2, 4, 6, 9, 12, 16, ...; the whole tree 132). Until 2026-10-25 each cost
-	// one more than the last (253 for the tree; the user: far too slow). The dev channel can still add perk points
-	// directly (face points). Perk points buy Protean perks only.
+	// solely that way, hearts and kills give none): they only go up and are never spent. As in Growl (the user's pick,
+	// 2026-10-28), each perk point costs one more than the last: 1, 2, 3, ... (earned at totals 1, 3, 6, 10, 15, ...; the
+	// whole tree 253). 2026-10-25 to 28 they cost 1, 1, 2, 2, 3, 3 (hearts were scarce: the user found 253 far too slow
+	// then). Renowned victims add a perk point directly (face points), as Sacrosanct rewards feeding on the powerful.
+	// The perk screen shows Protean's level (perk points earned) and a bar to the next, like the werewolf tree.
+	// Perk points buy Protean perks only.
 
 	[[nodiscard]] std::uint32_t PointsEarned(std::uint32_t a_total);  // perk points the count has earned
 	[[nodiscard]] std::uint32_t PointsAvailable();                    // earned + face points - perks bought
@@ -16,6 +18,7 @@ namespace protean::Evolve
 	// a body was consumed: a_points of biomass (small 1, people and middling animals 2, large 3, huge 5), counted per
 	// kind (a creature id, "people" or "other") for the Protean page
 	void OnConsume(std::string_view a_kind, std::string_view a_label, std::uint32_t a_points);
+	void OnRenowned(RE::Actor* a_body);  // a person consumed: one of the renowned gives a perk point, once each
 	[[nodiscard]] std::uint32_t NextPointAt(std::uint32_t a_total);   // the count that earns the next perk point
 	void Add(std::uint32_t a_points, std::string_view a_why);
 	void AddFacePoint(std::string_view a_why);

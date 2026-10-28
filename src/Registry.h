@@ -108,6 +108,8 @@ namespace protean
 		// the actor's display name (Ice Wolf, Pit Wolf, Cave Bear...), else the first creature of that race.
 		[[nodiscard]] const Creature* ByActor(const RE::Actor* a_actor) const;
 		[[nodiscard]] const Creature* ById(std::string_view a_id) const;
+		// a renowned person (creatures.json "renowned": parts of names, lower case): the part matched, or empty
+		[[nodiscard]] std::string Renowned(std::string_view a_name) const;
 		[[nodiscard]] const std::vector<Creature>& All() const { return _creatures; }
 
 		// A dial in the plugin (Global, e.g. "Protean_SprintMult"), read live so another mod's perks or scripts
@@ -122,6 +124,7 @@ namespace protean
 
 	private:
 		std::map<std::string, RE::TESGlobal*> _globals;
+		std::vector<std::string>              _renowned;
 		std::map<std::string, float>          _defaults;
 		RE::SpellItem*        _starter{ nullptr };
 		RE::SpellItem*        _revert{ nullptr };

@@ -69,6 +69,9 @@ your value.
 | `Protean_ConsumeBounty` | xx9E7 | Float | 1000 | consuming a person in sight of people: bounty with each witness's crime faction (0 = none) |
 | `Protean_ConsumeWitnessRange` | xx9E8 | Float | 3000 | consuming: how far a person who can see the player counts as a witness, game units |
 | `Protean_AssassinConsumeSeconds` | xx9E9 | Float | 1 | Assassin: seconds an unnoticed consumption takes |
+| `Protean_Level` | xx9EA | Float | 0 | kept by Protean (do not set): Protean's level in the perk screen, the perk points earned |
+| `Protean_LevelRatio` | xx9EB | Float | 0 | kept by Protean (do not set): the perk screen's bar to the next perk point, 0 to 1 |
+| `Protean_ShowLevelup` | xx9EC | Short | 0 | set to a level to show "Protean increased to <level>"; Custom Skills Framework clears it |
 | `Protean_XpOneHanded` | xx9BD | Float | 1 | multiplies the One-Handed skill uses of a bite or Rending Claws hit (as vanilla: the listed damage; the bite's is the race's own) |
 | `Protean_XpLightArmor` | xx9BE | Float | 0.38 | Light Armor skill uses per hit that hurts, in animal form or with Subtle Carapace on and no light body armor (vanilla's, measured) |
 | `Protean_RushSafeDrop` | xx9C0 | Float | 300 | Predator's Rush: a landing no more than this below the ground left during a boosted sprint does no harm (deeper drops are the game's) |

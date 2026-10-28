@@ -55,6 +55,7 @@ namespace protean
 		std::map<std::string, std::uint32_t> consumed;   // bodies consumed per kind: creature id, "people" or "other"
 		bool                   consumeWarned{ false };   // the first-time warning was shown
 		bool                   consumeLoot{ false };     // the Protean page's "Take the loot when consuming"
+		std::set<std::string>  renowned;                 // renowned people consumed (Registry::Renowned's matches)
 
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and
 		// taken off with the Stolen Face power. The player's own look is kept here while a stolen one is worn.
@@ -102,7 +103,7 @@ namespace protean
 
 		// Evolution points and the perks (src/Evolve.cpp). The count only goes up; perk points are worked out from it.
 		std::uint32_t                        evoTotal{ 0 };
-		std::uint32_t                        facePoints{ 0 };  // perk points given directly by named faces
+		std::uint32_t                        facePoints{ 0 };  // perk points given directly (renowned victims, the dev channel)
 		std::map<std::string, std::uint32_t> feeds;            // creature id -> hearts eaten (until 2026-10-28; kept)
 		std::vector<float>                   boosts;           // biomass boost stacks: seconds left on each
 		float                                boostApplied{ 0.0f };    // StaminaRateMult added now
