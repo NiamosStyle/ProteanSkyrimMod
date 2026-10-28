@@ -15,8 +15,12 @@ namespace protean::Consume
 		constexpr float       kGone = 0.5f;    // seconds from the tentacles' end to the body's
 		constexpr float       kCalmRange = 4000.0f;  // Assassin: how far the alarm is called off, game units (~57 m)
 		// BloodSprayImpactSetRed, Skyrim.esm: the blood Survivor's meal splashed (user's pick, live 2026-10-24); here it
-		// bursts from the body as the tentacles leave it and again as it goes (user, 2026-10-28)
+		// bursts from the body as the tentacles leave it and again as it goes (user, 2026-10-28). "A lot more" (the user,
+		// the same day, after seeing 4-6 splashes): it sprays from every body part every kBloodEvery seconds while the
+		// tentacles are on, and the body goes in Devastator's blood burst
 		constexpr RE::FormID  kBlood = 0x01F82A;
+		constexpr float       kBloodEvery = 0.25f;
+		constexpr RE::FormID  kBloodBurst = 0x015373;  // DLC1VampChangeExplosion (Dawnguard.esm), as Devastator's burst
 
 		struct Meal
 		{
@@ -27,6 +31,7 @@ namespace protean::Consume
 			bool                 animal{ false };   // the player is in animal form
 			bool                 silent{ false };   // Assassin: nobody saw the start, nobody notices
 			bool                 stopped{ false };  // the tentacles were taken off
+			float                blood{ 0.0f };     // when the next spray of blood is due
 			std::set<RE::FormID> seen;              // people who saw it
 		};
 		Meal g_meal;
@@ -194,9 +199,9 @@ namespace protean::Consume
 			}
 		}
 
-		// from the body's chest and head (the race's own nodes; with no node the game plays nothing), up and out, and
+		// from every part of the body the race names (with no node the game plays nothing), up and out all round, and
 		// down for the splashes on the ground
-		void Blood(RE::Actor* a_body)
+		void Blood(RE::Actor* a_body, bool a_log = false)
 		{
 			auto* set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(kBlood);
 			auto* im = RE::BGSImpactManager::GetSingleton();
@@ -205,10 +210,10 @@ namespace protean::Consume
 			if (!set || !im || !parts) {
 				return;
 			}
-			const RE::NiPoint3 ways[] = { { 0.0f, 0.0f, 1.0f }, { 0.7f, 0.0f, 0.7f }, { -0.7f, 0.0f, 0.7f }, { 0.0f, 0.0f, -1.0f } };
+			const RE::NiPoint3 ways[] = { { 0.0f, 0.0f, 1.0f }, { 0.7f, 0.0f, 0.7f }, { -0.7f, 0.0f, 0.7f }, { 0.0f, 0.7f, 0.7f },
+				{ 0.0f, -0.7f, 0.7f }, { 0.0f, 0.0f, -1.0f } };
 			int                played = 0;
-			for (const auto limb : { RE::BGSBodyPartDefs::LIMB_ENUM::kTorso, RE::BGSBodyPartDefs::LIMB_ENUM::kHead }) {
-				const auto* part = parts->parts[limb];
+			for (const auto* part : parts->parts) {
 				if (!part || part->targetName.empty()) {
 					continue;
 				}
@@ -216,7 +221,9 @@ namespace protean::Consume
 					played += im->PlayImpactEffect(a_body, set, part->targetName.c_str(), way, 512.0f, false, false) ? 1 : 0;
 				}
 			}
-			logger::info("consume: {} blood splashes", played);
+			if (a_log) {
+				logger::info("consume: {} blood splashes", played);
+			}
 		}
 
 		// the Devastator's way: the shader effect ended directly (EffectShader.Stop left it on for seconds)
@@ -304,7 +311,12 @@ namespace protean::Consume
 			const std::string label = person ? std::string(body->GetDisplayFullName()) : c ? c->name : std::string(body->GetName());
 			Evolve::OnConsume(person ? "people" : c ? c->id : "other", label, Biomass(body, c, person));
 			logger::info("consume: '{}' {:08X} consumed, healed {:.0f} of {:.0f}", body->GetName(), body->GetFormID(), heal, max);
-			Blood(body);
+			Blood(body, true);
+			if (auto* dh = RE::TESDataHandler::GetSingleton()) {
+				if (auto* burst = dh->LookupForm<RE::BGSExplosion>(kBloodBurst, "Dawnguard.esm")) {
+					body->PlaceObjectAtMe(burst, false);
+				}
+			}
 			body->Disable();
 		}
 
@@ -445,6 +457,12 @@ namespace protean::Consume
 			g_meal.stopped = true;
 			StopShader(ref.get());
 			StopShader(a_p);
+			if (auto* body = ref->As<RE::Actor>()) {
+				Blood(body, true);
+			}
+		}
+		if (!g_meal.stopped && g_meal.t >= g_meal.blood) {
+			g_meal.blood = g_meal.t + kBloodEvery;
 			if (auto* body = ref->As<RE::Actor>()) {
 				Blood(body);
 			}
