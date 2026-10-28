@@ -19,7 +19,8 @@ namespace protean::Shift
 	// A stolen face (the user's wish, 2026-10-26): crimes committed while it is worn are forgiven, as an animal's are,
 	// when it comes off unseen. The bounties are noted when it goes on.
 	void SnapshotFaceCrime();  // a stolen face put on
-	void ForgiveFaceCrime();   // it came off: unseen, its crimes are forgiven; seen, they stay
+	void ForgiveFaceCrime(bool a_unseen = false);  // it came off: unseen, its crimes are forgiven; seen, they stay
+	                                               // (a_unseen: Assassin's unnoticed consumption, nobody counts)
 	void ForgiveAll(std::string_view a_note);  // Metamorphosis: every bounty cleared, the hunt called off
 
 	// the creature the player is currently transformed into, or null

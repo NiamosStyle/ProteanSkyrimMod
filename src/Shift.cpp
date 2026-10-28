@@ -486,7 +486,7 @@ namespace protean::Shift
 		s.faceCrimeTaken = true;
 	}
 
-	void ForgiveFaceCrime()
+	void ForgiveFaceCrime(bool a_unseen)
 	{
 		auto& s = State::Get();
 		auto* p = Player();
@@ -495,7 +495,7 @@ namespace protean::Shift
 		}
 		// a person who can see the face come off knows who did it
 		bool seen = false;
-		if (auto* pl = RE::ProcessLists::GetSingleton()) {
+		if (auto* pl = RE::ProcessLists::GetSingleton(); pl && !a_unseen) {
 			for (auto& handle : pl->highActorHandles) {
 				auto  actor = handle.get();
 				auto* race = actor ? actor->GetRace() : nullptr;

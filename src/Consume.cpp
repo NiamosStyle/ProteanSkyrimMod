@@ -119,6 +119,9 @@ namespace protean::Consume
 				++calmed;
 				logger::info("consume: '{}' {:08X} stands down (Assassin)", a->GetName(), a->GetFormID());
 			}
+			// every alarm against the player ends too, as when a bounty is paid: Calcelmo, called off, went for the player
+			// again until the stolen face came off (2026-10-28)
+			pl->StopCombatAndAlarmOnActor(a_p, false);
 			logger::info("consume: {} alarmed actor(s) called off", calmed);
 		}
 
@@ -292,6 +295,12 @@ namespace protean::Consume
 				if (m.animal) {
 					Shift::SeenFeeding(body);
 				}
+			}
+			if (m.silent) {
+				// Assassin: what the worn face did (the sneak attack) is not held against the player, as when the face comes
+				// off unseen; then the alarms are ended again, in case any rose during the consumption
+				Shift::ForgiveFaceCrime(true);
+				Calm(a_p);
 			}
 			if (person && Evolve::Has("borrowed_visage")) {
 				Face::FromBody(body, !m.animal, m.silent, !m.seen.empty());
