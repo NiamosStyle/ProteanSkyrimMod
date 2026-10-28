@@ -79,6 +79,9 @@ namespace
 				if (spell && spell == reg.StalkerPower()) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Stalker::OnPowerCast(); });
 				}
+				if (spell && spell == reg.StealthPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Consume::OnStealthCast(); });
+				}
 				if (spell && spell == reg.Tendril()) {
 					SKSE::GetTaskInterface()->AddTask([spell]() { protean::Tendril::OnCast(spell); });
 				}
@@ -130,6 +133,7 @@ namespace
 				protean::Flight::Install();
 				protean::Predator::Install();
 				protean::Stalker::Install();
+				protean::Consume::Install();
 				protean::Skills::Install();
 				protean::Provoke::Install();
 				protean::Deceiver::Install();

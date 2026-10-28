@@ -92,7 +92,8 @@ PERKS = {
     "assassin": (0x971, "Assassin", "While you wear a stolen face, your sneak attacks do ten times the damage against "
                  "anyone who shares a faction with that face and is not hostile to you. Consume a person while nobody "
                  "can see you and it goes unnoticed: no crime, the alarm their death raised is called off, and their "
-                 "face goes on at once at no Stamina cost.",
+                 "face goes on at once at no Stamina cost. Comes with Stealth Consume: for a minute, every person you kill "
+                 "with a melee sneak attack is consumed at once.",
                  -2.5, 3.3, []),
 }
 # Renowned victims (Sacrosanct's "feed on the powerful", the user's pick 2026-10-28; the list from the perk spec):
@@ -151,6 +152,9 @@ ANIMAL_ARMS_PERK, DEFT_PERK = 0x9BB, 0x9BC
 # ASSASSIN_PERK, held while a stolen face is worn, multiplies sneak attacks on them. Infected: the Infect power puts
 # one INFECTION in the pockets; planted on someone, Protean puts them in INFECTED_FACTION, the player's ally, for a day.
 ASSASSIN_MARK, ASSASSIN_PERK = 0x9C4, 0x9C5
+# Assassin's Stealth Consume (src/Consume.cpp; the user's design, 2026-10-28): the power, and the timed effect it puts
+# on the player (STEALTH_SPELL, cast by Protean once the Stamina is paid), which Active Effects shows counting down
+STEALTH_POWER, STEALTH_EFFECT, STEALTH_SPELL = 0x9ED, 0x9EE, 0x9EF
 INFECTION, INFECT_POWER, INFECTED_FACTION = 0x9C7, 0x9C8, 0x9CA
 METAMORPHOSIS_POWER = 0x9CC  # opens the full character menu (src/Metamorphosis.cpp)
 # Devastator and Regeneration (src/Devastator.cpp): the two powers, and the tendrils the burst throws for the look (an
@@ -279,7 +283,9 @@ GLOBALS = {
     "Protean_ConsumeHealSurvivor": (0x9E6, 0.5,  "Float", "consuming with Survivor rank 2: share of maximum health a body heals (user: 50%)"),
     "Protean_ConsumeBounty":       (0x9E7, 1000, "Float", "consuming a person in sight of people: bounty with each witness's crime faction (murder's is 1000)"),
     "Protean_ConsumeWitnessRange": (0x9E8, 3000, "Float", "consuming: how far a person who can see the player counts as a witness, game units"),
-    "Protean_AssassinConsumeSeconds": (0x9E9, 1, "Float", "Assassin: seconds an unnoticed consumption takes"),
+    "Protean_AssassinConsumeSeconds": (0x9E9, 1, "Float", "Assassin: seconds an unnoticed consumption takes (and every Stealth Consume)"),
+    "Protean_StealthConsumeCost":  (0x9F0, 25,   "Float", "Stealth Consume: Stamina the power costs"),
+    "Protean_StealthConsumeSeconds": (0x9F1, 60, "Float", "Stealth Consume: how long it lasts (read when the plugin is built: the spell's duration)"),
     # The perk screen's level bar, like the werewolf tree (Custom Skills Framework reads them; kept by Protean): the
     # level is the perk points earned, the ratio the way to the next one; the level-up message shows the number
     # written to ShowLevelup (the framework clears it). Float, not Short: a Short level is put under skill decay.
@@ -544,6 +550,23 @@ def main():
     power(DEVASTATOR_POWER, "Protean_DevastatorPower", "Devastator",
           "Tendrils burst from your body, knocking down and tearing into every enemy within 30 meters. Your own form, "
           "full Stamina (all of it is used) and two biomass boosts.")
+    power(STEALTH_POWER, "Protean_StealthConsumePower", "Stealth Consume",
+          "For %d seconds, every person you kill with a melee sneak attack is consumed at once, and you take their face. "
+          "Your own form; costs %d Stamina." % (GLOBALS["Protean_StealthConsumeSeconds"][1], GLOBALS["Protean_StealthConsumeCost"][1]))
+    write(os.path.join(y, "MagicEffects", "Protean_StealthConsumeEffect - %s_%s.yaml" % (fid(STEALTH_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_StealthConsumeEffect\n" % (fid(STEALTH_EFFECT), PLUGIN)
+          + name_block("Stealth Consume")
+          + "Flags:\n- NoMagnitude\n- NoArea\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: FireAndForget\n"
+          "TargetType: Self\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: Every person you kill with a melee sneak attack is consumed at once.\n")
+    write(os.path.join(y, "Spells", "Protean_StealthConsume - %s_%s.yaml" % (fid(STEALTH_SPELL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_StealthConsume\n" % (fid(STEALTH_SPELL), PLUGIN)
+          + name_block("Stealth Consume")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\n"
+          "Type: Spell\nChargeTime: 0\nCastType: FireAndForget\nTargetType: Self\n"
+          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Duration: %d\n" % (fid(STEALTH_EFFECT), PLUGIN, GLOBALS["Protean_StealthConsumeSeconds"][1]))
     power(REGEN_POWER, "Protean_RegenerationPower", "Regeneration",
           "While on, Stamina drains and Health returns by the same amount. Cast again to stop.")
     write(os.path.join(y, "MagicEffects", "Protean_DevastatorTendrilEffect - %s_%s.yaml" % (fid(DEVASTATOR_TENDRIL_EFFECT), PLUGIN)),
@@ -940,7 +963,8 @@ def main():
                            "renowned": RENOWNED,
                            "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,
                                         "infectPower": INFECT_POWER, "infectedFaction": INFECTED_FACTION,
-                                        "metamorphosisPower": METAMORPHOSIS_POWER},
+                                        "metamorphosisPower": METAMORPHOSIS_POWER, "stealthPower": STEALTH_POWER,
+                                        "stealthSpell": STEALTH_SPELL, "stealthEffect": STEALTH_EFFECT},
                            "devastator": {"power": DEVASTATOR_POWER, "tendril": DEVASTATOR_TENDRIL, "regen": REGEN_POWER,
                                           "shader": DEVASTATOR_SHADER, "splash": DEVASTATOR_SPLASH},
                            "globals": {name: v[0] for name, v in GLOBALS.items()},

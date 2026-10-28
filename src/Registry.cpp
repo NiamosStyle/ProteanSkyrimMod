@@ -149,6 +149,12 @@ namespace protean
 			_infectPower = dh->LookupForm<RE::SpellItem>(d.value("infectPower", 0u), plugin);
 			_infectedFaction = dh->LookupForm<RE::TESFaction>(d.value("infectedFaction", 0u), plugin);
 			_metamorphosisPower = dh->LookupForm<RE::SpellItem>(d.value("metamorphosisPower", 0u), plugin);
+			_stealthPower = dh->LookupForm<RE::SpellItem>(d.value("stealthPower", 0u), plugin);
+			_stealthSpell = dh->LookupForm<RE::SpellItem>(d.value("stealthSpell", 0u), plugin);
+			_stealthEffect = dh->LookupForm<RE::EffectSetting>(d.value("stealthEffect", 0u), plugin);
+			if (!_stealthPower || !_stealthSpell || !_stealthEffect) {
+				logger::warn("Stealth Consume's records are missing from {}", plugin);
+			}
 			if (!_assassinMark || !_assassinPerk || !_infection || !_infectPower || !_infectedFaction || !_metamorphosisPower) {
 				logger::warn("a Deceiver record (Assassin, Infected) is missing from {}", plugin);
 			}

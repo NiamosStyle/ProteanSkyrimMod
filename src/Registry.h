@@ -91,6 +91,9 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* InfectPower() const { return _infectPower; }       // Infected: grows one
 		[[nodiscard]] RE::TESFaction* InfectedFaction() const { return _infectedFaction; }  // Infected: the player's ally
 		[[nodiscard]] RE::SpellItem* MetamorphosisPower() const { return _metamorphosisPower; }  // opens the character menu
+		[[nodiscard]] RE::SpellItem* StealthPower() const { return _stealthPower; }    // Assassin's Stealth Consume
+		[[nodiscard]] RE::SpellItem* StealthSpell() const { return _stealthSpell; }    // its timed effect, cast by Protean
+		[[nodiscard]] RE::EffectSetting* StealthEffect() const { return _stealthEffect; }  // on the player while it lasts
 		[[nodiscard]] RE::SpellItem* DevastatorPower() const { return _devastatorPower; }
 		[[nodiscard]] RE::SpellItem* DevastatorTendril() const { return _devastatorTendril; }  // the burst's tendrils, for the look
 		[[nodiscard]] RE::SpellItem* RegenPower() const { return _regenPower; }
@@ -150,6 +153,9 @@ namespace protean
 		RE::SpellItem*        _infectPower{ nullptr };
 		RE::TESFaction*       _infectedFaction{ nullptr };
 		RE::SpellItem*        _metamorphosisPower{ nullptr };
+		RE::SpellItem*        _stealthPower{ nullptr };
+		RE::SpellItem*        _stealthSpell{ nullptr };
+		RE::EffectSetting*    _stealthEffect{ nullptr };
 		RE::SpellItem*        _devastatorPower{ nullptr };
 		RE::SpellItem*        _devastatorTendril{ nullptr };
 		RE::SpellItem*        _regenPower{ nullptr };

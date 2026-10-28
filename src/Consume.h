@@ -14,6 +14,10 @@ namespace protean::Consume
 	// - Assassin: a person consumed in the player's own form while nobody can see them goes unnoticed: no crime, no
 	//   witness, the alarm their death raised called off, and the face goes on free and at once.
 	// The first time, a warning box asks first. A body a quest marks as a quest object is refused. Needs Instinct.
+	// - Stealth Consume (Assassin's power, the user's design 2026-10-28): for Protean_StealthConsumeSeconds after it is
+	//   cast (Protean_StealthConsumeCost Stamina, own form), a person the player kills with a melee sneak attack is
+	//   consumed at once, in Protean_AssassinConsumeSeconds, with no box; their face goes on free. Unseen, it is
+	//   Assassin's unnoticed consumption; seen, the usual crime. Its loot: the Protean page's own switch (on at first).
 
 	[[nodiscard]] bool OnActivate(RE::Actor* a_body);  // own form, a dead body searched (Hooks): true = no loot window
 	[[nodiscard]] bool OnAnimalActivate();             // animal form, Activate pressed: true = a body in reach is taken
@@ -21,4 +25,6 @@ namespace protean::Consume
 	void               Cancel();                       // a load
 	[[nodiscard]] bool Busy();                         // a body is being consumed
 	bool               Nearest();                      // dev: consume the nearest body, no warning
+	void               Install();                      // the hit watcher Stealth Consume needs
+	void               OnStealthCast();                // the Stealth Consume power was cast
 }

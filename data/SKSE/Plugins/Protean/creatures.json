@@ -120,7 +120,10 @@
   "infection": 2503,
   "infectPower": 2504,
   "infectedFaction": 2506,
-  "metamorphosisPower": 2508
+  "metamorphosisPower": 2508,
+  "stealthPower": 2541,
+  "stealthSpell": 2543,
+  "stealthEffect": 2542
  },
  "devastator": {
   "power": 2509,
@@ -227,6 +230,8 @@
   "Protean_ConsumeBounty": 2535,
   "Protean_ConsumeWitnessRange": 2536,
   "Protean_AssassinConsumeSeconds": 2537,
+  "Protean_StealthConsumeCost": 2544,
+  "Protean_StealthConsumeSeconds": 2545,
   "Protean_Level": 2538,
   "Protean_LevelRatio": 2539,
   "Protean_ShowLevelup": 2540

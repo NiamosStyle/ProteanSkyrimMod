@@ -56,6 +56,7 @@ namespace protean
 		bool                   consumeWarned{ false };   // the first-time warning was shown
 		bool                   consumeLoot{ false };     // the Protean page's "Take the loot when consuming"
 		bool                   consumeAsk{ true };       // the Protean page's "Ask first" (Loot / Consume / Cancel, own form)
+		bool                   stealthLoot{ true };      // the Protean page's "Stealth Consume takes the loot"
 		std::set<std::string>  renowned;                 // renowned people consumed (Registry::Renowned's matches)
 
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and

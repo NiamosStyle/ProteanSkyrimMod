@@ -68,7 +68,9 @@ your value.
 | `Protean_ConsumeHealSurvivor` | xx9E6 | Float | 0.5 | the same with Survivor rank 2 |
 | `Protean_ConsumeBounty` | xx9E7 | Float | 1000 | consuming a person in sight of people: bounty with each witness's crime faction (0 = none) |
 | `Protean_ConsumeWitnessRange` | xx9E8 | Float | 3000 | consuming: how far a person who can see the player counts as a witness, game units |
-| `Protean_AssassinConsumeSeconds` | xx9E9 | Float | 1 | Assassin: seconds an unnoticed consumption takes |
+| `Protean_AssassinConsumeSeconds` | xx9E9 | Float | 1 | Assassin: seconds an unnoticed consumption takes (and every Stealth Consume) |
+| `Protean_StealthConsumeCost` | xx9F0 | Float | 25 | Stealth Consume: Stamina the power costs |
+| `Protean_StealthConsumeSeconds` | xx9F1 | Float | 60 | Stealth Consume: how long it lasts (read when the plugin is built) |
 | `Protean_Level` | xx9EA | Float | 0 | kept by Protean (do not set): Protean's level in the perk screen, the perk points earned |
 | `Protean_LevelRatio` | xx9EB | Float | 0 | kept by Protean (do not set): the perk screen's bar to the next perk point, 0 to 1 |
 | `Protean_ShowLevelup` | xx9EC | Short | 0 | set to a level to show "Protean increased to <level>"; Custom Skills Framework clears it |

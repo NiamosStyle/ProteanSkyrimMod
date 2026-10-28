@@ -33,6 +33,7 @@ namespace protean::Consume
 			bool                 stopped{ false };  // the tentacles were taken off
 			float                blood{ 0.0f };     // when the next spray of blood is due
 			std::set<RE::FormID> seen;              // people who saw it
+			bool                 stealth{ false };  // Stealth Consume took it
 		};
 		Meal g_meal;
 
@@ -247,7 +248,7 @@ namespace protean::Consume
 			});
 		}
 
-		void Start(RE::PlayerCharacter* a_p, RE::Actor* a_body)
+		void Start(RE::PlayerCharacter* a_p, RE::Actor* a_body, bool a_stealth = false)
 		{
 			const bool animal = Shift::ActiveCreature() != nullptr;
 			const bool person = IsPerson(a_body);
@@ -257,7 +258,8 @@ namespace protean::Consume
 			m.body = a_body->GetHandle();
 			m.animal = animal;
 			m.silent = person && !animal && m.seen.empty() && Evolve::Has("assassin");
-			m.seconds = m.silent ? Dial("Protean_AssassinConsumeSeconds", 1.0f) : Dial("Protean_ConsumeSeconds", 2.0f);
+			m.stealth = a_stealth;
+			m.seconds = m.silent || a_stealth ? Dial("Protean_AssassinConsumeSeconds", 1.0f) : Dial("Protean_ConsumeSeconds", 2.0f);
 			g_meal = std::move(m);
 			if (auto* fx = Registry::Get().DevastatorShader()) {
 				a_body->ApplyEffectShader(fx, g_meal.seconds + kGone);
@@ -289,7 +291,7 @@ namespace protean::Consume
 			if (!m.silent) {
 				Watchers(a_p, body, m.seen);  // anyone who came by meanwhile
 			}
-			Loot(a_p, body, s.consumeLoot);
+			Loot(a_p, body, m.stealth && s.stealthLoot ? true : s.consumeLoot);
 			if (person && !m.seen.empty()) {
 				Crime(m.seen);  // before a stolen face goes on, so taking it off cannot forgive it
 				if (m.animal) {
@@ -303,7 +305,7 @@ namespace protean::Consume
 				Calm(a_p);
 			}
 			if (person && Evolve::Has("borrowed_visage")) {
-				Face::FromBody(body, !m.animal, m.silent, !m.seen.empty());
+				Face::FromBody(body, !m.animal, m.silent || m.stealth, !m.seen.empty());
 			}
 			if (person) {
 				Evolve::OnRenowned(body);
@@ -399,6 +401,86 @@ namespace protean::Consume
 				warn ? ", with the first-time warning" : "");
 		}
 
+		// ---- Stealth Consume
+
+		struct Pending
+		{
+			RE::ActorHandle target;
+			float           left;  // seconds it may still take to die
+		};
+		std::vector<Pending> g_pending;  // people the player sneak-attacked in melee while it was on (main thread)
+		bool                 g_stealthWas{ false };
+
+		bool StealthOn(RE::PlayerCharacter* a_p)
+		{
+			auto* e = Registry::Get().StealthEffect();
+			auto* mt = a_p ? a_p->AsMagicTarget() : nullptr;
+			return e && mt && mt->HasMagicEffect(e);
+		}
+
+		bool Allowed(RE::PlayerCharacter* a_p, RE::Actor* a_body);
+
+		// a sneak attack's target that dies within a moment is consumed (the killing blow and the death are not always
+		// reported in the same frame)
+		void Stealth(RE::PlayerCharacter* a_p, float a_delta)
+		{
+			const bool on = StealthOn(a_p);
+			if (g_stealthWas && !on) {
+				Shift::Notify("Stealth Consume has worn off.");
+				logger::info("stealth consume: worn off");
+			}
+			g_stealthWas = on;
+			for (auto it = g_pending.begin(); it != g_pending.end();) {
+				auto a = it->target.get();
+				it->left -= a_delta;
+				if (a && a->IsDead() && !g_meal.on) {
+					logger::info("stealth consume: '{}' {:08X} killed by a sneak attack", a->GetName(), a->GetFormID());
+					if (Allowed(a_p, a.get())) {
+						Start(a_p, a.get(), true);
+					}
+					it = g_pending.erase(it);
+				} else if (!a || it->left <= 0.0f) {
+					it = g_pending.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
+
+		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
+			{
+				if (!a_event || !a_event->cause || !a_event->target || !a_event->cause->IsPlayerRef() ||
+					!a_event->flags.any(RE::TESHitEvent::Flag::kSneakAttack)) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				// melee only: claws, fists, a weapon in hand; not a bow, a crossbow or a spell
+				auto* source = RE::TESForm::LookupByID(a_event->source);
+				if (source) {
+					auto* w = source->As<RE::TESObjectWEAP>();
+					if (!w || w->IsBow() || w->IsCrossbow()) {
+						return RE::BSEventNotifyControl::kContinue;
+					}
+				}
+				auto* target = a_event->target->As<RE::Actor>();
+				if (!target) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				const auto h = target->GetHandle();
+				SKSE::GetTaskInterface()->AddTask([h] {
+					auto* p = Player();
+					auto  a = h.get();
+					if (p && a && StealthOn(p) && !Shift::ActiveCreature() && IsPerson(a.get())) {
+						g_pending.push_back({ h, 1.5f });
+						logger::info("stealth consume: sneak attack on '{}' {:08X}", a->GetName(), a->GetFormID());
+					}
+				});
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+
 		// the checks both ways in share; true = go ahead
 		bool Allowed(RE::PlayerCharacter* a_p, RE::Actor* a_body)
 		{
@@ -477,6 +559,7 @@ namespace protean::Consume
 
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)
 	{
+		Stealth(a_p, a_delta);
 		if (!g_meal.on) {
 			return;
 		}
@@ -507,7 +590,46 @@ namespace protean::Consume
 		}
 	}
 
-	void Cancel() { g_meal = {}; }
+	void Cancel()
+	{
+		g_meal = {};
+		g_pending.clear();
+		g_stealthWas = false;
+	}
+
+	void Install()
+	{
+		static HitSink sink;
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&sink);
+	}
+
+	void OnStealthCast()
+	{
+		auto* p = Player();
+		auto* spell = Registry::Get().StealthSpell();
+		if (!p || !spell) {
+			return;
+		}
+		if (Shift::ActiveCreature()) {
+			Shift::Notify("Stealth Consume works only in your own form.");
+			return;
+		}
+		const float cost = Dial("Protean_StealthConsumeCost", 25.0f);
+		auto*       av = p->AsActorValueOwner();
+		if (cost > 0.0f && av->GetActorValue(RE::ActorValue::kStamina) < cost) {
+			Shift::Notify("You are too tired for Stealth Consume.");
+			logger::info("stealth consume: refused, stamina {:.0f} < {:.0f}", av->GetActorValue(RE::ActorValue::kStamina), cost);
+			return;
+		}
+		if (cost > 0.0f) {
+			av->DamageActorValue(RE::ActorValue::kStamina, cost);
+		}
+		if (auto* caster = p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
+			caster->CastSpellImmediate(spell, false, p, 1.0f, false, 0.0f, p);
+		}
+		Shift::Notify("Stealth Consume: your sneak kills will be consumed.");
+		logger::info("stealth consume: cast ({:.0f} Stamina)", cost);
+	}
 
 	bool Busy() { return g_meal.on; }
 

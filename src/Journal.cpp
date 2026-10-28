@@ -31,6 +31,8 @@ namespace protean::Journal
 		std::atomic<int>  g_lootSet{ -1 };
 		std::atomic<bool> g_ask{ true };  // the same for "Ask first"
 		std::atomic<int>  g_askSet{ -1 };
+		std::atomic<bool> g_stealthLoot{ true };  // the same for "Stealth Consume takes the loot"
+		std::atomic<int>  g_stealthLootSet{ -1 };
 
 		void __stdcall Render()
 		{
@@ -59,6 +61,13 @@ namespace protean::Journal
 			}
 			ui::TextWrapped("%s", "In your own form, sneaking and activating a body asks what to do. Off, it is consumed at once. "
 			                      "(In animal form a body is always consumed at once.)");
+			const int stealthPending = g_stealthLootSet.load();
+			bool      stealthLoot = stealthPending >= 0 ? stealthPending == 1 : g_stealthLoot.load();
+			if (ui::Checkbox("Stealth Consume takes the loot", &stealthLoot)) {
+				g_stealthLootSet = stealthLoot ? 1 : 0;
+			}
+			ui::TextWrapped("%s", "Assassin's power: on, everything a sneak kill carries goes into your inventory. Off, the "
+			                      "switch above decides, as for any body.");
 			ui::SeparatorText("Bodies consumed");
 			ui::TextWrapped("%s", "Every body gives Evolution Points by its size: small creatures 1, people and middling animals 2, "
 			                      "large creatures 3, giants and mammoths 5. Each perk point needs one more than the last. "
@@ -125,6 +134,11 @@ namespace protean::Journal
 			logger::info("menu: ask before consuming {}", s.consumeAsk ? "on" : "off");
 		}
 		g_ask = s.consumeAsk;
+		if (const int set = g_stealthLootSet.exchange(-1); set >= 0) {
+			s.stealthLoot = set == 1;
+			logger::info("menu: Stealth Consume takes the loot {}", s.stealthLoot ? "on" : "off");
+		}
+		g_stealthLoot = s.stealthLoot;
 		static float tick = 0.0f;
 		if ((tick -= a_delta) <= 0.0f) {
 			tick = 0.5f;

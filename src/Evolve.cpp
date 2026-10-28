@@ -137,6 +137,10 @@ namespace protean::Evolve
 				p->AddSpell(fp);  // Borrowed Visage: the Stolen Face power (face stealing itself asks for the perk)
 				logger::info("evolution: the Stolen Face power given");
 			}
+			if (auto* sp = reg.StealthPower(); sp && Has("assassin") && !p->HasSpell(sp)) {
+				p->AddSpell(sp);  // Assassin: the Stealth Consume power
+				logger::info("evolution: the Stealth Consume power given");
+			}
 			SyncDisease(p);
 			const auto& s = State::Get();
 			if (auto* evo = reg.Evolution(); evo && !p->HasSpell(evo) && (s.evoTotal > 0 || s.facePoints > 0 || Bought() > 0)) {
