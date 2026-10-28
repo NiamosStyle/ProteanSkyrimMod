@@ -2270,7 +2270,7 @@
    "heart": 2112,
    "power": 2113,
    "ability": 2328,
-   "size": "large_cave_ok",
+   "size": "large",
    "attacks": [
     {
      "event": "attackStartBackwardPower",
@@ -2415,7 +2415,7 @@
    "heart": 2114,
    "power": 2115,
    "ability": 2329,
-   "size": "large_cave_ok",
+   "size": "large",
    "attacks": [
     {
      "event": "attackStartBackwardPower",

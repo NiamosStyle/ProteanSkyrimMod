@@ -30,8 +30,8 @@ Health: the race value is only a base. Real health is measured live in Phase 1.
 | 22 | Mudcrab | MudcrabRace | small | 3 | Mudcrab Heart | 5-55 | 1-3 | 6 (4) |
 | 23 | Albino Spider | DLC2ExpSpiderBaseRace | small | 3 | Albino Spider Heart | 1-41 | 5-1000 | 7 (5) |
 | 24 | Chaurus | ChaurusRace | medium | 4 | Chaurus Heart | 253-253 | 12-12 | 12 (10) |
-| 25 | Troll | TrollRace | large_cave_ok | 4 | Troll Heart | 280-280 | 14-14 | 17 (7) |
-| 26 | Frost Troll | TrollFrostRace | large_cave_ok | 4 | Frost Troll Heart | 460-460 | 22-22 | 17 (10) |
+| 25 | Troll | TrollRace | large | 4 | Troll Heart | 280-280 | 14-14 | 17 (7) |
+| 26 | Frost Troll | TrollFrostRace | large | 4 | Frost Troll Heart | 460-460 | 22-22 | 17 (10) |
 | 27 | Horse | HorseRace | medium | 4 | Horse Heart | 289-289 | 4-4 | 2 (0) |
 | 28 | Horker | HorkerRace | large_cave_ok | 5 | Horker Heart | 192-192 | 3-3 | 6 (1) |
 | 29 | Mammoth | MammothRace | outdoor_only | 5 | Mammoth Heart | 931-931 | 38-38 | 6 (4) |

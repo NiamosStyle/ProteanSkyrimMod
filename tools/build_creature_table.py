@@ -14,8 +14,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(ROOT, "research", "raw")
 
 # size: how big the animal is for the indoor rule.
-#   small / medium  -> allowed anywhere
-#   large_cave_ok   -> Troll, Horker: caves/mines/ruins yes, buildings no (user decision)
+#   small / medium / large -> allowed anywhere (large: Troll, Frost Troll, user 2026-10-28)
+#   large_cave_ok   -> Horker: caves/mines/ruins yes, buildings no (user decision)
 #   outdoor_only    -> Mammoth, Giant: open air only (user decision; Giant is an assumption to confirm)
 # kind: how hard the form is to build (1 easiest .. 8 hardest), see docs/PLAN.md.
 # race: the vanilla race whose model/skeleton/attacks the player copy is built from.
@@ -47,8 +47,8 @@ CREATURES = [
     ("mudcrab", "Mudcrab", "MudcrabRace", ["Mudcrab"], "small", 3, "Mudcrab Claw Meat", "Tiny: camera check."),
     ("albino_spider", "Albino Spider", "DLC2ExpSpiderBaseRace", ["Albino Spider"], "small", 3, "Albino Spider Gland", "Dragonborn Expedition spider. Its own race, NOT Frostbite."),
     ("chaurus", "Chaurus", "ChaurusRace", ["Chaurus"], "medium", 4, "Chaurus Egg Sac", ""),
-    ("troll", "Troll", "TrollRace", ["Troll"], "large_cave_ok", 4, "Troll Fat", "Caves ok, buildings no."),
-    ("frost_troll", "Frost Troll", "TrollFrostRace", ["Frost Troll"], "large_cave_ok", 4, "Frost Troll Sinew", "Caves ok, buildings no."),
+    ("troll", "Troll", "TrollRace", ["Troll"], "large", 4, "Troll Fat", "Anywhere indoors (user 2026-10-28; was caves only)."),
+    ("frost_troll", "Frost Troll", "TrollFrostRace", ["Frost Troll"], "large", 4, "Frost Troll Sinew", "Anywhere indoors (user 2026-10-28; was caves only)."),
     ("horse", "Horse", "HorseRace", [], "medium", 4, "Horse Flank", "NPCs/game must not try to ride or claim the player."),
     ("horker", "Horker", "HorkerRace", ["Horker"], "large_cave_ok", 5, "Horker Blubber", "Land and water."),
     ("mammoth", "Mammoth", "MammothRace", ["Mammoth"], "outdoor_only", 5, "Mammoth Snout Flesh", "Huge, outdoors only."),
