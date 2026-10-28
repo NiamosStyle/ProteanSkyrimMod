@@ -14,6 +14,9 @@ namespace protean::Consume
 		constexpr float       kFront = 0.5f;   // animal form: cos of the widest angle off the facing a body is looked for (60 deg)
 		constexpr float       kGone = 0.5f;    // seconds from the tentacles' end to the body's
 		constexpr float       kCalmRange = 4000.0f;  // Assassin: how far the alarm is called off, game units (~57 m)
+		// BloodSprayImpactSetRed, Skyrim.esm: the blood Survivor's meal splashed (user's pick, live 2026-10-24); here it
+		// bursts from the body as the tentacles leave it and again as it goes (user, 2026-10-28)
+		constexpr RE::FormID  kBlood = 0x01F82A;
 
 		struct Meal
 		{
@@ -191,6 +194,31 @@ namespace protean::Consume
 			}
 		}
 
+		// from the body's chest and head (the race's own nodes; with no node the game plays nothing), up and out, and
+		// down for the splashes on the ground
+		void Blood(RE::Actor* a_body)
+		{
+			auto* set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(kBlood);
+			auto* im = RE::BGSImpactManager::GetSingleton();
+			auto* race = a_body->GetRace();
+			auto* parts = race ? race->bodyPartData : nullptr;
+			if (!set || !im || !parts) {
+				return;
+			}
+			const RE::NiPoint3 ways[] = { { 0.0f, 0.0f, 1.0f }, { 0.7f, 0.0f, 0.7f }, { -0.7f, 0.0f, 0.7f }, { 0.0f, 0.0f, -1.0f } };
+			int                played = 0;
+			for (const auto limb : { RE::BGSBodyPartDefs::LIMB_ENUM::kTorso, RE::BGSBodyPartDefs::LIMB_ENUM::kHead }) {
+				const auto* part = parts->parts[limb];
+				if (!part || part->targetName.empty()) {
+					continue;
+				}
+				for (auto way : ways) {
+					played += im->PlayImpactEffect(a_body, set, part->targetName.c_str(), way, 512.0f, false, false) ? 1 : 0;
+				}
+			}
+			logger::info("consume: {} blood splashes", played);
+		}
+
 		// the Devastator's way: the shader effect ended directly (EffectShader.Stop left it on for seconds)
 		void StopShader(RE::TESObjectREFR* a_body)
 		{
@@ -275,6 +303,7 @@ namespace protean::Consume
 			const std::string label = person ? std::string(body->GetDisplayFullName()) : c ? c->name : std::string(body->GetName());
 			Evolve::OnConsume(person ? "people" : c ? c->id : "other", label, Biomass(body, c, person));
 			logger::info("consume: '{}' {:08X} consumed, healed {:.0f} of {:.0f}", body->GetName(), body->GetFormID(), heal, max);
+			Blood(body);
 			body->Disable();
 		}
 
@@ -413,6 +442,9 @@ namespace protean::Consume
 		if (!g_meal.stopped && g_meal.t >= g_meal.seconds) {
 			g_meal.stopped = true;
 			StopShader(ref.get());
+			if (auto* body = ref->As<RE::Actor>()) {
+				Blood(body);
+			}
 		}
 		if (g_meal.t >= g_meal.seconds + kGone) {
 			Finish(a_p);
