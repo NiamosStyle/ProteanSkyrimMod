@@ -7,7 +7,7 @@ MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:
   TargetLanguage: English
-  Value: 'Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.'
+  Value: 'Wear the face you last took, or put your own face back. Consume a person to take their face.'
 Type: LesserPower
 ChargeTime: 0.5
 CastType: FireAndForget

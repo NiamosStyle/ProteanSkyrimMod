@@ -21,7 +21,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GAME = "C:/Games/steamapps/common/Skyrim Special Edition"
 PLUGIN = "Protean.esp"
 
-EFFECT, STARTER, REVERT, TOME, HEART_EFFECT = 0x800, 0x801, 0x802, 0x803, 0x804
+EFFECT, STARTER, REVERT, TOME = 0x800, 0x801, 0x802, 0x803
+# 0x804 was the hearts' effect, and FIRST_CREATURE + 2 * index each creature's heart, until 2026-10-28 (bodies are
+# consumed instead): not reused.
 BEAST_FACTION, WITNESS_FACTION = 0x805, 0x806
 FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stealing
 # Integration markers (docs/INTEGRATION.md). Per form, by its index in data/creatures.json (stable):
@@ -38,9 +40,8 @@ TREE_SCALE_X = 1.0
 TREE_SCALE_Y = 1.0
 PERKS = {
     "unbound_form": (0x960, "Unbound Form",
-                     "Take the form of any animal whose heart you have consumed. Immunity to all diseases. Passively "
-                     "absorb the life force of recent kills to temporarily boost your Stamina recovery (15% boost for "
-                     "90 seconds, stacks).", 0, 0,
+                     "Take the form of any animal you have consumed. Immunity to all diseases. Every body you consume "
+                     "boosts your Stamina recovery for a while (15% for 90 seconds, stacks).", 0, 0,
                      ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
     # Beast
     "keen": (0x961, "Keen", "Enhance your senses while wearing an animal's form. Open Favorites to access night vision, "
@@ -71,14 +72,14 @@ PERKS = {
     "regeneration": (0x96B, "Regeneration", "Cast Regeneration to switch it on or off: while on, Stamina drains and "
                      "Health returns by the same amount.",
                      -0.9, 2, []),
-    "devastator": (0x96C, "Devastator", "In your own form, with full Stamina and at least two kill boosts, cast "
-                   "Devastator: tendrils burst from your body, knocking down and tearing into every enemy within 15 "
-                   "meters. Uses all your Stamina; its kills feed no kill boost. Requires Rending Claws, Prey's Flight "
-                   "and Subtle Carapace.", 0, 3.4, []),
+    "devastator": (0x96C, "Devastator", "In your own form, with full Stamina and at least two biomass boosts, cast "
+                   "Devastator: tendrils burst from your body, knocking down and tearing into every enemy within 30 "
+                   "meters. Uses all your Stamina. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.4, []),
     # Deceiver
-    "borrowed_visage": (0x96D, "Borrowed Visage", "Sneak next to a body and activate it to copy its face, body and race, "
-                        "and join its factions. Cast Stolen Face to put the face on or take it off; putting it on costs "
-                        "Stamina, like changing form. Anyone who sees the theft turns hostile.", -1.8, 0.8,
+    "borrowed_visage": (0x96D, "Borrowed Visage", "Consume a person to take their face, body and race, and join their "
+                        "factions (consumed in animal form, the face is kept for later). Cast Stolen Face to put the face "
+                        "on or take it off; putting it on costs Stamina, like changing form. Anyone who sees the theft "
+                        "turns hostile.", -1.8, 0.8,
                         ["metamorphosis", "inconspicuous"]),
     "metamorphosis": (0x96E, "Metamorphosis", "Out of a fight, in your own face and with full Stamina, reshape yourself: "
                       "choose a new race, face and body, keeping your skills and perks. Every bounty on you is cleared. "
@@ -89,15 +90,17 @@ PERKS = {
     "infected": (0x970, "Infected", "Cast Infect to grow an infection (costs Stamina), then slip it into someone's "
                  "pocket: for a day they fight at your side. Only one person carries it at a time.", -1.4, 3.1, []),
     "assassin": (0x971, "Assassin", "While you wear a stolen face, your sneak attacks do ten times the damage against "
-                 "anyone who shares a faction with that face and is not hostile to you.",
+                 "anyone who shares a faction with that face and is not hostile to you. Consume a person while nobody "
+                 "can see you and it goes unnoticed: no crime, the alarm their death raised is called off, and their "
+                 "face goes on at once at no Stamina cost.",
                  -2.5, 3.3, []),
 }
 # Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
 # base id -> (local id, description)
 RANK2 = {
     "survivor": (0x972, "Increase the amount of Health you gain while wearing an animal's form by an even greater "
-                 "amount, and gain the ability to heal by eating (predators may feed on corpses, herbivores may feed on "
-                 "plants, and omnivores may feed on either. Feeding on a person will cause witnesses to turn hostile)."),
+                 "amount. Consuming a body heals half your Health, and in the form of a herbivore or an omnivore you can "
+                 "eat plants to heal."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
@@ -182,7 +185,7 @@ GLOBALS = {
     "Protean_DamageMult":          (0x94B, 1.0,  "Float", "multiplies all damage the player deals while transformed"),
     "Protean_ArmorBonus":          (0x94C, 0,    "Float", "armor rating added while transformed"),
     "Protean_ChangeStaminaCost":   (0x94D, 15,   "Float", "stamina a player-requested change into a form costs (0 = free)"),
-    "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one kill's stamina-regeneration stack lasts"),
+    "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one consumed body's stamina-regeneration stack lasts (the biomass boost; kills gave it until 2026-10-28)"),
     "Protean_KillBoostPct":        (0x94F, 15,   "Float", "stamina regeneration each stack adds, in percentage points of the normal rate"),
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
     "Protean_PerkPoints":          (0x951, 0,    "Float", "Protean perk points to spend (kept by Protean; the perk menu spends them)"),
@@ -229,15 +232,15 @@ GLOBALS = {
     "Protean_CarapaceArmorPerLevel": (0x9AB, 4,  "Float", "Subtle Carapace rank 1: armor added per player level"),
     "Protean_Carapace2Armor":      (0x9AC, 100,  "Float", "Subtle Carapace rank 2: armor before the level part (replaces rank 1's)"),
     "Protean_Carapace2ArmorPerLevel": (0x9AD, 7, "Float", "Subtle Carapace rank 2: armor added per player level"),
-    "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "Survivor rank 2: share of maximum health a meal of a body heals"),
+    "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "unused since 2026-10-28 (bodies are consumed: Protean_ConsumeHealSurvivor)"),
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
-    "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a meal takes, standing still"),
-    "Protean_FeedReach":           (0x9B1, 250,  "Float", "Survivor rank 2: how near a body or plant must be, game units"),
+    "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a plant takes to eat, standing still"),
+    "Protean_FeedReach":           (0x9B1, 250,  "Float", "animal form: how near a body to consume or a plant to eat must be, game units"),
     "Protean_StalkerFadeSeconds":  (0x9B5, 2,    "Float", "Stalker: seconds still or walking before the animal fades"),
     "Protean_StalkerDrain":        (0x9B6, 2,    "Float", "Stalker: stamina a second while faded and walking (standing is free)"),
     "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
     "Protean_StalkerRunMult":      (0x9B9, 2,    "Float", "Stalker: running while faded costs this times the walking drain"),
-    "Protean_ComboStacks":         (0x9BA, 5,    "Float", "kill boost stacks at once that give an evolution point, once per fight (0 = off)"),
+    "Protean_ComboStacks":         (0x9BA, 5,    "Float", "unused since 2026-10-28 (evolution points come only from consuming)"),
     "Protean_XpOneHanded":         (0x9BD, 1,    "Float", "multiplies the One-Handed skill uses of a bite or claw hit (vanilla: its listed damage)"),
     "Protean_XpLightArmor":        (0x9BE, 0.38, "Float", "Light Armor skill uses per hit that hurts, as an animal or with the carapace (vanilla, measured)"),
     "Protean_XpSneak":             (0x9BF, 0.62, "Float", "Sneak skill uses a second moving faded near someone unaware (vanilla, measured)"),
@@ -251,7 +254,7 @@ GLOBALS = {
     "Protean_DevastatorRadius":    (0x9D1, 2100, "Float", "Devastator: enemies this near are struck, game units (2100 ~ 30 m, the user's pick; 1050 missed a bandit on a ledge)"),
     "Protean_DevastatorDamage":    (0x9D2, 100,  "Float", "Devastator: damage before the level part"),
     "Protean_DevastatorDamagePerLevel": (0x9D3, 8, "Float", "Devastator: damage added per player level"),
-    "Protean_DevastatorStacks":    (0x9D4, 2,    "Float", "Devastator: kill boosts it needs"),
+    "Protean_DevastatorStacks":    (0x9D4, 2,    "Float", "Devastator: biomass boosts it needs"),
     "Protean_DevastatorWindup":    (0x9D5, 2.0,  "Float", "Devastator: real seconds of the ritual pose before the burst (1 ended before the pose, user 2026-10-27)"),
     "Protean_DevastatorSlowMo":    (0x9D6, 0.15, "Float", "Devastator: game speed in the slow motion after the burst (1 = none; 0.33 was hard to see)"),
     "Protean_DevastatorForce":     (0x9D7, 10,   "Float", "Devastator: how hard enemies are thrown down (PushActorAway force)"),
@@ -264,6 +267,13 @@ GLOBALS = {
     "Protean_DevastatorRethrow":   (0x9E1, 0.25, "Float", "Devastator: real seconds between throws of the tendrils while held, so they stay out"),
     "Protean_DevastatorTendrilHeight": (0x9E2, 60, "Float", "Devastator: height of the tendrils' casters above the feet (110 threw them from above the head)"),
     "Protean_DevastatorTendrilOut": (0x9E3, 0, "Float", "Devastator: distance of the tendrils' casters from the body's middle (45 and 15 threw some from too far out)"),
+    # Consuming bodies (src/Consume.cpp; the user's design, 2026-10-28)
+    "Protean_ConsumeSeconds":      (0x9E4, 2,    "Float", "consuming: seconds the red tentacles cover the body before it is gone"),
+    "Protean_ConsumeHeal":         (0x9E5, 0.2,  "Float", "consuming: share of maximum health a body heals (user: 20%)"),
+    "Protean_ConsumeHealSurvivor": (0x9E6, 0.5,  "Float", "consuming with Survivor rank 2: share of maximum health a body heals (user: 50%)"),
+    "Protean_ConsumeBounty":       (0x9E7, 1000, "Float", "consuming a person in sight of people: bounty with each witness's crime faction (murder's is 1000)"),
+    "Protean_ConsumeWitnessRange": (0x9E8, 3000, "Float", "consuming: how far a person who can see the player counts as a witness, game units"),
+    "Protean_AssassinConsumeSeconds": (0x9E9, 1, "Float", "Assassin: seconds an unnoticed consumption takes"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -360,7 +370,7 @@ EXTRA_FACTIONS = {
     "werewolf": ["Skyrim.esm:091822"],  # PlayerWerewolfFaction
     "werebear": ["Skyrim.esm:091822"],
 }
-FIRST_CREATURE = 0x810  # heart = base + 2*index, power = base + 2*index + 1
+FIRST_CREATURE = 0x810  # power = base + 2*index + 1 (base + 2*index was the heart until 2026-10-28)
 
 
 def fid(n):
@@ -467,16 +477,6 @@ def main():
           "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
           "Description:\n  TargetLanguage: English\n  Value: ''\n")
 
-    # Hearts need ONE effect: the inventory menu dereferences an ingestible's first effect, and a food
-    # with none crashed the game (measured 2026-10-19). This one does nothing at all.
-    write(os.path.join(y, "MagicEffects", "Protean_HeartEffect - %s_%s.yaml" % (fid(HEART_EFFECT), PLUGIN)),
-          "FormKey: %s:%s\nEditorID: Protean_HeartEffect\n" % (fid(HEART_EFFECT), PLUGIN)
-          + name_block("Shapeshifter's Hunger")
-          + "Flags:\n- NoDuration\n- NoMagnitude\n- NoArea\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
-          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: FireAndForget\n"
-          "SkillUsageMultiplier: 1\nDualCastScale: 1\n"
-          "Description:\n  TargetLanguage: English\n  Value: ''\n")
-
     # ---- integration markers and dials (for a larger mod built on Protean; see docs/INTEGRATION.md) ----
     def keyword(local, editor_id):
         write(os.path.join(y, "Keywords", "%s - %s_%s.yaml" % (editor_id, fid(local), PLUGIN)),
@@ -517,11 +517,12 @@ def main():
               "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(EFFECT), PLUGIN))
 
     power(STARTER, "Protean_Instinct", "Shapeshifter's Instinct",
-          "You can learn the forms of animals by eating their hearts. Cast to recall the forms you know.")
+          "Sneak and activate a body to consume it (in animal form, just activate it). Consuming an animal teaches its "
+          "form. Cast to recall the forms you know.")
     power(REVERT, "Protean_RevertForm", "Revert Form",
           "Return to your own form.")
     power(FACE_POWER, "Protean_FacePower", "Shapeshift: Stolen Face",
-          "Wear the face you last stole from a corpse, or put your own face back. Sneak next to a corpse and activate it to steal a face.")
+          "Wear the face you last took, or put your own face back. Consume a person to take their face.")
     power(INFECT_POWER, "Protean_InfectPower", "Infect",
           "Grow an infection to slip into someone's pocket: for a day they fight at your side. Costs %d Stamina."
           % GLOBALS["Protean_InfectCost"][1])
@@ -529,8 +530,8 @@ def main():
           "Reshape yourself: a new race, face and body, keeping your skills and perks. Clears every bounty. Out of a "
           "fight, in your own face, with full Stamina; uses all of it.")
     power(DEVASTATOR_POWER, "Protean_DevastatorPower", "Devastator",
-          "Tendrils burst from your body, knocking down and tearing into every enemy within 15 meters. Your own form, "
-          "full Stamina (all of it is used) and two kill boosts.")
+          "Tendrils burst from your body, knocking down and tearing into every enemy within 30 meters. Your own form, "
+          "full Stamina (all of it is used) and two biomass boosts.")
     power(REGEN_POWER, "Protean_RegenerationPower", "Regeneration",
           "While on, Stamina drains and Health returns by the same amount. Cast again to stop.")
     write(os.path.join(y, "MagicEffects", "Protean_DevastatorTendrilEffect - %s_%s.yaml" % (fid(DEVASTATOR_TENDRIL_EFFECT), PLUGIN)),
@@ -740,17 +741,17 @@ def main():
               "BaseCost: 0\nFlags:\n- ManualCostCalc\nType: Ability\nChargeTime: 0\nCastType: ConstantEffect\nTargetType: Self\n"
               "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 0\n" % (fid(e), PLUGIN))
 
-    # ---- the kill boost, as Active Effects shows it
+    # ---- the biomass boost (the kill boost until 2026-10-28), as Active Effects shows it
     write(os.path.join(y, "MagicEffects", "Protean_KillBoostEffect - %s_%s.yaml" % (fid(KILL_BOOST_EFFECT), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_KillBoostEffect\n" % (fid(KILL_BOOST_EFFECT), PLUGIN)
-          + name_block("Kill Boost")
+          + name_block("Biomass Boost")
           + "Flags:\n- Recover\n- NoArea\n- Painless\n- NoHitEffect\nBaseCost: 0\n"
           "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Script\nCastType: ConstantEffect\n"
           "SkillUsageMultiplier: 0\nDualCastScale: 1\n"
-          "Description:\n  TargetLanguage: English\n  Value: Stamina regenerates <mag>% faster. Every kill adds to it for a while.\n")
+          "Description:\n  TargetLanguage: English\n  Value: Stamina regenerates <mag>% faster. Every body consumed adds to it for a while.\n")
     write(os.path.join(y, "Spells", "Protean_KillBoost - %s_%s.yaml" % (fid(KILL_BOOST_SPELL), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_KillBoost\n" % (fid(KILL_BOOST_SPELL), PLUGIN)
-          + name_block("Kill Boost")
+          + name_block("Biomass Boost")
           + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
           "BaseCost: 0\nFlags:\n- ManualCostCalc\nType: Ability\nChargeTime: 0\nCastType: ConstantEffect\nTargetType: Self\n"
           "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 15\n" % (fid(KILL_BOOST_EFFECT), PLUGIN))
@@ -828,7 +829,7 @@ def main():
         "skills": [{
             "id": "protean",
             "name": "Protean",
-            "description": "New perks come with feeding. Perk points take a little more feeding as you go.",
+            "description": "New perks come with consuming. Perk points take a little more biomass as you go.",
             "nodes": [{"id": pid, "perk": ref(local), "x": round(x * TREE_SCALE_X, 2), "y": round(yy * TREE_SCALE_Y, 2),
                        **({"links": links} if links else {})}
                       for pid, (local, _, _, x, yy, links) in PERKS.items()],
@@ -851,17 +852,7 @@ def main():
     for index, c in enumerate(creatures):
         if c["id"] not in enabled:
             continue
-        heart = FIRST_CREATURE + 2 * index
-        pw = heart + 1
-        bnd = "ObjectBounds:\n  First: -3, -6, -3\n  Second: 3, 6, 3\n"
-        write(os.path.join(y, "Ingestibles", "Protean_Heart_%s - %s_%s.yaml" % (c["id"], fid(heart), PLUGIN)),
-              "FormKey: %s:%s\nEditorID: Protean_Heart_%s\n" % (fid(heart), PLUGIN, c["id"])
-              + bnd + name_block(c["unique_item"])
-              + "Keywords:\n- 08CDEA:Skyrim.esm\n"
-              "Model:\n  File: %s\n" % table["item_model"].replace("\\", "\\\\").join(['"', '"'])
-              + "PickUpSound: 03EDBD:Skyrim.esm\nPutDownSound: 03EDC0:Skyrim.esm\nWeight: 0.5\nValue: 5\n"
-              "Flags:\n- NoAutoCalc\n- FoodItem\nConsumeSound: 0B6435:Skyrim.esm\n"
-              "Effects:\n- BaseEffect: %s:%s\n  Data: {}\n" % (fid(HEART_EFFECT), PLUGIN))
+        pw = FIRST_CREATURE + 2 * index + 1
         power(pw, "Protean_Power_%s" % c["id"], "Shapeshift: %s" % c["name"],
               "Become a %s. Cast again, or use Revert Form, to return." % c["name"].lower())
 
@@ -888,13 +879,12 @@ def main():
         runtime.append({
             "id": c["id"], "name": c["name"], "index": index,
             "race": {"file": rf, "id": int(rid, 16)},
-            "heart": heart, "power": pw, "ability": ab,
+            "power": pw, "ability": ab,
             "size": c["size_class"],
             "attacks": [{"event": a["event"], "flags": a["flags"], "spell": a["spell"]} for a in c.get("attacks", []) if a["event"] not in by_race(BLOCKED, c, creatures)],
             "camera_height": round(0.9 * c["bound_height"]) if c.get("bound_height") else 60,
             "factions": [{"file": f.split(":")[0], "id": int(f.split(":")[1], 16)} for f in c["factions"] + EXTRA_FACTIONS.get(c["id"], [])],
             "ladder": c["health_ladder"],
-            # vanilla NPC records of this creature: dead ones get a heart when looted
             "race_names": [c["race"]],
             **body(c, npcs),
             **by_race(MELEE, c, creatures),

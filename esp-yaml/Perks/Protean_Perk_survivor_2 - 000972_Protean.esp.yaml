@@ -5,6 +5,6 @@ Name:
   Value: 'Survivor'
 Description:
   TargetLanguage: English
-  Value: 'Increase the amount of Health you gain while wearing an animal''s form by an even greater amount, and gain the ability to heal by eating (predators may feed on corpses, herbivores may feed on plants, and omnivores may feed on either. Feeding on a person will cause witnesses to turn hostile).'
+  Value: 'Increase the amount of Health you gain while wearing an animal''s form by an even greater amount. Consuming a body heals half your Health, and in the form of a herbivore or an omnivore you can eat plants to heal.'
 NumRanks: 1
 Playable: True

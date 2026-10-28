@@ -249,13 +249,12 @@ namespace protean
 			cr.spellDelay = c.value("spell_delay", 0.3f);
 			const auto& r = c.at("race");
 			cr.race = dh->LookupForm<RE::TESRace>(r.at("id").get<RE::FormID>(), r.at("file").get<std::string>());
-			cr.heart = dh->LookupForm<RE::AlchemyItem>(c.at("heart").get<RE::FormID>(), plugin);
 			cr.power = dh->LookupForm<RE::SpellItem>(c.at("power").get<RE::FormID>(), plugin);
 			cr.index = c.value("index", -1);
 			cr.ability = dh->LookupForm<RE::SpellItem>(c.value("ability", 0u), plugin);
-			if (!cr.race || !cr.heart || !cr.power) {
-				logger::error("creature '{}' skipped: race {} heart {} power {}", cr.id, static_cast<bool>(cr.race),
-					static_cast<bool>(cr.heart), static_cast<bool>(cr.power));
+			if (!cr.race || !cr.power) {
+				logger::error("creature '{}' skipped: race {} power {}", cr.id, static_cast<bool>(cr.race),
+					static_cast<bool>(cr.power));
 				continue;
 			}
 			for (const auto& f : c.value("factions", nlohmann::json::array())) {
@@ -290,16 +289,6 @@ namespace protean
 	{
 		for (const auto& c : _creatures) {
 			if (c.power->GetFormID() == a_id) {
-				return &c;
-			}
-		}
-		return nullptr;
-	}
-
-	const Creature* Registry::ByHeart(RE::FormID a_id) const
-	{
-		for (const auto& c : _creatures) {
-			if (c.heart->GetFormID() == a_id) {
 				return &c;
 			}
 		}

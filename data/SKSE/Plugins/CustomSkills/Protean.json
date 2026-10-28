@@ -11,7 +11,7 @@
     {
       "id": "protean",
       "name": "Protean",
-      "description": "New perks come with feeding. Perk points take a little more feeding as you go.",
+      "description": "New perks come with consuming. Perk points take a little more biomass as you go.",
       "nodes": [
         {
           "id": "unbound_form",

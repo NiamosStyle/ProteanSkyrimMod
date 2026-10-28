@@ -20,7 +20,6 @@ namespace protean
 		std::string                       id;
 		std::string                       name;
 		RE::TESRace*                      race{ nullptr };
-		RE::AlchemyItem*                  heart{ nullptr };
 		RE::SpellItem*                    power{ nullptr };
 		RE::SpellItem*                    ability{ nullptr };   // hidden marker carried while in this form (keywords
 		                                                        // Protean_Transformed + Protean_Form_<id>)
@@ -78,7 +77,7 @@ namespace protean
 		// senses (self spells) Protean casts and dispels
 		[[nodiscard]] const std::array<RE::SpellItem*, 3>& KeenPowers() const { return _keenPowers; }
 		[[nodiscard]] const std::array<RE::SpellItem*, 3>& KeenSenses() const { return _keenSenses; }
-		[[nodiscard]] RE::SpellItem* KillBoostDisplay() const { return _killBoost; }  // shows the kill boost in Active Effects
+		[[nodiscard]] RE::SpellItem* KillBoostDisplay() const { return _killBoost; }  // shows the biomass boost in Active Effects
 		[[nodiscard]] const std::vector<RE::SpellItem*>& GlideMarkers() const { return _glideMarkers; }  // OAR glide pose conditions
 		[[nodiscard]] RE::SpellItem* PredatorPoison() const { return _predatorPoison; }  // Predator rank 2; its effect [0] damages health
 		[[nodiscard]] RE::SpellItem* StalkerFade() const { return _stalkerFade; }        // Stalker: the game's Invisibility, cast on the player
@@ -104,7 +103,6 @@ namespace protean
 		[[nodiscard]] RE::TESFaction* ExposedFaction() const { return _exposed; }
 		[[nodiscard]] const std::vector<RE::BGSKeyword*>& OpenInteriorKeywords() const { return _openKeywords; }
 		[[nodiscard]] const Creature* ByPower(RE::FormID a_id) const;
-		[[nodiscard]] const Creature* ByHeart(RE::FormID a_id) const;
 		[[nodiscard]] const Creature* ByRace(const RE::TESRace* a_race) const;
 		// The creature a (dead) actor counts as: among the creatures sharing its race, the one whose name equals
 		// the actor's display name (Ice Wolf, Pit Wolf, Cave Bear...), else the first creature of that race.

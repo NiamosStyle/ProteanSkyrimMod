@@ -5,6 +5,6 @@ Name:
   Value: 'Devastator'
 Description:
   TargetLanguage: English
-  Value: 'In your own form, with full Stamina and at least two kill boosts, cast Devastator: tendrils burst from your body, knocking down and tearing into every enemy within 15 meters. Uses all your Stamina; its kills feed no kill boost. Requires Rending Claws, Prey''s Flight and Subtle Carapace.'
+  Value: 'In your own form, with full Stamina and at least two biomass boosts, cast Devastator: tendrils burst from your body, knocking down and tearing into every enemy within 30 meters. Uses all your Stamina. Requires Rending Claws, Prey''s Flight and Subtle Carapace.'
 NumRanks: 1
 Playable: True

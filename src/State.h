@@ -14,7 +14,7 @@ namespace protean
 	// removing the mod leaves no trace in the save proper beyond what the engine itself changed.
 	struct State
 	{
-		std::set<std::string> known;   // creature ids whose heart the player has eaten
+		std::set<std::string> known;   // creature ids whose form the player has learned (consumed; a heart until 2026-10-28)
 		std::string           active;  // creature id the player is currently transformed into, or empty
 
 		// Saved at the moment of transforming, used to revert.
@@ -36,7 +36,7 @@ namespace protean
 		// Phase 2: the move on each mouse button, per animal: creature id -> (LMB event, RMB event); empty = default attacks.
 		std::map<std::string, std::pair<std::string, std::string>> moves;
 
-		// Corpses that already had their heart added, so a taken heart is not added again.
+		// Corpses that had their heart added (hearts were dropped 2026-10-28; still read from old saves).
 		std::set<RE::FormID> looted;
 
 		// Crime gold (per crime faction) when the player turned into an animal; anything gained as the animal is
@@ -52,6 +52,9 @@ namespace protean
 		bool                   faceCrimeTaken{ false };  // faceCrime holds a snapshot (a save from before it: none)
 		bool                   regenOn{ false };         // Regeneration switched on
 		std::map<std::string, float> dialDefaults;       // Protean.esp's dial values when saved (Registry::SettleDials)
+		std::map<std::string, std::uint32_t> consumed;   // bodies consumed per kind: creature id, "people" or "other"
+		bool                   consumeWarned{ false };   // the first-time warning was shown
+		bool                   consumeLoot{ false };     // the Protean page's "Take the loot when consuming"
 
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and
 		// taken off with the Stolen Face power. The player's own look is kept here while a stolen one is worn.
@@ -100,14 +103,14 @@ namespace protean
 		// Evolution points and the perks (src/Evolve.cpp). The count only goes up; perk points are worked out from it.
 		std::uint32_t                        evoTotal{ 0 };
 		std::uint32_t                        facePoints{ 0 };  // perk points given directly by named faces
-		std::map<std::string, std::uint32_t> feeds;            // creature id -> hearts eaten
-		std::vector<float>                   boosts;           // kill boost stacks: seconds left on each
+		std::map<std::string, std::uint32_t> feeds;            // creature id -> hearts eaten (until 2026-10-28; kept)
+		std::vector<float>                   boosts;           // biomass boost stacks: seconds left on each
 		float                                boostApplied{ 0.0f };    // StaminaRateMult added now
 		float                                diseaseApplied{ 0.0f };  // ResistDisease added now
 		float                                rushApplied{ 0.0f };     // SpeedMult Predator's Rush added now
 		float                                carapaceApplied{ 0.0f };  // DamageResist Subtle Carapace added now
 		std::set<RE::FormID>                 eaten;                    // bodies already eaten (Survivor 2)
-		bool                                 comboSpent{ false };      // this fight's kill-boost point is taken (until out of combat)
+		bool                                 comboSpent{ false };      // unused since 2026-10-28 (the kill-boost point is gone)
 		float                                stalkerNoiseApplied{ 0.0f };  // MovementNoiseMult Stalker's fade took off now
 		std::vector<std::pair<RE::FormID, float>> provoked;  // animals frenzied for biting back, and their own Aggression
 		float                                inconspicuousApplied{ 0.0f };  // Sneak Inconspicuous added now

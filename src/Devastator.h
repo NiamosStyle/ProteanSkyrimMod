@@ -3,15 +3,14 @@
 namespace protean::Devastator
 {
 	// Devastator (the user's design, 2026-10-27, after Prototype's devastator attacks): the power, cast in the player's
-	// own form with full Stamina (all spent) and Protean_DevastatorStacks kill boosts, plays the ritual pose and the sound of
+	// own form with full Stamina (all spent) and Protean_DevastatorStacks biomass boosts, plays the ritual pose and the sound of
 	// the change into a beast while the camera slowly circles the player; then, in a moment of slow motion, tendrils burst from the body in
 	// every direction (for the look) and every hostile actor within Protean_DevastatorRadius is knocked down and takes
-	// Protean_DevastatorDamage + Protean_DevastatorDamagePerLevel x level. The damage is the player's but not a weapon's:
-	// its kills feed no kill boost.
+	// Protean_DevastatorDamage + Protean_DevastatorDamagePerLevel x level. The damage is the player's but not a weapon's.
+	// (Until 2026-10-28 kills fed the boost, and the Devastator's own were left out.)
 
 	void OnCast();                         // the Devastator power was cast
 	void OnFrame(RE::PlayerCharacter* a_p);  // main thread, every frame (it keeps real time: slow motion slows the game's)
-	[[nodiscard]] bool Struck(RE::FormID a_id);  // hit by a Devastator a moment ago: its death is not a kill-boost kill
 	void Reset();                          // a load: no attack goes on
 }
 

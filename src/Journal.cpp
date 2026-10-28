@@ -6,6 +6,8 @@
 
 #include <SKSEMenuFramework.h>
 
+#include <atomic>
+
 namespace protean::Journal
 {
 	namespace
@@ -15,9 +17,7 @@ namespace protean::Journal
 		struct Row
 		{
 			std::string   name;
-			std::uint32_t hearts{ 0 };
-			std::uint32_t points{ 0 };
-			std::uint32_t next{ 0 };  // the heart that pays next; 0 = none left
+			std::uint32_t bodies{ 0 };
 		};
 
 		// the numbers as the main thread last saw them: the page draws on the render thread
@@ -25,37 +25,45 @@ namespace protean::Journal
 		std::vector<Row> g_rows;
 		std::string      g_summary;
 		std::string      g_next;
+		std::string      g_total;
+		// the loot switch: the page shows g_loot and leaves a click in g_lootSet (-1 = none) for the main thread
+		std::atomic<bool> g_loot{ false };
+		std::atomic<int>  g_lootSet{ -1 };
 
 		void __stdcall Render()
 		{
 			std::vector<Row> rows;
-			std::string      summary, next;
+			std::string      summary, next, total;
 			{
 				std::scoped_lock l(g_lock);
 				rows = g_rows;
 				summary = g_summary;
 				next = g_next;
+				total = g_total;
 			}
 			ui::TextUnformatted(summary.c_str());
 			ui::TextUnformatted(next.c_str());
-			ui::SeparatorText("Hearts eaten");
-			ui::TextWrapped("%s", "Each kind gives an Evolution Point for its 1st, 3rd, 5th, 10th, 15th and 20th heart.");
-			if (ui::BeginTable("hearts", 4, ui::ImGuiTableFlags_RowBg | ui::ImGuiTableFlags_Borders | ui::ImGuiTableFlags_SizingStretchProp)) {
-				ui::TableSetupColumn("Creature", ui::ImGuiTableColumnFlags_WidthStretch, 2.0f);
-				ui::TableSetupColumn("Hearts", ui::ImGuiTableColumnFlags_WidthStretch, 1.0f);
-				ui::TableSetupColumn("Points", ui::ImGuiTableColumnFlags_WidthStretch, 1.0f);
-				ui::TableSetupColumn("Next point", ui::ImGuiTableColumnFlags_WidthStretch, 1.5f);
+			ui::SeparatorText("Consuming");
+			const int pending = g_lootSet.load();
+			bool      loot = pending >= 0 ? pending == 1 : g_loot.load();
+			if (ui::Checkbox("Take the loot when consuming", &loot)) {
+				g_lootSet = loot ? 1 : 0;
+			}
+			ui::TextWrapped("%s", "Off, a consumed body's belongings are destroyed with it (quest items are always kept).");
+			ui::SeparatorText("Bodies consumed");
+			ui::TextWrapped("%s", "Every body gives Evolution Points by its size: small creatures 1, people and middling animals 2, "
+			                      "large creatures 3, giants and mammoths 5.");
+			ui::TextUnformatted(total.c_str());
+			if (!rows.empty() && ui::BeginTable("bodies", 2, ui::ImGuiTableFlags_RowBg | ui::ImGuiTableFlags_Borders | ui::ImGuiTableFlags_SizingStretchProp)) {
+				ui::TableSetupColumn("Kind", ui::ImGuiTableColumnFlags_WidthStretch, 2.0f);
+				ui::TableSetupColumn("Bodies", ui::ImGuiTableColumnFlags_WidthStretch, 1.0f);
 				ui::TableHeadersRow();
 				for (const auto& r : rows) {
 					ui::TableNextRow();
 					ui::TableNextColumn();
 					ui::TextUnformatted(r.name.c_str());
 					ui::TableNextColumn();
-					ui::TextUnformatted(std::to_string(r.hearts).c_str());
-					ui::TableNextColumn();
-					ui::TextUnformatted(std::format("{} / {}", r.points, Evolve::HeartPointsMax()).c_str());
-					ui::TableNextColumn();
-					ui::TextUnformatted(r.next ? std::format("heart {}", r.next).c_str() : "all earned");
+					ui::TextUnformatted(std::to_string(r.bodies).c_str());
 				}
 				ui::EndTable();
 			}
@@ -63,25 +71,22 @@ namespace protean::Journal
 
 		void Refresh()
 		{
-			const auto&      s = State::Get();
+			auto&            s = State::Get();
 			std::vector<Row> rows;
-			for (const auto& c : Registry::Get().All()) {
-				if (!c.heart) {
-					continue;
-				}
-				const auto    it = s.feeds.find(c.id);
-				const auto    n = it == s.feeds.end() ? 0u : it->second;
-				rows.push_back({ c.name, n, Evolve::HeartPoints(n), Evolve::NextHeart(n) });
+			std::uint32_t    bodies = 0;
+			for (const auto& [kind, n] : s.consumed) {
+				const auto* c = Registry::Get().ById(kind);
+				rows.push_back({ kind == "people" ? "People" : c ? c->name : "Other creatures", n });
+				bodies += n;
 			}
-			// kinds already tasted first, the most eaten on top; the rest by name
-			std::ranges::sort(rows, [](const Row& a, const Row& b) {
-				return a.hearts != b.hearts ? a.hearts > b.hearts : a.name < b.name;
-			});
+			// the most consumed on top
+			std::ranges::sort(rows, [](const Row& a, const Row& b) { return a.bodies != b.bodies ? a.bodies > b.bodies : a.name < b.name; });
 			const auto at = Evolve::NextPointAt(s.evoTotal);
 			std::scoped_lock l(g_lock);
 			g_rows = std::move(rows);
 			g_summary = std::format("Evolution Points: {}    Perk points available: {}", s.evoTotal, Evolve::PointsAvailable());
 			g_next = std::format("Next perk point at {} Evolution Points ({} to go)", at, at - s.evoTotal);
+			g_total = std::format("{} bodies consumed", bodies);
 		}
 	}
 
@@ -98,6 +103,12 @@ namespace protean::Journal
 
 	void OnFrame(float a_delta)
 	{
+		auto& s = State::Get();
+		if (const int set = g_lootSet.exchange(-1); set >= 0) {
+			s.consumeLoot = set == 1;
+			logger::info("menu: take the loot when consuming {}", s.consumeLoot ? "on" : "off");
+		}
+		g_loot = s.consumeLoot;
 		static float tick = 0.0f;
 		if ((tick -= a_delta) <= 0.0f) {
 			tick = 0.5f;

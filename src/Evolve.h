@@ -4,19 +4,18 @@
 
 namespace protean::Evolve
 {
-	// Evolution points are a running count of feedings: they only go up and are never spent. Perk points cost 1, 1, 2,
-	// 2, 3, 3, ... of them (earned at totals 1, 2, 4, 6, 9, 12, 16, ...; the whole tree 132). Until 2026-10-25 each cost
-	// one more than the last (253 for the tree, more than all 35 kinds' hearts could give; the user: far too slow). Named faces add perk points directly (they skip the count). Perk points
-	// buy Protean perks only.
+	// Evolution points are a running count of the biomass consumed (Consume; the user's design, 2026-10-28: earned
+	// solely that way, hearts and kills give none): they only go up and are never spent. Perk points cost 1, 1, 2, 2,
+	// 3, 3, ... of them (earned at totals 1, 2, 4, 6, 9, 12, 16, ...; the whole tree 132). Until 2026-10-25 each cost
+	// one more than the last (253 for the tree; the user: far too slow). The dev channel can still add perk points
+	// directly (face points). Perk points buy Protean perks only.
 
 	[[nodiscard]] std::uint32_t PointsEarned(std::uint32_t a_total);  // perk points the count has earned
 	[[nodiscard]] std::uint32_t PointsAvailable();                    // earned + face points - perks bought
 
-	// a heart was eaten: the 1st, 3rd, 5th, 10th, 15th and 20th of a kind are each worth a point (6 a kind)
-	void Feed(const Creature& a_creature);
-	[[nodiscard]] std::uint32_t HeartPoints(std::uint32_t a_hearts);  // points so many hearts of a kind gave
-	[[nodiscard]] std::uint32_t HeartPointsMax();                     // the most a kind gives (6)
-	[[nodiscard]] std::uint32_t NextHeart(std::uint32_t a_hearts);    // the next heart that pays; 0 = none left
+	// a body was consumed: a_points of biomass (small 1, people and middling animals 2, large 3, huge 5), counted per
+	// kind (a creature id, "people" or "other") for the Protean page
+	void OnConsume(std::string_view a_kind, std::string_view a_label, std::uint32_t a_points);
 	[[nodiscard]] std::uint32_t NextPointAt(std::uint32_t a_total);   // the count that earns the next perk point
 	void Add(std::uint32_t a_points, std::string_view a_why);
 	void AddFacePoint(std::string_view a_why);
@@ -27,8 +26,9 @@ namespace protean::Evolve
 	bool               Buy(std::string_view a_perk);  // dev: spends one perk point without the menu
 	void               OpenMenu();                    // the Evolution power was cast
 
-	// The kill boost (Unbound Form): each kill adds a stack of stamina regeneration that lasts Protean_KillBoostSeconds.
-	void                        OnKill();
+	// The biomass boost (Unbound Form; the kill boost until 2026-10-28, user: consuming gives it, kills no longer do):
+	// each body consumed adds a stack of stamina regeneration that lasts Protean_KillBoostSeconds.
+	void                        AddBoost();
 	[[nodiscard]] std::uint32_t BoostStacks();
 
 	void OnFrame(float a_delta);  // main thread, every frame

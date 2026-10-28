@@ -29,7 +29,6 @@ namespace protean::Devastator
 		// slow motion): Protean_DevastatorHold real seconds, slow for Protean_DevastatorSlowSeconds of them, the tendrils
 		// thrown again every Protean_DevastatorRethrow so they stay out
 		float g_rethrow{ 0.0f };
-		constexpr float            kStruckFor = 5.0f;      // seconds a struck actor's death is not the player's kill
 		constexpr float            kSheatheMax = 2.0f;     // seconds the pose is asked for before going on without it
 
 		enum class Phase
@@ -45,7 +44,6 @@ namespace protean::Devastator
 		Clock::time_point g_start{};
 		Clock::time_point g_last{};
 		bool              g_slow{ false };
-		std::map<RE::FormID, Clock::time_point> g_struck;
 
 		using Flag = RE::ControlMap::UEFlag;
 		constexpr auto kLocked = static_cast<Flag>(std::to_underlying(Flag::kMovement) | std::to_underlying(Flag::kLooking) |
@@ -272,7 +270,6 @@ namespace protean::Devastator
 						}
 						continue;
 					}
-					g_struck[a->GetFormID()] = Clock::now();
 					Push(a_p, a.get(), force);
 					a->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kHealth, damage);
 					logger::info("devastator: '{}' {:08X} at {:.0f}: knocked down, {:.0f} damage, health now {:.0f}", a->GetName(), a->GetFormID(),
@@ -346,7 +343,7 @@ namespace protean::Devastator
 		}
 		const auto need = static_cast<std::uint32_t>(Dial("Protean_DevastatorStacks", 2.0f));
 		if (Evolve::BoostStacks() < need) {
-			Shift::Notify(std::format("Devastator needs {} kill boosts.", need));
+			Shift::Notify(std::format("Devastator needs {} biomass boosts. Consume bodies to gain them.", need));
 			return;
 		}
 		auto*       av = p->AsActorValueOwner();
@@ -412,12 +409,6 @@ namespace protean::Devastator
 		}
 	}
 
-	bool Struck(RE::FormID a_id)
-	{
-		const auto it = g_struck.find(a_id);
-		return it != g_struck.end() && Seconds(it->second) < kStruckFor;
-	}
-
 	void Reset()
 	{
 		if (g_phase != Phase::kNone) {
@@ -428,7 +419,6 @@ namespace protean::Devastator
 			g_sources.clear();
 			g_phase = Phase::kNone;
 		}
-		g_struck.clear();
 	}
 }
 

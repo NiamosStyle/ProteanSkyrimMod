@@ -1,4 +1,5 @@
 #include "Attacks.h"
+#include "Consume.h"
 #include "Feed.h"
 
 #include "Move.h"
@@ -315,11 +316,11 @@ namespace protean::Attacks
 					};
 					// Activate is one of the controls taken in animal form, so it too is recognised by its key
 					if (b->IsDown() && bound(ue->activate)) {
-						// doors, containers, talking, picking things up: blocked in animal form (user decision); with
-						// Survivor 2, eating a body or a plant in reach
+						// doors, containers, talking, picking things up: blocked in animal form (user decision); a body in
+						// reach is consumed, and with Survivor 2 a plant eaten
 						logger::info("activate pressed in animal form");
 						SKSE::GetTaskInterface()->AddTask([] {
-							if (Feed::OnActivate()) {
+							if (Consume::OnAnimalActivate() || Feed::OnActivate()) {
 								return;
 							}
 							static auto last = std::chrono::steady_clock::time_point{};

@@ -14,24 +14,11 @@ namespace protean::Face
 	namespace
 	{
 		constexpr auto kIni = "Data/SKSE/Plugins/Protean.ini";
-		constexpr int  kOfferFrames = 120;  // how long to wait for the loot window to open before giving up
 
 		bool  g_menuTakeOff{ false };     // [Face] TakeOffOnMenu: the game menu (save, load, quit) takes a stolen face off
 		bool  g_joinFactions{ true };    // [Face] JoinFactions: take on the corpse's factions (test switch)
 		float g_range{ 3000.0f };        // [Face] WitnessRange, game units
 		bool  g_enabled{ true };         // [Face] Enabled
-
-		// The choice currently on offer.
-		std::mutex             g_lock;
-		std::string            g_offerName;
-		std::atomic<RE::FormID> g_offerId{ 0 };
-		int                    g_wait{ 0 };
-		bool                   g_shown{ false };
-		std::atomic<bool>      g_queued{ false };
-		RE::FormID             g_bypass{ 0 };  // corpse we are opening ourselves for looting: do not offer again
-		int                    g_boxFrames{ 0 };  // frames since the choice box was queued
-		bool                   g_boxSeen{ false };
-		constexpr int          kBoxFrames = 90;   // ~1.5 s for the box to appear before falling back to the loot window
 
 		RE::PlayerCharacter* Player() { return RE::PlayerCharacter::GetSingleton(); }
 
@@ -599,15 +586,12 @@ namespace protean::Face
 				return false;
 			}
 			if (Registry::Get().ByRace(race)) {
-				return false;  // an animal: that is a heart, not a face
+				return false;  // an animal: it teaches a form, not a face
 			}
 			return true;
 		}
 
-		void ShowChoice();
-
-		// The game is paused while the loot window is open, so the per-frame hook never runs then: watch for the
-		// menu opening instead.
+		// The game menu (save, load, quit) may take a stolen face off ([Face] TakeOffOnMenu).
 		class MenuSink : public RE::BSTEventSink<RE::MenuOpenCloseEvent>
 		{
 		public:
@@ -626,87 +610,12 @@ namespace protean::Face
 						Shift::Notify("Your stolen face came off. Use Stolen Face to wear it again.");
 					});
 				}
-				if (a_event && a_event->opening && a_event->menuName == RE::ContainerMenu::MENU_NAME && g_offerId && !g_shown && !g_queued.exchange(true)) {
-					SKSE::GetTaskInterface()->AddTask([]() { ShowChoice(); });
-				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};
-
-		// ---- the choice window (render thread) ----------------------------------------------------------
-
-		void CloseOffer()
-		{
-			g_offerId = 0;
-			g_wait = 0;
-			g_shown = false;
-			g_queued = false;
-			g_boxFrames = 0;
-			g_boxSeen = false;
-		}
-
-		// The game's own message box: Loot / Copy appearance / Cancel.
-		class Choice : public RE::IMessageBoxCallback
-		{
-		public:
-			explicit Choice(RE::FormID a_id) :
-				_id(a_id) {}
-
-			void Run(std::uint8_t a_button) override
-			{
-				const auto id = _id;
-				SKSE::GetTaskInterface()->AddTask([id, a_button]() {
-					if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
-						if (a_button == 0) {
-							g_bypass = id;
-							a->ActivateRef(Player(), 0, nullptr, 1, false);
-						} else if (a_button == 1) {
-							Steal(a->GetActorBase(), a, true);
-						}
-					}
-					CloseOffer();
-				});
-			}
-
-		private:
-			RE::FormID _id;
-		};
-
-		void ShowChoice()
-		{
-			// the game opened the loot window; close it and ask instead
-			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::ContainerMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
-			const auto id = g_offerId.load();
-			SKSE::GetTaskInterface()->AddTask([id]() {
-				std::string name;
-				{
-					std::scoped_lock lk(g_lock);
-					name = g_offerName;
-				}
-				auto* box = RE::UIMessageDataFactory::Create<RE::MessageBoxData>();
-				if (!box) {
-					logger::error("face offer: could not create the message box");
-					CloseOffer();
-					return;
-				}
-				box->bodyText = name.c_str();
-				box->buttonText.push_back(RE::BSString("Loot"));
-				box->buttonText.push_back(RE::BSString("Copy appearance"));
-				box->buttonText.push_back(RE::BSString("Cancel"));
-				box->cancelButtonIndex = 2;
-				box->isCancellable = true;
-				box->callback = RE::BSTSmartPointer<RE::IMessageBoxCallback>(new Choice(id));
-				RE::MessageBoxMenu::QueueMessage(box);
-				g_shown = true;
-				g_queued = false;
-				logger::info("face offer: loot window replaced by the choice box");
-			});
-		}
 	}
 
 	// ---- public --------------------------------------------------------------------------------------
-
-	void Register() {}  // the choice is the game's own message box: nothing to register
 
 	void Install()
 	{
@@ -720,34 +629,6 @@ namespace protean::Face
 	bool Disguised()
 	{
 		return State::Get().disguised;
-	}
-
-	bool OnCorpseActivated(RE::Actor* a_corpse)
-	{
-		auto* p = Player();
-		auto& s = State::Get();
-		if (!g_enabled || !a_corpse || !p) {
-			return false;
-		}
-		if (g_bypass == a_corpse->GetFormID()) {
-			g_bypass = 0;  // our own loot request coming back through the activation event
-			return false;
-		}
-		if (!s.active.empty() || !Evolve::Has("borrowed_visage") || !p->IsSneaking() || !Eligible(a_corpse)) {
-			return false;
-		}
-		{
-			std::scoped_lock lk(g_lock);
-			g_offerName = std::format("Body of {}", a_corpse->GetDisplayFullName());
-		}
-		g_offerId = a_corpse->GetFormID();
-		g_wait = kOfferFrames;
-		g_shown = false;
-		if (auto* ui = RE::UI::GetSingleton(); ui && ui->IsMenuOpen(RE::ContainerMenu::MENU_NAME) && !g_queued.exchange(true)) {
-			ShowChoice();  // the loot window beat us to it
-		}
-		logger::info("face offer started for {:08X} '{}' (sneaking)", a_corpse->GetFormID(), a_corpse->GetName());
-		return true;
 	}
 
 	// Borrowed Visage: putting a face on costs the stamina of a change of form (taking it off is free)
@@ -766,7 +647,7 @@ namespace protean::Face
 		return true;
 	}
 
-	void Steal(RE::TESNPC* a_source, RE::Actor* a_corpse, bool a_witnessed)
+	void Steal(RE::TESNPC* a_source, RE::Actor* a_corpse, bool a_witnessed, bool a_pay)
 	{
 		auto* p = Player();
 		auto& s = State::Get();
@@ -778,7 +659,7 @@ namespace protean::Face
 			Shift::Notify("You must return to your own form first.");
 			return;
 		}
-		if (!PayForFace(p)) {
+		if (a_pay && !PayForFace(p)) {
 			return;
 		}
 		logger::info("=== steal face of {:08X} '{}' (race '{}', witnessed check {}) ===", a_source->GetFormID(), a_source->GetName(),
@@ -806,6 +687,35 @@ namespace protean::Face
 		s.disguised = true;
 		Shift::Notify(std::format("You have taken the face of {}.", a_source->GetName()));
 		Dump();
+	}
+
+	void FromBody(RE::Actor* a_body, bool a_wear, bool a_free, bool a_witnessed)
+	{
+		auto* p = Player();
+		auto& s = State::Get();
+		auto* npc = a_body ? a_body->GetActorBase() : nullptr;
+		if (!g_enabled || !p || !npc || !Eligible(a_body)) {
+			return;
+		}
+		const float cost = Registry::Get().Dial("Protean_ChangeStaminaCost", 15.0f);
+		if (a_wear && s.active.empty() &&
+			(a_free || cost <= 0.0f || p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina) >= cost)) {
+			Steal(npc, a_body, a_witnessed, !a_free);
+			return;
+		}
+		if (s.disguised) {
+			// the worn face is the banked one: a new one would take its place under it
+			Shift::Notify(std::format("You wear a stolen face already: the face of {} is lost.", npc->GetName()));
+			logger::info("face: '{}' not kept, a stolen face is worn", npc->GetName());
+			return;
+		}
+		s.bank = LookOf(npc);
+		s.bankedNpc = npc->GetFormID();
+		if (auto* fp = Registry::Get().FacePower(); fp && !p->HasSpell(fp)) {
+			p->AddSpell(fp);
+		}
+		Shift::Notify(std::format("You keep the face of {}. Cast Stolen Face in your own form to wear it.", npc->GetName()));
+		logger::info("face: '{}' {:08X} kept ({})", npc->GetName(), npc->GetFormID(), a_wear ? "too tired to wear it" : "animal form");
 	}
 
 	void SetIgnoreFaceFiles(bool a_on)
@@ -849,7 +759,7 @@ namespace protean::Face
 			}
 		}
 		if (!s.bank.valid) {
-			Shift::Notify("You have no face kept. Sneak next to a body and activate it.");
+			Shift::Notify("You have no face kept. Consume a person to take theirs.");
 			return;
 		}
 		if (!PayForFace(Player())) {
@@ -872,33 +782,6 @@ namespace protean::Face
 	void OnFrame()
 	{
 		RedrawTick();
-		const auto id = g_offerId.load();
-		if (!id) {
-			return;
-		}
-		auto* p = Player();
-		auto* corpse = RE::TESForm::LookupByID<RE::Actor>(id);
-		if (!corpse || !p || p->IsDead() || !State::Get().active.empty()) {
-			CloseOffer();
-			return;
-		}
-		if (!g_shown) {
-			if (--g_wait <= 0) {
-				logger::info("face offer: the loot window never opened; dropping the offer");
-				CloseOffer();
-			}
-			return;
-		}
-		// the box is open: the callback ends the offer. Seen once: a search did nothing, the box queued but never
-		// on screen (the game slowed until Tab). If it does not appear in time, open the loot window after all.
-		if (auto* ui = RE::UI::GetSingleton(); ui && ui->IsMenuOpen(RE::MessageBoxMenu::MENU_NAME)) {
-			g_boxSeen = true;
-		} else if (!g_boxSeen && ++g_boxFrames > kBoxFrames) {
-			logger::info("face offer: the choice box never appeared; opening the loot window instead");
-			CloseOffer();
-			g_bypass = id;
-			corpse->ActivateRef(p, 0, nullptr, 1, false);
-		}
 	}
 
 	void OnGameLoaded()
@@ -918,7 +801,6 @@ namespace protean::Face
 
 	void BeforeLoad()
 	{
-		CloseOffer();
 		g_redraw = 0;
 		g_pendingTints.clear();
 	}

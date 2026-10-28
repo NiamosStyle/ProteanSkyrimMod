@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "Carapace.h"
 #include "Claws.h"
+#include "Consume.h"
 #include "Deceiver.h"
 #include "Devastator.h"
 #include "Dev.h"
@@ -42,6 +43,7 @@ namespace protean::Hooks
 				Rush::OnFrame(a_this, a_delta);
 				Carapace::OnFrame(a_this, a_delta);
 				Feed::OnFrame(a_this, a_delta);
+				Consume::OnFrame(a_this, a_delta);
 				Stalker::OnFrame(a_this, a_delta);
 				Skills::OnFrame(a_this, a_delta);
 				Deceiver::OnFrame(a_this, a_delta);
@@ -65,17 +67,15 @@ namespace protean::Hooks
 			static constexpr std::size_t                   idx = 0xAD;  // Actor::Update, SE/AE
 		};
 
-		// a body being searched: its heart goes in first, so the loot window shows it. Added at the death instead, a
-		// body still falling went stiff and could no longer be searched (testing 2026-10-24); added on the activate
-		// event, the window was already filled and showed it only the second time
+		// a body being searched: sneaking, it is consumed instead (no loot window)
 		struct NpcActivate
 		{
 			static bool thunk(RE::TESNPC* a_this, RE::TESObjectREFR* a_target, RE::TESObjectREFR* a_activator, std::uint8_t a_arg3,
 				RE::TESBoundObject* a_object, std::int32_t a_count)
 			{
 				if (a_activator && a_activator->IsPlayerRef() && a_target) {
-					if (auto* corpse = a_target->As<RE::Actor>(); corpse && corpse->IsDead()) {
-						Shift::AddHeart(corpse);
+					if (auto* corpse = a_target->As<RE::Actor>(); corpse && corpse->IsDead() && Consume::OnActivate(corpse)) {
+						return true;
 					}
 				}
 				return func(a_this, a_target, a_activator, a_arg3, a_object, a_count);

@@ -29,7 +29,7 @@ Papyrus: `RegisterForModEvent("Protean_Transformed", "OnProteanTransformed")`, t
 |---|---|---|---|
 | `Protean_Transformed` | form id, e.g. `wolf` | form number | after the body has changed and the markers are on |
 | `Protean_Reverted` | the form left | its number | after the human body is back and the markers are off |
-| `Protean_Learned` | form id | form number | when a heart teaches a new form |
+| `Protean_Learned` | form id | form number | when consuming an animal teaches a new form (a heart until 2026-10-28) |
 
 A change the player asks for plays 1.5 s of effects first; the event comes when the body actually
 changes. Forced changes (death, loading a save, too big for an interior) are immediate.
@@ -59,10 +59,16 @@ your value.
 | `Protean_DamageMult` | xx94B | Float | 1.0 | multiplies all damage the player deals while transformed |
 | `Protean_ArmorBonus` | xx94C | Float | 0 | armor rating added while transformed |
 | `Protean_ChangeStaminaCost` | xx94D | Float | 15 | stamina a change into a form the player asks for costs (refused if too tired); 0 = free |
-| `Protean_KillBoostSeconds` | xx94E | Float | 90 | how long one kill's stamina-regeneration stack lasts (needs the Unbound Form perk) |
+| `Protean_KillBoostSeconds` | xx94E | Float | 90 | how long one consumed body's stamina-regeneration stack (the biomass boost) lasts (needs the Unbound Form perk; kills gave it until 2026-10-28) |
 | `Protean_KillBoostPct` | xx94F | Float | 15 | stamina regeneration each stack adds, percentage points of the normal rate |
 | `Protean_KillBoostMax` | xx950 | Float | 0 | most stacks at once; 0 = no limit |
-| `Protean_ComboStacks` | xx9BA | Float | 5 | kill boost stacks at once that give one evolution point; once per fight, earned again after leaving combat (0 = off; never reached if `Protean_KillBoostMax` is lower) |
+| `Protean_ComboStacks` | xx9BA | Float | 5 | unused since 2026-10-28 (evolution points come only from consuming) |
+| `Protean_ConsumeSeconds` | xx9E4 | Float | 2 | consuming: seconds the red tentacles cover the body before it is gone |
+| `Protean_ConsumeHeal` | xx9E5 | Float | 0.2 | consuming: share of maximum health a body heals |
+| `Protean_ConsumeHealSurvivor` | xx9E6 | Float | 0.5 | the same with Survivor rank 2 |
+| `Protean_ConsumeBounty` | xx9E7 | Float | 1000 | consuming a person in sight of people: bounty with each witness's crime faction (0 = none) |
+| `Protean_ConsumeWitnessRange` | xx9E8 | Float | 3000 | consuming: how far a person who can see the player counts as a witness, game units |
+| `Protean_AssassinConsumeSeconds` | xx9E9 | Float | 1 | Assassin: seconds an unnoticed consumption takes |
 | `Protean_XpOneHanded` | xx9BD | Float | 1 | multiplies the One-Handed skill uses of a bite or Rending Claws hit (as vanilla: the listed damage; the bite's is the race's own) |
 | `Protean_XpLightArmor` | xx9BE | Float | 0.38 | Light Armor skill uses per hit that hurts, in animal form or with Subtle Carapace on and no light body armor (vanilla's, measured) |
 | `Protean_RushSafeDrop` | xx9C0 | Float | 300 | Predator's Rush: a landing no more than this below the ground left during a boosted sprint does no harm (deeper drops are the game's) |
@@ -105,10 +111,10 @@ your value.
 | `Protean_CarapaceArmorPerLevel` | xx9AB | Float | 4 | Subtle Carapace rank 1: armor added per player level |
 | `Protean_Carapace2Armor` | xx9AC | Float | 100 | Subtle Carapace rank 2: armor before the level part (replaces rank 1's) |
 | `Protean_Carapace2ArmorPerLevel` | xx9AD | Float | 7 | Subtle Carapace rank 2: armor added per player level |
-| `Protean_FeedCorpseHeal` | xx9AE | Float | 0.25 | Survivor rank 2: share of maximum health a meal of a body heals |
+| `Protean_FeedCorpseHeal` | xx9AE | Float | 0.25 | unused since 2026-10-28 (bodies are consumed: `Protean_ConsumeHealSurvivor`) |
 | `Protean_FeedPlantHeal` | xx9AF | Float | 0.2 | Survivor rank 2: share of maximum health a plant heals |
-| `Protean_FeedSeconds` | xx9B0 | Float | 3 | Survivor rank 2: seconds a meal takes, standing still |
-| `Protean_FeedReach` | xx9B1 | Float | 250 | Survivor rank 2: how near a body or plant must be, game units |
+| `Protean_FeedSeconds` | xx9B0 | Float | 3 | Survivor rank 2: seconds a plant takes to eat, standing still |
+| `Protean_FeedReach` | xx9B1 | Float | 250 | animal form: how near a body to consume or a plant to eat must be, game units |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -138,7 +144,7 @@ Notes:
 
 ## 4. The forms
 
-| Form | id | Number | Power | Heart | Hidden ability | Keyword |
+| Form | id | Number | Power | Heart (gone since 2026-10-28; the ID is not reused) | Hidden ability | Keyword |
 |---|---|---|---|---|---|---|
 | Wolf | `wolf` | 1 | xx811 | xx810 | xx900 | xx880 |
 | Ice Wolf | `ice_wolf` | 2 | xx813 | xx812 | xx901 | xx881 |
@@ -196,7 +202,7 @@ not contiguous.
 | `Protean_KeenNightPower` / `LifePower` / `DeadPower` (lesser powers) | xx98A / xx98B / xx98C | Keen's senses; known only while an animal owns the perk (xx961) |
 | `Protean_KeenNight` / `Protean_KeenLife` / `Protean_KeenDead` (self spells) | xx98D / xx98E / xx98F | What Protean casts: the game's night eye; 2 s Detect Life / Detect Dead pulses repeated while on |
 | `Protean_KeenDetectDead*` (effects) | xx990-xx993 | The game's held Detect Undead effects as fire-and-forget ones |
-| `Protean_KillBoost` (ability) / `Protean_KillBoostEffect` | xx97D / xx97C | Shows Unbound Form's kill boost in Active Effects (magnitude = the current total) |
+| `Protean_KillBoost` (ability) / `Protean_KillBoostEffect` | xx97D / xx97C | Shows Unbound Form's biomass boost ("Biomass Boost") in Active Effects (magnitude = the current total) |
 | `Protean_Glide1` (ability) / `Protean_GlideEffect1` | xx99F / xx99C | Hidden, on the player while gliding: Open Animation Replacer's condition for the glide pose |
 | `Protean_PredatorPoison` (spell) / `Protean_PredatorPoisonEffect` | xx9A3 / xx9A2 | Predator rank 2's poison (Damage Health over time, poison resistance counts); Protean sets magnitude and duration from the player's level |
 | `Protean_StalkerFade` (spell) / `Protean_StalkerAmbush` (perk) / `Protean_StalkPower` | xx9B3 / xx9B4 / xx9B8 | Stalker: the fade (the game's Invisibility effect), the hidden ambush perk held from the swing to the hit, and the Stalk toggle in the animal's Favorites |
@@ -225,15 +231,17 @@ not contiguous.
 - The glide pose is Protean's own animation (`meshes/actors/character/animations/OpenAnimationReplacer/Protean/Glide/`,
   replacing `mt_jumpfall` while `Protean_GlideEffect1` is on). An animation mod that replaces the fall at a higher
   OAR priority than 2,000,000,001 would hide it.
-- Activate is not blocked for a Survivor 2 animal near a meal. Eating a person's body where people can see it puts
-  them in `Protean_WitnessFaction` and into combat, until the player changes back (as for seeing the change).
+- Consuming (2026-10-28): in the player's own form a sneaking search of a dead body is taken over (Protean hooks the
+  NPC base form's activation and returns before the loot window); in animal form Activate by a body does it. The body is
+  disabled at the end (not deleted). A body whose quest alias has the Quest Object flag is refused. Consuming a
+  person seen by people adds `Protean_ConsumeBounty` to each witness's crime faction; in animal form they also go into
+  `Protean_WitnessFaction` and combat until the player changes back (as for seeing the change). Activate is not
+  blocked for a Survivor 2 animal near a plant.
 - A save made in animal form can come back without the health and damage bonuses (the game drops some temporary
   modifiers on a load after a restart; measured 2026-10-24). The co-save keeps the temporary modifiers of the
   values Protean changes (health, AttackDamageMult, DamageResist, SpeedMult, StaminaRateMult, ResistDisease,
   WaterBreathing); after a load Protean puts back its own part when exactly that much is missing, and only logs any
   other difference.
-- Hearts go into an animal's body as it is searched (Protean hooks the NPC base form's activation), so the loot window
-  shows them the first time.
 - Favorites in animal form works like the Vampire Lord's: it lists only Revert Form and the Keen powers the player
   knows. While that menu is being built, Protean points the default objects `VampireRace` and `VampireSpells` at the
   animal's race and its own list, then puts them back; a mod that reads those two during the Favorites menu sees

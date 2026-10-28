@@ -2,7 +2,7 @@ FormKey: 00097C:Protean.esp
 EditorID: Protean_KillBoostEffect
 Name:
   TargetLanguage: English
-  Value: 'Kill Boost'
+  Value: 'Biomass Boost'
 Flags:
 - Recover
 - NoArea
@@ -17,4 +17,4 @@ SkillUsageMultiplier: 0
 DualCastScale: 1
 Description:
   TargetLanguage: English
-  Value: Stamina regenerates <mag>% faster. Every kill adds to it for a while.
+  Value: Stamina regenerates <mag>% faster. Every body consumed adds to it for a while.

@@ -20,7 +20,7 @@ The harness writes commands into `Protean.cmd`, reads `Documents/My Games/Skyrim
 and cross-checks the plugin against DevBench (race, health, camera).
 
 ## Dev commands (Protean.cmd lines: `<increasing number> <command> [arg]`)
-`starter` `hearts` `learn <id>` `unlearn <id>` `transform <id>` `revert` `dump` `scan` `spawn <hex base FormID>`
+`starter` `consume` `learn <id>` `unlearn <id>` `transform <id>` `revert` `dump` `scan` `spawn <hex base FormID>`
 `anim <graph event>` `draw` `kill`
 
 ## Things only a human can judge (ask the user to look)
@@ -36,7 +36,7 @@ and cross-checks the plugin against DevBench (race, health, camera).
 3. Crime: does attacking a guard/livestock as an animal create a bounty? (Reference mods remove bounties; we
    have not touched crime yet.)
 4. Save and load while transformed (state restored from the co-save; camera/controls re-applied).
-5. Corpse hearts: open a dead wolf as a shapeshifter and see whether the heart appears.
+5. Consuming: sneak-activate a dead wolf as a shapeshifter (hearts were dropped 2026-10-28).
 
 ## Manual checks for Phase 2 (need a person)
 - Transform (console: `player.addspell FE004811` after learning, or the dev channel), then press **B**: the Beast Moves

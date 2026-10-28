@@ -659,7 +659,6 @@ namespace protean::Shift
 		auto* p = Player();
 		auto& s = State::Get();
 		if (s.known.contains(a_c.id)) {
-			Evolve::Feed(a_c);  // a known form again: counts towards the milestones
 			return;
 		}
 		s.known.insert(a_c.id);
@@ -667,43 +666,6 @@ namespace protean::Shift
 		Notify(std::format("You have learned the form of the {}.", a_c.name));
 		logger::info("learned '{}'", a_c.id);
 		SendModEvent("Protean_Learned", a_c.id, static_cast<float>(a_c.index + 1));
-		Evolve::Feed(a_c);
-	}
-
-	void OnCorpseActivated(RE::Actor* a_corpse)
-	{
-		if (!a_corpse || !a_corpse->IsDead()) {
-			return;
-		}
-		if (Face::OnCorpseActivated(a_corpse)) {
-			return;  // the Loot / Copy appearance choice took over
-		}
-		AddHeart(a_corpse);
-	}
-
-	// as the body is searched, before the loot window fills (Hooks: TESNPC::Activate); the activate event adds it too
-	void AddHeart(RE::Actor* a_corpse)
-	{
-		if (!a_corpse || !a_corpse->IsDead()) {
-			return;
-		}
-		auto* p = Player();
-		auto& reg = Registry::Get();
-		if (!p->HasSpell(reg.Starter())) {
-			return;
-		}
-		const auto* c = reg.ByActor(a_corpse);
-		if (!c) {
-			return;
-		}
-		auto& s = State::Get();
-		// a form already known keeps dropping its heart once Unbound Form is bought: repeat feedings are worth points
-		if ((s.known.contains(c->id) && !Evolve::Has("unbound_form")) || s.looted.contains(a_corpse->GetFormID())) {
-			return;
-		}
-		s.looted.insert(a_corpse->GetFormID());
-		a_corpse->AddObjectToContainer(c->heart, nullptr, 1, nullptr);
-		logger::info("added '{}' to corpse {:08X}", c->heart->GetName(), a_corpse->GetFormID());
 	}
 
 	void Transform(const Creature& a_c)
@@ -1024,7 +986,7 @@ namespace protean::Shift
 		}
 		if (a_spell == reg.Starter()) {
 			if (s.known.empty()) {
-				Notify("You know no forms yet. Eat the heart of an animal.");
+				Notify("You know no forms yet. Consume an animal's body to learn its form.");
 			} else {
 				std::string names;
 				for (const auto& id : s.known) {

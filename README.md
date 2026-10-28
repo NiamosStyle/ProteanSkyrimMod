@@ -1,6 +1,6 @@
 # Protean
 
-Animal shapeshifting for Skyrim SE **1.7.104**. Eat the heart of a slain animal to learn its form, then
+Animal shapeshifting for Skyrim SE **1.7.104**. Consume the body of a slain animal to learn its form, then
 become it: its own model, animations, attacks, size and health, and the world treats you as that animal
 unless it watched you change.
 

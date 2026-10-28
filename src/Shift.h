@@ -6,18 +6,14 @@ namespace protean::Shift
 {
 	void Notify(const std::string& a_text);
 
-	// eating a heart: teach the form and add its power
+	// an animal consumed: teach the form and add its power (nothing when it is known)
 	void Learn(const Creature& a_creature);
 
 	// the player cast one of our powers (runs on the main thread)
 	void OnPowerCast(RE::SpellItem* a_spell);
 
-	// a dead animal was activated: add its heart if the player is a shapeshifter
-	void OnCorpseActivated(RE::Actor* a_corpse);
-	void AddHeart(RE::Actor* a_corpse);  // an animal's heart in its body, once (as the body is searched)
-
-	// the animal was seen eating a person (Survivor 2): whoever saw it turns hostile until the player changes back,
-	// as witnesses of the change do
+	// the animal was seen consuming a person: whoever saw it turns hostile until the player changes back, as
+	// witnesses of the change do
 	void SeenFeeding(RE::Actor* a_body);
 
 	// A stolen face (the user's wish, 2026-10-26): crimes committed while it is worn are forgiven, as an animal's are,

@@ -2,6 +2,7 @@
 
 #include "Attacks.h"
 #include "Claws.h"
+#include "Consume.h"
 #include "Evolve.h"
 #include "Face.h"
 #include "Fly.h"
@@ -33,11 +34,8 @@ namespace protean::Dev
 			if (a_cmd == "starter") {
 				p->AddSpell(reg.Starter());
 				logger::info("dev: starter power given");
-			} else if (a_cmd == "hearts") {
-				for (const auto& cr : reg.All()) {
-					p->AddObjectToContainer(cr.heart, nullptr, 1, nullptr);
-				}
-				logger::info("dev: one heart of each creature given");
+			} else if (a_cmd == "consume") {
+				Consume::Nearest();  // the nearest body, no warning
 			} else if (a_cmd == "learn" && c) {
 				Shift::Learn(*c);
 				logger::info("dev: learn '{}' ok", c->id);
@@ -303,10 +301,8 @@ namespace protean::Dev
 			} else if (a_cmd == "buyperk" && !a_arg.empty()) {
 				Evolve::Buy(a_arg);
 				Evolve::Dump();
-			} else if (a_cmd == "feed" && c) {
-				Evolve::Feed(*c);  // as if one of its hearts was eaten (the form is not learned)
-			} else if (a_cmd == "killboost") {
-				Evolve::OnKill();  // as if the player had killed something
+			} else if (a_cmd == "boost") {
+				Evolve::AddBoost();  // as if a body had been consumed
 				Evolve::Dump();
 			} else if (a_cmd == "claws") {
 				Claws::Give();  // the Rending Claws weapon, one per hand

@@ -74,7 +74,11 @@ The tree starts at **Unbound Form** and splits into three branches:
 
 Perks are not unlocked with normal Skyrim perk points. Instead, the player earns **evolution points** by feeding, the way vampires and werewolves grow stronger. The name is a placeholder. Candidates include "Biomass" (a term from Prototype), "Vitae," or a name tied to Protean lore.
 
-Evolution points come from four sources:
+**Consuming (the user's redesign, 2026-10-28: "not Prototype enough"; built, not yet tested in game):** in any body the player can consume a corpse: in their own form by sneaking and activating it, in animal form by activating it (animals cannot sneak). Red tentacles (the Devastator's) cover it for 2 s, then it disappears. A switch on Protean's F1 page (SKSE Menu Framework), off at first, decides whether its loot moves to the player's inventory or is lost; quest items always move. A warning box appears the first time. Every body heals 20% of maximum health (50% with Survivor rank 2) and gives a stack of the stamina-recovery boost (the old kill boost, now the "biomass boost"; kills no longer give it). The first animal of a kind teaches its form (hearts are gone). A person gives their face with Borrowed Visage (worn at once in the own form; in animal form kept for the Stolen Face power) and is a crime if seen (1000 bounty with each witness's crime faction). Children, the undead (vampires excepted), Dwarven machines and ghosts cannot be consumed, nor a body a quest marks as a quest object (any quest alias is logged).
+
+**Evolution points (2026-10-28):** earned solely by consuming biomass: small creatures 1, people and middling animals 2, large creatures 3, giants and mammoths 5; creatures with no form by their height. The page lists the bodies consumed per kind. The earlier sources below (hearts, combat stacks) are gone; points already earned are kept.
+
+Until 2026-10-28, evolution points came from four sources:
 
 - **A) First-time feeding:** eating the heart of a creature type the player has never eaten before.
 - **B) Repeat feeding milestones:** eating a growing number of hearts of the same type. The milestones are the 3rd, 5th, 10th, 15th and 20th heart (with the 1st, 6 points a kind; 2026-10-25, was 5, 10, 20). The game has to track the count for each creature type.
@@ -131,7 +135,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 
 **Not usable:** Alduin, Paarthurnax, and other dragons; Miraak (no body left); Karstaag (turns to ice); dragon priests (turn to ash); ghosts such as Haknir Death-Brand. None of them leave a human body to take a face from.
 
-**Kill stacks:** Each Unbound Form kill stack lasts 60 to 120 seconds before it expires. The exact time will be tuned during testing.
+**Kill stacks:** Each Unbound Form kill stack lasts 60 to 120 seconds before it expires. The exact time will be tuned during testing. (Since 2026-10-28 a stack comes from each body consumed, not each kill.)
 
 ---
 
@@ -160,6 +164,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
   - Rank 1: the health bonus rises from 25% of your health to 50%, plus a quarter of the size gap as before. See "Changes to Protean itself."
   - Rank 2: it rises to 75%, plus the same quarter of the gap. Predator animals also gain the ability to "activate" a corpse and eat it, like a werewolf, which restores health.
   - Idea to explore: herbivores could "activate" plants and mushrooms to eat them for the same health restoration. If this can't be done, herbivores instead get an extra health regeneration bonus outside of combat.
+- **Changed 2026-10-28 (user):** rank 2's body-eating is replaced by consuming: with rank 2 a consumed body heals 50% instead of 20%. Eating plants stays.
 - **Status:** Done, tested in game (2026-10-24). The health bonus is 50% / 75% (each rank adds `Protean_SurvivorHealthPct`). Rank 2: press Activate in animal form by a body (meat eaters) or a harvestable plant (plant eaters; omnivores both, diets from Wikipedia and the games' lore) to eat for 3 s standing still; a body heals 25% of maximum health (once per body), a plant 20% (it counts as harvested and grows back; the ingredient is not kept). Moving ends the meal without healing. Eating a person in sight of people turns them hostile until the change back. Sounds: the player's eating sound twice for a plant, the werewolf's feeding sound once for a body, with a hit's blood splashing twice from the animal's mouth. No eating animation: the animal just stands (user: plenty of vanilla actions have none). The few the game has (deer, goat, cow, sabre cats, were-forms) were dropped, as the deer's outlasted the meal and held the player in place for several seconds.
 
 ### Predator ×2
@@ -235,6 +240,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Unbound Form
 - **What it does:** Unlocks the face-stealer power.
 - **Stamina:** Costs the same amount of Stamina as changing into an animal.
+- **Changed 2026-10-28:** the face comes from consuming a person; the Loot / Copy appearance window is gone.
 - **Status:** Built (2026-10-24), not yet tested as a perk. Face stealing (tested live earlier on Ulfric, Lydia and others) now needs this perk instead of the Instinct power; owning it gives the Stolen Face power. Putting a face on (stealing one, or wearing the kept one) costs `Protean_ChangeStaminaCost`; taking it off is free.
 
 ### Metamorphosis (stamina)
@@ -259,6 +265,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Inconspicuous
 - **What it does:** Gives a large sneak-attack bonus against a non-hostile target while you wear the face of someone from that target's faction.
 - **Status:** Built (2026-10-26), untested. While a stolen face is worn, people near who share one of its factions and are not hostile are marked (`Protean_AssassinMark`); a hidden perk multiplies sneak attacks on them x10 (the user: it should kill one person outright before the rest react).
+- **Added 2026-10-28 (user: a sneak kill, consume and change into the person with no alerts if hidden before activating), built, untested:** consuming a person in the own form while no person can see the player takes 1 s, is never witnessed (no crime, no exposure), calls off the combat and alarm of everyone near who cannot see the player, and puts the face on at once with no Stamina cost.
 
 ---
 

@@ -34,7 +34,7 @@ namespace protean::Evolve
 			}
 		}
 
-		// The stacks' regeneration is a temporary modifier on StaminaRateMult (the multiplier the game applies to
+		// The biomass boost's stacks: their regeneration is a temporary modifier on StaminaRateMult (the multiplier the game applies to
 		// stamina regeneration, 100 = normal); the state remembers how much is on, so a load can take it off or keep it.
 		// What Active Effects shows: an ability whose only effect states the total; it does nothing itself. Its
 		// magnitude is set on the record and the ability given again whenever the total changes (an active effect
@@ -104,7 +104,7 @@ namespace protean::Evolve
 				reg.SetGlobal("Protean_PerkPoints", left);
 			}
 			if (Has(kUnbound) && !p->HasSpell(reg.Starter())) {
-				p->AddSpell(reg.Starter());  // the Instinct power: shapeshifting, and hearts in corpses
+				p->AddSpell(reg.Starter());  // the Instinct power: shapeshifting and consuming
 			}
 			if (auto* fp = reg.FacePower(); fp && Has("borrowed_visage") && !p->HasSpell(fp)) {
 				p->AddSpell(fp);  // Borrowed Visage: the Stolen Face power (face stealing itself asks for the perk)
@@ -160,38 +160,6 @@ namespace protean::Evolve
 		Shift::Notify(std::format("You have a new Protean perk point ({} available).", PointsAvailable()));
 	}
 
-	namespace
-	{
-		constexpr std::uint32_t kHeartMilestones[] = { 1, 3, 5, 10, 15, 20 };
-
-		// "+1 Evolution Point" read as a perk point (2026-10-26): each says how far the next perk point is, counted
-		// after this point is added
-		std::string PointGained()
-		{
-			const std::uint32_t total = State::Get().evoTotal + 1;
-			const std::uint32_t left = NextPointAt(total) - total;
-			return left == 0 ? std::string("+1 Evolution Point") :
-			                   std::format("+1 Evolution Point ({} more to your next perk point)", left);
-		}
-	}
-
-	std::uint32_t HeartPoints(std::uint32_t a_hearts)
-	{
-		return static_cast<std::uint32_t>(std::ranges::count_if(kHeartMilestones, [&](auto m) { return m <= a_hearts; }));
-	}
-
-	std::uint32_t HeartPointsMax() { return static_cast<std::uint32_t>(std::size(kHeartMilestones)); }
-
-	std::uint32_t NextHeart(std::uint32_t a_hearts)
-	{
-		for (auto m : kHeartMilestones) {
-			if (m > a_hearts) {
-				return m;
-			}
-		}
-		return 0;
-	}
-
 	std::uint32_t NextPointAt(std::uint32_t a_total)
 	{
 		// the count at which PointsEarned goes up by one
@@ -202,22 +170,19 @@ namespace protean::Evolve
 		return need;
 	}
 
-	void Feed(const Creature& a_c)
+	void OnConsume(std::string_view a_kind, std::string_view a_label, std::uint32_t a_points)
 	{
-		auto&               s = State::Get();
-		const std::uint32_t n = ++s.feeds[a_c.id];
-		const bool          pays = std::ranges::find(kHeartMilestones, n) != std::end(kHeartMilestones);
-		const std::uint32_t next = NextHeart(n);
-		// every heart says where the kind stands (the user asked to track hearts, 2026-10-26)
-		Shift::Notify(pays ? (next ? std::format("{} heart {}: {}. Next at {}.", a_c.name, n, PointGained(), next) :
-		                             std::format("{} heart {}: {}, the last from this kind.", a_c.name, n, PointGained())) :
-		                     (next ? std::format("{} heart {}. Next Evolution Point at {}.", a_c.name, n, next) :
-		                             std::format("{} heart {}. No more Evolution Points from this kind.", a_c.name, n)));
-		if (pays) {
-			Add(1, n == 1 ? std::format("first heart of the {}", a_c.name) : std::format("{} hearts of the {}", n, a_c.name));
-		} else {
-			logger::info("evolution: heart {} of the {}", n, a_c.name);
+		auto& s = State::Get();
+		++s.consumed[std::string(a_kind)];
+		if (a_points == 0) {
+			return;
 		}
+		// each body says how far the next perk point is, counted after it (the user asked to track it, 2026-10-26)
+		const std::uint32_t total = s.evoTotal + a_points;
+		const std::uint32_t left = NextPointAt(total) - total;
+		Shift::Notify(std::format("{}: +{} Evolution Point{} ({} more to your next perk point).", a_label, a_points,
+			a_points == 1 ? "" : "s", left));
+		Add(a_points, std::format("consumed '{}' ({})", a_label, a_kind));
 	}
 
 	bool Has(std::string_view a_perk)
@@ -261,7 +226,7 @@ namespace protean::Evolve
 		return static_cast<std::uint32_t>(State::Get().boosts.size());
 	}
 
-	void OnKill()
+	void AddBoost()
 	{
 		auto* p = RE::PlayerCharacter::GetSingleton();
 		auto& s = State::Get();
@@ -272,19 +237,11 @@ namespace protean::Evolve
 		const float seconds = reg.Dial("Protean_KillBoostSeconds", 90.0f);
 		const auto  cap = static_cast<std::size_t>(std::max(reg.Dial("Protean_KillBoostMax", 0.0f), 0.0f));
 		if (cap > 0 && s.boosts.size() >= cap) {
-			s.boosts.erase(s.boosts.begin());  // the oldest makes room: a kill at the cap renews the boost
+			s.boosts.erase(s.boosts.begin());  // the oldest makes room: a body at the cap renews the boost
 		}
 		s.boosts.push_back(seconds);
 		SyncBoost(p);
-		logger::info("kill boost: {} stack(s), +{:.0f} stamina regeneration", s.boosts.size(), s.boostApplied);
-		// a run of kills feeds evolution: Protean_ComboStacks stacks at once give an evolution point, once a fight (it
-		// comes back after leaving combat; the user's design, 2026-10-24)
-		const auto combo = static_cast<std::size_t>(std::max(reg.Dial("Protean_ComboStacks", 5.0f), 0.0f));
-		if (combo > 0 && !s.comboSpent && s.boosts.size() >= combo) {
-			s.comboSpent = true;
-			Shift::Notify(std::format("The slaughter feeds your evolution: {}.", PointGained()));
-			Add(1, std::format("{} kill boosts at once", s.boosts.size()));
-		}
+		logger::info("biomass boost: {} stack(s), +{:.0f} stamina regeneration", s.boosts.size(), s.boostApplied);
 	}
 
 	void OnFrame(float a_delta)
@@ -299,12 +256,6 @@ namespace protean::Evolve
 		if ((sinceSync += a_delta) >= 0.25f) {
 			sinceSync = 0.0f;
 			Sync();
-			// earned again out of combat and below the stacks it needs (kills outside a fight never start one)
-			if (s.comboSpent && !p->IsInCombat() &&
-				s.boosts.size() < static_cast<std::size_t>(std::max(Registry::Get().Dial("Protean_ComboStacks", 5.0f), 1.0f))) {
-				s.comboSpent = false;
-				logger::info("evolution: out of combat, the kill-boost point can be earned again");
-			}
 		}
 		if (s.boosts.empty() && s.boostApplied == 0.0f) {
 			return;
@@ -316,7 +267,7 @@ namespace protean::Evolve
 		std::erase_if(s.boosts, [](float t) { return t <= 0.0f; });
 		SyncBoost(p);
 		if (s.boosts.size() != n) {
-			logger::info("kill boost: {} stack(s) left", s.boosts.size());
+			logger::info("biomass boost: {} stack(s) left", s.boosts.size());
 		}
 	}
 
@@ -341,10 +292,10 @@ namespace protean::Evolve
 			perks += std::format(" {}={}", id, Has(id) ? 1 : 0);
 		}
 		std::string feeds;
-		for (const auto& [id, n] : s.feeds) {
+		for (const auto& [id, n] : s.consumed) {
 			feeds += std::format(" {}={}", id, n);
 		}
-		logger::info("dev: evolution total {} earned {} face {} bought {} available {} (global {}); perks{}; feeds{}; boost stacks {} "
+		logger::info("dev: evolution total {} earned {} face {} bought {} available {} (global {}); perks{}; consumed{}; boost stacks {} "
 		             "applied {:.0f}; disease {:.0f}",
 			s.evoTotal, PointsEarned(s.evoTotal), s.facePoints, Bought(), PointsAvailable(), Registry::Get().Dial("Protean_PerkPoints", -1.0f),
 			perks, feeds, s.boosts.size(), s.boostApplied, s.diseaseApplied);

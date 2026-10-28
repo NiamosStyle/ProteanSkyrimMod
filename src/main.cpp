@@ -1,6 +1,7 @@
 #include "Attacks.h"
 #include "Camera.h"
 #include "Claws.h"
+#include "Consume.h"
 #include "Deceiver.h"
 #include "Devastator.h"
 #include "Dev.h"
@@ -30,8 +31,6 @@ namespace
 	// work runs on the main thread through SKSE's task interface.
 	class Sink : public RE::BSTEventSink<RE::TESEquipEvent>,
 	             public RE::BSTEventSink<RE::TESSpellCastEvent>,
-	             public RE::BSTEventSink<RE::TESActivateEvent>,
-	             public RE::BSTEventSink<RE::TESDeathEvent>,
 	             public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
 	{
 	public:
@@ -41,15 +40,8 @@ namespace
 			return &s;
 		}
 
-		// eating a heart
 		RE::BSEventNotifyControl ProcessEvent(const RE::TESEquipEvent* a_event, RE::BSTEventSource<RE::TESEquipEvent>*) override
 		{
-			if (a_event && a_event->equipped && a_event->actor && a_event->actor->IsPlayerRef()) {
-				auto& reg = protean::Registry::Get();
-				if (const auto* c = reg.ByHeart(a_event->baseObject)) {
-					SKSE::GetTaskInterface()->AddTask([c]() { protean::Shift::Learn(*c); });
-				}
-			}
 			// the claw weapon going into or out of a hand (equipped or not): the claw pieces follow
 			if (a_event && a_event->actor && a_event->actor->IsPlayerRef()) {
 				auto& reg = protean::Registry::Get();
@@ -111,39 +103,6 @@ namespace
 			}
 			return RE::BSEventNotifyControl::kContinue;
 		}
-
-		// a kill by the player: a stack of the Unbound Form boost
-		RE::BSEventNotifyControl ProcessEvent(const RE::TESDeathEvent* a_event, RE::BSTEventSource<RE::TESDeathEvent>*) override
-		{
-			if (a_event && a_event->dead && a_event->actorDying && !a_event->actorDying->IsPlayerRef()) {
-				const auto* dying = a_event->actorDying.get();
-				const auto* killer = a_event->actorKiller.get();
-				const bool  pulled = !killer && protean::Tendril::PulledRecently(dying->GetFormID());
-				if (pulled) {
-					logger::info("death: '{}' landed from a Tendril pull: the player's kill", dying->GetName());
-				}
-				if (((killer && killer->IsPlayerRef()) || pulled) && !protean::Devastator::Struck(dying->GetFormID())) {
-					SKSE::GetTaskInterface()->AddTask([]() { protean::Evolve::OnKill(); });
-				}
-			}
-			return RE::BSEventNotifyControl::kContinue;
-		}
-
-		// opening a dead animal
-		RE::BSEventNotifyControl ProcessEvent(const RE::TESActivateEvent* a_event, RE::BSTEventSource<RE::TESActivateEvent>*) override
-		{
-			if (a_event && a_event->actionRef && a_event->actionRef->IsPlayerRef() && a_event->objectActivated) {
-				if (auto* actor = a_event->objectActivated->As<RE::Actor>(); actor && actor->IsDead()) {
-					const auto id = actor->GetFormID();
-					SKSE::GetTaskInterface()->AddTask([id]() {
-						if (auto* a = RE::TESForm::LookupByID<RE::Actor>(id)) {
-							protean::Shift::OnCorpseActivated(a);
-						}
-					});
-				}
-			}
-			return RE::BSEventNotifyControl::kContinue;
-		}
 	};
 
 	bool g_ready = false;
@@ -152,7 +111,6 @@ namespace
 	{
 		switch (a_msg->type) {
 		case SKSE::MessagingInterface::kPostLoad:
-			protean::Face::Register();
 			protean::Journal::Register();  // every plugin is loaded now, SKSEMenuFramework.dll among them
 			break;
 		case SKSE::MessagingInterface::kDataLoaded:
@@ -160,8 +118,6 @@ namespace
 				auto* events = RE::ScriptEventSourceHolder::GetSingleton();
 				events->AddEventSink<RE::TESEquipEvent>(Sink::Get());
 				events->AddEventSink<RE::TESSpellCastEvent>(Sink::Get());
-				events->AddEventSink<RE::TESActivateEvent>(Sink::Get());
-				events->AddEventSink<RE::TESDeathEvent>(Sink::Get());
 				events->AddEventSink<RE::TESMagicEffectApplyEvent>(Sink::Get());
 				protean::Dev::Init();
 				protean::Attacks::Install();
@@ -190,6 +146,7 @@ namespace
 			protean::Move::Reset();
 			protean::Keen::Reset();
 			protean::Feed::Cancel();
+			protean::Consume::Cancel();
 			protean::Stalker::Reset();
 			protean::Devastator::Reset();
 			break;

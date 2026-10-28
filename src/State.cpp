@@ -8,7 +8,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 22;  // 3 to 16 are still read
+		constexpr std::uint32_t kVersion = 23;  // 3 to 16 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -256,6 +256,13 @@ namespace protean
 				PutStr(a, name);
 				Put(a, value);
 			}
+			Put<std::uint32_t>(a, static_cast<std::uint32_t>(s.consumed.size()));
+			for (const auto& [kind, n] : s.consumed) {
+				PutStr(a, kind);
+				Put(a, n);
+			}
+			Put<std::uint8_t>(a, s.consumeWarned ? 1 : 0);
+			Put<std::uint8_t>(a, s.consumeLoot ? 1 : 0);
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -475,6 +482,21 @@ namespace protean
 									break;
 								}
 								s.dialDefaults[name] = value;
+							}
+						}
+						if (std::uint32_t m = 0; version >= 23 && Get(a, m) && m <= 10000) {
+							for (std::uint32_t i = 0; i < m; ++i) {
+								std::string   kind;
+								std::uint32_t bodies = 0;
+								if (!GetStr(a, kind) || !Get(a, bodies)) {
+									break;
+								}
+								s.consumed[kind] = bodies;
+							}
+							std::uint8_t warned = 0, loot = 0;
+							if (Get(a, warned) && Get(a, loot)) {
+								s.consumeWarned = warned != 0;
+								s.consumeLoot = loot != 0;
 							}
 						}
 					}
