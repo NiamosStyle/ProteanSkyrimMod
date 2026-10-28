@@ -250,6 +250,7 @@ namespace protean::Consume
 			g_meal = std::move(m);
 			if (auto* fx = Registry::Get().DevastatorShader()) {
 				a_body->ApplyEffectShader(fx, g_meal.seconds + kGone);
+				a_p->ApplyEffectShader(fx, g_meal.seconds + kGone);  // on the player too, as Devastator's wind-up (user, 2026-10-28)
 			}
 			Sound(a_body, kSound);
 			if (g_meal.silent) {
@@ -435,6 +436,7 @@ namespace protean::Consume
 		auto ref = g_meal.body.get();
 		if (!ref || a_p->IsDead()) {
 			logger::info("consume: stopped ({})", ref ? "the player died" : "the body is gone");
+			StopShader(a_p);
 			g_meal = {};
 			return;
 		}
@@ -442,6 +444,7 @@ namespace protean::Consume
 		if (!g_meal.stopped && g_meal.t >= g_meal.seconds) {
 			g_meal.stopped = true;
 			StopShader(ref.get());
+			StopShader(a_p);
 			if (auto* body = ref->As<RE::Actor>()) {
 				Blood(body);
 			}
