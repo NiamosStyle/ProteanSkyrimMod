@@ -80,8 +80,8 @@ namespace protean::Deceiver
 				on ? a_p->AddPerk(perk) : a_p->RemovePerk(perk);
 				logger::info("assassin: {}", on ? "sneak attacks on anyone not hostile multiplied" : "off");
 			}
-			// the user, 2026-10-28: anyone who is not hostile to the player (no longer only the worn face's factions)
-			auto trusts = [&](RE::Actor* a) { return on && !a->IsDead() && !a->IsHostileToActor(a_p); };
+			// the user, 2026-10-28: anyone who would not attack the player on sight (no longer only the worn face's factions)
+			auto trusts = [&](RE::Actor* a) { return on && !a->IsDead() && !AttacksOnSight(a, a_p).has_value(); };
 			std::set<RE::FormID> now;
 			ForNear(a_p, kMarkRange, [&](RE::Actor* a) {
 				const bool should = trusts(a);
@@ -213,6 +213,25 @@ namespace protean::Deceiver
 	{
 		static Sink sink;
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESContainerChangedEvent>(&sink);
+	}
+
+	std::optional<std::string_view> AttacksOnSight(RE::Actor* a_a, RE::PlayerCharacter* a_p)
+	{
+		if (auto t = a_a->GetActorRuntimeData().currentCombatTarget.get(); t && t.get() == a_p) {
+			return "fighting you";
+		}
+		if (a_a->GetFactionReaction(a_p) == RE::FIGHT_REACTION::kEnemy) {
+			return "an enemy by faction";
+		}
+		if (a_a->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAggression) >= 2.0f) {
+			return "attacks anyone";
+		}
+		// the engine's own answer is trusted only for those outside the law (bandits, necromancers...): it called four
+		// calm Markarth guards hostile with no bounty (2026-10-28), who then talked to the player as usual
+		if (!a_a->GetCrimeFaction() && a_a->IsHostileToActor(a_p)) {
+			return "hostile, outside the law";
+		}
+		return std::nullopt;
 	}
 
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta)

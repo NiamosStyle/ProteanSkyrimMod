@@ -16,4 +16,7 @@ namespace protean::Deceiver
 	void Install();                                      // kDataLoaded: watch items changing hands
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta);  // main thread, after the player's update
 	void OnInfectCast();                                 // the Infect power was cast
+	// Assassin: why a_a would attack the player on sight (fighting them, an enemy faction, attacks anyone, an outlaw
+	// the engine calls hostile), or nothing: then sneak attacks on them are multiplied
+	std::optional<std::string_view> AttacksOnSight(RE::Actor* a_a, RE::PlayerCharacter* a_p);
 }

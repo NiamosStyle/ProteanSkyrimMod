@@ -3,6 +3,7 @@
 #include "Attacks.h"
 #include "Claws.h"
 #include "Consume.h"
+#include "Deceiver.h"
 #include "Evolve.h"
 #include "Face.h"
 #include "Fly.h"
@@ -469,9 +470,10 @@ namespace protean::Dev
 					// Assassin's x10 needs its hidden perk on the player and its mark on the target
 					auto* mark = Registry::Get().AssassinMark();
 					auto* perk = Registry::Get().AssassinPerk();
-					logger::info("hit: sneak attack on '{}', Assassin x10 {} (perk {}, marked {})", a_event->target->GetName(),
+					const auto why = target ? Deceiver::AttacksOnSight(target, p) : std::nullopt;
+					logger::info("hit: sneak attack on '{}', Assassin x10 {} (perk {}, marked {}, attacks on sight: {})", a_event->target->GetName(),
 						perk && mark && p->HasPerk(perk) && target && target->IsInFaction(mark) ? "yes" : "no",
-						perk && p->HasPerk(perk), mark && target && target->IsInFaction(mark));
+						perk && p->HasPerk(perk), mark && target && target->IsInFaction(mark), why ? *why : "no");
 				}
 				logger::info("hit: '{}' by {} with '{}'{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
 					a_event->target->GetName(), kind, source ? source->GetName() : "?", f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
