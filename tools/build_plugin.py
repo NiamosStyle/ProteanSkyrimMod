@@ -89,8 +89,8 @@ PERKS = {
                       -1.9, 2, ["infected", "assassin"]),
     "infected": (0x970, "Infected", "Cast Infect to grow an infection (costs Stamina), then slip it into someone's "
                  "pocket: for a day they fight at your side. Only one person carries it at a time.", -1.4, 3.1, []),
-    "assassin": (0x971, "Assassin", "While you wear a stolen face, your sneak attacks do ten times the damage against "
-                 "anyone who shares a faction with that face and is not hostile to you. Consume a person while nobody "
+    "assassin": (0x971, "Assassin", "Your sneak attacks do ten times the damage against anyone who is not hostile "
+                 "to you. Consume a person while nobody "
                  "can see you and it goes unnoticed: no crime, the alarm their death raised is called off, and their "
                  "face goes on at once at no Stamina cost. Comes with Stealth Consume: for a minute, every person you kill "
                  "with a melee sneak attack is consumed at once.",
@@ -148,8 +148,8 @@ STALKER_POWER = 0x9B8  # Stalk: the toggle in the animal's Favorites menu, besid
 # check, so ANIMAL_ARMS (held in animal form) carries Armsman / Savage Strike (attack damage) and Fighting Stance (power
 # attack stamina); DEFT (held in animal form or with the carapace) is Deft Movement's no-damage chance, drawn by Protean.
 ANIMAL_ARMS_PERK, DEFT_PERK = 0x9BB, 0x9BC
-# Deceiver (src/Deceiver.cpp). Assassin: Protean puts the people who trust the worn face in ASSASSIN_MARK; the hidden
-# ASSASSIN_PERK, held while a stolen face is worn, multiplies sneak attacks on them. Infected: the Infect power puts
+# Deceiver (src/Deceiver.cpp). Assassin: Protean puts everyone near who is not hostile to the player in ASSASSIN_MARK;
+# the hidden ASSASSIN_PERK, held in the player's own form, multiplies sneak attacks on them. Infected: the Infect power puts
 # one INFECTION in the pockets; planted on someone, Protean puts them in INFECTED_FACTION, the player's ally, for a day.
 ASSASSIN_MARK, ASSASSIN_PERK = 0x9C4, 0x9C5
 # Assassin's Stealth Consume (src/Consume.cpp; the user's design, 2026-10-28): the power, and the timed effect it puts
@@ -258,7 +258,7 @@ GLOBALS = {
     "Protean_InconspicuousPerPerson": (0x9C1, 5, "Float", "Inconspicuous: Sneak each friendly person nearby adds"),
     "Protean_InconspicuousMax":    (0x9C2, 30,   "Float", "Inconspicuous: the most Sneak it adds"),
     "Protean_InconspicuousRange":  (0x9C3, 1050, "Float", "Inconspicuous: how near a person counts, game units (1050 ~ 15 m)"),
-    "Protean_AssassinMult":        (0x9C6, 10,   "Float", "Assassin: sneak attack multiplier against someone who trusts the worn face"),
+    "Protean_AssassinMult":        (0x9C6, 10,   "Float", "Assassin: sneak attack multiplier against someone not hostile to the player"),
     "Protean_InfectCost":          (0x9C9, 50,   "Float", "Infected: stamina the Infect power costs"),
     "Protean_InfectedHours":       (0x9CB, 24,   "Float", "Infected: game hours the infected fight for the player"),
     "Protean_DevastatorRadius":    (0x9D1, 2100, "Float", "Devastator: enemies this near are struck, game units (2100 ~ 30 m, the user's pick; 1050 missed a bandit on a ledge)"),

@@ -465,6 +465,14 @@ namespace protean::Dev
 					cone = proc->high->attackData->data.strikeAngle;
 				}
 				auto* source = RE::TESForm::LookupByID(a_event->source);
+				if (f.any(RE::TESHitEvent::Flag::kSneakAttack)) {
+					// Assassin's x10 needs its hidden perk on the player and its mark on the target
+					auto* mark = Registry::Get().AssassinMark();
+					auto* perk = Registry::Get().AssassinPerk();
+					logger::info("hit: sneak attack on '{}', Assassin x10 {} (perk {}, marked {})", a_event->target->GetName(),
+						perk && mark && p->HasPerk(perk) && target && target->IsInFaction(mark) ? "yes" : "no",
+						perk && p->HasPerk(perk), mark && target && target->IsInFaction(mark));
+				}
 				logger::info("hit: '{}' by {} with '{}'{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
 					a_event->target->GetName(), kind, source ? source->GetName() : "?", f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
 					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f, data, cone,

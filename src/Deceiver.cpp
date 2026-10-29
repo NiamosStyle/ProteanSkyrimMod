@@ -71,29 +71,17 @@ namespace protean::Deceiver
 			auto&      reg = Registry::Get();
 			auto*      mark = reg.AssassinMark();
 			auto*      perk = reg.AssassinPerk();
-			const auto& s = State::Get();
 			if (!mark || !perk) {
 				return;
 			}
-			const bool on = Evolve::Has("assassin") && Face::Disguised() && !Shift::ActiveCreature();
+			// the user, 2026-10-28: no stolen face needed for now ("to see if it feels like Prototype")
+			const bool on = Evolve::Has("assassin") && !Shift::ActiveCreature();
 			if (a_p->HasPerk(perk) != on) {
 				on ? a_p->AddPerk(perk) : a_p->RemovePerk(perk);
-				logger::info("assassin: {}", on ? "a stolen face worn, sneak attacks on those who trust it multiplied" : "off");
+				logger::info("assassin: {}", on ? "sneak attacks on anyone not hostile multiplied" : "off");
 			}
-			auto trusts = [&](RE::Actor* a) {
-				if (!on || a->IsDead() || a->IsHostileToActor(a_p)) {
-					return false;
-				}
-				bool shared = false;
-				a->VisitFactions([&](RE::TESFaction* f, std::int8_t rank) {
-					if (f && rank >= 0 && f != reg.DisguiseFaction() && std::ranges::find(s.disguiseFactions, f->GetFormID()) != s.disguiseFactions.end()) {
-						shared = true;
-						return true;
-					}
-					return false;
-				});
-				return shared;
-			};
+			// the user, 2026-10-28: anyone who is not hostile to the player (no longer only the worn face's factions)
+			auto trusts = [&](RE::Actor* a) { return on && !a->IsDead() && !a->IsHostileToActor(a_p); };
 			std::set<RE::FormID> now;
 			ForNear(a_p, kMarkRange, [&](RE::Actor* a) {
 				const bool should = trusts(a);
@@ -102,7 +90,7 @@ namespace protean::Deceiver
 				}
 				if (should != a->IsInFaction(mark)) {  // also clears a mark left from an earlier session
 					should ? a->AddToFaction(mark, 0) : a->RemoveFromFaction(mark);
-					logger::info("assassin: '{}' {:08X} {}", a->GetName(), a->GetFormID(), should ? "trusts the face" : "no longer marked");
+					logger::info("assassin: '{}' {:08X} {}", a->GetName(), a->GetFormID(), should ? "unsuspecting (x10)" : "no longer marked");
 				}
 			});
 			for (auto id : g_marked) {  // out of range now
