@@ -225,7 +225,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Subtle Carapace
 - **What it does:** A toggle. While it's on, Stamina drains and health rises by the same amount.
 - **The payoff:** Its real benefit comes from stacking kill boosts from Unbound Form. With enough stacks, Stamina recovers faster than Regeneration drains it, so the toggle becomes sustainable.
-- **Status:** Needs research. The toggle and the drain-to-health link need scripting. We need to set the exact rates and confirm that stacked kill boosts can outpace the drain.
+- **Status:** Built 2026-10-27 (with Devastator): a toggle power, Stamina into Health at `Protean_RegenPerSecond` (8) a second. Tested in game by the user 2026-11-02, in combat, switched on and off twice (log: on/off at the right times; the amounts are not logged).
 
 ### Devastator (capstone, stamina)
 - **Requires:** Rending Claws, Prey's Flight, and Subtle Carapace
