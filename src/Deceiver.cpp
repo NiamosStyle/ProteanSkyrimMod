@@ -115,6 +115,19 @@ namespace protean::Deceiver
 
 		float Now() { return RE::Calendar::GetSingleton()->GetDaysPassed(); }
 
+		// the user, 2026-11-02: the infected ignore the player's crimes; no crime faction = outside the law (the game's own
+		// Actor.SetCrimeFaction, kept per actor in the save)
+		void SetCrime(RE::Actor* a_a, RE::TESFaction* a_faction)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			if (!vm) {
+				return;
+			}
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_a->GetFormType(), a_a);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchMethodCall2(handle, "Actor", "SetCrimeFaction", RE::MakeFunctionArguments(std::move(a_faction)), cb);
+		}
+
 		void Cure(std::string_view a_why)
 		{
 			auto& s = State::Get();
@@ -127,6 +140,9 @@ namespace protean::Deceiver
 				av->SetBaseActorValue(RE::ActorValue::kConfidence, s.infectedConfidence);
 				if (auto* f = Registry::Get().InfectedFaction()) {
 					a->RemoveFromFaction(f);
+				}
+				if (auto* base = a->GetActorBase(); base && base->crimeFaction) {
+					SetCrime(a, base->crimeFaction);  // their own law again
 				}
 				logger::info("infected: '{}' {:08X} cured ({})", a->GetName(), s.infected, a_why);
 				if (a_why == "the day is over" && !a->IsDead()) {
@@ -177,6 +193,10 @@ namespace protean::Deceiver
 			auto* p = RE::PlayerCharacter::GetSingleton();
 			if (!p || !a_a->Is3DLoaded()) {
 				return;
+			}
+			if (a_a->GetCrimeFaction()) {
+				SetCrime(a_a, nullptr);
+				logger::info("infected: '{}' {:08X} no longer answers to the law", a_a->GetName(), a_a->GetFormID());
 			}
 			auto target = a_a->GetActorRuntimeData().currentCombatTarget.get();
 			if (a_a->IsInCombat() && target && target.get() == p) {
