@@ -11,6 +11,7 @@ namespace protean::Deceiver
 	namespace
 	{
 		constexpr float kCheckEvery = 0.5f;     // seconds
+		constexpr float kFightRange = 4096.0f;  // the infected join fights against the player this close (about 58 m)
 		constexpr float kMarkRange = 4000.0f;   // game units: well beyond any sneak attack's reach
 		constexpr float kBrave = 3.0f;          // Confidence: the infected do not run from a fight
 
@@ -169,6 +170,47 @@ namespace protean::Deceiver
 				s.infected, s.infectedAssistance, s.infectedConfidence, s.infectedUntil);
 		}
 
+		// the user, 2026-11-02: the infected never turn on the player, crimes included (a guard sided with his city when
+		// the player attacked Thongvor); they fight whoever fights the player, the nearest first
+		void Loyal(RE::Actor* a_a)
+		{
+			auto* p = RE::PlayerCharacter::GetSingleton();
+			if (!p || !a_a->Is3DLoaded()) {
+				return;
+			}
+			auto target = a_a->GetActorRuntimeData().currentCombatTarget.get();
+			if (a_a->IsInCombat() && target && target.get() == p) {
+				a_a->StopCombat();
+				a_a->StopAlarmOnActor();
+				logger::info("infected: '{}' {:08X} called off the player", a_a->GetName(), a_a->GetFormID());
+				target.reset();
+			}
+			auto* pl = RE::ProcessLists::GetSingleton();
+			if (!pl) {
+				return;
+			}
+			RE::Actor* foe = nullptr;
+			float      best = kFightRange;
+			for (auto& h : pl->highActorHandles) {
+				auto e = h.get();
+				if (!e || e.get() == a_a || e.get() == p || e->IsDead() || !e->IsInCombat()) {
+					continue;
+				}
+				auto t = e->GetActorRuntimeData().currentCombatTarget.get();
+				if (!t || t.get() != p) {
+					continue;
+				}
+				if (const float d = a_a->GetPosition().GetDistance(e->GetPosition()); d < best) {
+					best = d;
+					foe = e.get();
+				}
+			}
+			if (foe && (!target || target.get() != foe) && !(target && target.get() != p && a_a->IsInCombat())) {
+				a_a->StartCombat(foe);
+				logger::info("infected: '{}' {:08X} attacks '{}' {:08X}", a_a->GetName(), a_a->GetFormID(), foe->GetName(), foe->GetFormID());
+			}
+		}
+
 		void Infected()
 		{
 			auto& s = State::Get();
@@ -182,8 +224,11 @@ namespace protean::Deceiver
 				Cure("dead");
 			} else if (Now() >= s.infectedUntil) {
 				Cure("the day is over");
-			} else if (auto* f = Registry::Get().InfectedFaction(); f && !a->IsInFaction(f)) {
-				a->AddToFaction(f, 0);  // kept, whatever took it away
+			} else {
+				if (auto* f = Registry::Get().InfectedFaction(); f && !a->IsInFaction(f)) {
+					a->AddToFaction(f, 0);  // kept, whatever took it away
+				}
+				Loyal(a);
 			}
 		}
 

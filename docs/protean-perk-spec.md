@@ -261,7 +261,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 ### Infected
 - **Requires:** Inconspicuous
 - **What it does:** Reverse-pickpockets an infection onto someone. The infected fight for you.
-- **Status:** Built (2026-10-26), untested. The Infect power (50 Stamina) puts one Infection item in your pockets; planted by reverse pickpocket, the person joins `Protean_InfectedFaction` (allied to the player), helps allies and stands their ground for one game day (`Protean_InfectedHours`). One person at a time (user's choices: fight as an ally; a day and one at a time).
+- **Status:** Built (2026-10-26), untested. The Infect power (50 Stamina) puts one Infection item in your pockets; planted by reverse pickpocket, the person joins `Protean_InfectedFaction` (allied to the player), helps allies and stands their ground for one game day (`Protean_InfectedHours`). One person at a time (user's choices: fight as an ally; a day and one at a time). 2026-11-02, tested by the user: Infect grows the item (50 Stamina), planting it infects (the item lookup was broken until then). As a plain ally a guard still turned on the player for a crime (attacking Thongvor); the user chose: the infected never turn on the player, crimes included. Every half second an infected person targeting the player is called off (combat and alarm stopped), and one not already fighting someone else attacks the nearest actor fighting the player within 58 m. Untested.
 
 ### Assassin
 - **Requires:** Inconspicuous
