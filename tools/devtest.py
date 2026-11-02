@@ -21,13 +21,15 @@ MO2_MOD = r"C:\Users\user\AppData\Local\ModOrganizer\Skyrim Special Edition\mods
 CMD = os.path.join(MO2_MOD, "SKSE", "Plugins", "Protean.cmd")
 LOG = r"C:\Users\user\OneDrive\Documents\My Games\Skyrim Special Edition\SKSE\Protean.log"
 GAME = "C:/Games/steamapps/common/Skyrim Special Edition"
+# Git's bash: a bare "bash" from Python finds Windows' own (WSL) first, which prints nothing here
+BASH = r"C:\Program Files\Git\bin\bash.exe" if os.path.exists(r"C:\Program Files\Git\bin\bash.exe") else "bash"
 
 FAILS = []
 
 
 def bench(*args):
     """Run tools/devbench-cli.sh and return parsed JSON (or the raw text)."""
-    r = subprocess.run(["bash", "tools/devbench-cli.sh", *args], cwd=GAME, capture_output=True, text=True, timeout=60)
+    r = subprocess.run([BASH, "tools/devbench-cli.sh", *args], cwd=GAME, capture_output=True, text=True, timeout=60)
     out = r.stdout.strip()
     try:
         return json.loads(out)

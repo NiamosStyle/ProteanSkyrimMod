@@ -164,11 +164,12 @@ namespace protean::Dev
 				// attack [lmb|rmb|power|rpower]: what that button would do
 				Attacks::TestFire(a_arg.find("power") != std::string::npos, a_arg.starts_with("r"));
 			} else if (a_cmd == "place" && !a_arg.empty()) {
-				// place <ref hex> <distance>: put that actor in front of the player, facing the player, held in place
+				// place <ref hex> <distance> [away]: put that actor in front of the player, facing the player (or, with
+				// "away", its back to the player: a sneak attack's victim), held in place
 				std::istringstream in(a_arg);
-				std::string         hex;
+				std::string         hex, facing;
 				float               dist = 0.0f;
-				in >> hex >> dist;
+				in >> hex >> dist >> facing;
 				auto* a = RE::TESForm::LookupByID<RE::Actor>(static_cast<RE::FormID>(std::stoul(hex, nullptr, 16)));
 				if (a) {
 					const float yaw = p->GetAngleZ();
@@ -176,7 +177,7 @@ namespace protean::Dev
 					pos.x += dist * std::sin(yaw);
 					pos.y += dist * std::cos(yaw);
 					a->SetPosition(pos, true);
-					a->SetAngle({ 0.0f, 0.0f, yaw + RE::NI_PI });
+					a->SetAngle({ 0.0f, 0.0f, facing == "away" ? yaw : yaw + RE::NI_PI });
 					logger::info("dev: placed {:08X} '{}' {:.0f} in front, measured distance {:.0f}", a->GetFormID(), a->GetName(), dist,
 						p->GetPosition().GetDistance(a->GetPosition()));
 				}
@@ -371,6 +372,19 @@ namespace protean::Dev
 				Flight::SetLooks("pose", a_arg);  // glidepose <0-3>: which glide marker (the OAR pose being chosen)
 			} else if (a_cmd == "slamsound" || a_cmd == "slamshake") {
 				Flight::SetLooks(a_cmd == "slamsound" ? "sound" : "shake", a_arg);  // compare the dive's landing live
+			} else if (a_cmd == "power" && !a_arg.empty()) {
+				// power <hex>: as if the player had cast that spell (a Protean.esp local id, or a full FormID): console cast
+				// and Papyrus Spell.Cast do not reach Protean's power handlers, the game's spell-cast event does
+				const auto id = static_cast<RE::FormID>(std::stoul(a_arg, nullptr, 16));
+				auto*      dh = RE::TESDataHandler::GetSingleton();
+				auto*      spell = id <= 0xFFF && dh ? dh->LookupForm<RE::SpellItem>(id, "Protean.esp") : RE::TESForm::LookupByID<RE::SpellItem>(id);
+				if (spell) {
+					RE::TESSpellCastEvent ev{ RE::NiPointer<RE::TESObjectREFR>(p), spell->GetFormID() };
+					RE::ScriptEventSourceHolder::GetSingleton()->RE::BSTEventSource<RE::TESSpellCastEvent>::SendEvent(&ev);
+					logger::info("dev: power '{}' {:08X} cast", spell->GetName(), spell->GetFormID());
+				} else {
+					logger::warn("dev: power {}: no such spell", a_arg);
+				}
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");
