@@ -128,6 +128,20 @@ namespace protean::Deceiver
 			vm->DispatchMethodCall2(handle, "Actor", "SetCrimeFaction", RE::MakeFunctionArguments(std::move(a_faction)), cb);
 		}
 
+		// the factions an actor is in now (base ones, then the changes made in game, which win)
+		std::map<RE::TESFaction*, std::int8_t> Memberships(RE::Actor* a_a)
+		{
+			std::map<RE::TESFaction*, std::int8_t> all;
+			a_a->VisitFactions([&](RE::TESFaction* a_f, std::int8_t a_rank) {
+				if (a_f) {
+					all[a_f] = a_rank;
+				}
+				return false;
+			});
+			std::erase_if(all, [](const auto& a_kv) { return a_kv.second < 0; });
+			return all;
+		}
+
 		void Cure(std::string_view a_why)
 		{
 			auto& s = State::Get();
@@ -141,8 +155,15 @@ namespace protean::Deceiver
 				if (auto* f = Registry::Get().InfectedFaction()) {
 					a->RemoveFromFaction(f);
 				}
-				if (auto* base = a->GetActorBase(); base && base->crimeFaction) {
-					SetCrime(a, base->crimeFaction);  // their own law again
+				if (auto* base = a->GetActorBase()) {
+					if (base->crimeFaction) {
+						SetCrime(a, base->crimeFaction);  // their own law again
+					}
+					for (auto& fr : base->factions) {  // and their own people (factions given in game are not put back)
+						if (fr.faction && fr.rank >= 0) {
+							a->AddToFaction(fr.faction, fr.rank);
+						}
+					}
 				}
 				logger::info("infected: '{}' {:08X} cured ({})", a->GetName(), s.infected, a_why);
 				if (a_why == "the day is over" && !a->IsDead()) {
@@ -197,6 +218,19 @@ namespace protean::Deceiver
 			if (a_a->GetCrimeFaction()) {
 				SetCrime(a_a, nullptr);
 				logger::info("infected: '{}' {:08X} no longer answers to the law", a_a->GetName(), a_a->GetFormID());
+			}
+			// nor to anyone else (a guard defended his comrade the player hit, 2026-11-02): out of every faction but
+			// Protean's own (the infected's, Assassin's mark...), the base's put back when cured
+			int left = 0;
+			for (auto& [f, rank] : Memberships(a_a)) {
+				const auto* file = f->GetFile(0);
+				if (!file || file->GetFilename() != "Protean.esp") {
+					a_a->RemoveFromFaction(f);
+					++left;
+				}
+			}
+			if (left) {
+				logger::info("infected: '{}' {:08X} left {} faction(s)", a_a->GetName(), a_a->GetFormID(), left);
 			}
 			auto target = a_a->GetActorRuntimeData().currentCombatTarget.get();
 			if (a_a->IsInCombat() && target && target.get() == p) {
