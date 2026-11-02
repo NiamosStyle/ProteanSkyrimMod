@@ -79,6 +79,7 @@ your value.
 | `Protean_RushSafeDrop` | xx9C0 | Float | 300 | Predator's Rush: a landing no more than this below the ground left during a boosted sprint does no harm (deeper drops are the game's) |
 | `Protean_XpSneak` | xx9BF | Float | 0.62 | Sneak skill uses a second while moving faded (Stalker) near someone who has not noticed the player (vanilla's, measured) |
 | `Protean_StalkerFadeSeconds` / `Protean_StalkerDrain` / `Protean_StalkerAmbushMult` / `Protean_StalkerRunMult` | xx9B5 / xx9B6 / xx9B7 / xx9B9 | Float | 2 / 2 / 2 / 2 | Stalker: seconds still or walking to fade; stamina a second walking faded (standing free); damage of the bite from hiding; running's drain multiplier |
+| `Protean_StalkerLoseSeconds` | xx9F2 | Float | 3 | Stalker rank 2: seconds an enemy must not see the faded animal before giving up the hunt |
 | `Protean_ClawDamageMin` | xx953 | Float | 6 | Rending Claws damage never goes below this |
 | `Protean_ClawDamageMax` | xx954 | Float | 10 | Rending Claws damage on a full stamina bar, before the level parts (full bar = this + PerLevel x level + PerLevelSq x level²: 11 at 1, 19 at 10, 49 at 30, 95 at 50) |
 | `Protean_ClawDamagePerLevel` | xx955 | Float | 0.7 | Rending Claws full-bar damage added per player level |

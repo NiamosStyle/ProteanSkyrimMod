@@ -11,6 +11,8 @@ namespace protean::Stalker
 	// Sprinting, jumping, eating, being hit, a fight, an empty Stamina bar or attacking end it. The bite thrown from hiding does
 	// Protean_StalkerAmbushMult times the damage (a hidden perk held from the swing to its hit): animals cannot sneak, so
 	// the game's own sneak attacks never come to them.
+	// Stalker rank 2 (the user, 2026-11-02): the fade may also start in a fight while no enemy has the player in sight,
+	// and once faded, an enemy that has not seen the player for Protean_StalkerLoseSeconds gives up the hunt.
 
 	void OnFrame(RE::PlayerCharacter* a_p, float a_delta);  // after the player's update
 	void OnPowerCast();                                    // main thread: Stalk was cast

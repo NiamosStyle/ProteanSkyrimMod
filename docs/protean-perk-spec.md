@@ -181,7 +181,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **What it does:**
   - Rank 1: a stealth bonus.
   - Rank 2: enemies lose track of you faster.
-- **Status:** Needs research. Stealth bonuses are standard. Making enemies lose track faster is less common and may need scripting.
+- **Status:** Rank 1 done, tested in game (Stalk: see `src/Stalker.h`). Rank 2 built 2026-11-02, untested (the user's design): Stalk's fade may start in a fight while no enemy has the player in line of sight (rank 1 forbade any fight, which made "lose track sooner" useless); once faded, an enemy that has not seen the player for `Protean_StalkerLoseSeconds` (3) gives up the hunt (its combat and alarm are stopped). Being hit, attacking, sprinting or an empty bar still end the fade.
 
 ### Apex (capstone)
 - **Requires:** Survivor, Predator, and Stalker, each taken at least once

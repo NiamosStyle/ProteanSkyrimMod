@@ -5,6 +5,6 @@ Name:
   Value: 'Stalker'
 Description:
   TargetLanguage: English
-  Value: 'Enemies lose track of your animal forms sooner.'
+  Value: 'Stalk works in a fight too, once no enemy can see you: break their line of sight and keep still to fade. Faded, an enemy who cannot see you gives up the hunt after 3 seconds.'
 NumRanks: 1
 Playable: True

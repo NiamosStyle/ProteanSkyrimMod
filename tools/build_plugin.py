@@ -110,7 +110,8 @@ RANK2 = {
                  "eat plants to heal."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
-    "stalker": (0x974, "Enemies lose track of your animal forms sooner."),
+    "stalker": (0x974, "Stalk works in a fight too, once no enemy can see you: break their line of sight and keep "
+                "still to fade. Faded, an enemy who cannot see you gives up the hunt after 3 seconds."),
     "subtle_carapace": (0x975, "The carapace hardens further: 100 armor plus 7 per level, under the same rule."),
 }
 # Rending Claws (tools/build_claws.py makes the models): an empty-handed weapon for either hand, and one hidden
@@ -177,7 +178,7 @@ BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "
          "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis",
          "regeneration", "devastator"}
 # second ranks not built yet, though their first rank is
-RANK2_UNBUILT = {"stalker"}
+RANK2_UNBUILT = set()
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
 # Dials read live by the SKSE plugin: name -> (local id, default, Float/Short, what it does)
 GLOBALS = {
@@ -250,6 +251,7 @@ GLOBALS = {
     "Protean_StalkerDrain":        (0x9B6, 2,    "Float", "Stalker: stamina a second while faded and walking (standing is free)"),
     "Protean_StalkerAmbushMult":   (0x9B7, 2,    "Float", "Stalker: damage multiplier of a bite from hiding"),
     "Protean_StalkerRunMult":      (0x9B9, 2,    "Float", "Stalker: running while faded costs this times the walking drain"),
+    "Protean_StalkerLoseSeconds":  (0x9F2, 3,    "Float", "Stalker rank 2: seconds an enemy must not see the faded animal before giving up"),
     "Protean_ComboStacks":         (0x9BA, 5,    "Float", "unused since 2026-10-28 (evolution points come only from consuming)"),
     "Protean_XpOneHanded":         (0x9BD, 1,    "Float", "multiplies the One-Handed skill uses of a bite or claw hit (vanilla: its listed damage)"),
     "Protean_XpLightArmor":        (0x9BE, 0.38, "Float", "Light Armor skill uses per hit that hurts, as an animal or with the carapace (vanilla, measured)"),
