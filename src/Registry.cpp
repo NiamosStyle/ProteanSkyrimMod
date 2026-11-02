@@ -145,7 +145,7 @@ namespace protean
 			const auto d = j.value("deceiver", nlohmann::json::object());
 			_assassinMark = dh->LookupForm<RE::TESFaction>(d.value("assassinMark", 0u), plugin);
 			_assassinPerk = dh->LookupForm<RE::BGSPerk>(d.value("assassinPerk", 0u), plugin);
-			_infection = dh->LookupForm<RE::TESBoundObject>(d.value("infection", 0u), plugin);
+			_infection = dh->LookupForm<RE::TESObjectMISC>(d.value("infection", 0u), plugin);
 			_infectPower = dh->LookupForm<RE::SpellItem>(d.value("infectPower", 0u), plugin);
 			_infectedFaction = dh->LookupForm<RE::TESFaction>(d.value("infectedFaction", 0u), plugin);
 			_metamorphosisPower = dh->LookupForm<RE::SpellItem>(d.value("metamorphosisPower", 0u), plugin);

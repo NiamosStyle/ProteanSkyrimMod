@@ -258,11 +258,14 @@ namespace protean::Deceiver
 	{
 		auto* p = RE::PlayerCharacter::GetSingleton();
 		auto* item = Registry::Get().Infection();
+		logger::info("infected: Infect cast");
 		if (!p || !item || !Evolve::Has("infected")) {
+			logger::info("infected: Infect cast, nothing grown (item {}, perk {})", item != nullptr, Evolve::Has("infected"));
 			return;
 		}
 		if (Count(p, item) > 0) {
 			Shift::Notify("You already carry an infection.");
+			logger::info("infected: Infect cast, one is carried already");
 			return;
 		}
 		const float cost = Dial("Protean_InfectCost", 50.0f);
