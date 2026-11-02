@@ -182,7 +182,74 @@ def s_stalker2_seen():
     clear_actors()
 
 
+def sneak_attack(kind):
+    """Human, sneaking, dagger drawn: one real sneak attack on a fresh victim of that kind, its back turned and its AI
+    off (so it cannot notice). Returns (ref, damage dealt, log text)."""
+    con("player.additem 1397E 1")  # Iron Dagger
+    con("player.equipitem 1397E")
+    # crouched before the victim exists, so it never glimpses the player standing
+    if call("Actor", "IsSneaking", "[]", "0x14") is not True:  # it toggles: a second call stands the player up
+        call("Actor", "StartSneaking", "[]", "0x14")
+    call("Actor", "DrawWeapon", "[]", "0x14")
+    time.sleep(2)
+    foe = person(kind)
+    if not foe:
+        return None, None, ""
+    F = "0x" + foe
+    call("Actor", "EnableAI", "[false]", F)
+    send("place", foe + " 90 away", wait_for=r"dev: placed")
+    time.sleep(6)
+    check("sneaking, unseen", call("Actor", "IsSneaking", "[]", "0x14") is True
+          and call("Actor", "IsDetectedBy", '[{"form":"%s"}]' % F, "0x14") is False)
+    hp0 = call("Actor", "GetActorValue", '["Health"]', F)
+    off = dt.log_size()
+    call("Debug", "SendAnimationEvent", '[{"form":"0x14"},"attackStart"]')
+    t = wait_log(off, r"hit: '", 5)
+    time.sleep(1)
+    hp1 = call("Actor", "GetActorValue", '["Health"]', F)
+    t = log_since(off)
+    return foe, (hp0 - hp1) if hp0 is not None and hp1 is not None else None, t
+
+
+def s_assassin():
+    """Assassin: a sneak attack on a citizen gets x10, one on a bandit (attacks on sight) does not."""
+    setup()
+    own_perk("assassin")
+    _, dmg_f, t = sneak_attack("farmer")
+    check("the farmer was sneak attacked", "sneak attack on 'Farmer'" in t, t[-300:])
+    check("x10 applied to the farmer", "Assassin x10 yes" in t)
+    _, dmg_b, t = sneak_attack("bandit")
+    check("the bandit was sneak attacked", "sneak attack on 'Bandit'" in t, t[-300:])
+    check("no x10 on the bandit", "Assassin x10 no" in t and "attacks anyone" in t)
+    ok = dmg_f is not None and dmg_b is not None and dmg_b > 0 and 8 <= dmg_f / dmg_b <= 12
+    check("the farmer took about 10 times the damage", ok, "farmer %s, bandit %s" % (dmg_f, dmg_b))
+    clear_actors()
+
+
+def s_stealth_consume():
+    """Stealth Consume: cast it, sneak-kill a person, and the body is consumed at once."""
+    setup()
+    own_perk("assassin")
+    con("player.restoreav stamina 500")
+    off = dt.log_size()
+    send("power", STEALTH_POWER, wait_for=r"stealth consume: (cast|refused)")
+    t = wait_log(off, r"stealth consume: (cast|refused)", 5)
+    check("the power was cast", "stealth consume: cast" in t, t[-300:])
+    foe, _, t = sneak_attack("farmer")
+    t = wait_log(off, r"consume: '.*' consumed", 10)
+    check("the sneak attack was noticed", "stealth consume: sneak attack on 'Farmer'" in t, t[-500:])
+    check("the farmer was killed by it", "killed by a sneak attack" in t)
+    check("the body was consumed", re.search(r"consume: 'Farmer' .* consumed", t) is not None)
+    check("nobody saw it", "seen by '" not in t)
+    if foe:
+        time.sleep(1)
+        check("the body is gone", call("ObjectReference", "IsDisabled", "[]", "0x" + foe) is not False)
+    clear_actors()
+
+
 SCENARIOS = {
+    "assassin": s_assassin,
+    "stealth_consume": s_stealth_consume,
     "stalker2": s_stalker2,
     "stalker2_seen": s_stalker2_seen,
 }
