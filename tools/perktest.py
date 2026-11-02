@@ -156,8 +156,35 @@ def s_stalker2():
     clear_actors()
 
 
+def s_stalker2_seen():
+    """Stalker rank 2: in a fight, with the enemy looking right at the wolf, Stalk must not fade."""
+    setup()
+    own_perk("stalker")
+    own_perk("stalker_2")
+    send("learn", "wolf", wait_for=r"dev: learn")
+    send("transform", "wolf", wait_for=r"health bonus|dev: transform")
+    time.sleep(3)
+    foe = person("bandit")
+    check("a bandit was spawned", foe is not None)
+    if not foe:
+        return
+    # 8 m ahead with its back turned it may never see the player: close, facing it
+    send("place", foe + " 250", wait_for=r"dev: placed")
+    call("Actor", "StartCombat", '[{"form":"0x14"}]', "0x" + foe)
+    check("the player is in a fight", wait_true(lambda: call("Actor", "IsInCombat", "[]", "0x14"), 10))
+    check("the bandit sees the wolf", wait_true(lambda: call("Actor", "HasLOS", '[{"form":"0x14"}]', "0x" + foe), 5))
+    off = dt.log_size()
+    send("power", STALK_POWER, wait_for=r"stalker: Stalk")
+    t = wait_log(off, r"stalker: faded out", 5)
+    check("did not fade while seen", "stalker: faded out" not in t, t[-400:])
+    check("the reason given is being seen", "in a fight, seen" in t, t[-400:])
+    send("revert")
+    clear_actors()
+
+
 SCENARIOS = {
     "stalker2": s_stalker2,
+    "stalker2_seen": s_stalker2_seen,
 }
 
 if __name__ == "__main__":

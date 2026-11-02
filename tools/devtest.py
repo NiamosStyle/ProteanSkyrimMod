@@ -29,7 +29,10 @@ FAILS = []
 
 def bench(*args):
     """Run tools/devbench-cli.sh and return parsed JSON (or the raw text)."""
-    r = subprocess.run([BASH, "tools/devbench-cli.sh", *args], cwd=GAME, capture_output=True, text=True, timeout=60)
+    # the arguments travel in environment variables: Windows' command line strips the quotes out of JSON
+    env = dict(os.environ, **{"DB_ARG%d" % i: a for i, a in enumerate(args)})
+    script = "exec bash tools/devbench-cli.sh " + " ".join('"$DB_ARG%d"' % i for i in range(len(args)))
+    r = subprocess.run([BASH, "-c", script], cwd=GAME, env=env, capture_output=True, text=True, timeout=60)
     out = r.stdout.strip()
     try:
         return json.loads(out)
