@@ -489,8 +489,8 @@ namespace protean::Dev
 						perk && mark && p->HasPerk(perk) && target && target->IsInFaction(mark) ? "yes" : "no",
 						perk && p->HasPerk(perk), mark && target && target->IsInFaction(mark), why ? *why : "no");
 				}
-				logger::info("hit: '{}' by {} with '{}'{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
-					a_event->target->GetName(), kind, source ? source->GetName() : "?", f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
+				logger::info("hit: '{}' {:08X} by {} with '{}'{}, health now {:.1f}, attack data '{}' cone {:.0f}, race reach {:.0f}, distance {:.0f}",
+					a_event->target->GetName(), a_event->target->GetFormID(), kind, source ? source->GetName() : "?", f.any(RE::TESHitEvent::Flag::kHitBlocked) ? " (blocked)" : "",
 					target ? target->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) : 0.0f, data, cone,
 					p->GetRace() ? p->GetRace()->data.unarmedReach : 0.0f, p->GetPosition().GetDistance(a_event->target->GetPosition()));
 				return RE::BSEventNotifyControl::kContinue;
