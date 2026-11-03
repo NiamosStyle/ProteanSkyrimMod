@@ -277,7 +277,9 @@ namespace protean::Consume
 			m.animal = animal;
 			m.silent = person && !animal && m.seen.empty() && Evolve::Has("assassin");
 			m.stealth = a_stealth;
-			m.seconds = m.silent || a_stealth ? Dial("Protean_AssassinConsumeSeconds", 1.0f) : Dial("Protean_ConsumeSeconds", 2.0f);
+			m.seconds = m.silent || a_stealth ? Dial("Protean_AssassinConsumeSeconds", 1.0f) :
+			            a_p->IsInCombat()     ? Dial("Protean_ConsumeCombatSeconds", 1.0f) :
+			                                    Dial("Protean_ConsumeSeconds", 2.0f);
 			g_meal = std::move(m);
 			if (auto* fx = Registry::Get().DevastatorShader()) {
 				a_body->ApplyEffectShader(fx, g_meal.seconds + kGone);
@@ -337,14 +339,16 @@ namespace protean::Consume
 			if (c) {
 				Shift::Learn(*c);
 			}
-			Evolve::AddBoost();
+			// a body restores Stamina at once, like a potion; the regeneration stacks come from kills (user, 2026-11-03)
+			const float stamina = Dial("Protean_ConsumeStamina", 50.0f);
+			av->RestoreActorValue(RE::ActorValue::kStamina, stamina);
 			const bool draugr = IsDraugr(body);
 			if (!draugr) {  // no evolution points for the dead
 				const std::string label = person ? std::string(body->GetDisplayFullName()) : c ? c->name : std::string(body->GetName());
 				Evolve::OnConsume(person ? "people" : c ? c->id : "other", label, Biomass(body, c, person));
 			}
-			logger::info("consume: '{}' {:08X} consumed, healed {:.0f} of {:.0f}{}", body->GetName(), body->GetFormID(), heal, max,
-				draugr ? " (a draugr: no evolution points)" : "");
+			logger::info("consume: '{}' {:08X} consumed, healed {:.0f} of {:.0f}, stamina +{:.0f}{}", body->GetName(), body->GetFormID(), heal,
+				max, stamina, draugr ? " (a draugr: no evolution points)" : "");
 			Blood(body, true);
 			if (auto* dh = RE::TESDataHandler::GetSingleton()) {
 				if (auto* burst = dh->LookupForm<RE::BGSExplosion>(kBloodBurst, "Dawnguard.esm")) {
@@ -468,6 +472,23 @@ namespace protean::Consume
 				}
 			}
 		}
+
+		// every kill by the player, in any form, adds a biomass boost stack (user, 2026-11-03: kills give the regeneration,
+		// bodies the Stamina)
+		class DeathSink : public RE::BSTEventSink<RE::TESDeathEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESDeathEvent* a_event, RE::BSTEventSource<RE::TESDeathEvent>*) override
+			{
+				if (!a_event || !a_event->dead || !a_event->actorKiller || !a_event->actorKiller->IsPlayerRef() || !a_event->actorDying ||
+					a_event->actorDying->IsPlayerRef()) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				logger::info("kill: '{}' {:08X}", a_event->actorDying->GetName(), a_event->actorDying->GetFormID());
+				SKSE::GetTaskInterface()->AddTask([] { Evolve::AddBoost(); });
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
 
 		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
 		{
@@ -622,7 +643,9 @@ namespace protean::Consume
 	void Install()
 	{
 		static HitSink sink;
+		static DeathSink deaths;
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&sink);
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESDeathEvent>(&deaths);
 	}
 
 	void OnStealthCast()

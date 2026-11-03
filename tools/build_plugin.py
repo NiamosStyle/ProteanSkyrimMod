@@ -196,7 +196,7 @@ GLOBALS = {
     "Protean_DamageMult":          (0x94B, 1.0,  "Float", "multiplies all damage the player deals while transformed"),
     "Protean_ArmorBonus":          (0x94C, 0,    "Float", "armor rating added while transformed"),
     "Protean_ChangeStaminaCost":   (0x94D, 15,   "Float", "stamina a player-requested change into a form costs (0 = free)"),
-    "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one consumed body's stamina-regeneration stack lasts (the biomass boost; kills gave it until 2026-10-28)"),
+    "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one kill's stamina-regeneration stack lasts (the biomass boost; consumed bodies gave it 2026-10-28 to 2026-11-03)"),
     "Protean_KillBoostPct":        (0x94F, 15,   "Float", "stamina regeneration each stack adds, in percentage points of the normal rate"),
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
     "Protean_PerkPoints":          (0x951, 0,    "Float", "Protean perk points to spend (kept by Protean; the perk menu spends them)"),
@@ -286,6 +286,8 @@ GLOBALS = {
     "Protean_ConsumeBounty":       (0x9E7, 1000, "Float", "consuming a person in sight of people: bounty with each witness's crime faction (murder's is 1000)"),
     "Protean_ConsumeWitnessRange": (0x9E8, 3000, "Float", "consuming: how far a person who can see the player counts as a witness, game units"),
     "Protean_AssassinConsumeSeconds": (0x9E9, 1, "Float", "Assassin: seconds an unnoticed consumption takes (and every Stealth Consume)"),
+    "Protean_ConsumeStamina":      (0x9F3, 50,   "Float", "consuming: Stamina a body restores at once, like a potion (user, 2026-11-03)"),
+    "Protean_ConsumeCombatSeconds": (0x9F4, 1,   "Float", "consuming in combat: seconds the tentacles take (user, 2026-11-03: faster mid-fight)"),
     "Protean_StealthConsumeCost":  (0x9F0, 25,   "Float", "Stealth Consume: Stamina the power costs"),
     "Protean_StealthConsumeSeconds": (0x9F1, 60, "Float", "Stealth Consume: how long it lasts (read when the plugin is built: the spell's duration)"),
     # The perk screen's level bar, like the werewolf tree (Custom Skills Framework reads them; kept by Protean): the

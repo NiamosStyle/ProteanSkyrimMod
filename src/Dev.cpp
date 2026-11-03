@@ -304,7 +304,7 @@ namespace protean::Dev
 				Evolve::Buy(a_arg);
 				Evolve::Dump();
 			} else if (a_cmd == "boost") {
-				Evolve::AddBoost();  // as if a body had been consumed
+				Evolve::AddBoost();  // as if the player had killed something
 				Evolve::Dump();
 			} else if (a_cmd == "claws") {
 				Claws::Give();  // the Rending Claws weapon, one per hand

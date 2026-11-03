@@ -59,13 +59,15 @@ your value.
 | `Protean_DamageMult` | xx94B | Float | 1.0 | multiplies all damage the player deals while transformed |
 | `Protean_ArmorBonus` | xx94C | Float | 0 | armor rating added while transformed |
 | `Protean_ChangeStaminaCost` | xx94D | Float | 15 | stamina a change into a form the player asks for costs (refused if too tired); 0 = free |
-| `Protean_KillBoostSeconds` | xx94E | Float | 90 | how long one consumed body's stamina-regeneration stack (the biomass boost) lasts (needs the Unbound Form perk; kills gave it until 2026-10-28) |
+| `Protean_KillBoostSeconds` | xx94E | Float | 90 | how long one kill's stamina-regeneration stack (the biomass boost) lasts (needs the Unbound Form perk; consumed bodies gave it 2026-10-28 to 2026-11-03) |
 | `Protean_KillBoostPct` | xx94F | Float | 15 | stamina regeneration each stack adds, percentage points of the normal rate |
 | `Protean_KillBoostMax` | xx950 | Float | 0 | most stacks at once; 0 = no limit |
 | `Protean_ComboStacks` | xx9BA | Float | 5 | unused since 2026-10-28 (evolution points come only from consuming) |
 | `Protean_ConsumeSeconds` | xx9E4 | Float | 2 | consuming: seconds the red tentacles cover the body before it is gone |
 | `Protean_ConsumeHeal` | xx9E5 | Float | 0.2 | consuming: share of maximum health a body heals |
 | `Protean_ConsumeHealSurvivor` | xx9E6 | Float | 0.5 | the same with Survivor rank 2 |
+| `Protean_ConsumeStamina` | xx9F3 | Float | 50 | consuming: Stamina a body restores at once |
+| `Protean_ConsumeCombatSeconds` | xx9F4 | Float | 1 | consuming in combat: seconds the tentacles take |
 | `Protean_ConsumeBounty` | xx9E7 | Float | 1000 | consuming a person in sight of people: bounty with each witness's crime faction (0 = none) |
 | `Protean_ConsumeWitnessRange` | xx9E8 | Float | 3000 | consuming: how far a person who can see the player counts as a witness, game units |
 | `Protean_AssassinConsumeSeconds` | xx9E9 | Float | 1 | Assassin: seconds an unnoticed consumption takes (and every Stealth Consume) |

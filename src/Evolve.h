@@ -30,7 +30,7 @@ namespace protean::Evolve
 	void               OpenMenu();                    // the Evolution power was cast
 
 	// The biomass boost (Unbound Form; the kill boost until 2026-10-28, user: consuming gives it, kills no longer do):
-	// each body consumed adds a stack of stamina regeneration that lasts Protean_KillBoostSeconds.
+	// each kill adds a stack of stamina regeneration that lasts Protean_KillBoostSeconds.
 	void                        AddBoost();
 	[[nodiscard]] std::uint32_t BoostStacks();
 

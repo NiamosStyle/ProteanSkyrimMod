@@ -232,6 +232,8 @@
   "Protean_ConsumeBounty": 2535,
   "Protean_ConsumeWitnessRange": 2536,
   "Protean_AssassinConsumeSeconds": 2537,
+  "Protean_ConsumeStamina": 2547,
+  "Protean_ConsumeCombatSeconds": 2548,
   "Protean_StealthConsumeCost": 2544,
   "Protean_StealthConsumeSeconds": 2545,
   "Protean_Level": 2538,
