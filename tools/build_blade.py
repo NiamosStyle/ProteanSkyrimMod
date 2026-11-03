@@ -44,9 +44,11 @@ SINEW = ("textures\\dlc02\\dungeons\\apocrypha\\darktentacle01.dds",
 SLEEVE_SLOT = 57
 FOREARM = ("NPC R Forearm [RLar]", "NPC R ForearmTwist1 [RLt1]", "NPC R ForearmTwist2 [RLt2]")
 UPPER = ("NPC R UpperArm [RUar]", "NPC R UpperarmTwist1 [RUt1]", "NPC R UpperarmTwist2 [RUt2]")
-# how far the flesh stands out from the skin (units); at 3.5 / 1.5 / 1.6 it hid under clothes and gloves (user, 2026-11-03)
-THICK = {"forearm": 10.0, "upper": 6.0, "hand": 6.5}  # at 7 / 4 / 4.5 it still showed spotty through fine clothes
-# and the shrouded gloves poked through (user, 2026-11-03)
+# how far the flesh stands out from the skin (units). At 3.5 / 1.5 / 1.6 it hid under clothes; at 7 / 4 / 4.5 it still
+# showed spotty through fine clothes and the shrouded gloves poked through; at 10 / 6 / 6.5 it could be "a little bit
+# bigger, still" (user, 2026-11-03). The hand is a lump the blade grows from.
+THICK = {"forearm": 12.0, "upper": 7.0, "hand": 10.0}
+BLADE_BONE = "NPC R ForearmTwist1 [RLt1]"  # the forearm's wrist end: turns with the forearm, not the wrist
 TILE = 25.0       # units of arm per repeat of the texture
 
 
@@ -176,12 +178,8 @@ def sleeve(skel):
     return verts, normals, uvs, faces, weights
 
 
-def build_sleeve(skel):
-    verts, normals, uvs, faces, weights = sleeve(skel)
-    path = os.path.join(OUT, "Sleeve_M.nif")
-    nif = NifFile()
-    nif.initialize("SKYRIMSE", path)
-    shape = nif.createShapeFromData("ProteanSleeve", verts, faces, uvs, normals)
+def skinned(nif, name, verts, faces, uvs, normals, weights, skel):
+    shape = nif.createShapeFromData(name, verts, faces, uvs, normals)
     shape.skin()
     for b in sorted(weights):
         shape.add_bone(b, skel.nodes[b].global_transform)
@@ -191,15 +189,43 @@ def build_sleeve(skel):
         shape.setShapeWeights(b, weights[b])
     shape.set_partitions([SkyPartition(part_id=SLEEVE_SLOT, flags=0, namedict=nif.dict)], [0] * len(faces))
     set_shader(shape, True, "natural")
+    return shape
+
+
+def build_sleeve(skel):
+    path = os.path.join(OUT, "Sleeve_M.nif")
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path)
+    verts, normals, uvs, faces, weights = sleeve(skel)
+    shape = skinned(nif, "ProteanSleeve", verts, faces, uvs, normals, weights, skel)
     shape.set_texture("Diffuse", SINEW[0])
     shape.set_texture("Normal", SINEW[1])
     shape.save_shader_attributes()
+    # the blade, fixed to the forearm: as the weapon's model it hung from the hand and turned with the wrist, so at
+    # the ready it looked held, not grown (user's screenshot 36, 2026-11-03)
+    w = skel.nodes["WEAPON"].global_transform
+    to_global = lambda v, t: tuple(sum(w.rotation[i][j] * v[j] for j in range(3)) + t[i] for i in range(3))
+    bv, bf, bu, bn = blade(ANGLES["along"], skel)
+    skinned(nif, "ProteanBladeEdge", [to_global(v, w.translation) for v in bv], bf, bu,
+            [to_global(n, (0, 0, 0)) for n in bn], {BLADE_BONE: [(i, 1.0) for i in range(len(bv))]}, skel)
     nif.save()
-    print("wrote", path, len(verts), "verts", len(faces), "tris")
+    print("wrote", path, len(verts), "+", len(bv), "verts")
+
+
+def build_empty():
+    """The weapon's own model: nothing to see (the blade is in the sleeve); the weapon still hits."""
+    path = os.path.join(OUT, "Blade_along.nif")
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path, "BSFadeNode", "ProteanBlade")
+    NiStringExtraData.New(nif, "Prn", "WeaponSword", parent=nif.rootNode)
+    nif.save()
+    print("wrote", path, "(empty)")
 
 
 if __name__ == "__main__":
     skel = NifFile(SKELETONS["M"])  # one weapon model serves both sexes, as in the game
     for name, share in ANGLES.items():
-        build(name, share, skel)
+        if name != "along":
+            build(name, share, skel)
+    build_empty()  # "along" is now drawn by the sleeve
     build_sleeve(skel)
