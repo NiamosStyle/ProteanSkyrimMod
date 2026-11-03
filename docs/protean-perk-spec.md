@@ -64,7 +64,7 @@ Examples for a player with 200 health:
 
 The tree starts at **Unbound Form** and splits into three branches:
 
-- **Beast**: animal-form perks, ending in the dragon capstone **Apex**.
+- **Beast**: animal-form perks, ending in the capstone **Apex** (no longer a dragon; to be redesigned).
 - **Hunter**: combat, movement, and stamina perks, ending in the capstone **Devastator**.
 - **Deceiver**: face-stealing and stealth perks, ending in **Infected** and **Assassin**.
 
@@ -186,7 +186,8 @@ Stealing the face of any of these characters grants one automatic perk point. No
 ### Apex (capstone)
 - **Requires:** Survivor, Predator, and Stalker, each taken at least once
 - **What it does:** Lets you transform into a dragon, which you fully control.
-- **Status:** Needs research. This depends heavily on **True Dragon Aspect**. We need to decide whether we use it as a required mod, copy what we need from it, or replace it. Your mod will be affected if its author changes it later.
+- **Status:** Dragon dropped (the user, 2026-11-02): Play as a Dragon (Nexus 28854) and True Dragon Aspect were both tried in game and were jerky and buggy to move and attack with (the dragon's head also bent hard to one side); neither will be used, required or copied. The user will choose a new capstone.
+- **Kept from the trial:** True Dragon Aspect's jump-and-glide flight (jump lowers gravity to glide; extra jumps in the air; Sneak drops fast) felt natural to the user for winged flight. An idea for winged forms; the chaurus hunter's bug-wing flight works and stays as it is.
 
 ---
 
@@ -280,7 +281,7 @@ These are the outside mods the tree relies on, and which perks use them:
 | Dependency | Used by | Notes |
 |---|---|---|
 | Protean 1.0.0 (`C:\Modding\Protean`) | Every perk | Your own mod. Checked; see "What Protean 1.0.0 already does." |
-| True Dragon Aspect (Nexus 142635) | Apex | Preferred approach: copy only the parts we need. Author updates could break the mod if we require it. |
+| True Dragon Aspect (Nexus 142635) | (Apex, dropped) | Tried 2026-11-02 and rejected as too buggy. Its jump-and-glide flight is a reference idea for winged forms. |
 | Feral (claws mod) | Rending Claws | Chosen as the base. We'll make our own, larger and fiercer, meshes. |
 | Miraak's tendril (Dragonborn DLC) | Tendril | Possible source for the whip effect. Needs checking. |
 | Paraglider (Nexus SE 53256) | Prey's Flight | Used as a reference for gliding. Gliding must work with only the player's body. A gliding animation must be found or built. |
@@ -293,7 +294,7 @@ These are the outside mods the tree relies on, and which perks use them:
 
 1. **Check the existing foundation.** Confirm what the Protean folder already does, then finish Unbound Form.
 2. **Test the risky ideas first.** Make small prototypes for the three biggest unknowns: Prey's Flight (gliding and animation), Tendril, and Devastator. This is cheaper than finding out late that one of them doesn't work.
-3. **Beast branch.** Keen, then Survivor, Predator, and Stalker, then Apex. Apex waits until True Dragon Aspect is decided.
+3. **Beast branch.** Keen, then Survivor, Predator, and Stalker, then Apex. Apex waits for the user's new capstone (the dragon was dropped 2026-11-02).
 4. **Hunter branch.** Choose a claws mod first, then build Rending Claws, Tendril, Predator's Rush, Prey's Flight, Subtle Carapace, Regeneration, and finally Devastator.
 5. **Deceiver branch.** Borrowed Visage, Metamorphosis, Inconspicuous, then Infected and Assassin.
 6. **Final check.** Compare the mod against this document and list any mismatches.
