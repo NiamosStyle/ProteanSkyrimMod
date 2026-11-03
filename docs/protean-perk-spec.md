@@ -205,6 +205,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
 - **Hammerfist** (requires Rending Claws): one-handed; counts as a mace for the vanilla perks. Every power attack staggers: a hit staggers the target, a miss strikes the ground and staggers enemies nearby. Costs Stamina like the claws.
 - **Blade** (requires Rending Claws): both arms become blades; a two-handed weapon using the Two-Handed skill. Its edge over a greatsword: it slices quickly. Costs Stamina like the claws.
   Look (the user, 2026-11-03, from Prototype reference images in `Prototype/`): **one** huge scythe-like blade growing from the right forearm (the hand disappears into it), the left hand resting near it in the two-handed poses; a **pale bone edge**; **as big as Prototype's** (tip near the knee with the arm hanging); dark red flesh with glowing veins over the forearm.
+  Status (step 1 test, 2026-11-03, user's screenshots, sneaking): with the greatsword animations both hands are held together in front, so the "along" blade points straight forward like a lance, and the "half" blade stands up out of the fists like an ordinary curved sword. Neither looks like Prototype's hanging arm-blade. (The sheathed blade had first fallen to the feet: fixed with a Prn tag.)
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
