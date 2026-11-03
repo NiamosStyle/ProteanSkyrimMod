@@ -41,10 +41,27 @@ namespace protean::Consume
 
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
+		// The dead that still have flesh (user, 2026-11-03): a draugr heals and gives the boost, but no evolution
+		// points, no face. Its races by FormID (DraugrRace, DraugrMagicRace, Dragonborn's DLC2HulkingDraugrRace)
+		bool IsDraugr(RE::Actor* a_body)
+		{
+			auto* race = a_body->GetRace();
+			if (!race) {
+				return false;
+			}
+			const auto id = race->GetFormID();
+			if (id == 0x000D53 || id == 0x0F71DC) {
+				return true;
+			}
+			auto* dh = RE::TESDataHandler::GetSingleton();
+			return dh && race == dh->LookupForm<RE::TESRace>(0x02A6FD, "Dragonborn.esm");
+		}
+
 		bool IsPerson(RE::Actor* a_body)
 		{
 			auto* race = a_body->GetRace();
-			return race && race->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) && !Registry::Get().ByRace(race);
+			return race && race->data.flags.all(RE::RACE_DATA::Flag::kFaceGenHead) && !Registry::Get().ByRace(race) &&
+			       !IsDraugr(a_body);
 		}
 
 		// what a quest holds the body for: a quest object (the flag that keeps quest items from being dropped) is
@@ -76,8 +93,9 @@ namespace protean::Consume
 			if (!race || !a_body->IsDead() || a_body->IsPlayerRef() || a_body->IsDisabled() || race->IsChildRace()) {
 				return false;
 			}
-			// bones, dust and machines are no biomass; a vampire is
-			const bool undead = a_body->HasKeywordString("ActorTypeUndead") && !a_body->HasKeywordString("Vampire");
+			// bones, dust and machines are no biomass; a vampire is, and a draugr's dried flesh still heals
+			const bool undead = a_body->HasKeywordString("ActorTypeUndead") && !a_body->HasKeywordString("Vampire") &&
+			                    !IsDraugr(a_body);
 			return !undead && !a_body->HasKeywordString("ActorTypeDwarven") && !a_body->HasKeywordString("ActorTypeGhost");
 		}
 
@@ -320,9 +338,13 @@ namespace protean::Consume
 				Shift::Learn(*c);
 			}
 			Evolve::AddBoost();
-			const std::string label = person ? std::string(body->GetDisplayFullName()) : c ? c->name : std::string(body->GetName());
-			Evolve::OnConsume(person ? "people" : c ? c->id : "other", label, Biomass(body, c, person));
-			logger::info("consume: '{}' {:08X} consumed, healed {:.0f} of {:.0f}", body->GetName(), body->GetFormID(), heal, max);
+			const bool draugr = IsDraugr(body);
+			if (!draugr) {  // no evolution points for the dead
+				const std::string label = person ? std::string(body->GetDisplayFullName()) : c ? c->name : std::string(body->GetName());
+				Evolve::OnConsume(person ? "people" : c ? c->id : "other", label, Biomass(body, c, person));
+			}
+			logger::info("consume: '{}' {:08X} consumed, healed {:.0f} of {:.0f}{}", body->GetName(), body->GetFormID(), heal, max,
+				draugr ? " (a draugr: no evolution points)" : "");
 			Blood(body, true);
 			if (auto* dh = RE::TESDataHandler::GetSingleton()) {
 				if (auto* burst = dh->LookupForm<RE::BGSExplosion>(kBloodBurst, "Dawnguard.esm")) {
