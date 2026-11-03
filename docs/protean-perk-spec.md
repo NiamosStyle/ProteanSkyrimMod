@@ -227,7 +227,7 @@ Open: numbers (damage, speed, Stamina per swing), looks.
 ### Subtle Carapace ×2
 - **Requires:** Unbound Form
 - **What it does:** Armor bonus, with two ranks.
-- **Status:** Done, tested in game (2026-10-24). Rank 1: 50 + 4 x level armor; rank 2: 100 + 7 x level (replaces rank 1's). It works in every animal form, and in human form only while no light or heavy armor is worn on the body (clothes and robes are fine): the restriction that balances it. At level 50 rank 2 is about a well-made light armor set. The numbers are starting points for the user's playtest.
+- **Status:** Done, tested in game (2026-10-24). Rank 1: 50 + 4 x level armor; rank 2: 100 + 7 x level (replaces rank 1's). It works in every animal form, and in human form only while no heavy armor, and no light armor other than fur, hide, leather, chitin or dragonscale, is worn on the body (clothes and robes are fine; the natural kinds allowed by the user 2026-10-25): the restriction that balances it. At level 50 rank 2 is about a well-made light armor set. The numbers are starting points for the user's playtest.
 
 ### Regeneration
 - **Requires:** Subtle Carapace
