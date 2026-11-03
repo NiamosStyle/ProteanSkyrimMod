@@ -7,11 +7,12 @@ namespace protean::Devastator
 	// the change into a beast while the camera slowly circles the player; then, in a moment of slow motion, tendrils burst from the body in
 	// every direction (for the look) and every hostile actor within Protean_DevastatorRadius is knocked down and takes
 	// Protean_DevastatorDamage + Protean_DevastatorDamagePerLevel x level. The damage is the player's but not a weapon's.
-	// (Until 2026-10-28 kills fed the boost, and the Devastator's own were left out.)
+	// Kills feed the boost (again since 2026-11-03), the Devastator's own excepted (the user's choice).
 
 	void OnCast();                         // the Devastator power was cast
 	void OnFrame(RE::PlayerCharacter* a_p);  // main thread, every frame (it keeps real time: slow motion slows the game's)
 	void Reset();                          // a load: no attack goes on
+	bool Struck(RE::FormID a_actor);       // the actor was struck by a burst in the last few seconds
 }
 
 namespace protean::Regeneration

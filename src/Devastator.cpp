@@ -41,6 +41,7 @@ namespace protean::Devastator
 		};
 
 		Phase             g_phase{ Phase::kNone };
+		std::map<RE::FormID, Clock::time_point> g_struck;  // who each burst struck, and when: their deaths feed no boost
 		Clock::time_point g_start{};
 		Clock::time_point g_last{};
 		bool              g_slow{ false };
@@ -271,6 +272,7 @@ namespace protean::Devastator
 						continue;
 					}
 					Push(a_p, a.get(), force);
+					g_struck[a->GetFormID()] = Clock::now();
 					a->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kHealth, damage);
 					logger::info("devastator: '{}' {:08X} at {:.0f}: knocked down, {:.0f} damage, health now {:.0f}", a->GetName(), a->GetFormID(),
 						here.GetDistance(a->GetPosition()), damage, a->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth));
@@ -343,7 +345,7 @@ namespace protean::Devastator
 		}
 		const auto need = static_cast<std::uint32_t>(Dial("Protean_DevastatorStacks", 2.0f));
 		if (Evolve::BoostStacks() < need) {
-			Shift::Notify(std::format("Devastator needs {} biomass boosts. Consume bodies to gain them.", need));
+			Shift::Notify(std::format("Devastator needs {} biomass boosts. Kill enemies to gain them.", need));
 			return;
 		}
 		auto*       av = p->AsActorValueOwner();
@@ -409,8 +411,15 @@ namespace protean::Devastator
 		}
 	}
 
+	bool Struck(RE::FormID a_actor)
+	{
+		const auto it = g_struck.find(a_actor);
+		return it != g_struck.end() && Seconds(it->second) < 15.0f;  // the knock-down and its fall take a few seconds
+	}
+
 	void Reset()
 	{
+		g_struck.clear();
 		if (g_phase != Phase::kNone) {
 			Slow(false);
 			CameraBoost(false);

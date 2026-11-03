@@ -1,5 +1,6 @@
 #include "Consume.h"
 
+#include "Devastator.h"
 #include "Evolve.h"
 #include "Face.h"
 #include "Registry.h"
@@ -482,6 +483,10 @@ namespace protean::Consume
 			{
 				if (!a_event || !a_event->dead || !a_event->actorKiller || !a_event->actorKiller->IsPlayerRef() || !a_event->actorDying ||
 					a_event->actorDying->IsPlayerRef()) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				if (Devastator::Struck(a_event->actorDying->GetFormID())) {
+					logger::info("kill: '{}' {:08X} by the Devastator: no boost", a_event->actorDying->GetName(), a_event->actorDying->GetFormID());
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				logger::info("kill: '{}' {:08X}", a_event->actorDying->GetName(), a_event->actorDying->GetFormID());
