@@ -118,6 +118,9 @@ RANK2 = {
 # armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
 CLAW_WEAPON, CLAW_ARMA_R, CLAW_ARMA_L, CLAW_ARMO_R, CLAW_ARMO_L = 0x980, 0x981, 0x982, 0x983, 0x984
 CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM_RIGHT), 58 (MOD_ARM_LEFT)
+# The Blade (tools/build_blade.py makes the models): step 1 (2026-11-03) is two test greatswords, one per angle, to
+# compare the blade's size and pose in the greatsword animations (player.additem; no perk gives them yet).
+BLADE_TESTS = {"along": 0xA00, "half": 0xA01}
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
 # tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
@@ -633,6 +636,23 @@ def main():
           "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
           "Critical:\n  Damage: 3\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
           "DetectionSoundLevel: Normal\n")
+    # ---- the Blade's step 1 test greatswords
+    for angle, local in BLADE_TESTS.items():
+        write(os.path.join(y, "Weapons", "Protean_BladeTest_%s - %s_%s.yaml" % (angle, fid(local), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_BladeTest_%s\n" % (fid(local), PLUGIN, angle)
+              + name_block("Blade (test: %s)" % angle)
+              + "Model:\n  File: Protean\\Blade\\Blade_%s.nif\n" % angle
+              + "EquipmentType: 013F45:Skyrim.esm\n"  # BothHands
+              "Description:\n  TargetLanguage: English\n  Value: ''\n"
+              "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
+              "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
+              "Keywords:\n- 06D931:Skyrim.esm\n"  # WeapTypeGreatsword
+              "BasicStats:\n  Damage: 17\n  Weight: 1\n"
+              "Data:\n  AnimationType: TwoHandSword\n  Speed: 0.75\n  Reach: 1.3\n  NumProjectiles: 1\n"
+              "  RangeMin: 500\n  RangeMax: 2000\n  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n"
+              "  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
+              "Critical:\n  Damage: 8\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
+              "DetectionSoundLevel: Normal\n")
     for side, arma, armo in (("R", CLAW_ARMA_R, CLAW_ARMO_R), ("L", CLAW_ARMA_L, CLAW_ARMO_L)):
         template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
                 "Race: 000019:Skyrim.esm\n" % CLAW_SLOT_FLAG[side])
