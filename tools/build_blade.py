@@ -16,6 +16,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_claws import NifFile, SKELETONS, TEXTURES, add, sub, mul, dot, cross, length, norm, set_shader  # noqa: E402
+from pyn.pynifly import NiStringExtraData  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "meshes", "Protean", "Blade")
@@ -84,6 +85,8 @@ def build(name, share, skel):
     path = os.path.join(OUT, "Blade_%s.nif" % name)
     nif = NifFile()
     nif.initialize("SKYRIMSE", path, "BSFadeNode", "ProteanBlade")
+    # where the sheathed blade hangs, as on the game's greatswords; without it it fell to the feet (step 1, 2026-11-03)
+    NiStringExtraData.New(nif, "Prn", "WeaponBack", parent=nif.rootNode)
     verts, faces, uvs, normals = blade(share, skel)
     set_shader(nif.createShapeFromData("ProteanBlade:0", verts, faces, uvs, normals), False, "natural")
     nif.save()
