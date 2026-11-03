@@ -207,7 +207,14 @@ def build_sleeve(skel):
     w = skel.nodes["WEAPON"].global_transform
     to_global = lambda v, t: tuple(sum(w.rotation[i][j] * v[j] for j in range(3)) + t[i] for i in range(3))
     bv, bf, bu, bn = blade(ANGLES["along"], skel)
-    skinned(nif, "ProteanBladeEdge", [to_global(v, w.translation) for v in bv], bf, bu,
+    # onto the forearm's centre line (elbow joint to wrist joint): through the palm it sat on the arm's inner edge
+    # (user, 2026-11-03)
+    elbow = list(skel.nodes["NPC R Forearm [RLar]"].global_transform.translation)
+    wrist = list(skel.nodes["NPC R Hand [RHnd]"].global_transform.translation)
+    line = norm(sub(wrist, elbow))
+    off = sub(wrist, list(w.translation))
+    shift = add(list(w.translation), sub(off, mul(line, dot(off, line))))
+    skinned(nif, "ProteanBladeEdge", [to_global(v, shift) for v in bv], bf, bu,
             [to_global(n, (0, 0, 0)) for n in bn], {BLADE_BONE: [(i, 1.0) for i in range(len(bv))]}, skel)
     nif.save()
     print("wrote", path, len(verts), "+", len(bv), "verts")
