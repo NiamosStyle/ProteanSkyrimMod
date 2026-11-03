@@ -43,7 +43,8 @@ SINEW = ("textures\\dlc02\\dungeons\\apocrypha\\darktentacle01.dds",
 SLEEVE_SLOT = 57
 FOREARM = ("NPC R Forearm [RLar]", "NPC R ForearmTwist1 [RLt1]", "NPC R ForearmTwist2 [RLt2]")
 UPPER = ("NPC R UpperArm [RUar]", "NPC R UpperarmTwist1 [RUt1]", "NPC R UpperarmTwist2 [RUt2]")
-THICK = {"forearm": 3.5, "upper": 1.5, "hand": 1.6}  # how far the flesh stands out from the skin (units)
+# how far the flesh stands out from the skin (units); at 3.5 / 1.5 / 1.6 it hid under clothes and gloves (user, 2026-11-03)
+THICK = {"forearm": 7.0, "upper": 4.0, "hand": 4.5}
 TILE = 25.0       # units of arm per repeat of the texture
 
 
@@ -104,7 +105,8 @@ def build(name, share, skel):
     nif = NifFile()
     nif.initialize("SKYRIMSE", path, "BSFadeNode", "ProteanBlade")
     # where the sheathed blade hangs, as on the game's greatswords; without it it fell to the feet (step 1, 2026-11-03)
-    NiStringExtraData.New(nif, "Prn", "WeaponBack", parent=nif.rootNode)
+    # "along" is held one-handed now, and a one-handed sword hangs at the hip: drawn, it stayed on the back otherwise
+    NiStringExtraData.New(nif, "Prn", "WeaponSword" if name == "along" else "WeaponBack", parent=nif.rootNode)
     verts, faces, uvs, normals = blade(share, skel)
     set_shader(nif.createShapeFromData("ProteanBlade:0", verts, faces, uvs, normals), False, "natural")
     nif.save()
