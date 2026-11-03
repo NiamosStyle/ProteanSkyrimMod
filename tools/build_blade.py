@@ -30,8 +30,9 @@ import bsa  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "meshes", "Protean", "Blade")
 ANGLES = {"along": 0.0, "half": 0.5}  # share of the way from the forearm's line to a greatsword's
-BACK = 14.0       # the blade starts this far back along the forearm from the palm (game units, 1 ~ 1.43 cm)
-LENGTH = 74.0     # whole length, base to tip: the tip near the knee with the arm hanging, as in Prototype
+BACK = 22.0       # the blade starts this far back along the forearm from the palm (game units, 1 ~ 1.43 cm): near the
+                  # elbow; at 14 it seemed to grow from the knuckles (user, screenshot 37, 2026-11-03)
+LENGTH = 82.0     # whole length, base to tip: the tip near the knee with the arm hanging, as in Prototype
 CURVE = 20.0      # how far the tip sweeps back from the edge (a sabre's curve; 8 looked nearly straight, user 2026-11-03)
 WIDTH = (12.0, 20.0, 0.4)  # spine to edge at the base, at its widest, and where along the length the widest is
 # (8 / 13 looked too narrow, user 2026-11-03)
