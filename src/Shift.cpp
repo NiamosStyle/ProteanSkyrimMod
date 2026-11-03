@@ -580,6 +580,21 @@ namespace protean::Shift
 			}
 		}
 
+		// The game's head tracking held an animal's head bent to one side, whatever it faced (the wolf's to the right,
+		// the user, 2026-11-03); off, it straightened at once. Off in every animal, back on in the player's own body.
+		void SetHeadTracking(bool a_on)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			auto* p = Player();
+			if (!vm || !p) {
+				return;
+			}
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(p->GetFormType(), p);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchMethodCall2(handle, "Actor", "SetHeadTracking", RE::MakeFunctionArguments(std::move(a_on)), cb);
+			logger::info("head tracking {}", a_on ? "on" : "off");
+		}
+
 		void PutOnMarkers(RE::PlayerCharacter* a_p, const Creature& a_c)
 		{
 			if (a_c.ability && !a_p->HasSpell(a_c.ability)) {
@@ -707,6 +722,7 @@ namespace protean::Shift
 		JoinFactions(p, a_c);
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, bonus);
 		PutOnMarkers(p, a_c);
+		SetHeadTracking(false);
 		AddDialStats(p);
 		if (a_c.swims) {
 			// the fish drowned underwater without it (measured); the same value an Argonian or a potion raises
@@ -808,6 +824,7 @@ namespace protean::Shift
 
 		RestoreGear(p);
 		TakeOffMarkers(p);
+		SetHeadTracking(true);
 
 		const std::string was = s.active;
 		const float       wasNumber = Active() ? static_cast<float>(Active()->index + 1) : 0.0f;
@@ -1103,6 +1120,7 @@ namespace protean::Shift
 		}
 		if (const auto* c = Active()) {
 			PutOnMarkers(p, *c);  // a save from before the markers existed has none on
+			SetHeadTracking(false);
 		}
 		// The save was made while transformed. Race, health and factions are already in the save;
 		// the control lock and the camera are not.
