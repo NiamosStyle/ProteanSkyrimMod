@@ -200,12 +200,12 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Look:** Our own natural horn claws. The attack animations are the game's own beast-race claw animations (Feral uses the same ones), so Feral is not needed; Open Animation Replacer is.
 - **Status:** Done and tested in game (2026-10-23): damage follows the stamina bar, 5 Stamina a swing, werewolf hit sounds.
 
-### Proposed hand forms (the user's brainstorm, 2026-11-03; not designed yet)
-More shapes for the player's hands, as in Prototype, beside Rending Claws:
-- **Hammerfist:** the player's hits stagger the enemy.
-- **Shield:** blocks all damage, at a Stamina cost each time.
-- **Blade:** both arms become blades; a two-handed weapon that uses the Two-Handed skill, for players who prefer that style.
-Open: where they sit in the tree, how each is equipped, their numbers.
+### Proposed hand forms (the user's design, 2026-11-03; not built)
+More shapes for the player's hands, as in Prototype. All are stronger than normal weapons and armour because they cost Stamina to use (the user: a fight should drain Stamina fast while many biomass stacks refill it fast).
+- **Hammerfist** (requires Rending Claws): one-handed; counts as a mace for the vanilla perks. Every power attack staggers: a hit staggers the target, a miss strikes the ground and staggers enemies nearby. Costs Stamina like the claws.
+- **Blade** (requires Rending Claws): both arms become blades; a two-handed weapon using the Two-Handed skill. Its edge over a greatsword: it slices quickly. Costs Stamina like the claws.
+- **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
+Open: numbers (damage, speed, Stamina per swing), looks.
 
 ### Tendril
 - **Requires:** Rending Claws
