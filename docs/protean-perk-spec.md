@@ -204,6 +204,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 More shapes for the player's hands, as in Prototype. All are stronger than normal weapons and armour because they cost Stamina to use (the user: a fight should drain Stamina fast while many biomass stacks refill it fast).
 - **Hammerfist** (requires Rending Claws): one-handed; counts as a mace for the vanilla perks. Every power attack staggers: a hit staggers the target, a miss strikes the ground and staggers enemies nearby. Costs Stamina like the claws.
 - **Blade** (requires Rending Claws): both arms become blades; a two-handed weapon using the Two-Handed skill. Its edge over a greatsword: it slices quickly. Costs Stamina like the claws.
+  Look (the user, 2026-11-03, from Prototype reference images in `Prototype/`): **one** huge scythe-like blade growing from the right forearm (the hand disappears into it), the left hand resting near it in the two-handed poses; a **pale bone edge**; **as big as Prototype's** (tip near the knee with the arm hanging); dark red flesh with glowing veins over the forearm.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
