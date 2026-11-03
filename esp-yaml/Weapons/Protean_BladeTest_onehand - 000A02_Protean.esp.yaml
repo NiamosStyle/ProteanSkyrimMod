@@ -1,0 +1,38 @@
+FormKey: 000A02:Protean.esp
+EditorID: Protean_BladeTest_onehand
+Name:
+  TargetLanguage: English
+  Value: 'Blade (test: one-handed)'
+Model:
+  File: Protean\Blade\Blade_along.nif
+EquipmentType: 013F42:Skyrim.esm
+Description:
+  TargetLanguage: English
+  Value: ''
+ImpactDataSet: 0F23C4:Skyrim.esm
+AttackFailSound: 0C06D1:Skyrim.esm
+EquipSound: 0C06CF:Skyrim.esm
+UnequipSound: 0C06D0:Skyrim.esm
+Keywords:
+- 06D931:Skyrim.esm
+BasicStats:
+  Damage: 17
+  Weight: 1
+Data:
+  AnimationType: OneHandSword
+  Speed: 1
+  Reach: 1.3
+  Skill: TwoHanded
+  NumProjectiles: 1
+  RangeMin: 500
+  RangeMax: 2000
+  AnimationAttackMult: 1
+  RumbleLeftMotorStrength: 0.5
+  RumbleRightMotorStrength: 1
+  RumbleDuration: 0.33
+Critical:
+  Damage: 8
+  PercentMult: 1
+  Flags:
+  - OnDeath
+DetectionSoundLevel: Normal

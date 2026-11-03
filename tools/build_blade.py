@@ -1,7 +1,8 @@
 """Build the Blade's model: one huge bone scythe-blade growing from the right forearm (the user's design, 2026-11-03,
 from Prototype's reference images in Prototype/).
 
-  python tools/build_blade.py     -> data/meshes/Protean/Blade/Blade_<angle>.nif, one per angle in ANGLES
+  python tools/build_blade.py     -> data/meshes/Protean/Blade/Blade_<angle>.nif, one per angle in ANGLES,
+                                     and Sleeve_M.nif (the flesh over the right arm)
 
 A weapon model hangs at the right hand's WEAPON node. A greatsword's blade runs along that node's +Y, across the fist,
 its grip on -Y and its edges on +-X (read from the vanilla steel greatsword). Protean's blade instead runs out along
@@ -9,6 +10,12 @@ the forearm, past the knuckles. Step 1 (2026-11-03) is a rough block-out at two 
   along  the forearm's own line, as in Prototype
   half   halfway between the forearm's line and a greatsword's
 The blade lies in the plane of the forearm and a greatsword's line, its edge on the side a greatsword points to.
+In the greatsword stance both hands are held together in front, so "along" pointed ahead like a lance and "half" stood
+up like a sword (user's screenshots, 2026-11-03); the next test holds "along" in the one-handed stance, arm hanging.
+
+The sleeve: the game's own male right arm and hand (body and hands meshes, read from the archives), pushed out along
+their normals into a thick, lumpy mass (thickest on the forearm, as in Prototype), keeping the game's skin weights so
+it bends with the arm. It sits in body slot 57, beside the claws' 59. Male only for now (a test).
 """
 import math
 import os
@@ -16,7 +23,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_claws import NifFile, SKELETONS, TEXTURES, add, sub, mul, dot, cross, length, norm, set_shader  # noqa: E402
-from pyn.pynifly import NiStringExtraData  # noqa: E402
+from pyn.pynifly import NiStringExtraData, SkyPartition  # noqa: E402
+from build_claws import inverse, TransformBuf  # noqa: E402
+import bsa  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "meshes", "Protean", "Blade")
@@ -27,6 +36,15 @@ CURVE = 8.0       # how far the tip sweeps back from the edge (a sabre's curve)
 WIDTH = (8.0, 13.0, 0.35)  # spine to edge at the base, at its widest, and where along the length the widest is
 SPINE = 2.5       # thickness at the spine's base
 SEGMENTS = 24
+MESHES = ["C:/Games/steamapps/common/Skyrim Special Edition/Data/Skyrim - Meshes%d.bsa" % i for i in (0, 1)]
+ARM = "meshes\\actors\\character\\character assets\\"
+SINEW = ("textures\\dlc02\\dungeons\\apocrypha\\darktentacle01.dds",
+         "textures\\dlc02\\dungeons\\apocrypha\\darktentacle01_n.dds", (0.01, 0.23))  # the tendril's skin
+SLEEVE_SLOT = 57
+FOREARM = ("NPC R Forearm [RLar]", "NPC R ForearmTwist1 [RLt1]", "NPC R ForearmTwist2 [RLt2]")
+UPPER = ("NPC R UpperArm [RUar]", "NPC R UpperarmTwist1 [RUt1]", "NPC R UpperarmTwist2 [RUt2]")
+THICK = {"forearm": 3.5, "upper": 1.5, "hand": 1.6}  # how far the flesh stands out from the skin (units)
+TILE = 25.0       # units of arm per repeat of the texture
 
 
 def weapon_space(skel):
@@ -93,7 +111,91 @@ def build(name, share, skel):
     print("wrote", path, len(verts), "verts", len(faces), "tris")
 
 
+def game_mesh(name):
+    for archive in MESHES:
+        try:
+            data = bsa.read(archive, ARM + name)
+        except KeyError:
+            continue
+        path = os.path.join(OUT, "_" + name)  # a scratch copy for PyNifly to open, deleted below
+        with open(path, "wb") as f:
+            f.write(data)
+        return path
+    raise KeyError(name)
+
+
+def lumps(v):
+    """0..1, a slow bumpy field over the arm."""
+    n = (math.sin(v[0] * 0.55 + 1.3) * math.sin(v[1] * 0.47 + 0.4) + math.sin(v[2] * 0.33 + 2.1) * math.sin(v[0] * 0.21 - v[1] * 0.3))
+    return 0.5 + 0.25 * n
+
+
+def sleeve(skel):
+    shoulder = list(skel.nodes[UPPER[0]].global_transform.translation)
+    hand = list(skel.nodes["NPC R Hand [RHnd]"].global_transform.translation)
+    axis = norm(sub(hand, shoulder))
+    across = norm(cross(axis, [0.0, 1.0, 0.0]))
+    up = cross(across, axis)
+    u0, u1 = SINEW[2]
+    verts, normals, uvs, faces, weights = [], [], [], [], {}
+    for name, shape_name in (("malebody_1.nif", "MaleUnderwearBody:0"), ("malehands_1.nif", "HandMaleBig3rd")):
+        path = game_mesh(name)
+        shape = [x for x in NifFile(path).shapes if x.name == shape_name][0]
+        g2s = list(shape.global_to_skin.translation)
+        own = {}  # vertex -> {bone: weight}
+        for bone, vw in shape.bone_weights.items():
+            for v, w in vw:
+                own.setdefault(v, {})[bone] = w
+        keep = {}
+        for v, bw in own.items():
+            arm = sum(w for b, w in bw.items() if " R " in b and ("Arm" in b or "arm" in b or "Hand" in b or "Finger" in b))
+            if arm < 0.5 or shape.verts[v][0] <= 0:
+                continue
+            fore = sum(bw.get(b, 0) for b in FOREARM)
+            upper = sum(bw.get(b, 0) for b in UPPER)
+            rest = max(0.0, 1.0 - fore - upper)  # the hand and fingers
+            p = [shape.verts[v][i] - g2s[i] for i in range(3)]
+            th = (THICK["forearm"] * fore + THICK["upper"] * upper + THICK["hand"] * rest) * min(1.0, arm)
+            th *= 0.6 + 0.8 * lumps(p)
+            keep[v] = len(verts)
+            verts.append(tuple(add(p, mul(list(shape.normals[v]), th))))
+            normals.append(tuple(shape.normals[v]))
+            d = sub(p, shoulder)
+            angle = math.atan2(dot(d, up), dot(d, across)) / (2 * math.pi) + 0.5
+            uvs.append((u0 + (u1 - u0) * angle, dot(d, axis) / TILE))
+            for b, w in bw.items():
+                weights.setdefault(b, []).append((keep[v], w))
+        for t in shape.tris:
+            if all(i in keep for i in t):
+                faces.append(tuple(keep[i] for i in t))
+        os.remove(path)
+    return verts, normals, uvs, faces, weights
+
+
+def build_sleeve(skel):
+    verts, normals, uvs, faces, weights = sleeve(skel)
+    path = os.path.join(OUT, "Sleeve_M.nif")
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path)
+    shape = nif.createShapeFromData("ProteanSleeve", verts, faces, uvs, normals)
+    shape.skin()
+    for b in sorted(weights):
+        shape.add_bone(b, skel.nodes[b].global_transform)
+    shape.set_global_to_skin(TransformBuf())
+    for b in sorted(weights):
+        shape.set_skin_to_bone_xform(b, inverse(skel.nodes[b].global_transform))
+        shape.setShapeWeights(b, weights[b])
+    shape.set_partitions([SkyPartition(part_id=SLEEVE_SLOT, flags=0, namedict=nif.dict)], [0] * len(faces))
+    set_shader(shape, True, "natural")
+    shape.set_texture("Diffuse", SINEW[0])
+    shape.set_texture("Normal", SINEW[1])
+    shape.save_shader_attributes()
+    nif.save()
+    print("wrote", path, len(verts), "verts", len(faces), "tris")
+
+
 if __name__ == "__main__":
     skel = NifFile(SKELETONS["M"])  # one weapon model serves both sexes, as in the game
     for name, share in ANGLES.items():
         build(name, share, skel)
+    build_sleeve(skel)

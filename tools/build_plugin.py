@@ -121,6 +121,7 @@ CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM
 # The Blade (tools/build_blade.py makes the models): step 1 (2026-11-03) is two test greatswords, one per angle, to
 # compare the blade's size and pose in the greatsword animations (player.additem; no perk gives them yet).
 BLADE_TESTS = {"along": 0xA00, "half": 0xA01}
+BLADE_ONEHAND, BLADE_SLEEVE_ARMA, BLADE_SLEEVE_ARMO = 0xA02, 0xA03, 0xA04
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
 # tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
@@ -653,6 +654,39 @@ def main():
               "  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
               "Critical:\n  Damage: 8\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
               "DetectionSoundLevel: Normal\n")
+    # the greatsword stance held "along" out like a lance; this one holds it in the one-handed stance, arm hanging
+    # (2026-11-03). Still the Two-Handed skill, and the greatsword keyword for the Two-Handed perks.
+    write(os.path.join(y, "Weapons", "Protean_BladeTest_onehand - %s_%s.yaml" % (fid(BLADE_ONEHAND), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_BladeTest_onehand\n" % (fid(BLADE_ONEHAND), PLUGIN)
+          + name_block("Blade (test: one-handed)")
+          + "Model:\n  File: Protean\\Blade\\Blade_along.nif\n"
+          + "EquipmentType: 013F42:Skyrim.esm\n"  # RightHand
+          "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
+          "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
+          "Keywords:\n- 06D931:Skyrim.esm\n"  # WeapTypeGreatsword
+          "BasicStats:\n  Damage: 17\n  Weight: 1\n"
+          "Data:\n  AnimationType: OneHandSword\n  Speed: 1\n  Reach: 1.3\n  Skill: TwoHanded\n  NumProjectiles: 1\n"
+          "  RangeMin: 500\n  RangeMax: 2000\n  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n"
+          "  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
+          "Critical:\n  Damage: 8\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
+          "DetectionSoundLevel: Normal\n")
+    # the flesh over the right arm, a wearable test piece for now (body slot 57)
+    template = ("BodyTemplate:\n  FirstPersonFlags:\n  - 0x08000000\n  ArmorType: Clothing\n  ActsLike44: True\n"
+                "Race: 000019:Skyrim.esm\n")
+    write(os.path.join(y, "ArmorAddons", "Protean_BladeSleeveAA - %s_%s.yaml" % (fid(BLADE_SLEEVE_ARMA), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_BladeSleeveAA\n" % (fid(BLADE_SLEEVE_ARMA), PLUGIN) + template
+          + "Priority:\n  Male: 10\n  Female: 10\n"
+          "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
+          + "".join("%s:\n  Male:\n    File: Protean\\Blade\\Sleeve_M.nif\n"
+                    "  Female:\n    File: Protean\\Blade\\Sleeve_M.nif\n" % field
+                    for field in ("WorldModel", "FirstPersonModel"))
+          + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
+    write(os.path.join(y, "Armors", "Protean_BladeSleeve - %s_%s.yaml" % (fid(BLADE_SLEEVE_ARMO), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_BladeSleeve\n" % (fid(BLADE_SLEEVE_ARMO), PLUGIN)
+          + name_block("Blade Sleeve (test)") + template
+          + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "Armature:\n- %s:%s\n" % (fid(BLADE_SLEEVE_ARMA), PLUGIN))
     for side, arma, armo in (("R", CLAW_ARMA_R, CLAW_ARMO_R), ("L", CLAW_ARMA_L, CLAW_ARMO_L)):
         template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
                 "Race: 000019:Skyrim.esm\n" % CLAW_SLOT_FLAG[side])
