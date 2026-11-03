@@ -32,9 +32,10 @@ OUT = os.path.join(ROOT, "data", "meshes", "Protean", "Blade")
 ANGLES = {"along": 0.0, "half": 0.5}  # share of the way from the forearm's line to a greatsword's
 BACK = 14.0       # the blade starts this far back along the forearm from the palm (game units, 1 ~ 1.43 cm)
 LENGTH = 74.0     # whole length, base to tip: the tip near the knee with the arm hanging, as in Prototype
-CURVE = 8.0       # how far the tip sweeps back from the edge (a sabre's curve)
-WIDTH = (8.0, 13.0, 0.35)  # spine to edge at the base, at its widest, and where along the length the widest is
-SPINE = 2.5       # thickness at the spine's base
+CURVE = 20.0      # how far the tip sweeps back from the edge (a sabre's curve; 8 looked nearly straight, user 2026-11-03)
+WIDTH = (12.0, 20.0, 0.4)  # spine to edge at the base, at its widest, and where along the length the widest is
+# (8 / 13 looked too narrow, user 2026-11-03)
+SPINE = 3.5       # thickness at the spine's base
 SEGMENTS = 24
 MESHES = ["C:/Games/steamapps/common/Skyrim Special Edition/Data/Skyrim - Meshes%d.bsa" % i for i in (0, 1)]
 ARM = "meshes\\actors\\character\\character assets\\"
@@ -44,7 +45,8 @@ SLEEVE_SLOT = 57
 FOREARM = ("NPC R Forearm [RLar]", "NPC R ForearmTwist1 [RLt1]", "NPC R ForearmTwist2 [RLt2]")
 UPPER = ("NPC R UpperArm [RUar]", "NPC R UpperarmTwist1 [RUt1]", "NPC R UpperarmTwist2 [RUt2]")
 # how far the flesh stands out from the skin (units); at 3.5 / 1.5 / 1.6 it hid under clothes and gloves (user, 2026-11-03)
-THICK = {"forearm": 7.0, "upper": 4.0, "hand": 4.5}
+THICK = {"forearm": 10.0, "upper": 6.0, "hand": 6.5}  # at 7 / 4 / 4.5 it still showed spotty through fine clothes
+# and the shrouded gloves poked through (user, 2026-11-03)
 TILE = 25.0       # units of arm per repeat of the texture
 
 
