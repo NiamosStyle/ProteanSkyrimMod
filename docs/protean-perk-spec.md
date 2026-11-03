@@ -200,6 +200,13 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Look:** Our own natural horn claws. The attack animations are the game's own beast-race claw animations (Feral uses the same ones), so Feral is not needed; Open Animation Replacer is.
 - **Status:** Done and tested in game (2026-10-23): damage follows the stamina bar, 5 Stamina a swing, werewolf hit sounds.
 
+### Proposed hand forms (the user's brainstorm, 2026-11-03; not designed yet)
+More shapes for the player's hands, as in Prototype, beside Rending Claws:
+- **Hammerfist:** the player's hits stagger the enemy.
+- **Shield:** blocks all damage, at a Stamina cost each time.
+- **Blade:** both arms become blades; a two-handed weapon that uses the Two-Handed skill, for players who prefer that style.
+Open: where they sit in the tree, how each is equipped, their numbers.
+
 ### Tendril
 - **Requires:** Rending Claws
 - **What it does:** A whip of flesh that shoots out and hits the target, damaging their health and draining their stamina into the player. A light target is yanked off its feet to the player; a large one (troll, bear, giant, mammoth, grounded dragon) hauls the player to it instead.
