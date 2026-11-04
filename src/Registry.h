@@ -72,6 +72,7 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* Evolution() const { return _evolution; }  // opens the perk tree
 		[[nodiscard]] RE::TESObjectWEAP* ClawWeapon() const { return _clawWeapon; }  // Rending Claws
 		[[nodiscard]] RE::TESObjectARMO* ClawPiece(bool a_left) const { return a_left ? _clawLeft : _clawRight; }
+		[[nodiscard]] RE::TESObjectWEAP* BladeWeapon() const { return _bladeWeapon; }  // the Blade (right hand, two-handed)
 		[[nodiscard]] RE::SpellItem* Tendril() const { return _tendril; }  // its effects: [0] damage health, [1] absorb stamina
 		// Keen, in the order night vision, Detect Life, Detect Dead: the powers the Favorites menu offers, and the
 		// senses (self spells) Protean casts and dispels
@@ -138,6 +139,7 @@ namespace protean
 		RE::TESObjectWEAP*    _clawWeapon{ nullptr };
 		RE::TESObjectARMO*    _clawRight{ nullptr };
 		RE::TESObjectARMO*    _clawLeft{ nullptr };
+		RE::TESObjectWEAP*    _bladeWeapon{ nullptr };
 		RE::SpellItem*        _tendril{ nullptr };
 		RE::SpellItem*        _killBoost{ nullptr };
 		std::vector<RE::SpellItem*> _glideMarkers;

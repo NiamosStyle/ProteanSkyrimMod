@@ -112,6 +112,9 @@ namespace protean
 		if (!_clawWeapon || !_clawRight || !_clawLeft) {
 			logger::warn("Rending Claws records missing from {}", plugin);
 		}
+		if (const auto& b = j.value("blade", nlohmann::json::object()); !b.empty()) {
+			_bladeWeapon = dh->LookupForm<RE::TESObjectWEAP>(b.value("weapon", 0u), plugin);
+		}
 		if (const auto& t = j.value("tendril", nlohmann::json::object()); !t.empty()) {
 			_tendril = dh->LookupForm<RE::SpellItem>(t.value("spell", 0u), plugin);
 		}

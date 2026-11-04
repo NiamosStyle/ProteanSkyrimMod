@@ -15,6 +15,9 @@
   "right": 2435,
   "left": 2436
  },
+ "blade": {
+  "weapon": 2562
+ },
  "tendril": {
   "spell": 2441,
   "projectile": 2438

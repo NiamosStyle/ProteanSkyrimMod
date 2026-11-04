@@ -26,6 +26,7 @@ add_commonlibsse_plugin(
 	SOURCES
 		src/main.cpp
 		src/Attacks.cpp
+		src/Blade.cpp
 		src/Camera.cpp
 		src/Claws.cpp
 		src/Consume.cpp
