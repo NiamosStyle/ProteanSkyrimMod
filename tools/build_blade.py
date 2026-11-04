@@ -228,6 +228,8 @@ TEX_GAME = "textures\\Protean\\Blade\\"
 XTEXCONV = "C:/Games/steamapps/common/Skyrim Special Edition/tools/Elric/xtexconv.exe"
 GLOW_RED = (1.0, 0.03, 0.03)   # the veins' glow colour, red (not orange: user, 2026-11-04)
 GLOW_MULT = 1.0
+# no glow for now: the user wants realistic flesh in the mod's dark-blood theme, not Prototype's glow (2026-11-04)
+GLOW = False
 SPEC = {"Arm": 0.55, "Blade": 0.3}   # wet flesh shines more than bone (the normal map's alpha)
 # Blender bakes OpenGL-style normal maps (green = up); Skyrim is taken here to want DirectX-style (green = down).
 # Not yet confirmed in game: if the grooves look lit from the wrong side, set this False.
@@ -249,6 +251,8 @@ def build_textures():
             g = ImageChops.invert(g)
         a = Image.new("L", r.size, int(255 * SPEC[part]))
         Image.merge("RGBA", (r, g, b, a)).save(os.path.join(tmp, part + "_n.png")); jobs.append((part + "_n.png", "BC3_UNORM"))
+        if not GLOW:
+            continue
         m = Image.open(os.path.join(BAKED, part + "_g.png")).convert("L")
         top = m.getextrema()[1] or 1
         m = m.point(lambda x: min(255, int(x * 255 / top)))
@@ -263,8 +267,11 @@ def build_textures():
 def textured(shape, part):
     shape.set_texture("Diffuse", TEX_GAME + part + "_d.dds")
     shape.set_texture("Normal", TEX_GAME + part + "_n.dds")
-    shape.set_texture("Glow", TEX_GAME + part + "_g.dds")
     sp = shape.shader.properties
+    if not GLOW:
+        shape.save_shader_attributes()
+        return
+    shape.set_texture("Glow", TEX_GAME + part + "_g.dds")
     sp.Shader_Type = 2   # glow shader: the glow map lights the veins
     sp.shaderflags1_set(ShaderFlags1.OWN_EMIT)
     sp.shaderflags2_set(ShaderFlags2.GLOW_MAP)
