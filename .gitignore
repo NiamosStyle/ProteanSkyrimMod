@@ -14,3 +14,6 @@ dist/
 # the glide pose, made by tools/build_glide_anim.py
 data/meshes/actors/character/animations/OpenAnimationReplacer/
 data/meshes/actors/character/_1stperson/animations/OpenAnimationReplacer/
+# Bethesda meshes extracted for reference in Blender (not ours to share)
+art/*/ref/*.nif
+art/*/ref/*.jpg
