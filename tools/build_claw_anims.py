@@ -57,7 +57,10 @@ FIRST = {
 # the hip as for a sword. While the right hand holds it, the sword's draw and sheathe are the empty hands' own (the arm
 # just comes up, as with the claws); its attacks, blocking and stance stay the sword's.
 BLADE_WEAPON = "A02"  # Protean.esp, tools/build_plugin.py BLADE_ONEHAND
-BLADE = {"1hm_equip.hkx": "h2h_equip.hkx", "1hm_unequip.hkx": "h2h_unequip.hkx"}
+# The draw is the bound sword's (conjured into the hand: no reach either). The empty hands' draw carries no
+# BeginWeaponDraw / weaponDraw signals, and without them the draw sometimes took 2 seconds to count as done (user,
+# 2026-11-04); the bound sword's has both, in 3rd and 1st person. The sheathe stays the empty hands' (instant).
+BLADE = {"1hm_equip.hkx": "1hm_boundswordequip.hkx", "1hm_unequip.hkx": "h2h_unequip.hkx"}
 SUBMODS = ("RendingClaws", "Blade")
 
 
