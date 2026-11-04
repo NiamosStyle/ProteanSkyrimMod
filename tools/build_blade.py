@@ -305,6 +305,39 @@ def build_sleeve_from_blender(skel):
     textured(blade_shape, "Blade")
     nif.save()
     print("wrote", path, len(fl["verts"]), "+", len(bl["verts"]), "verts")
+    build_first_person(data, skel)
+
+
+# The game draws no body slot 57 in 1st person (seen 2026-11-04). Sleeve1st_M.nif holds the same flesh, cut at the
+# elbow (the upper arm and shoulder would sit beside the camera), and the blade; the plugin (src/Blade.cpp) binds them
+# to the 1st-person skeleton's bones of the same names.
+FIRST_PERSON_DROP = ("NPC R UpperArm", "NPC R UpperarmTwist", "NPC R Clavicle")
+
+
+def build_first_person(data, skel):
+    path = os.path.join(OUT, "Sleeve1st_M.nif")
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path)
+    fl = data["flesh"]
+    upper = [sum(w for b, w in bw.items() if b.startswith(FIRST_PERSON_DROP)) for bw in fl["weights"]]
+    tris = [t for t in fl["tris"] if all(upper[i] < 0.5 for i in t)]
+    used = sorted({i for t in tris for i in t})
+    new = {old: k for k, old in enumerate(used)}
+    weights = {}
+    for k, old in enumerate(used):
+        for b, w in fl["weights"][old].items():
+            weights.setdefault(b, []).append((k, w))
+    shape = skinned(nif, "ProteanSleeve1st", [tuple(fl["verts"][i]) for i in used],
+                    [tuple(new[i] for i in t) for t in tris], [tuple(fl["uvs"][i]) for i in used],
+                    [tuple(fl["normals"][i]) for i in used], weights, skel)
+    textured(shape, "Arm")
+    bl = data["blade"]
+    blade_shape = skinned(nif, "ProteanBladeEdge1st", [tuple(v) for v in bl["verts"]], [tuple(t) for t in bl["tris"]],
+                          [tuple(u) for u in bl["uvs"]], [tuple(n) for n in bl["normals"]],
+                          {BLADE_BONE: [(i, 1.0) for i in range(len(bl["verts"]))]}, skel)
+    textured(blade_shape, "Blade")
+    nif.save()
+    print("wrote", path, len(used), "+", len(bl["verts"]), "verts")
 
 
 def build_empty():
