@@ -226,6 +226,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04): user approved the darker arm in game: "I think it's perfect". The Blade look (vines shape, dark arm, bone blade) is final for the male third-person model.
   Status (2026-11-04, user test): the one-handed test Blade (one-handed stance, Two-Handed skill) blocks with the right mouse button when the left hand is empty. (An earlier left punch was with the Blade unequipped by mistake.) Next: keep the left hand empty while the Blade is out, so it plays as a two-handed weapon.
   Status (2026-11-04): built and installed: the Blade keeps the left hand empty like a greatsword (src/Blade.cpp): anything put in the left hand (weapon, spell, torch, shield) puts the Blade away; taking the Blade up empties the left hand. Not yet tested.
+  Status (2026-11-04, user test): works: a spell (Tendril) into the left hand put the Blade away; taking up the Blade made the left hand drop a torch; blocking works. Shield not tested (the user has none).
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
