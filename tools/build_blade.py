@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_claws import NifFile, SKELETONS, TEXTURES, add, sub, mul, dot, cross, length, norm, set_shader  # noqa: E402
 from pyn.pynifly import NiStringExtraData, SkyPartition  # noqa: E402
-from build_claws import inverse, TransformBuf  # noqa: E402
+from build_claws import inverse, TransformBuf, ShaderFlags2  # noqa: E402
 import bsa  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -220,6 +220,60 @@ def build_sleeve(skel):
     print("wrote", path, len(verts), "+", len(bv), "verts")
 
 
+BLENDER_EXPORT = os.path.join(ROOT, "art", "blade", "export.json")  # written by export_game.py inside Blade.blend
+FLESH_TINT = (0.38, 0.07, 0.08)  # the blade's flesh, painted over the horn by vertex colour until the real textures
+
+
+def build_sleeve_from_blender(skel):
+    """The arm's flesh and the blade as shaped in Blender (2026-11-04), in place of the script-made ones."""
+    import json
+    with open(BLENDER_EXPORT) as f:
+        data = json.load(f)
+    path = os.path.join(OUT, "Sleeve_M.nif")
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path)
+    # the flesh: the game's arm bones carry it, as they carried the arm it was grown from
+    fl = data["flesh"]
+    shoulder = list(skel.nodes[UPPER[0]].global_transform.translation)
+    hand = list(skel.nodes["NPC R Hand [RHnd]"].global_transform.translation)
+    axis = norm(sub(hand, shoulder))
+    across = norm(cross(axis, [0.0, 1.0, 0.0]))
+    up = cross(across, axis)
+    u0, u1 = SINEW[2]
+    uvs = []
+    for p in fl["verts"]:
+        d = sub(p, shoulder)
+        angle = math.atan2(dot(d, up), dot(d, across)) / (2 * math.pi) + 0.5
+        uvs.append((u0 + (u1 - u0) * angle, dot(d, axis) / TILE))
+    weights = {}
+    for i, bw in enumerate(fl["weights"]):
+        for b, w in bw.items():
+            weights.setdefault(b, []).append((i, w))
+    shape = skinned(nif, "ProteanSleeve", [tuple(v) for v in fl["verts"]], [tuple(t) for t in fl["tris"]], uvs,
+                    [tuple(n) for n in fl["normals"]], weights, skel)
+    shape.set_texture("Diffuse", SINEW[0])
+    shape.set_texture("Normal", SINEW[1])
+    shape.save_shader_attributes()
+    # the blade: fixed whole to the forearm (the spike above the elbow too, so nothing tears when the elbow bends)
+    bl = data["blade"]
+    elbow = list(skel.nodes["NPC R Forearm [RLar]"].global_transform.translation)
+    line = norm(sub(hand, elbow))
+    side = norm(cross(line, [0.0, 1.0, 0.0]))
+    hu0, hv0, hu1, hv1 = TEXTURES["horn"][2]
+    along = [dot(sub(p, elbow), line) for p in bl["verts"]]
+    lo, hi = min(along), max(along)
+    buv = [(hu0 + (hu1 - hu0) * (0.5 + dot(sub(p, elbow), side) / 40.0), hv0 + (hv1 - hv0) * (a - lo) / (hi - lo))
+           for p, a in zip(bl["verts"], along)]
+    blade_shape = skinned(nif, "ProteanBladeEdge", [tuple(v) for v in bl["verts"]], [tuple(t) for t in bl["tris"]],
+                          buv, [tuple(n) for n in bl["normals"]],
+                          {BLADE_BONE: [(i, 1.0) for i in range(len(bl["verts"]))]}, skel)
+    blade_shape.set_colors([tuple(1.0 + (c - 1.0) * m for c in FLESH_TINT) + (1.0,) for m in bl["flesh"]])
+    blade_shape.shader.properties.shaderflags2_set(ShaderFlags2.VERTEX_COLORS)
+    blade_shape.save_shader_attributes()
+    nif.save()
+    print("wrote", path, len(fl["verts"]), "+", len(bl["verts"]), "verts")
+
+
 def build_empty():
     """The weapon's own model: nothing to see (the blade is in the sleeve); the weapon still hits."""
     path = os.path.join(OUT, "Blade_along.nif")
@@ -236,4 +290,4 @@ if __name__ == "__main__":
         if name != "along":
             build(name, share, skel)
     build_empty()  # "along" is now drawn by the sleeve
-    build_sleeve(skel)
+    build_sleeve_from_blender(skel)  # build_sleeve(skel) was the script-made one
