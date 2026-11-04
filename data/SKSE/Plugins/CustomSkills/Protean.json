@@ -80,8 +80,15 @@
           "y": 0.9,
           "links": [
             "tendril",
-            "devastator"
+            "devastator",
+            "blade"
           ]
+        },
+        {
+          "id": "blade",
+          "perk": "Protean.esp|A05",
+          "x": 0.45,
+          "y": 2.7
         },
         {
           "id": "tendril",

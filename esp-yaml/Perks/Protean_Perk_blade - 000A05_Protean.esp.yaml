@@ -1,0 +1,10 @@
+FormKey: 000A05:Protean.esp
+EditorID: Protean_Perk_blade
+Name:
+  TargetLanguage: English
+  Value: 'Blade'
+Description:
+  TargetLanguage: English
+  Value: 'Draw the Blade and your right arm becomes one: flesh grows over it and a great bone blade bursts from the forearm. It fights with the Two-Handed skill and perks, blocks, and needs your left hand free. Every swing costs Stamina.'
+NumRanks: 1
+Playable: True

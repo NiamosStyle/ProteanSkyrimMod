@@ -1,5 +1,6 @@
 #include "Blade.h"
 
+#include "Evolve.h"
 #include "Registry.h"
 
 #undef GetObject  // windows.h renames it to GetObjectA, which hides BGSDefaultObjectManager::GetObject
@@ -8,8 +9,18 @@ namespace protean::Blade
 {
 	namespace
 	{
+		constexpr auto kPerk = "blade";
+
 		bool  g_had{ false };   // the Blade was in the right hand at the last look
 		float g_wait{ 0.0f };   // after a change, give the game time to carry it out before looking again
+		bool  g_out{ false };   // the draw animation has put the Blade in the hand (until the sheathe puts it away)
+
+		std::int32_t Count(RE::PlayerCharacter* a_p, RE::TESBoundObject* a_item)
+		{
+			const auto counts = a_p->GetInventoryCounts([a_item](RE::TESBoundObject& a_obj) { return &a_obj == a_item; });
+			const auto it = counts.find(a_item);
+			return it != counts.end() ? it->second : 0;
+		}
 
 		// the game's Actor.UnequipSpell (source 0: the left hand); CommonLib has no direct call for it
 		void UnequipLeftSpell(RE::PlayerCharacter* a_p, RE::SpellItem* a_spell)
@@ -40,44 +51,130 @@ namespace protean::Blade
 				}
 			}
 		}
+
+		// like a greatsword, the Blade keeps the left hand empty (checked a few times a second)
+		void KeepLeftEmpty(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_blade, float a_step)
+		{
+			if (g_wait > 0.0f) {
+				g_wait -= a_step;
+				return;
+			}
+			const bool has = a_p->GetEquippedObject(false) == a_blade;
+			auto*      left = a_p->GetEquippedObject(true);
+			auto*      shield = a_p->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kShield);
+			if (has && (left || shield)) {
+				const char* what = shield ? shield->GetName() : left->GetName();
+				if (!g_had) {
+					// the Blade was just taken up: it needs both hands
+					logger::info("blade: taken up, the left hand lets go of '{}'", what);
+					ClearLeft(a_p, left, shield);
+				} else {
+					// something went into the left hand: the Blade goes away, as a greatsword would
+					logger::info("blade: '{}' into the left hand, the Blade goes away", what);
+					RE::ActorEquipManager::GetSingleton()->UnequipObject(a_p, a_blade);
+					g_had = false;
+					g_wait = 0.5f;
+					return;
+				}
+				g_wait = 0.5f;
+			}
+			g_had = has;
+		}
+
+		// the flesh and the bone blade are on the arm only while the Blade is drawn; never kept in the inventory
+		void Sleeve(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_blade, RE::TESObjectARMO* a_sleeve)
+		{
+			using WS = RE::WEAPON_STATE;
+			const auto* st = a_p->AsActorState();
+			const auto  ws = st ? st->GetWeaponState() : WS::kSheathed;
+			if (ws == WS::kSheathed || ws == WS::kWantToDraw) {
+				g_out = false;
+			}
+			const bool want = a_p->GetEquippedObject(false) == a_blade &&
+			                  (ws == WS::kDrawn || ws == WS::kWantToSheathe || ((ws == WS::kDrawing || ws == WS::kSheathing) && g_out));
+			const bool worn = a_p->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kModShoulder) == a_sleeve;
+			auto*      mgr = RE::ActorEquipManager::GetSingleton();
+			if (want && !worn) {
+				if (Count(a_p, a_sleeve) == 0) {
+					a_p->AddObjectToContainer(a_sleeve, nullptr, 1, nullptr);
+				}
+				mgr->EquipObject(a_p, a_sleeve, nullptr, 1, nullptr, false, false, false, true);
+				logger::info("blade: grows (weapon state {})", static_cast<int>(ws));
+			} else if (!want) {
+				if (worn) {
+					mgr->UnequipObject(a_p, a_sleeve, nullptr, 1, nullptr, false, true, false, true);
+					logger::info("blade: goes back (weapon state {})", static_cast<int>(ws));
+				}
+				if (const auto n = Count(a_p, a_sleeve); n > 0) {
+					a_p->RemoveItem(a_sleeve, n, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+				}
+			}
+		}
+
+		// the moments the draw puts the Blade in the hand and the sheathe takes it away, and every swing's Stamina
+		class AnimSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override
+			{
+				auto* p = RE::PlayerCharacter::GetSingleton();
+				auto* blade = Registry::Get().BladeWeapon();
+				if (!a_event || !p || !blade || a_event->holder != p || p->GetEquippedObject(false) != blade) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				const std::string_view tag(a_event->tag.c_str());
+				if (tag == "weaponDraw") {
+					g_out = true;
+				} else if (tag == "weaponSheathe") {
+					g_out = false;
+				} else if (tag == "weaponSwing") {
+					const float cost = Registry::Get().Dial("Protean_BladeSwingCost", 5.0f);
+					if (cost > 0.0f) {
+						p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
+					}
+					logger::info("blade: swing, stamina -{:.0f}", cost);
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+		AnimSink g_anim;
 	}
 
 	void OnFrame(float a_delta)
 	{
+		auto*       p = RE::PlayerCharacter::GetSingleton();
+		const auto& reg = Registry::Get();
+		auto*       blade = reg.BladeWeapon();
+		auto*       sleeve = reg.BladeSleeve();
+		if (!p || !blade || !sleeve) {
+			return;
+		}
+		// the player's animation graphs are rebuilt on a race change or a load: listen again whenever the Blade is
+		// taken up (adding twice is harmless: it is taken off first)
+		static bool held = false;
+		const bool  has = p->GetEquippedObject(false) == blade;
+		if (has && !held) {
+			p->RemoveAnimationGraphEventSink(&g_anim);
+			p->AddAnimationGraphEventSink(&g_anim);
+		}
+		held = has;
+		Sleeve(p, blade, sleeve);
+
 		static float since = 0.0f;
 		if ((since += a_delta) < 0.1f) {
 			return;
 		}
 		const float step = since;
 		since = 0.0f;
-		if (g_wait > 0.0f) {
-			g_wait -= step;
-			return;
-		}
-		auto* p = RE::PlayerCharacter::GetSingleton();
-		auto* blade = Registry::Get().BladeWeapon();
-		if (!p || !blade) {
-			return;
-		}
-		const bool has = p->GetEquippedObject(false) == blade;
-		auto*      left = p->GetEquippedObject(true);
-		auto*      shield = p->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kShield);
-		if (has && (left || shield)) {
-			const char* what = shield ? shield->GetName() : left->GetName();
-			if (!g_had) {
-				// the Blade was just taken up: it needs both hands
-				logger::info("blade: taken up, the left hand lets go of '{}'", what);
-				ClearLeft(p, left, shield);
-			} else {
-				// something went into the left hand: the Blade goes away, as a greatsword would
-				logger::info("blade: '{}' into the left hand, the Blade goes away", what);
-				RE::ActorEquipManager::GetSingleton()->UnequipObject(p, blade);
-				g_had = false;
-				g_wait = 0.5f;
-				return;
+		KeepLeftEmpty(p, blade, step);
+		// the perk keeps the Blade in the inventory
+		static float sinceGive = 0.0f;
+		if ((sinceGive += step) >= 2.0f) {
+			sinceGive = 0.0f;
+			if (Evolve::Has(kPerk) && Count(p, blade) == 0) {
+				p->AddObjectToContainer(blade, nullptr, 1, nullptr);
+				logger::info("blade: the perk gives the Blade");
 			}
-			g_wait = 0.5f;
 		}
-		g_had = has;
 	}
 }

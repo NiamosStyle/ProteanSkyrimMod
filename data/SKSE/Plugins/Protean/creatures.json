@@ -16,7 +16,8 @@
   "left": 2436
  },
  "blade": {
-  "weapon": 2562
+  "weapon": 2562,
+  "sleeve": 2564
  },
  "tendril": {
   "spell": 2441,
@@ -46,6 +47,7 @@
   "stalker": 2404,
   "apex": 2405,
   "rending_claws": 2406,
+  "blade": 2565,
   "tendril": 2407,
   "predators_rush": 2408,
   "preys_flight": 2409,
@@ -64,6 +66,7 @@
  },
  "perksBuilt": [
   "assassin",
+  "blade",
   "borrowed_visage",
   "devastator",
   "inconspicuous",
@@ -241,7 +244,8 @@
   "Protean_StealthConsumeSeconds": 2545,
   "Protean_Level": 2538,
   "Protean_LevelRatio": 2539,
-  "Protean_ShowLevelup": 2540
+  "Protean_ShowLevelup": 2540,
+  "Protean_BladeSwingCost": 2566
  },
  "openInteriorKeywords": [
   {

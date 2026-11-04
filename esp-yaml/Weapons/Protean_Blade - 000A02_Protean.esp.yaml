@@ -1,8 +1,8 @@
 FormKey: 000A02:Protean.esp
-EditorID: Protean_BladeTest_onehand
+EditorID: Protean_Blade
 Name:
   TargetLanguage: English
-  Value: 'Blade (test: one-handed)'
+  Value: 'Blade'
 Model:
   File: Protean\Blade\Blade_along.nif
 EquipmentType: 013F42:Skyrim.esm

@@ -57,7 +57,11 @@ PERKS = {
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
-                      0.8, 0.9, ["tendril", "devastator"]),
+                      0.8, 0.9, ["tendril", "devastator", "blade"]),
+    # its place on the tree is for now (2026-11-04); the constellation will settle it
+    "blade": (0xA05, "Blade", "Draw the Blade and your right arm becomes one: flesh grows over it and a great bone "
+              "blade bursts from the forearm. It fights with the Two-Handed skill and perks, blocks, and needs your "
+              "left hand free. Every swing costs Stamina.", 0.45, 2.7, []),
     "tendril": (0x967, "Tendril", "Learn Tendril, a whip of flesh cast from either hand: it tears at health, drains "
                 "Stamina into you, yanks light foes to you and hauls you to large ones. Each lash costs Stamina.",
                 0.9, 2, []),
@@ -118,9 +122,9 @@ RANK2 = {
 # armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
 CLAW_WEAPON, CLAW_ARMA_R, CLAW_ARMA_L, CLAW_ARMO_R, CLAW_ARMO_L = 0x980, 0x981, 0x982, 0x983, 0x984
 CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM_RIGHT), 58 (MOD_ARM_LEFT)
-# The Blade (tools/build_blade.py makes the models): step 1 (2026-11-03) is two test greatswords, one per angle, to
-# compare the blade's size and pose in the greatsword animations (player.additem; no perk gives them yet).
-BLADE_TESTS = {"along": 0xA00, "half": 0xA01}
+# The Blade (tools/build_blade.py makes the models): a one-handed weapon with no model of its own that plays as a
+# two-handed one, and a hidden sleeve (body slot 57: the flesh and the bone blade) that Protean's plugin puts on while
+# the Blade is drawn. 0xA00 and 0xA01 were test greatswords (2026-11-03); not reused.
 BLADE_ONEHAND, BLADE_SLEEVE_ARMA, BLADE_SLEEVE_ARMO = 0xA02, 0xA03, 0xA04
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
@@ -180,7 +184,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
          "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis",
-         "regeneration", "devastator"}
+         "regeneration", "devastator", "blade"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = set()
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -300,6 +304,7 @@ GLOBALS = {
     "Protean_Level":               (0x9EA, 0,    "Float", "Protean's level in the perk screen: perk points earned (kept by Protean)"),
     "Protean_LevelRatio":          (0x9EB, 0,    "Float", "the perk screen's bar: progress to the next perk point, 0 to 1 (kept by Protean)"),
     "Protean_ShowLevelup":         (0x9EC, 0,    "Short", "set to a level to show 'Protean increased to <level>' (Custom Skills Framework clears it)"),
+    "Protean_BladeSwingCost":      (0xA06, 5,    "Float", "stamina each Blade swing costs; 0 = free"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -637,28 +642,12 @@ def main():
           "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
           "Critical:\n  Damage: 3\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
           "DetectionSoundLevel: Normal\n")
-    # ---- the Blade's step 1 test greatswords
-    for angle, local in BLADE_TESTS.items():
-        write(os.path.join(y, "Weapons", "Protean_BladeTest_%s - %s_%s.yaml" % (angle, fid(local), PLUGIN)),
-              "FormKey: %s:%s\nEditorID: Protean_BladeTest_%s\n" % (fid(local), PLUGIN, angle)
-              + name_block("Blade (test: %s)" % angle)
-              + "Model:\n  File: Protean\\Blade\\Blade_%s.nif\n" % angle
-              + "EquipmentType: 013F45:Skyrim.esm\n"  # BothHands
-              "Description:\n  TargetLanguage: English\n  Value: ''\n"
-              "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
-              "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
-              "Keywords:\n- 06D931:Skyrim.esm\n"  # WeapTypeGreatsword
-              "BasicStats:\n  Damage: 17\n  Weight: 1\n"
-              "Data:\n  AnimationType: TwoHandSword\n  Speed: 0.75\n  Reach: 1.3\n  NumProjectiles: 1\n"
-              "  RangeMin: 500\n  RangeMax: 2000\n  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n"
-              "  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
-              "Critical:\n  Damage: 8\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
-              "DetectionSoundLevel: Normal\n")
+    # ---- the Blade
     # the greatsword stance held "along" out like a lance; this one holds it in the one-handed stance, arm hanging
     # (2026-11-03). Still the Two-Handed skill, and the greatsword keyword for the Two-Handed perks.
-    write(os.path.join(y, "Weapons", "Protean_BladeTest_onehand - %s_%s.yaml" % (fid(BLADE_ONEHAND), PLUGIN)),
-          "FormKey: %s:%s\nEditorID: Protean_BladeTest_onehand\n" % (fid(BLADE_ONEHAND), PLUGIN)
-          + name_block("Blade (test: one-handed)")
+    write(os.path.join(y, "Weapons", "Protean_Blade - %s_%s.yaml" % (fid(BLADE_ONEHAND), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_Blade\n" % (fid(BLADE_ONEHAND), PLUGIN)
+          + name_block("Blade")
           + "Model:\n  File: Protean\\Blade\\Blade_along.nif\n"
           + "EquipmentType: 013F42:Skyrim.esm\n"  # RightHand
           "Description:\n  TargetLanguage: English\n  Value: ''\n"
@@ -671,7 +660,7 @@ def main():
           "  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
           "Critical:\n  Damage: 8\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
           "DetectionSoundLevel: Normal\n")
-    # the flesh over the right arm, a wearable test piece for now (body slot 57)
+    # the flesh and the bone blade over the right arm (body slot 57): hidden, put on by Protean while the Blade is drawn
     template = ("BodyTemplate:\n  FirstPersonFlags:\n  - 0x08000000\n  ArmorType: Clothing\n  ActsLike44: True\n"
                 "Race: 000019:Skyrim.esm\n")
     write(os.path.join(y, "ArmorAddons", "Protean_BladeSleeveAA - %s_%s.yaml" % (fid(BLADE_SLEEVE_ARMA), PLUGIN)),
@@ -684,7 +673,7 @@ def main():
           + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
     write(os.path.join(y, "Armors", "Protean_BladeSleeve - %s_%s.yaml" % (fid(BLADE_SLEEVE_ARMO), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_BladeSleeve\n" % (fid(BLADE_SLEEVE_ARMO), PLUGIN)
-          + name_block("Blade Sleeve (test)") + template
+          + "MajorFlags:\n- NonPlayable\n" + name_block("Blade Sleeve") + template
           + "Description:\n  TargetLanguage: English\n  Value: ''\n"
           "Armature:\n- %s:%s\n" % (fid(BLADE_SLEEVE_ARMA), PLUGIN))
     for side, arma, armo in (("R", CLAW_ARMA_R, CLAW_ARMO_R), ("L", CLAW_ARMA_L, CLAW_ARMO_L)):
@@ -1011,7 +1000,7 @@ def main():
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
-                           "blade": {"weapon": BLADE_ONEHAND},
+                           "blade": {"weapon": BLADE_ONEHAND, "sleeve": BLADE_SLEEVE_ARMO},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
