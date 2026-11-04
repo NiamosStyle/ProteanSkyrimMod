@@ -224,6 +224,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04): user approved the vines tip ("It looks good"); vines baked, built (flesh 9982 verts) and installed in MO2. Awaiting an in-game look.
   Status (2026-11-04): vines in game: user says the shape looks good and the blade looks perfect; the arm sleeve is "still too red" and should be a red so dark it is nearly black, like shiny dark blood. The arm alone is now darkened (ARM_VALUE=0.4 in make_skin.py; the blade is unchanged) and shinier (Arm spec 0.7). Installed; awaiting a look.
   Status (2026-11-04): user approved the darker arm in game: "I think it's perfect". The Blade look (vines shape, dark arm, bone blade) is final for the male third-person model.
+  Status (2026-11-04, user test): the one-handed test Blade (one-handed stance, Two-Handed skill) blocks with the right mouse button when the left hand is empty. (An earlier left punch was with the Blade unequipped by mistake.) Next: keep the left hand empty while the Blade is out, so it plays as a two-handed weapon.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
