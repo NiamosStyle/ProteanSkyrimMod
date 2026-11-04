@@ -53,6 +53,13 @@ FIRST = {
     "h2h_locomotionpose.hkx": "beasth2h_locomotionpose.hkx",
 }
 
+# The Blade (the user, 2026-11-04): it grows from the arm, so drawing and sheathing it must not reach across the body to
+# the hip as for a sword. While the right hand holds it, the sword's draw and sheathe are the empty hands' own (the arm
+# just comes up, as with the claws); its attacks, blocking and stance stay the sword's.
+BLADE_WEAPON = "A02"  # Protean.esp, tools/build_plugin.py BLADE_ONEHAND
+BLADE = {"1hm_equip.hkx": "h2h_equip.hkx", "1hm_unequip.hkx": "h2h_unequip.hkx"}
+SUBMODS = ("RendingClaws", "Blade")
+
 
 def build():
     """Write the OAR folders under data/; returns the files written (relative to data/)."""
@@ -65,7 +72,7 @@ def build():
             shutil.rmtree(dst)
         os.makedirs(dst)
         with open(os.path.join(root, "config.json"), "w", encoding="utf-8") as f:
-            json.dump({"name": "Protean", "description": "Rending Claws attack animations (%s person)" % ("1st" if person else "3rd"),
+            json.dump({"name": "Protean", "description": "Rending Claws and Blade animations (%s person)" % ("1st" if person else "3rd"),
                        "author": "Protean"}, f, indent=2)
         with open(os.path.join(dst, "config.json"), "w", encoding="utf-8") as f:
             # either hand: with a claw in the left hand alone, the clawed hand made a fist (the user, 2026-10-23)
@@ -81,6 +88,22 @@ def build():
                 f.write(bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source))
             written.append(rel + "/RendingClaws/" + name)
         print("wrote", len(names), "animations to", dst)
+        dst = os.path.join(root, "Blade")
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)
+        os.makedirs(dst)
+        with open(os.path.join(dst, "config.json"), "w", encoding="utf-8") as f:
+            json.dump({"name": "Blade", "description": "Draw and sheathe like empty hands while the right hand holds the Blade.",
+                       "priority": 15101,
+                       "conditions": [{"condition": "IsEquipped", "requiredVersion": "1.0.0.0",
+                                       "Form": {"pluginName": "Protean.esp", "formID": BLADE_WEAPON}, "Left hand": False}]},
+                      f, indent=2)
+        written.append(rel + "/Blade/config.json")
+        for name, source in BLADE.items():
+            with open(os.path.join(dst, name), "wb") as f:
+                f.write(bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source))
+            written.append(rel + "/Blade/" + name)
+        print("wrote", len(BLADE), "animations to", dst)
     return written
 
 
@@ -88,9 +111,10 @@ if __name__ == "__main__":
     files = build()
     if len(sys.argv) > 1:
         for person in ("", "_1stperson/"):
-            target = os.path.join(sys.argv[1], "meshes/actors/character", person + OAR, "RendingClaws")
-            if os.path.isdir(target):
-                shutil.rmtree(target)  # nothing left over from an older set
+            for sub in SUBMODS:
+                target = os.path.join(sys.argv[1], "meshes/actors/character", person + OAR, sub)
+                if os.path.isdir(target):
+                    shutil.rmtree(target)  # nothing left over from an older set
         for rel in files:
             target = os.path.join(sys.argv[1], rel)
             os.makedirs(os.path.dirname(target), exist_ok=True)
