@@ -19,3 +19,4 @@ art/*/ref/*.nif
 art/*/ref/*.jpg
 *.blend1
 art/blade/export.json
+art/blade/textures/

@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_claws import NifFile, SKELETONS, TEXTURES, add, sub, mul, dot, cross, length, norm, set_shader  # noqa: E402
 from pyn.pynifly import NiStringExtraData, SkyPartition  # noqa: E402
 from build_claws import inverse, TransformBuf, ShaderFlags2  # noqa: E402
+from pyn.nifconstants import ShaderFlags1  # noqa: E402
 import bsa  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -221,11 +222,59 @@ def build_sleeve(skel):
 
 
 BLENDER_EXPORT = os.path.join(ROOT, "art", "blade", "export.json")  # written by export_game.py inside Blade.blend
-FLESH_TINT = (0.38, 0.07, 0.08)  # the blade's flesh, painted over the horn by vertex colour until the real textures
+BAKED = os.path.join(ROOT, "art", "blade", "textures")  # baked by bake_skin.py inside Blade.blend (PNG)
+TEX_OUT = os.path.join(ROOT, "data", "textures", "Protean", "Blade")
+TEX_GAME = "textures\\Protean\\Blade\\"
+XTEXCONV = "C:/Games/steamapps/common/Skyrim Special Edition/tools/Elric/xtexconv.exe"
+GLOW_RED = (1.0, 0.03, 0.03)   # the veins' glow colour, red (not orange: user, 2026-11-04)
+GLOW_MULT = 1.0
+SPEC = {"Arm": 0.55, "Blade": 0.3}   # wet flesh shines more than bone (the normal map's alpha)
+# Blender bakes OpenGL-style normal maps (green = up); Skyrim is taken here to want DirectX-style (green = down).
+# Not yet confirmed in game: if the grooves look lit from the wrong side, set this False.
+FLIP_GREEN = True
+
+
+def build_textures():
+    """The baked PNGs to the game's DDS files: colour, normal (+ shine in alpha) and glow (red veins)."""
+    import subprocess
+    from PIL import Image, ImageChops
+    tmp = os.path.join(BAKED, "_game")
+    os.makedirs(tmp, exist_ok=True); os.makedirs(TEX_OUT, exist_ok=True)
+    jobs = []
+    for part in ("Arm", "Blade"):
+        d = Image.open(os.path.join(BAKED, part + "_d.png")).convert("RGB")
+        d.save(os.path.join(tmp, part + "_d.png")); jobs.append((part + "_d.png", "BC1_UNORM"))
+        r, g, b = Image.open(os.path.join(BAKED, part + "_n.png")).convert("RGB").split()
+        if FLIP_GREEN:
+            g = ImageChops.invert(g)
+        a = Image.new("L", r.size, int(255 * SPEC[part]))
+        Image.merge("RGBA", (r, g, b, a)).save(os.path.join(tmp, part + "_n.png")); jobs.append((part + "_n.png", "BC3_UNORM"))
+        m = Image.open(os.path.join(BAKED, part + "_g.png")).convert("L")
+        top = m.getextrema()[1] or 1
+        m = m.point(lambda x: min(255, int(x * 255 / top)))
+        glow = Image.merge("RGB", tuple(m.point(lambda x, c=c: int(x * c)) for c in GLOW_RED))
+        glow.save(os.path.join(tmp, part + "_g.png")); jobs.append((part + "_g.png", "BC1_UNORM"))
+    for name, fmt in jobs:
+        subprocess.run([XTEXCONV, "-nologo", "-m", "0", "-f", fmt, "-o", TEX_OUT, os.path.join(tmp, name)],
+                       check=True, stdout=subprocess.DEVNULL)
+    print("wrote", len(jobs), "textures to", TEX_OUT)
+
+
+def textured(shape, part):
+    shape.set_texture("Diffuse", TEX_GAME + part + "_d.dds")
+    shape.set_texture("Normal", TEX_GAME + part + "_n.dds")
+    shape.set_texture("Glow", TEX_GAME + part + "_g.dds")
+    sp = shape.shader.properties
+    sp.Shader_Type = 2   # glow shader: the glow map lights the veins
+    sp.shaderflags1_set(ShaderFlags1.OWN_EMIT)
+    sp.shaderflags2_set(ShaderFlags2.GLOW_MAP)
+    sp.Emissive_Color = (1.0, 1.0, 1.0, 1.0)
+    sp.Emissive_Mult = GLOW_MULT
+    shape.save_shader_attributes()
 
 
 def build_sleeve_from_blender(skel):
-    """The arm's flesh and the blade as shaped in Blender (2026-11-04), in place of the script-made ones."""
+    """The arm's flesh and the blade as shaped and painted in Blender (2026-11-04)."""
     import json
     with open(BLENDER_EXPORT) as f:
         data = json.load(f)
@@ -234,42 +283,19 @@ def build_sleeve_from_blender(skel):
     nif.initialize("SKYRIMSE", path)
     # the flesh: the game's arm bones carry it, as they carried the arm it was grown from
     fl = data["flesh"]
-    shoulder = list(skel.nodes[UPPER[0]].global_transform.translation)
-    hand = list(skel.nodes["NPC R Hand [RHnd]"].global_transform.translation)
-    axis = norm(sub(hand, shoulder))
-    across = norm(cross(axis, [0.0, 1.0, 0.0]))
-    up = cross(across, axis)
-    u0, u1 = SINEW[2]
-    uvs = []
-    for p in fl["verts"]:
-        d = sub(p, shoulder)
-        angle = math.atan2(dot(d, up), dot(d, across)) / (2 * math.pi) + 0.5
-        uvs.append((u0 + (u1 - u0) * angle, dot(d, axis) / TILE))
     weights = {}
     for i, bw in enumerate(fl["weights"]):
         for b, w in bw.items():
             weights.setdefault(b, []).append((i, w))
-    shape = skinned(nif, "ProteanSleeve", [tuple(v) for v in fl["verts"]], [tuple(t) for t in fl["tris"]], uvs,
-                    [tuple(n) for n in fl["normals"]], weights, skel)
-    shape.set_texture("Diffuse", SINEW[0])
-    shape.set_texture("Normal", SINEW[1])
-    shape.save_shader_attributes()
+    shape = skinned(nif, "ProteanSleeve", [tuple(v) for v in fl["verts"]], [tuple(t) for t in fl["tris"]],
+                    [tuple(u) for u in fl["uvs"]], [tuple(n) for n in fl["normals"]], weights, skel)
+    textured(shape, "Arm")
     # the blade: fixed whole to the forearm (the spike above the elbow too, so nothing tears when the elbow bends)
     bl = data["blade"]
-    elbow = list(skel.nodes["NPC R Forearm [RLar]"].global_transform.translation)
-    line = norm(sub(hand, elbow))
-    side = norm(cross(line, [0.0, 1.0, 0.0]))
-    hu0, hv0, hu1, hv1 = TEXTURES["horn"][2]
-    along = [dot(sub(p, elbow), line) for p in bl["verts"]]
-    lo, hi = min(along), max(along)
-    buv = [(hu0 + (hu1 - hu0) * (0.5 + dot(sub(p, elbow), side) / 40.0), hv0 + (hv1 - hv0) * (a - lo) / (hi - lo))
-           for p, a in zip(bl["verts"], along)]
     blade_shape = skinned(nif, "ProteanBladeEdge", [tuple(v) for v in bl["verts"]], [tuple(t) for t in bl["tris"]],
-                          buv, [tuple(n) for n in bl["normals"]],
+                          [tuple(u) for u in bl["uvs"]], [tuple(n) for n in bl["normals"]],
                           {BLADE_BONE: [(i, 1.0) for i in range(len(bl["verts"]))]}, skel)
-    blade_shape.set_colors([tuple(1.0 + (c - 1.0) * m for c in FLESH_TINT) + (1.0,) for m in bl["flesh"]])
-    blade_shape.shader.properties.shaderflags2_set(ShaderFlags2.VERTEX_COLORS)
-    blade_shape.save_shader_attributes()
+    textured(blade_shape, "Blade")
     nif.save()
     print("wrote", path, len(fl["verts"]), "+", len(bl["verts"]), "verts")
 
@@ -290,4 +316,5 @@ if __name__ == "__main__":
         if name != "along":
             build(name, share, skel)
     build_empty()  # "along" is now drawn by the sleeve
+    build_textures()
     build_sleeve_from_blender(skel)  # build_sleeve(skel) was the script-made one
