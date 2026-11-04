@@ -61,6 +61,33 @@ BLADE_WEAPON = "A02"  # Protean.esp, tools/build_plugin.py BLADE_ONEHAND
 # BeginWeaponDraw / weaponDraw signals, and without them the draw sometimes took 2 seconds to count as done (user,
 # 2026-11-04); the bound sword's has both, in 3rd and 1st person. The sheathe stays the empty hands' (instant).
 BLADE = {"1hm_equip.hkx": "1hm_boundswordequip.hkx", "1hm_unequip.hkx": "h2h_unequip.hkx"}
+# The empty hands' sheathe carries none of the signals the sword's sheathe waits for (BeginWeaponSheathe,
+# weaponSheathe), so the game sat in "sheathing" until a fallback timer ran out and the next draw waited for it
+# (the user, 2026-11-04: still several seconds after pressing R). The Blade's copy gets them at its start.
+SIGNALS = {"1hm_unequip.hkx": [(0.0, "BeginWeaponSheathe"), (0.03, "weaponSheathe")]}
+PYNIFLY_HKX = "C:/Games/steamapps/common/Skyrim Special Edition/tools/pynifly/io_scene_nifly/hkx"
+
+
+def with_signals(raw, signals):
+    """The clip raw (bytes of a game .hkx) with the annotations added; uses PyNifly's HKX module (GPL-3.0, only run
+    here, never shipped), as tools/build_glide_anim.py does."""
+    import tempfile
+    if PYNIFLY_HKX not in sys.path:
+        sys.path.insert(0, PYNIFLY_HKX)
+    import anim_skyrim as hkx
+    from anim_fo4 import Annotation
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "clip.hkx")
+        with open(path, "wb") as f:
+            f.write(raw)
+        anim = hkx.load_skyrim_animation(path)
+        anim.annotations = list(anim.annotations) + [Annotation(time=t, text=x) for t, x in signals]
+        anim.annotations.sort(key=lambda a: a.time)
+        hkx.write_skyrim_animation(path, anim, ptr_size=8)  # SE: 64-bit
+        back = hkx.load_skyrim_animation(path)
+        assert [(round(a.time, 2), a.text) for a in back.annotations] == [(round(t, 2), x) for t, x in sorted(signals)], back.annotations
+        with open(path, "rb") as f:
+            return f.read()
 SUBMODS = ("RendingClaws", "Blade")
 
 
@@ -103,8 +130,11 @@ def build():
                       f, indent=2)
         written.append(rel + "/Blade/config.json")
         for name, source in BLADE.items():
+            raw = bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source)
+            if name in SIGNALS:
+                raw = with_signals(raw, SIGNALS[name])
             with open(os.path.join(dst, name), "wb") as f:
-                f.write(bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source))
+                f.write(raw)
             written.append(rel + "/Blade/" + name)
         print("wrote", len(BLADE), "animations to", dst)
     return written

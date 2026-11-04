@@ -156,6 +156,12 @@ namespace protean::Blade
 			using WS = RE::WEAPON_STATE;
 			const auto* st = a_p->AsActorState();
 			const auto  ws = st ? st->GetWeaponState() : WS::kSheathed;
+			// each step of a draw or sheathe in the log (timing a slow draw, 2026-11-04)
+			static auto lastWs = ws;
+			if (ws != lastWs && a_p->GetEquippedObject(false) == a_blade) {
+				logger::info("blade: weapon state {} -> {}", static_cast<int>(lastWs), static_cast<int>(ws));
+			}
+			lastWs = ws;
 			// only while fully drawn: both the draw and the sheathe reach across the body to the hip as if to a
 			// scabbard, which looked odd with the blade on the arm (user, 2026-11-04, 1st person); it grows once the
 			// draw is done and goes back the moment the sheathe starts
