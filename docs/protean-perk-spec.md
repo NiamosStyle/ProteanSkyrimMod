@@ -222,6 +222,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04): user on the corded preview: forearm-to-hand "way too swollen"; wants more tendons and muscle fibres, "almost like vines". Third preset "vines" (now the Blender default; not yet in game): slimmer forearm and hand, raised strands twisting round the arm with a second set twisting the other way. The bulk limit now fades in at the elbow and out at the wrist for corded/vines; lumpy is unchanged.
   Status (2026-11-04): user liked the vines render but saw two big balls at the fingertips. Cause: past the wrist the strands bunch up with nothing to wrap round. Vines now thins the hand and fades the strands toward the tip (TIP=14, TIP_MIN=0.15); awaiting the user's look.
   Status (2026-11-04): user approved the vines tip ("It looks good"); vines baked, built (flesh 9982 verts) and installed in MO2. Awaiting an in-game look.
+  Status (2026-11-04): vines in game: user says the shape looks good and the blade looks perfect; the arm sleeve is "still too red" and should be a red so dark it is nearly black, like shiny dark blood. The arm alone is now darkened (ARM_VALUE=0.4 in make_skin.py; the blade is unchanged) and shinier (Arm spec 0.7). Installed; awaiting a look.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 

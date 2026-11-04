@@ -230,7 +230,7 @@ GLOW_RED = (1.0, 0.03, 0.03)   # the veins' glow colour, red (not orange: user, 
 GLOW_MULT = 1.0
 # no glow for now: the user wants realistic flesh in the mod's dark-blood theme, not Prototype's glow (2026-11-04)
 GLOW = False
-SPEC = {"Arm": 0.55, "Blade": 0.3}   # wet flesh shines more than bone (the normal map's alpha)
+SPEC = {"Arm": 0.7, "Blade": 0.3}   # wet flesh shines more than bone (the normal map's alpha)
 # Blender bakes OpenGL-style normal maps (green = up); Skyrim is taken here to want DirectX-style (green = down).
 # Not yet confirmed in game: if the grooves look lit from the wrong side, set this False.
 FLIP_GREEN = True
