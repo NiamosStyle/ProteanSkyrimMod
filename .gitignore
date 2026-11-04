@@ -17,3 +17,4 @@ data/meshes/actors/character/_1stperson/animations/OpenAnimationReplacer/
 # Bethesda meshes extracted for reference in Blender (not ours to share)
 art/*/ref/*.nif
 art/*/ref/*.jpg
+*.blend1
