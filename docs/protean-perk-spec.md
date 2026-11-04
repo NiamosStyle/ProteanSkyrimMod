@@ -212,6 +212,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-03, screenshot 37): with the blade in the sleeve it still seemed to grow from the fingers (it began just behind the palm). Its base moved back to near the elbow, the tip kept where it was.
   Status (2026-11-03): it starts at the elbow now, but on the arm's inner (medial) edge, not its middle (user). Moved onto the forearm's centre line.
   Status (2026-11-03): on the centre line it is "more in line, now" (user).
+  Status (2026-11-03): the user asked to get the shape right in Blender first (official Blender Lab MCP; `art/blade/Blade.blend`, generator text `make_blade.py` inside it). Approved outline (draft 4): a bone crescent down the back of the forearm, about Prototype's size, ribbed near the elbow, a concave front edge, a spike above the elbow pointing up, and a talon tip after Mercer's blade in Prototype 2 ("Yes, this is good"). A slim straight point (draft 3) was rejected. Next: the flesh.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
