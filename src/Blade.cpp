@@ -13,7 +13,6 @@ namespace protean::Blade
 
 		bool  g_had{ false };   // the Blade was in the right hand at the last look
 		float g_wait{ 0.0f };   // after a change, give the game time to carry it out before looking again
-		bool  g_out{ false };   // the draw animation has put the Blade in the hand (until the sheathe puts it away)
 
 		std::int32_t Count(RE::PlayerCharacter* a_p, RE::TESBoundObject* a_item)
 		{
@@ -157,11 +156,10 @@ namespace protean::Blade
 			using WS = RE::WEAPON_STATE;
 			const auto* st = a_p->AsActorState();
 			const auto  ws = st ? st->GetWeaponState() : WS::kSheathed;
-			if (ws == WS::kSheathed || ws == WS::kWantToDraw) {
-				g_out = false;
-			}
-			const bool want = a_p->GetEquippedObject(false) == a_blade &&
-			                  (ws == WS::kDrawn || ws == WS::kWantToSheathe || ((ws == WS::kDrawing || ws == WS::kSheathing) && g_out));
+			// only while fully drawn: both the draw and the sheathe reach across the body to the hip as if to a
+			// scabbard, which looked odd with the blade on the arm (user, 2026-11-04, 1st person); it grows once the
+			// draw is done and goes back the moment the sheathe starts
+			const bool want = a_p->GetEquippedObject(false) == a_blade && ws == WS::kDrawn;
 			FirstPerson(a_p, want);
 			const bool worn = a_p->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kModShoulder) == a_sleeve;
 			auto*      mgr = RE::ActorEquipManager::GetSingleton();
@@ -182,7 +180,7 @@ namespace protean::Blade
 			}
 		}
 
-		// the moments the draw puts the Blade in the hand and the sheathe takes it away, and every swing's Stamina
+		// every swing costs Stamina
 		class AnimSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
 		{
 		public:
@@ -194,11 +192,7 @@ namespace protean::Blade
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const std::string_view tag(a_event->tag.c_str());
-				if (tag == "weaponDraw") {
-					g_out = true;
-				} else if (tag == "weaponSheathe") {
-					g_out = false;
-				} else if (tag == "weaponSwing") {
+				if (tag == "weaponSwing") {
 					const float cost = Registry::Get().Dial("Protean_BladeSwingCost", 5.0f);
 					if (cost > 0.0f) {
 						p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
