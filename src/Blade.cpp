@@ -188,6 +188,18 @@ namespace protean::Blade
 			}
 		}
 
+		// a greatsword's lead over a sword on top of the claws' full-bar damage at the player's level (Claws.cpp); always
+		// full strength, never weaker on a low stamina bar (user, 2026-11-04); Two-Handed skill and perks multiply it
+		void SetDamage(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_blade)
+		{
+			const auto& reg = Registry::Get();
+			const float level = static_cast<float>(a_p->GetLevel());
+			const float claws = reg.Dial("Protean_ClawDamageMax", 10.0f) + reg.Dial("Protean_ClawDamagePerLevel", 0.7f) * level +
+			                    reg.Dial("Protean_ClawDamagePerLevelSq", 0.02f) * level * level;
+			a_blade->attackDamage = static_cast<std::uint16_t>(
+				std::clamp(std::lround(claws * reg.Dial("Protean_BladeDamageMult", 1.7f)), 0L, 65535L));
+		}
+
 		// every swing costs Stamina
 		class AnimSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
 		{
@@ -201,11 +213,11 @@ namespace protean::Blade
 				}
 				const std::string_view tag(a_event->tag.c_str());
 				if (tag == "weaponSwing") {
-					const float cost = Registry::Get().Dial("Protean_BladeSwingCost", 5.0f);
+					const float cost = Registry::Get().Dial("Protean_BladeSwingCost", 8.0f);
 					if (cost > 0.0f) {
 						p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
 					}
-					logger::info("blade: swing, stamina -{:.0f}", cost);
+					logger::info("blade: swing, stamina -{:.0f}, damage {}", cost, blade->attackDamage);
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -240,6 +252,7 @@ namespace protean::Blade
 		const float step = since;
 		since = 0.0f;
 		KeepLeftEmpty(p, blade, step);
+		SetDamage(p, blade);
 		// the perk keeps the Blade in the inventory
 		static float sinceGive = 0.0f;
 		if ((sinceGive += step) >= 2.0f) {

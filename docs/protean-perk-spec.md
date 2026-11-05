@@ -241,6 +241,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04): installed: Sleeve_F.nif and Sleeve1st_F.nif, the male flesh carried onto the game's female body (Blade.blend make_female.py: each point keeps its place over the skin; the female skeleton's arm bones match the male's). Same textures. The plugin hangs the female 1st-person model for a female player. Not yet tested.
   Status (2026-11-04, user test): "Yes, it looks good": the female arm fits, no gaps at the shoulder.
   Status (2026-11-04, user): no faint ring, no nubs at the hand tip, the 1st-person blade angle is fine, and the blade appearing on R is good: the looks are done. Next: the numbers (user: significantly stronger than the claws).
+  Status (2026-11-04): numbers agreed with the user and installed: damage 1.7x Rending Claws' full-bar damage at the player's level (the vanilla greatsword-over-sword gap: 18 at level 1, 32 at 10, 83 at 30, 162 at 50), always full strength (user: only costs Stamina), Two-Handed skill and perks on top; sword speed 1.0 (slices quickly), greatsword reach 1.3 and stagger 1.1; 8 Stamina a swing. Dials Protean_BladeDamageMult (0xA07), Protean_BladeSwingCost. Not yet tested.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 

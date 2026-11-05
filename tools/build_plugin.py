@@ -304,7 +304,10 @@ GLOBALS = {
     "Protean_Level":               (0x9EA, 0,    "Float", "Protean's level in the perk screen: perk points earned (kept by Protean)"),
     "Protean_LevelRatio":          (0x9EB, 0,    "Float", "the perk screen's bar: progress to the next perk point, 0 to 1 (kept by Protean)"),
     "Protean_ShowLevelup":         (0x9EC, 0,    "Short", "set to a level to show 'Protean increased to <level>' (Custom Skills Framework clears it)"),
-    "Protean_BladeSwingCost":      (0xA06, 5,    "Float", "stamina each Blade swing costs; 0 = free"),
+    # the Blade (numbers agreed with the user 2026-11-04): a greatsword's lead over a sword (vanilla: 1.7x a hit) over
+    # Rending Claws' full-bar damage, at a sword's speed ("slices quickly"); always full strength, it only costs stamina
+    "Protean_BladeSwingCost":      (0xA06, 8,    "Float", "stamina each Blade swing costs; 0 = free"),
+    "Protean_BladeDamageMult":     (0xA07, 1.7,  "Float", "Blade damage as a multiple of Rending Claws' full-bar damage at the player's level"),
 }
 # Events the animal's graph was seen to refuse when sent to the player (probed live with the dev "anim" command).
 BLOCKED = {
@@ -654,8 +657,8 @@ def main():
           "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
           "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
           "Keywords:\n- 06D931:Skyrim.esm\n"  # WeapTypeGreatsword
-          "BasicStats:\n  Damage: 17\n  Weight: 1\n"
-          "Data:\n  AnimationType: OneHandSword\n  Speed: 1\n  Reach: 1.3\n  Skill: TwoHanded\n  NumProjectiles: 1\n"
+          "BasicStats:\n  Damage: 18\n  Weight: 1\n"  # Protean sets the damage (Protean_BladeDamageMult)
+          "Data:\n  AnimationType: OneHandSword\n  Speed: 1\n  Reach: 1.3\n  Stagger: 1.1\n  Skill: TwoHanded\n  NumProjectiles: 1\n"
           "  RangeMin: 500\n  RangeMax: 2000\n  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n"
           "  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
           "Critical:\n  Damage: 8\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
