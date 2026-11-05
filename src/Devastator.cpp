@@ -53,6 +53,22 @@ namespace protean::Devastator
 
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
+		// the player's animation events while the pose is asked for and building, in the log (2026-11-04: once the pose
+		// was taken by the graph yet the player only stood still, after the claws were put away)
+		class AnimLog : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override
+			{
+				if (a_event && (g_phase == Phase::kSheathe || g_phase == Phase::kWindup)) {
+					logger::info("devastator: anim event '{}' {:.2f} s in", a_event->tag.c_str(),
+						std::chrono::duration<float>(Clock::now() - g_start).count());
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+		AnimLog g_animLog;
+
 		float Seconds(Clock::time_point a_from) { return std::chrono::duration<float>(Clock::now() - a_from).count(); }
 
 		void Play(RE::PlayerCharacter* a_p, const char* a_name)
@@ -355,6 +371,8 @@ namespace protean::Devastator
 			return;
 		}
 		av->DamageActorValue(RE::ActorValue::kStamina, stamina);
+		p->RemoveAnimationGraphEventSink(&g_animLog);  // the graphs are rebuilt on loads: listen afresh each time
+		p->AddAnimationGraphEventSink(&g_animLog);
 		Lock(true);
 		g_start = g_last = Clock::now();
 		if (p->AsActorState()->GetWeaponState() != RE::WEAPON_STATE::kSheathed) {
