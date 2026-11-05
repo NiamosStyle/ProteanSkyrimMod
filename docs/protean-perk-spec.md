@@ -240,6 +240,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04, user test, female via player.sexchange): the male model (used for both) mostly fits, but there are gaps near the shoulder (screenshots 59, 60: the flesh floats off her narrower shoulder by the neck). Next: a female model built on the female body.
   Status (2026-11-04): installed: Sleeve_F.nif and Sleeve1st_F.nif, the male flesh carried onto the game's female body (Blade.blend make_female.py: each point keeps its place over the skin; the female skeleton's arm bones match the male's). Same textures. The plugin hangs the female 1st-person model for a female player. Not yet tested.
   Status (2026-11-04, user test): "Yes, it looks good": the female arm fits, no gaps at the shoulder.
+  Status (2026-11-04, user): no faint ring, no nubs at the hand tip, the 1st-person blade angle is fine, and the blade appearing on R is good: the looks are done. Next: the numbers (user: significantly stronger than the claws).
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
