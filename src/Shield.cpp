@@ -21,32 +21,11 @@ namespace protean::Shield
 			return shield && a_p->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kShield) == shield;
 		}
 
-		// ---- the block (the user's rule, 2026-11-05): a blocked hit, arrow or spell from the front does nothing and
-		// costs a flat Protean_ShieldBlockCost Stamina; with less Stamina than that the block stops nothing and the
-		// hit staggers, as a guard break
-
-		// the hidden perk's "percent blocked" (set, not multiplied): 1 stops all of a blocked hit, 0 none of it
-		void SetBlocked(RE::BGSPerk* a_perk, float a_value)
-		{
-			for (auto* e : a_perk->perkEntries) {
-				if (e && e->GetType() == RE::PERK_ENTRY_TYPE::kEntryPoint) {
-					auto* entry = static_cast<RE::BGSEntryPointPerkEntry*>(e);
-					if (entry->IsEntryPoint(RE::BGSEntryPoint::ENTRY_POINT::kModPercentBlocked) && entry->functionData) {
-						if (auto* one = skyrim_cast<RE::BGSEntryPointFunctionDataOneValue*>(entry->functionData)) {
-							one->data = a_value;
-						}
-					}
-				}
-			}
-		}
-
-		float g_lastStamina = -1.0f;  // the player's Stamina last frame: the hit event comes after the game's own block cost
-		float g_lastHealth = -1.0f;
-		// a paid block's damage given back (the game's own thread only): Health is held at g_refundHealth until then
-		float                                 g_refundHealth = 0.0f;
-		std::chrono::steady_clock::time_point g_refundUntil{};
-		float                                 g_refunded = 0.0f;
-
+		// ---- the block (the user's rule, 2026-11-05): a blocked hit or arrow from the front does nothing and costs a
+		// flat Protean_ShieldBlockCost Stamina; with less Stamina than that it lands in full and staggers, a guard break.
+		// The game's own "percent blocked" stops at most 70% (fBlockMax) and the Health give-back was not liked
+		// (user, 2026-11-05): the hit itself is changed as the game works it out (option 1). Option 3, if this fails: a
+		// perk that cancels all incoming damage while blocking (hits from behind too).
 		// every hostile effect landing on the player while blocking with the Shield (what still hurt, 2026-11-05)
 		class EffectSink : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
 		{
@@ -69,72 +48,55 @@ namespace protean::Shield
 
 		float Stamina(RE::PlayerCharacter* a_p) { return a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina); }
 
-		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
+		struct ProcessHit
 		{
-		public:
-			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
+			// the game's call that applies a worked-out hit to its target (as established combat mods hook it)
+			static void thunk(RE::Actor* a_target, RE::HitData& a_hit)
 			{
 				auto* p = RE::PlayerCharacter::GetSingleton();
-				if (!a_event || !p || a_event->target.get() != p || !a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || !Holds(p)) {
-					return RE::BSEventNotifyControl::kContinue;
+				if (p && a_target == p) {   // a plain address check first: nothing of the hit is read for anyone else
+					Block(p, a_hit);
 				}
-				auto*       av = p->AsActorValueOwner();
+				func(a_target, a_hit);
+			}
+			static inline REL::Relocation<decltype(thunk)> func;
+
+			static void Block(RE::PlayerCharacter* a_p, RE::HitData& a_hit)
+			{
+				static int seen = 0;
+				if (seen < 3) {   // the first few hits on the player, to show the patch reads real hits
+					++seen;
+					auto who = a_hit.aggressor.get();
+					logger::info("shield: hit seen: from '{}', damage {:.1f}, blocked {:.2f}, flags {:X}", who ? who->GetName() : "?",
+						a_hit.totalDamage, a_hit.percentBlocked, a_hit.flags.underlying());
+				}
+				if (!a_hit.flags.any(RE::HitData::Flag::kBlocked) || !Holds(a_p)) {
+					return;
+				}
+				auto*       av = a_p->AsActorValueOwner();
 				const float cost = Dial("Protean_ShieldBlockCost", 5.0f);
-				const float now = Stamina(p);
-				const float gameCost = g_lastStamina >= 0.0f ? std::max(0.0f, g_lastStamina - now) : 0.0f;
-				const bool  paid = g_lastStamina >= cost;  // what the perk was set to when the hit landed
-				if (gameCost > 0.0f) {
-					av->RestoreActorValue(RE::ActorValue::kStamina, gameCost);  // the flat cost instead
-				}
-				auto* who = a_event->cause.get();
-				// what the hit did (2026-11-05, user: still hurt while blocking): Health and Stamina against the last frame,
-				// and whether the block perk was held and at what share
-				{
-					auto*       perk = Registry::Get().ShieldBlockPerk();
-					float       share = -1.0f;
-					if (perk) {
-						for (auto* e : perk->perkEntries) {
-							if (e && e->GetType() == RE::PERK_ENTRY_TYPE::kEntryPoint) {
-								if (auto* one = skyrim_cast<RE::BGSEntryPointFunctionDataOneValue*>(static_cast<RE::BGSEntryPointPerkEntry*>(e)->functionData)) {
-									share = one->data;
-								}
-							}
-						}
-					}
-					const float hp = av->GetActorValue(RE::ActorValue::kHealth);
-					logger::info("shield: hit check: health {:.1f} -> {:.1f}, stamina {:.1f} -> {:.1f}, perk held {}, share {:.1f}, blocking {}, source {:08X}",
-						g_lastHealth, hp, g_lastStamina, now, perk && p->HasPerk(perk), share, p->IsBlocking(), a_event->source);
-				}
-				// the event comes before the hit's damage, from another thread: what it does is done on the game's own thread
-				const float hpNow = av->GetActorValue(RE::ActorValue::kHealth);
+				auto        who = a_hit.aggressor.get();
 				const std::string name = who ? who->GetName() : "?";
-				const float before = g_lastStamina;
-				SKSE::GetTaskInterface()->AddTask([paid, cost, gameCost, hpNow, name, before]() {
-					auto* p = RE::PlayerCharacter::GetSingleton();
-					if (!p) {
-						return;
-					}
-					auto* av = p->AsActorValueOwner();
-					if (paid) {
-						av->DamageActorValue(RE::ActorValue::kStamina, cost);
-						// the "percent blocked" perk did not stop all of a blocked hit (user's test, 2026-11-05: Health fell
-						// with it set to 1): whatever Health the hit takes in the next moment is given back
-						g_refundHealth = hpNow;
-						g_refundUntil = std::chrono::steady_clock::now() + std::chrono::milliseconds(300);
-						g_refunded = 0.0f;
-						logger::info("shield: blocked a hit from '{}', stamina -{:.0f} (the game's own {:.1f} given back), now {:.0f}",
-							name, cost, gameCost, Stamina(p));
-					} else {
-						p->SetGraphVariableFloat("staggerMagnitude", 0.5f);
-						p->NotifyAnimationGraph("staggerStart");
-						logger::info("shield: guard broken by '{}': stamina {:.0f} under {:.0f}, the hit went through", name, before, cost);
-					}
-				});
-				g_lastStamina = Stamina(p);
-				return RE::BSEventNotifyControl::kContinue;
+				if (av->GetActorValue(RE::ActorValue::kStamina) >= cost) {
+					const float was = a_hit.totalDamage;
+					a_hit.totalDamage = 0.0f;       // nothing of it lands
+					a_hit.physicalDamage = 0.0f;
+					a_hit.percentBlocked = 1.0f;
+					av->DamageActorValue(RE::ActorValue::kStamina, cost);
+					logger::info("shield: blocked {:.1f} damage from '{}', stamina -{:.0f}", was, name, cost);
+				} else {
+					a_hit.percentBlocked = 0.0f;    // a guard break: all of it lands, and it staggers
+					a_hit.flags.reset(RE::HitData::Flag::kBlocked);
+					SKSE::GetTaskInterface()->AddTask([]() {
+						if (auto* p = RE::PlayerCharacter::GetSingleton()) {
+							p->SetGraphVariableFloat("staggerMagnitude", 0.5f);
+							p->NotifyAnimationGraph("staggerStart");
+						}
+					});
+					logger::info("shield: guard broken by '{}' (stamina under {:.0f}): {:.1f} damage lands", name, cost, a_hit.totalDamage);
+				}
 			}
 		};
-		HitSink g_hits;
 
 		// ---- the ward: a hostile spell from the front, while blocking, does nothing (MagicTarget::AddTarget refused)
 		std::mutex                                                        g_wardLock;
@@ -253,7 +215,19 @@ namespace protean::Shield
 
 	void Install()
 	{
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&g_hits);
+		// the hit patch, only where the game's code holds a call (E8) as expected; otherwise nothing is written
+		{
+			REL::Relocation<std::uintptr_t> fn{ RELOCATION_ID(37673, 38627) };
+			const auto site = fn.address() + REL::Relocate(0x3C0, 0x4A8);
+			if (*reinterpret_cast<const std::uint8_t*>(site) == 0xE8) {
+				SKSE::AllocTrampoline(14);
+				ProcessHit::func = SKSE::GetTrampoline().write_call<5>(site, ProcessHit::thunk);
+				logger::info("shield: hit patch written at +{:X}", site - REL::Module::get().base());
+			} else {
+				logger::warn("shield: no call at +{:X} (byte {:02X}); the hit patch is not written",
+					site - REL::Module::get().base(), *reinterpret_cast<const std::uint8_t*>(site));
+			}
+		}
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESMagicEffectApplyEvent>(&g_effects);
 		HookWard(RE::PlayerCharacter::GetSingleton());
 	}
@@ -268,35 +242,6 @@ namespace protean::Shield
 			return;
 		}
 		Sleeve(p, shield, sleeve);
-		// the block perk held while the Shield is worn; it stops all of a blocked hit only while the Stamina can pay
-		if (auto* perk = reg.ShieldBlockPerk()) {
-			const bool on = Holds(p);
-			if (on != p->HasPerk(perk)) {
-				if (on) {
-					p->AddPerk(perk);
-				} else {
-					p->RemovePerk(perk);
-				}
-			}
-			SetBlocked(perk, Stamina(p) >= Dial("Protean_ShieldBlockCost", 5.0f) ? 1.0f : 0.0f);
-		}
-		g_lastStamina = Stamina(p);
-		{
-			auto*       av = p->AsActorValueOwner();
-			const float hp = av->GetActorValue(RE::ActorValue::kHealth);
-			if (g_refundUntil.time_since_epoch().count() != 0) {
-				if (std::chrono::steady_clock::now() < g_refundUntil) {
-					if (hp < g_refundHealth) {
-						av->RestoreActorValue(RE::ActorValue::kHealth, g_refundHealth - hp);
-						g_refunded += g_refundHealth - hp;
-					}
-				} else {
-					logger::info("shield: the blocked hit's damage given back: {:.1f}", g_refunded);
-					g_refundUntil = {};
-				}
-			}
-		}
-		g_lastHealth = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
 		if (!AddTarget::func.address()) {
 			HookWard(p);  // the player may not have been made yet when Install ran
 		}
