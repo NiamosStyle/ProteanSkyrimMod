@@ -18,5 +18,5 @@ data/meshes/actors/character/_1stperson/animations/OpenAnimationReplacer/
 art/*/ref/*.nif
 art/*/ref/*.jpg
 *.blend1
-art/blade/export.json
+art/blade/export*.json
 art/blade/textures/

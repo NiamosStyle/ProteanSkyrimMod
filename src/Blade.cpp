@@ -81,9 +81,9 @@ namespace protean::Blade
 		}
 
 		constexpr auto kFirstName = "ProteanBlade1st";
-		constexpr auto kFirstModel = "Protean\\Blade\\Sleeve1st_M.nif";
+		constexpr auto kFirstModel = "Protean\\Blade\\Sleeve1st_{}.nif";  // M or F (the female arm, 2026-11-04)
 
-		// The game draws no body slot 57 in 1st person (seen 2026-11-04). There the plugin hangs Sleeve1st_M.nif in the
+		// The game draws no body slot 57 in 1st person (seen 2026-11-04). There the plugin hangs Sleeve1st_M/F.nif in the
 		// 1st-person body itself and binds its skinned flesh and blade to the 1st-person skeleton's bones of the same
 		// names, as the game does for worn armor, so the flesh bends with the wrist.
 		void FirstPerson(RE::PlayerCharacter* a_p, bool a_on)
@@ -104,13 +104,15 @@ namespace protean::Blade
 			if (have) {
 				return;
 			}
+			const auto* base = a_p->GetActorBase();
+			const auto  path = fmt::format(kFirstModel, base && base->GetSex() == RE::SEX::kFemale ? 'F' : 'M');
 			RE::NiPointer<RE::NiNode> model;
-			if ((RE::BSModelDB::Demand(kFirstModel, model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
-				(RE::BSModelDB::Demand((std::string("Meshes\\") + kFirstModel).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
+			if ((RE::BSModelDB::Demand(path.c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
+				(RE::BSModelDB::Demand(("Meshes\\" + path).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
 				static bool warned = false;
 				if (!warned) {
 					warned = true;
-					logger::warn("blade: could not load {}", kFirstModel);
+					logger::warn("blade: could not load {}", path);
 				}
 				return;
 			}

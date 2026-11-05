@@ -15,7 +15,7 @@ up like a sword (user's screenshots, 2026-11-03); the next test holds "along" in
 
 The sleeve: the game's own male right arm and hand (body and hands meshes, read from the archives), pushed out along
 their normals into a thick, lumpy mass (thickest on the forearm, as in Prototype), keeping the game's skin weights so
-it bends with the arm. It sits in body slot 57, beside the claws' 59. Male only for now (a test).
+it bends with the arm. It sits in body slot 57, beside the claws' 59. Sleeve_M / Sleeve_F: male and female.
 """
 import math
 import os
@@ -221,7 +221,8 @@ def build_sleeve(skel):
     print("wrote", path, len(verts), "+", len(bv), "verts")
 
 
-BLENDER_EXPORT = os.path.join(ROOT, "art", "blade", "export.json")  # written by export_game.py inside Blade.blend
+BLENDER_EXPORT = os.path.join(ROOT, "art", "blade", "export%s.json")  # written by export_game.py inside Blade.blend:
+# "" the male arm, "_F" the female (make_female.py: the male flesh carried onto the female body, 2026-11-04)
 BAKED = os.path.join(ROOT, "art", "blade", "textures")  # baked by bake_skin.py inside Blade.blend (PNG)
 TEX_OUT = os.path.join(ROOT, "data", "textures", "Protean", "Blade")
 TEX_GAME = "textures\\Protean\\Blade\\"
@@ -280,12 +281,12 @@ def textured(shape, part):
     shape.save_shader_attributes()
 
 
-def build_sleeve_from_blender(skel):
-    """The arm's flesh and the blade as shaped and painted in Blender (2026-11-04)."""
+def build_sleeve_from_blender(skel, sex="M"):
+    """The arm's flesh and the blade as shaped and painted in Blender (2026-11-04); both sexes share the textures."""
     import json
-    with open(BLENDER_EXPORT) as f:
+    with open(BLENDER_EXPORT % ("" if sex == "M" else "_F")) as f:
         data = json.load(f)
-    path = os.path.join(OUT, "Sleeve_M.nif")
+    path = os.path.join(OUT, "Sleeve_%s.nif" % sex)
     nif = NifFile()
     nif.initialize("SKYRIMSE", path)
     # the flesh: the game's arm bones carry it, as they carried the arm it was grown from
@@ -305,7 +306,7 @@ def build_sleeve_from_blender(skel):
     textured(blade_shape, "Blade")
     nif.save()
     print("wrote", path, len(fl["verts"]), "+", len(bl["verts"]), "verts")
-    build_first_person(data, skel)
+    build_first_person(data, skel, sex)
 
 
 # The game draws no body slot 57 in 1st person (seen 2026-11-04). Sleeve1st_M.nif holds the same flesh, cut at the
@@ -314,8 +315,8 @@ def build_sleeve_from_blender(skel):
 FIRST_PERSON_DROP = ("NPC R UpperArm", "NPC R UpperarmTwist", "NPC R Clavicle")
 
 
-def build_first_person(data, skel):
-    path = os.path.join(OUT, "Sleeve1st_M.nif")
+def build_first_person(data, skel, sex="M"):
+    path = os.path.join(OUT, "Sleeve1st_%s.nif" % sex)
     nif = NifFile()
     nif.initialize("SKYRIMSE", path)
     fl = data["flesh"]
@@ -358,3 +359,4 @@ if __name__ == "__main__":
     build_empty()  # "along" is now drawn by the sleeve
     build_textures()
     build_sleeve_from_blender(skel)  # build_sleeve(skel) was the script-made one
+    build_sleeve_from_blender(NifFile(SKELETONS["F"]), "F")

@@ -668,7 +668,7 @@ def main():
           + "Priority:\n  Male: 10\n  Female: 10\n"
           "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
           + "".join("%s:\n  Male:\n    File: Protean\\Blade\\Sleeve_M.nif\n"
-                    "  Female:\n    File: Protean\\Blade\\Sleeve_M.nif\n" % field
+                    "  Female:\n    File: Protean\\Blade\\Sleeve_F.nif\n" % field
                     for field in ("WorldModel", "FirstPersonModel"))
           + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
     write(os.path.join(y, "Armors", "Protean_BladeSleeve - %s_%s.yaml" % (fid(BLADE_SLEEVE_ARMO), PLUGIN)),
