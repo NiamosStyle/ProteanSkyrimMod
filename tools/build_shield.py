@@ -30,7 +30,7 @@ OUT = os.path.join(ROOT, "data", "meshes", "Protean", "Shield")
 TEX_OUT = os.path.join(ROOT, "data", "textures", "Protean", "Shield")
 TEX_GAME = "textures\\Protean\\Shield\\"
 SLOT = 54
-SPEC = {"Arm": 0.7, "Shell": 0.6}   # wet flesh, glossy chitin
+SPEC = {"Arm": 0.7, "Shell": 0.6}   # the shine where no mask is baked (the shell has Shell_s.png)   # wet flesh, glossy chitin
 FIRST_PERSON_DROP = ("NPC L UpperArm", "NPC L UpperarmTwist", "NPC L Clavicle")
 
 
@@ -48,6 +48,9 @@ def build_textures():
         if build_blade.FLIP_GREEN:
             g = ImageChops.invert(g)
         a = Image.new("L", r.size, int(255 * SPEC[part]))
+        mask = os.path.join(BAKED, part + "_s.png")   # a baked shine mask, where there is one (the shell: dull cracks)
+        if os.path.exists(mask):
+            a = Image.open(mask).convert("L").resize(r.size)
         Image.merge("RGBA", (r, g, b, a)).save(os.path.join(tmp, part + "_n.png"))
         jobs.append((part + "_n.png", "BC7_UNORM"))
     for name, fmt in jobs:
@@ -56,9 +59,17 @@ def build_textures():
     print("wrote", len(jobs), "textures to", TEX_OUT)
 
 
+# the shell as glossy as the chaurus's (its own model: glossiness 80, specular 1.0, a faintly green-yellow highlight;
+# 2026-11-05, user: ours looked nothing like it, screenshots 80-81; the dull sheen was the claws' 8 and 0.25)
+SHINE = {"Shell": (80.0, 1.0, (0.94, 1.0, 0.87))}
+
+
 def textured(shape, part):
     shape.set_texture("Diffuse", TEX_GAME + part + "_d.dds")
     shape.set_texture("Normal", TEX_GAME + part + "_n.dds")
+    if part in SHINE:
+        sp = shape.shader.properties
+        sp.Glossiness, sp.Spec_Str, sp.Spec_Color = SHINE[part][0], SHINE[part][1], SHINE[part][2]
     shape.save_shader_attributes()
 
 
