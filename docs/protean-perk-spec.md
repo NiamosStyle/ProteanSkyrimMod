@@ -236,6 +236,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04, user test): the draw still took several seconds after R. Cause (log: each draw began 3 s after the sheathe): the empty hands' sheathe has no BeginWeaponSheathe/weaponSheathe either, so the game waited out a timer. The Blade's copy now has both at its start.
   Status (2026-11-04, user test): "It is quick, now." Draw and sheathe both fast. Next: the flesh's edge on the back/shoulder is a straight line with right angles, not organic (with or without clothes).
   Status (2026-11-04): installed: the shoulder edge is now cut on the finer points along a wandering line that reaches out from the shoulder further in some directions (make_base.py REACH, make_flesh.py EDGE*), and the flesh rises out of the skin over a shorter band (TAPER 4). Not yet tested.
+  Status (2026-11-04, user test): "It looks much better": the shoulder edge is organic now.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
