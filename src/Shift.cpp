@@ -1063,6 +1063,8 @@ namespace protean::Shift
 				return s.stalkerNoiseApplied;
 			case RE::ActorValue::kSneak:
 				return s.inconspicuousApplied;
+			case RE::ActorValue::kResistMagic:
+				return s.carapaceMagicApplied;
 			case RE::ActorValue::kWaterBreathing: {
 				const auto* c = Active();
 				return c && c->swims ? 1.0f : 0.0f;

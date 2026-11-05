@@ -57,6 +57,7 @@ namespace protean
 		bool                   consumeLoot{ false };     // the Protean page's "Take the loot when consuming"
 		bool                   consumeAsk{ true };       // the Protean page's "Ask first" (Loot / Consume / Cancel, own form)
 		bool                   stealthLoot{ true };      // the Protean page's "Stealth Consume takes the loot"
+		float                  carapaceMagicApplied{ 0.0f };  // MagicResist Subtle Carapace added now (co-save 27)
 		std::set<std::string>  renowned;                 // renowned people consumed (Registry::Renowned's matches)
 
 		// Face stealing. The face of the last corpse copied is "banked" (one at a time) and can be put on and
@@ -133,7 +134,8 @@ namespace protean
 	// the actor values whose temporary modifier Protean changes, checked after a load
 	inline constexpr RE::ActorValue kTempChecked[] = { RE::ActorValue::kHealth, RE::ActorValue::kAttackDamageMult,
 		RE::ActorValue::kDamageResist, RE::ActorValue::kSpeedMult, RE::ActorValue::kStaminaRateMult,
-		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing, RE::ActorValue::kMovementNoiseMult, RE::ActorValue::kSneak };
+		RE::ActorValue::kResistDisease, RE::ActorValue::kWaterBreathing, RE::ActorValue::kMovementNoiseMult, RE::ActorValue::kSneak,
+		RE::ActorValue::kResistMagic };
 
 	namespace Persist
 	{

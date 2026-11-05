@@ -268,6 +268,7 @@ Open: numbers (damage, speed, Stamina per swing), looks.
 - **Requires:** Unbound Form
 - **What it does:** Armor bonus, with two ranks.
 - **Status:** Done, tested in game (2026-10-24). Rank 1: 50 + 4 x level armor; rank 2: 100 + 7 x level (replaces rank 1's). It works in every animal form, and in human form only while no heavy armor, and no light armor other than fur, hide, leather, chitin or dragonscale, is worn on the body (clothes and robes are fine; the natural kinds allowed by the user 2026-10-25): the restriction that balances it. At level 50 rank 2 is about a well-made light armor set. The numbers are starting points for the user's playtest.
+- **Changed 2026-11-05 (user):** also magic resistance, 10% at rank 1 and 20% at rank 2 (replaces rank 1's), under the same rule as the armor (`Protean_CarapaceMagic`, `Protean_Carapace2Magic`). Built and installed, untested.
 
 ### Regeneration
 - **Requires:** Subtle Carapace

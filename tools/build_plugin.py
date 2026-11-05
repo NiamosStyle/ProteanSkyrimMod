@@ -70,8 +70,8 @@ PERKS = {
                        ["preys_flight"]),
     "preys_flight": (0x969, "Prey's Flight", ("No fall damage. In human form, jump again in mid-air, hold Jump to glide, and power attack in the air "
                      "to dive and stagger everyone around your landing."), 0, 2.2, ["devastator"]),
-    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: 50 armor plus 4 per level, in animal "
-                        "form, or in your own when you wear no body armor (clothes and robes are fine).", -0.8, 0.9,
+    "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: 50 armor plus 4 per level and 10% "
+                        "magic resistance, in animal form, or in your own when you wear no body armor (clothes and robes are fine).", -0.8, 0.9,
                         ["regeneration", "devastator"]),
     "regeneration": (0x96B, "Regeneration", "Cast Regeneration to switch it on or off: while on, Stamina drains and "
                      "Health returns by the same amount.",
@@ -116,7 +116,7 @@ RANK2 = {
                  "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Stalk works in a fight too, once no enemy can see you: break their line of sight and keep "
                 "still to fade. Faded, an enemy who cannot see you gives up the hunt after 3 seconds."),
-    "subtle_carapace": (0x975, "The carapace hardens further: 100 armor plus 7 per level, under the same rule."),
+    "subtle_carapace": (0x975, "The carapace hardens further: 100 armor plus 7 per level and 20% magic resistance, under the same rule."),
 }
 # Rending Claws (tools/build_claws.py makes the models): an empty-handed weapon for either hand, and one hidden
 # armor piece per hand that shows the blades. Protean's plugin puts a hand's claws on while that hand holds the weapon.
@@ -251,6 +251,8 @@ GLOBALS = {
     "Protean_CarapaceArmorPerLevel": (0x9AB, 4,  "Float", "Subtle Carapace rank 1: armor added per player level"),
     "Protean_Carapace2Armor":      (0x9AC, 100,  "Float", "Subtle Carapace rank 2: armor before the level part (replaces rank 1's)"),
     "Protean_Carapace2ArmorPerLevel": (0x9AD, 7, "Float", "Subtle Carapace rank 2: armor added per player level"),
+    "Protean_CarapaceMagic":       (0xA08, 10,   "Float", "Subtle Carapace rank 1: magic resistance, percent (user 2026-11-05)"),
+    "Protean_Carapace2Magic":      (0xA09, 20,   "Float", "Subtle Carapace rank 2: magic resistance, percent (replaces rank 1's)"),
     "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "unused since 2026-10-28 (bodies are consumed: Protean_ConsumeHealSurvivor)"),
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a plant takes to eat, standing still"),

@@ -14,6 +14,7 @@ namespace protean::Carapace
 
 		float g_wait = 0.0f;
 		float g_logged = -1.0f;
+		float g_loggedMagic = -1.0f;
 
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
@@ -40,10 +41,29 @@ namespace protean::Carapace
 			return !natural;
 		}
 
-		float Wanted(RE::PlayerCharacter* a_p)
+		int Rank(RE::PlayerCharacter* a_p)
 		{
 			const int rank = Evolve::Has("subtle_carapace_2") ? 2 : Evolve::Has("subtle_carapace") ? 1 : 0;
-			if (rank == 0 || a_p->IsDead() || (!Shift::ActiveCreature() && WearsBodyArmor(a_p))) {
+			return rank == 0 || a_p->IsDead() || (!Shift::ActiveCreature() && WearsBodyArmor(a_p)) ? 0 : rank;
+		}
+
+		// magic resistance too, under the same rule (the user, 2026-11-05: 10% at rank 1, 20% at rank 2)
+		float WantedMagic(RE::PlayerCharacter* a_p)
+		{
+			switch (Rank(a_p)) {
+			case 2:
+				return Dial("Protean_Carapace2Magic", 20.0f);
+			case 1:
+				return Dial("Protean_CarapaceMagic", 10.0f);
+			default:
+				return 0.0f;
+			}
+		}
+
+		float Wanted(RE::PlayerCharacter* a_p)
+		{
+			const int rank = Rank(a_p);
+			if (rank == 0) {
 				return 0.0f;
 			}
 			const float level = static_cast<float>(a_p->GetLevel());
@@ -67,9 +87,17 @@ namespace protean::Carapace
 				want - s.carapaceApplied);
 			s.carapaceApplied = want;
 		}
-		if (want != g_logged) {
+		const float magic = WantedMagic(a_p);
+		if (magic != s.carapaceMagicApplied) {
+			a_p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kResistMagic,
+				magic - s.carapaceMagicApplied);
+			s.carapaceMagicApplied = magic;
+		}
+		if (want != g_logged || magic != g_loggedMagic) {
 			g_logged = want;
-			logger::info("subtle carapace: armor +{:.0f}{}", want, want == 0.0f && Evolve::Has("subtle_carapace") ? " (body armor worn)" : "");
+			g_loggedMagic = magic;
+			logger::info("subtle carapace: armor +{:.0f}, magic resistance +{:.0f}%{}", want, magic,
+				want == 0.0f && Evolve::Has("subtle_carapace") ? " (body armor worn)" : "");
 		}
 	}
 }
