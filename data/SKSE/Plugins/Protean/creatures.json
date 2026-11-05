@@ -21,7 +21,8 @@
  },
  "shield": {
   "armor": 2571,
-  "sleeve": 2574
+  "sleeve": 2574,
+  "blockPerk": 2575
  },
  "tendril": {
   "spell": 2441,
@@ -204,6 +205,8 @@
   "Protean_Carapace2ArmorPerLevel": 2477,
   "Protean_CarapaceMagic": 2568,
   "Protean_Carapace2Magic": 2569,
+  "Protean_ShieldBlockCost": 2576,
+  "Protean_ShieldWardAngle": 2577,
   "Protean_FeedCorpseHeal": 2478,
   "Protean_FeedPlantHeal": 2479,
   "Protean_FeedSeconds": 2480,

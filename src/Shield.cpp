@@ -13,6 +13,122 @@ namespace protean::Shield
 		constexpr auto kFirstModel = "Protean\\Shield\\Sleeve1st_{}.nif";  // M or F
 		constexpr auto kSleeveSlot = RE::BGSBipedObjectForm::BipedObjectSlot::kModLegLeft;  // body slot 54
 
+		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
+
+		bool Holds(RE::PlayerCharacter* a_p)
+		{
+			auto* shield = Registry::Get().ShieldArmor();
+			return shield && a_p->GetWornArmor(RE::BGSBipedObjectForm::BipedObjectSlot::kShield) == shield;
+		}
+
+		// ---- the block (the user's rule, 2026-11-05): a blocked hit, arrow or spell from the front does nothing and
+		// costs a flat Protean_ShieldBlockCost Stamina; with less Stamina than that the block stops nothing and the
+		// hit staggers, as a guard break
+
+		// the hidden perk's "percent blocked" (set, not multiplied): 1 stops all of a blocked hit, 0 none of it
+		void SetBlocked(RE::BGSPerk* a_perk, float a_value)
+		{
+			for (auto* e : a_perk->perkEntries) {
+				if (e && e->GetType() == RE::PERK_ENTRY_TYPE::kEntryPoint) {
+					auto* entry = static_cast<RE::BGSEntryPointPerkEntry*>(e);
+					if (entry->IsEntryPoint(RE::BGSEntryPoint::ENTRY_POINT::kModPercentBlocked) && entry->functionData) {
+						if (auto* one = skyrim_cast<RE::BGSEntryPointFunctionDataOneValue*>(entry->functionData)) {
+							one->data = a_value;
+						}
+					}
+				}
+			}
+		}
+
+		float g_lastStamina = -1.0f;  // the player's Stamina last frame: the hit event comes after the game's own block cost
+
+		float Stamina(RE::PlayerCharacter* a_p) { return a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina); }
+
+		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
+			{
+				auto* p = RE::PlayerCharacter::GetSingleton();
+				if (!a_event || !p || a_event->target.get() != p || !a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || !Holds(p)) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				auto*       av = p->AsActorValueOwner();
+				const float cost = Dial("Protean_ShieldBlockCost", 5.0f);
+				const float now = Stamina(p);
+				const float gameCost = g_lastStamina >= 0.0f ? std::max(0.0f, g_lastStamina - now) : 0.0f;
+				const bool  paid = g_lastStamina >= cost;  // what the perk was set to when the hit landed
+				if (gameCost > 0.0f) {
+					av->RestoreActorValue(RE::ActorValue::kStamina, gameCost);  // the flat cost instead
+				}
+				auto* who = a_event->cause.get();
+				if (paid) {
+					av->DamageActorValue(RE::ActorValue::kStamina, cost);
+					logger::info("shield: blocked a hit from '{}', stamina -{:.0f} (the game's own {:.1f} given back), now {:.0f}",
+						who ? who->GetName() : "?", cost, gameCost, Stamina(p));
+				} else {
+					p->SetGraphVariableFloat("staggerMagnitude", 0.5f);
+					p->NotifyAnimationGraph("staggerStart");
+					logger::info("shield: guard broken by '{}': stamina {:.0f} under {:.0f}, the hit went through", who ? who->GetName() : "?",
+						g_lastStamina, cost);
+				}
+				g_lastStamina = Stamina(p);
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+		HitSink g_hits;
+
+		// ---- the ward: a hostile spell from the front, while blocking, does nothing (MagicTarget::AddTarget refused)
+		std::mutex                                                        g_wardLock;
+		std::map<std::pair<RE::FormID, RE::FormID>, std::chrono::steady_clock::time_point> g_warded;  // caster, spell -> when paid
+
+		bool Ward(RE::MagicTarget* a_this, const RE::MagicTarget::AddTargetData& a_data)
+		{
+			auto* p = RE::PlayerCharacter::GetSingleton();
+			if (!p || a_this != static_cast<RE::MagicTarget*>(p) || !a_data.caster || a_data.caster == p || !a_data.effect ||
+				!a_data.effect->baseEffect || !a_data.effect->baseEffect->IsHostile() || !p->IsBlocking() || !Holds(p)) {
+				return false;
+			}
+			// in front: the caster within Protean_ShieldWardAngle of where the player faces
+			const auto  d = a_data.caster->GetPosition() - p->GetPosition();
+			const float h = p->GetAngleZ();
+			const float len = std::hypot(d.x, d.y);
+			const float cosA = len > 1.0f ? (d.x * std::sin(h) + d.y * std::cos(h)) / len : 1.0f;
+			const float deg = std::acos(std::clamp(cosA, -1.0f, 1.0f)) * 57.29578f;
+			if (deg > Dial("Protean_ShieldWardAngle", 60.0f)) {
+				return false;
+			}
+			const float cost = Dial("Protean_ShieldBlockCost", 5.0f);
+			const auto  key = std::make_pair(a_data.caster->GetFormID(), a_data.magicItem ? a_data.magicItem->GetFormID() : 0u);
+			const auto  now = std::chrono::steady_clock::now();
+			std::lock_guard lock(g_wardLock);
+			// one spell lands as several effects at once (and a stream every moment): it is paid once each half second
+			if (auto it = g_warded.find(key); it != g_warded.end() && now - it->second < std::chrono::milliseconds(500)) {
+				return true;
+			}
+			auto* av = p->AsActorValueOwner();
+			if (av->GetActorValue(RE::ActorValue::kStamina) < cost) {
+				return false;  // no Stamina: the spell goes through
+			}
+			av->DamageActorValue(RE::ActorValue::kStamina, cost);
+			g_warded[key] = now;
+			logger::info("shield: warded '{}' from '{}' ({:.0f} degrees off), stamina -{:.0f}",
+				a_data.magicItem ? a_data.magicItem->GetName() : "?", a_data.caster->GetName(), deg, cost);
+			return true;
+		}
+
+		struct AddTarget
+		{
+			static bool thunk(RE::MagicTarget* a_this, RE::MagicTarget::AddTargetData& a_data)
+			{
+				if (Ward(a_this, a_data)) {
+					return false;
+				}
+				return func(a_this, a_data);
+			}
+			static inline REL::Relocation<decltype(thunk)> func;
+		};
+
 		std::int32_t Count(RE::PlayerCharacter* a_p, RE::TESBoundObject* a_item)
 		{
 			const auto counts = a_p->GetInventoryCounts([a_item](RE::TESBoundObject& a_obj) { return &a_obj == a_item; });
@@ -50,6 +166,28 @@ namespace protean::Shield
 		}
 	}
 
+	void Install()
+	{
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&g_hits);
+		// the ward: the player's own MagicTarget table, found by matching the player's table pointer (which of the
+		// class's tables is MagicTarget's is not assumed)
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		if (!p) {
+			logger::warn("shield: no player yet; the ward is not installed");
+			return;
+		}
+		const auto mine = *reinterpret_cast<std::uintptr_t*>(static_cast<RE::MagicTarget*>(p));
+		for (std::size_t i = 0; i < RE::VTABLE_PlayerCharacter.size(); ++i) {
+			REL::Relocation<std::uintptr_t> vtbl{ RE::VTABLE_PlayerCharacter[i] };
+			if (vtbl.address() == mine) {
+				AddTarget::func = vtbl.write_vfunc(0x1, AddTarget::thunk);
+				logger::info("shield: ward hooked (PlayerCharacter table {}: MagicTarget::AddTarget)", i);
+				return;
+			}
+		}
+		logger::warn("shield: the player's MagicTarget table not found; the ward is not installed");
+	}
+
 	void OnFrame(float a_delta)
 	{
 		auto*       p = RE::PlayerCharacter::GetSingleton();
@@ -60,6 +198,19 @@ namespace protean::Shield
 			return;
 		}
 		Sleeve(p, shield, sleeve);
+		// the block perk held while the Shield is worn; it stops all of a blocked hit only while the Stamina can pay
+		if (auto* perk = reg.ShieldBlockPerk()) {
+			const bool on = Holds(p);
+			if (on != p->HasPerk(perk)) {
+				if (on) {
+					p->AddPerk(perk);
+				} else {
+					p->RemovePerk(perk);
+				}
+			}
+			SetBlocked(perk, Stamina(p) >= Dial("Protean_ShieldBlockCost", 5.0f) ? 1.0f : 0.0f);
+		}
+		g_lastStamina = Stamina(p);
 		// the perk keeps the Shield in the inventory
 		static float since = 0.0f;
 		if ((since += a_delta) >= 2.0f) {

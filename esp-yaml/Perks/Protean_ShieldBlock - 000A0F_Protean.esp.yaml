@@ -1,0 +1,17 @@
+FormKey: 000A0F:Protean.esp
+EditorID: Protean_ShieldBlock
+Name:
+  TargetLanguage: English
+  Value: 'Shield Block'
+Description:
+  TargetLanguage: English
+  Value: ''
+NumRanks: 1
+Playable: False
+Hidden: True
+Effects:
+- MutagenObjectType: PerkEntryPointModifyValue
+  EntryPoint: ModPercentBlocked
+  PerkConditionTabCount: 3
+  Modification: Set
+  Value: 1

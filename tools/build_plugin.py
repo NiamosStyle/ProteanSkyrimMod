@@ -134,6 +134,7 @@ BLADE_ONEHAND, BLADE_SLEEVE_ARMA, BLADE_SLEEVE_ARMO = 0xA02, 0xA03, 0xA04
 # plated shield) that Protean's plugin puts on while it is drawn
 SHIELD_ARMO, SHIELD_ARMA, SHIELD_SLEEVE_ARMA, SHIELD_SLEEVE_ARMO = 0xA0B, 0xA0C, 0xA0D, 0xA0E
 SHIELD_SLEEVE_FLAG = "0x01000000"  # body slot 54
+SHIELD_BLOCK_PERK = 0xA0F
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
 # tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
@@ -261,6 +262,8 @@ GLOBALS = {
     "Protean_Carapace2ArmorPerLevel": (0x9AD, 7, "Float", "Subtle Carapace rank 2: armor added per player level"),
     "Protean_CarapaceMagic":       (0xA08, 10,   "Float", "Subtle Carapace rank 1: magic resistance, percent (user 2026-11-05)"),
     "Protean_Carapace2Magic":      (0xA09, 20,   "Float", "Subtle Carapace rank 2: magic resistance, percent (replaces rank 1's)"),
+    "Protean_ShieldBlockCost":     (0xA10, 5,    "Float", "Shield: Stamina each blocked hit, arrow or spell costs (it then does no damage)"),
+    "Protean_ShieldWardAngle":     (0xA11, 60,   "Float", "Shield: a spell is stopped when its caster is within this many degrees of where the player faces"),
     "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "unused since 2026-10-28 (bodies are consumed: Protean_ConsumeHealSurvivor)"),
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a plant takes to eat, standing still"),
@@ -819,11 +822,15 @@ def main():
               + "Description:\n  TargetLanguage: English\n  Value: ''\n"
               "NumRanks: 1\nPlayable: False\nHidden: True\nEffects:\n"
               + "".join("- MutagenObjectType: PerkEntryPointModifyValue\n  EntryPoint: %s\n"
-                        "  PerkConditionTabCount: %d\n  Modification: Multiply\n  Value: 1\n" % e for e in entries))
+                        "  PerkConditionTabCount: %d\n  Modification: %s\n  Value: 1\n"
+                        % (e[0], e[1], e[2] if len(e) > 2 else "Multiply") for e in entries))
 
     hidden_perk(ANIMAL_ARMS_PERK, "Protean_AnimalArms", "Animal One-Handed",
                 [("ModAttackDamage", 3), ("ModPowerAttackStamina", 1)])
     hidden_perk(DEFT_PERK, "Protean_AnimalDeftMovement", "Animal Deft Movement", [("ModIncomingDamage", 3)])
+    # the Shield's block (user, 2026-11-05): held while the Shield is worn; Protean sets the share of a blocked hit
+    # that is stopped: 1 (all of it) with Stamina enough to pay, 0 (none) without
+    hidden_perk(SHIELD_BLOCK_PERK, "Protean_ShieldBlock", "Shield Block", [("ModPercentBlocked", 3, "Set")])
 
     # ---- Deceiver
     write(os.path.join(y, "Factions", "Protean_AssassinMark - %s_%s.yaml" % (fid(ASSASSIN_MARK), PLUGIN)),
@@ -1048,7 +1055,7 @@ def main():
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "blade": {"weapon": BLADE_ONEHAND, "sleeve": BLADE_SLEEVE_ARMO},
-                           "shield": {"armor": SHIELD_ARMO, "sleeve": SHIELD_SLEEVE_ARMO},
+                           "shield": {"armor": SHIELD_ARMO, "sleeve": SHIELD_SLEEVE_ARMO, "blockPerk": SHIELD_BLOCK_PERK},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},

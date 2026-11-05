@@ -119,6 +119,7 @@ namespace protean
 		if (const auto& b = j.value("shield", nlohmann::json::object()); !b.empty()) {
 			_shieldArmor = dh->LookupForm<RE::TESObjectARMO>(b.value("armor", 0u), plugin);
 			_shieldSleeve = dh->LookupForm<RE::TESObjectARMO>(b.value("sleeve", 0u), plugin);
+			_shieldBlockPerk = dh->LookupForm<RE::BGSPerk>(b.value("blockPerk", 0u), plugin);
 		}
 		if (const auto& t = j.value("tendril", nlohmann::json::object()); !t.empty()) {
 			_tendril = dh->LookupForm<RE::SpellItem>(t.value("spell", 0u), plugin);
