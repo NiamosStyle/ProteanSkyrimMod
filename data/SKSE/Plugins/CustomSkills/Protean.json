@@ -81,8 +81,15 @@
           "links": [
             "tendril",
             "devastator",
-            "blade"
+            "blade",
+            "hammerfist"
           ]
+        },
+        {
+          "id": "hammerfist",
+          "perk": "Protean.esp|A12",
+          "x": 1.2,
+          "y": 2.75
         },
         {
           "id": "blade",

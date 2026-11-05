@@ -121,6 +121,11 @@ namespace protean
 			_shieldSleeve = dh->LookupForm<RE::TESObjectARMO>(b.value("sleeve", 0u), plugin);
 			_shieldBlockPerk = dh->LookupForm<RE::BGSPerk>(b.value("blockPerk", 0u), plugin);
 		}
+		if (const auto& b = j.value("hammerfist", nlohmann::json::object()); !b.empty()) {
+			_hammerfistWeapon = dh->LookupForm<RE::TESObjectWEAP>(b.value("weapon", 0u), plugin);
+			_hammerfistRight = dh->LookupForm<RE::TESObjectARMO>(b.value("right", 0u), plugin);
+			_hammerfistLeft = dh->LookupForm<RE::TESObjectARMO>(b.value("left", 0u), plugin);
+		}
 		if (const auto& t = j.value("tendril", nlohmann::json::object()); !t.empty()) {
 			_tendril = dh->LookupForm<RE::SpellItem>(t.value("spell", 0u), plugin);
 		}

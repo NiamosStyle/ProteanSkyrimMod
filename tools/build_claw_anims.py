@@ -21,6 +21,7 @@ import bsa  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ANIMATIONS = "C:/Games/steamapps/common/Skyrim Special Edition/Data/Skyrim - Animations.bsa"
 CLAW_WEAPON = "980"  # Protean.esp, tools/build_plugin.py CLAW_WEAPON
+HAMMERFIST_WEAPON = "A13"  # Protean.esp, tools/build_plugin.py HAMMERFIST_WEAPON
 OAR = "animations/OpenAnimationReplacer/Protean"
 # the name OAR replaces -> the game's beast-race animation
 THIRD = {
@@ -106,9 +107,12 @@ def build():
                        "author": "Protean"}, f, indent=2)
         with open(os.path.join(dst, "config.json"), "w", encoding="utf-8") as f:
             # either hand: with a claw in the left hand alone, the clawed hand made a fist (the user, 2026-10-23)
+            # the Hammerfist plays the same beast-race set (2026-11-05): its huge fists hang low there, clear of the
+            # face, where the human unarmed guard holds them by the head (tools/measure_fist_poses.py)
             claw = [{"condition": "IsEquipped", "requiredVersion": "1.0.0.0",
-                     "Form": {"pluginName": "Protean.esp", "formID": CLAW_WEAPON}, "Left hand": left} for left in (False, True)]
-            json.dump({"name": "Rending Claws", "description": "Claw attacks while either hand holds Rending Claws.",
+                     "Form": {"pluginName": "Protean.esp", "formID": form}, "Left hand": left}
+                    for form in (CLAW_WEAPON, HAMMERFIST_WEAPON) for left in (False, True)]
+            json.dump({"name": "Rending Claws", "description": "Claw attacks while either hand holds Rending Claws or a Hammerfist.",
                        "priority": 15100,
                        "conditions": [{"condition": "OR", "requiredVersion": "1.0.0.0", "Conditions": claw}]},
                       f, indent=2)

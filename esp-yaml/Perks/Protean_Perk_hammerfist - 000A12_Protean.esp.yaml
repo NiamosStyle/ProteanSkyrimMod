@@ -1,0 +1,10 @@
+FormKey: 000A12:Protean.esp
+EditorID: Protean_Perk_hammerfist
+Name:
+  TargetLanguage: English
+  Value: 'Hammerfist'
+Description:
+  TargetLanguage: English
+  Value: 'Your arm swells with muscle into a huge fist armoured in chitin and spiked with bone, a weapon for each hand. It fights as a mace with the One-Handed skill and perks, strikes hardest when your Stamina is full, and every swing costs Stamina.'
+NumRanks: 1
+Playable: True

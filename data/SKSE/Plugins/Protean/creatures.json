@@ -24,6 +24,11 @@
   "sleeve": 2574,
   "blockPerk": 2575
  },
+ "hammerfist": {
+  "weapon": 2579,
+  "right": 2582,
+  "left": 2583
+ },
  "tendril": {
   "spell": 2441,
   "projectile": 2438
@@ -52,6 +57,7 @@
   "stalker": 2404,
   "apex": 2405,
   "rending_claws": 2406,
+  "hammerfist": 2578,
   "blade": 2565,
   "tendril": 2407,
   "predators_rush": 2408,
@@ -75,6 +81,7 @@
   "blade",
   "borrowed_visage",
   "devastator",
+  "hammerfist",
   "inconspicuous",
   "infected",
   "keen",
@@ -207,6 +214,8 @@
   "Protean_Carapace2Magic": 2569,
   "Protean_ShieldBlockCost": 2576,
   "Protean_ShieldWardAngle": 2577,
+  "Protean_HammerfistDamageMult": 2584,
+  "Protean_HammerfistSwingCost": 2585,
   "Protean_FeedCorpseHeal": 2478,
   "Protean_FeedPlantHeal": 2479,
   "Protean_FeedSeconds": 2480,

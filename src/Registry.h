@@ -77,6 +77,8 @@ namespace protean
 		[[nodiscard]] RE::TESObjectARMO* ShieldArmor() const { return _shieldArmor; }   // the Shield (left hand, empty model)
 		[[nodiscard]] RE::TESObjectARMO* ShieldSleeve() const { return _shieldSleeve; }  // its flesh and plates, worn while drawn
 		[[nodiscard]] RE::BGSPerk*       ShieldBlockPerk() const { return _shieldBlockPerk; }  // hidden: how much of a blocked hit it stops
+		[[nodiscard]] RE::TESObjectWEAP* HammerfistWeapon() const { return _hammerfistWeapon; }  // either hand, no model
+		[[nodiscard]] RE::TESObjectARMO* HammerfistArm(bool a_left) const { return a_left ? _hammerfistLeft : _hammerfistRight; }  // worn while drawn
 		[[nodiscard]] RE::SpellItem* Tendril() const { return _tendril; }  // its effects: [0] damage health, [1] absorb stamina
 		// Keen, in the order night vision, Detect Life, Detect Dead: the powers the Favorites menu offers, and the
 		// senses (self spells) Protean casts and dispels
@@ -148,6 +150,9 @@ namespace protean
 		RE::TESObjectARMO*    _shieldArmor{ nullptr };
 		RE::TESObjectARMO*    _shieldSleeve{ nullptr };
 		RE::BGSPerk*          _shieldBlockPerk{ nullptr };
+		RE::TESObjectWEAP*    _hammerfistWeapon{ nullptr };
+		RE::TESObjectARMO*    _hammerfistRight{ nullptr };
+		RE::TESObjectARMO*    _hammerfistLeft{ nullptr };
 		RE::SpellItem*        _tendril{ nullptr };
 		RE::SpellItem*        _killBoost{ nullptr };
 		std::vector<RE::SpellItem*> _glideMarkers;

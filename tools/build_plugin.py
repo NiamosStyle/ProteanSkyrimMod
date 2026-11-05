@@ -57,7 +57,11 @@ PERKS = {
     "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
-                      0.8, 0.9, ["tendril", "devastator", "blade"]),
+                      0.8, 0.9, ["tendril", "devastator", "blade", "hammerfist"]),
+    # its place on the tree is for now (2026-11-05)
+    "hammerfist": (0xA12, "Hammerfist", "Your arm swells with muscle into a huge fist armoured in chitin and spiked with "
+                   "bone, a weapon for each hand. It fights as a mace with the One-Handed skill and perks, strikes "
+                   "hardest when your Stamina is full, and every swing costs Stamina.", 1.2, 2.75, []),
     # its place on the tree is for now (2026-11-04); the constellation will settle it
     "blade": (0xA05, "Blade", "Draw the Blade and your right arm becomes one: flesh grows over it and a great bone "
               "blade bursts from the forearm. It fights with the Two-Handed skill and perks, blocks, and needs your "
@@ -135,6 +139,13 @@ BLADE_ONEHAND, BLADE_SLEEVE_ARMA, BLADE_SLEEVE_ARMO = 0xA02, 0xA03, 0xA04
 SHIELD_ARMO, SHIELD_ARMA, SHIELD_SLEEVE_ARMA, SHIELD_SLEEVE_ARMO = 0xA0B, 0xA0C, 0xA0D, 0xA0E
 SHIELD_SLEEVE_FLAG = "0x01000000"  # body slot 54
 SHIELD_BLOCK_PERK = 0xA0F
+# The Hammerfist (tools/build_hammerfist.py makes the models; 2026-11-05): a weapon for either hand like the claws, with no
+# model of its own, the game's mace keyword for the mace perks; one hidden sleeve per hand (right body slot 56, left 60)
+# that Protean puts on while that hand holds it drawn
+HAMMERFIST_WEAPON = 0xA13
+HAMMERFIST_ARMA = {"R": 0xA14, "L": 0xA15}
+HAMMERFIST_ARMO = {"R": 0xA16, "L": 0xA17}
+HAMMERFIST_SLOT_FLAG = {"R": "0x04000000", "L": "0x40000000"}  # body slots 56, 60
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
 # tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
@@ -193,7 +204,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
          "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis",
-         "regeneration", "devastator", "blade", "shield"}
+         "regeneration", "devastator", "blade", "shield", "hammerfist"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = set()
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -264,6 +275,10 @@ GLOBALS = {
     "Protean_Carapace2Magic":      (0xA09, 20,   "Float", "Subtle Carapace rank 2: magic resistance, percent (replaces rank 1's)"),
     "Protean_ShieldBlockCost":     (0xA10, 5,    "Float", "Shield: Stamina each blocked hit, arrow or spell costs (it then does no damage)"),
     "Protean_ShieldWardAngle":     (0xA11, 60,   "Float", "Shield: a spell is stopped when its caster is within this many degrees of where the player faces"),
+    # the Hammerfist (set by the Claude on the user's brief, 2026-11-05; to be tuned in play): the claws' damage (it
+    # follows the Stamina bar) times a mace's lead over a sword (vanilla steel: 10 against 8), heavier swings
+    "Protean_HammerfistDamageMult": (0xA18, 1.25, "Float", "Hammerfist damage as a multiple of Rending Claws' at the same Stamina and level"),
+    "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
     "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "unused since 2026-10-28 (bodies are consumed: Protean_ConsumeHealSurvivor)"),
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a plant takes to eat, standing still"),
@@ -692,6 +707,38 @@ def main():
           + "MajorFlags:\n- NonPlayable\n" + name_block("Blade Sleeve") + template
           + "Description:\n  TargetLanguage: English\n  Value: ''\n"
           "Armature:\n- %s:%s\n" % (fid(BLADE_SLEEVE_ARMA), PLUGIN))
+    # ---- the Hammerfist: the weapon (the claws' record with a mace's keyword, damage and weight) and a sleeve per hand
+    write(os.path.join(y, "Weapons", "Protean_Hammerfist - %s_%s.yaml" % (fid(HAMMERFIST_WEAPON), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_Hammerfist\n" % (fid(HAMMERFIST_WEAPON), PLUGIN)
+          + name_block("Hammerfist")
+          + "Model:\n  File: Protean\\Hammerfist\\Hammerfist.nif\n"
+          + "EquipmentType: 013F44:Skyrim.esm\n"  # EitherHand
+          "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          # blunt hits: the mace's impacts (WPNBluntImpactSet... the claws' werewolf set kept for now: fleshy blows)
+          "ImpactDataSet: 0F23C4:Skyrim.esm\nAttackFailSound: 0C06D1:Skyrim.esm\n"
+          "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
+          "Keywords:\n- 01E714:Skyrim.esm\n"  # WeapTypeMace: the One-Handed mace perks (Bone Breaker)
+          "BasicStats:\n  Damage: 8\n  Weight: 1\n"  # Protean sets the damage (Protean_HammerfistDamageMult)
+          "Data:\n  Speed: 1\n  Reach: 0.8\n  Stagger: 1\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
+          "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
+          "Critical:\n  Damage: 4\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
+          "DetectionSoundLevel: Normal\n")
+    for side in ("R", "L"):
+        template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
+                    "Race: 000019:Skyrim.esm\n" % HAMMERFIST_SLOT_FLAG[side])
+        write(os.path.join(y, "ArmorAddons", "Protean_HammerfistAA_%s - %s_%s.yaml" % (side, fid(HAMMERFIST_ARMA[side]), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_HammerfistAA_%s\n" % (fid(HAMMERFIST_ARMA[side]), PLUGIN, side) + template
+              + "Priority:\n  Male: 10\n  Female: 10\n"
+              "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
+              + "".join("%s:\n  Male:\n    File: Protean\\Hammerfist\\Arm_%s_M.nif\n"
+                        "  Female:\n    File: Protean\\Hammerfist\\Arm_%s_F.nif\n" % (field, side, side)
+                        for field in ("WorldModel", "FirstPersonModel"))
+              + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
+        write(os.path.join(y, "Armors", "Protean_HammerfistArm_%s - %s_%s.yaml" % (side, fid(HAMMERFIST_ARMO[side]), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_HammerfistArm_%s\n" % (fid(HAMMERFIST_ARMO[side]), PLUGIN, side)
+              + "MajorFlags:\n- NonPlayable\n" + name_block("Hammerfist Arm") + template
+              + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+              "Armature:\n- %s:%s\n" % (fid(HAMMERFIST_ARMA[side]), PLUGIN))
     # ---- the Shield: the item (light, like Dragonborn's Chitin Shield it is drawn from) and its hidden sleeve
     write(os.path.join(y, "ArmorAddons", "Protean_ShieldAA - %s_%s.yaml" % (fid(SHIELD_ARMA), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_ShieldAA\n" % (fid(SHIELD_ARMA), PLUGIN)
@@ -1056,6 +1103,7 @@ def main():
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "blade": {"weapon": BLADE_ONEHAND, "sleeve": BLADE_SLEEVE_ARMO},
                            "shield": {"armor": SHIELD_ARMO, "sleeve": SHIELD_SLEEVE_ARMO, "blockPerk": SHIELD_BLOCK_PERK},
+                           "hammerfist": {"weapon": HAMMERFIST_WEAPON, "right": HAMMERFIST_ARMO["R"], "left": HAMMERFIST_ARMO["L"]},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},

@@ -135,6 +135,13 @@ namespace protean::Skills
 				}
 				if (a_event->cause->IsPlayerRef() && !target->IsPlayerRef()) {
 					auto*      claws = Registry::Get().ClawWeapon();
+					auto*      fist = Registry::Get().HammerfistWeapon();
+					const bool fistHit = fist && a_event->source == fist->GetFormID();
+					if (fistHit) {   // the Hammerfist's hits teach One-Handed as the claws' do (its listed damage)
+						const float listed = static_cast<float>(fist->GetAttackDamage());
+						SKSE::GetTaskInterface()->AddTask([listed] { AddXp(RE::ActorValue::kOneHanded, listed * Dial("Protean_XpOneHanded", 1.0f), "hammerfist"); });
+						return RE::BSEventNotifyControl::kContinue;
+					}
 					const bool clawHit = claws && a_event->source == claws->GetFormID();
 					if (!clawHit && !Shift::ActiveCreature()) {
 						return RE::BSEventNotifyControl::kContinue;

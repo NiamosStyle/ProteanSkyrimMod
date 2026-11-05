@@ -9,6 +9,7 @@
 #include "Carapace.h"
 #include "Blade.h"
 #include "Shield.h"
+#include "Hammerfist.h"
 #include "Claws.h"
 #include "Consume.h"
 #include "Deceiver.h"
@@ -63,6 +64,7 @@ namespace protean::Hooks
 				Claws::OnFrame(a_delta);
 				Blade::OnFrame(a_delta);
 				Shield::OnFrame(a_delta);
+				Hammerfist::OnFrame(a_delta);
 				Face::OnFrame();
 				Hud::OnFrame(a_this);
 				Dev::Poll();
