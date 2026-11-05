@@ -30,6 +30,15 @@ namespace protean::Devastator
 		// thrown again every Protean_DevastatorRethrow so they stay out
 		float g_rethrow{ 0.0f };
 		constexpr float            kSheatheMax = 2.0f;     // seconds the pose is asked for before going on without it
+		// the pose was taken by the graph and stopped the same instant (IdleStop, 2026-11-05, hands already empty, so asked
+		// for at once); guessed cause: the player still moving. So it waits for the player to stand (at most kStillMax s),
+		// and a pose stopped in its first kStopWatch s is asked for again, up to kRetries times
+		constexpr float            kStillMax = 0.6f;
+		constexpr float            kStillSpeed = 0.3f;     // horizontal speed (Havok units a second) that counts as standing
+		constexpr float            kStopWatch = 0.6f;
+		constexpr int              kRetries = 3;
+		std::atomic<bool>          g_stopped{ false };    // set by the animation events (another thread)
+		int                        g_retries{ 0 };
 
 		enum class Phase
 		{
@@ -61,8 +70,11 @@ namespace protean::Devastator
 			RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent>*) override
 			{
 				if (a_event && (g_phase == Phase::kSheathe || g_phase == Phase::kWindup)) {
-					logger::info("devastator: anim event '{}' {:.2f} s in", a_event->tag.c_str(),
-						std::chrono::duration<float>(Clock::now() - g_start).count());
+					const float in = std::chrono::duration<float>(Clock::now() - g_start).count();
+					logger::info("devastator: anim event '{}' {:.2f} s in", a_event->tag.c_str(), in);
+					if (g_phase == Phase::kWindup && in < kStopWatch && a_event->tag == "IdleStop") {
+						g_stopped = true;
+					}
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -320,6 +332,17 @@ namespace protean::Devastator
 			logger::info("devastator: {} tentacle effect(s) stopped", stopped);
 		}
 
+		float Speed(RE::PlayerCharacter* a_p)
+		{
+			auto* cc = a_p->GetCharController();
+			if (!cc) {
+				return 0.0f;
+			}
+			RE::hkVector4 v;
+			cc->GetLinearVelocityImpl(v);
+			return std::hypot(v.quad.m128_f32[0], v.quad.m128_f32[1]);
+		}
+
 		void Finish(RE::PlayerCharacter* a_p)
 		{
 			StopShader(a_p);
@@ -344,6 +367,8 @@ namespace protean::Devastator
 			PlaceMarks(a_p);
 			g_phase = Phase::kWindup;
 			g_start = g_last = Clock::now();
+			g_stopped = false;
+			g_retries = 0;
 			logger::info("devastator: wind-up (the rise {} after {:.2f} s, weapon state {})", a_took ? "playing" : "refused by the graph",
 				waited, std::to_underlying(a_p->AsActorState()->GetWeaponState()));
 		}
@@ -393,7 +418,10 @@ namespace protean::Devastator
 			if (a_p->IsDead()) {
 				Lock(false);
 				g_phase = Phase::kNone;
+			} else if (const float speed = Speed(a_p); speed > kStillSpeed && t < kStillMax) {
+				// still moving: wait
 			} else if (a_p->NotifyAnimationGraph(kRise)) {
+				logger::info("devastator: the rise asked for at speed {:.2f}", Speed(a_p));
 				Begin(a_p, true);
 			} else if (t >= kSheatheMax) {
 				Begin(a_p, false);
@@ -401,6 +429,12 @@ namespace protean::Devastator
 			return;
 		}
 		CameraKeep();
+		if (g_phase == Phase::kWindup && g_stopped.exchange(false) && g_retries < kRetries) {
+			++g_retries;
+			const bool took = a_p->NotifyAnimationGraph(kRise);
+			logger::info("devastator: the rise was stopped; asked again ({}), {}, speed {:.2f}", g_retries, took ? "taken" : "refused",
+				Speed(a_p));
+		}
 		if (a_p->IsDead()) {
 			Finish(a_p);
 			return;
