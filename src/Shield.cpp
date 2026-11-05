@@ -41,6 +41,27 @@ namespace protean::Shield
 		}
 
 		float g_lastStamina = -1.0f;  // the player's Stamina last frame: the hit event comes after the game's own block cost
+		float g_lastHealth = -1.0f;
+
+		// every hostile effect landing on the player while blocking with the Shield (what still hurt, 2026-11-05)
+		class EffectSink : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESMagicEffectApplyEvent* a_event, RE::BSTEventSource<RE::TESMagicEffectApplyEvent>*) override
+			{
+				auto* p = RE::PlayerCharacter::GetSingleton();
+				if (!a_event || !p || a_event->target.get() != p || !p->IsBlocking() || !Holds(p)) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				auto* mgef = RE::TESForm::LookupByID<RE::EffectSetting>(a_event->magicEffect);
+				if (mgef && mgef->IsHostile()) {
+					logger::info("shield: effect '{}' {:08X} landed while blocking, from '{}'", mgef->GetName(), a_event->magicEffect,
+						a_event->caster ? a_event->caster->GetName() : "?");
+				}
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+		EffectSink g_effects;
 
 		float Stamina(RE::PlayerCharacter* a_p) { return a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina); }
 
@@ -62,6 +83,24 @@ namespace protean::Shield
 					av->RestoreActorValue(RE::ActorValue::kStamina, gameCost);  // the flat cost instead
 				}
 				auto* who = a_event->cause.get();
+				// what the hit did (2026-11-05, user: still hurt while blocking): Health and Stamina against the last frame,
+				// and whether the block perk was held and at what share
+				{
+					auto*       perk = Registry::Get().ShieldBlockPerk();
+					float       share = -1.0f;
+					if (perk) {
+						for (auto* e : perk->perkEntries) {
+							if (e && e->GetType() == RE::PERK_ENTRY_TYPE::kEntryPoint) {
+								if (auto* one = skyrim_cast<RE::BGSEntryPointFunctionDataOneValue*>(static_cast<RE::BGSEntryPointPerkEntry*>(e)->functionData)) {
+									share = one->data;
+								}
+							}
+						}
+					}
+					const float hp = av->GetActorValue(RE::ActorValue::kHealth);
+					logger::info("shield: hit check: health {:.1f} -> {:.1f}, stamina {:.1f} -> {:.1f}, perk held {}, share {:.1f}, blocking {}, source {:08X}",
+						g_lastHealth, hp, g_lastStamina, now, perk && p->HasPerk(perk), share, p->IsBlocking(), a_event->source);
+				}
 				if (paid) {
 					av->DamageActorValue(RE::ActorValue::kStamina, cost);
 					logger::info("shield: blocked a hit from '{}', stamina -{:.0f} (the game's own {:.1f} given back), now {:.0f}",
@@ -166,26 +205,38 @@ namespace protean::Shield
 		}
 	}
 
+	namespace
+	{
+		// the ward: the player's own MagicTarget table, found by matching the player's table pointer (which of the
+		// class's tables is MagicTarget's is not assumed). Tried once at Install and once more on the first frame.
+		void HookWard(RE::PlayerCharacter* a_p)
+		{
+			static int tries = 0;
+			if (!a_p || tries++ >= 2) {
+				return;
+			}
+			const auto base = REL::Module::get().base();
+			const auto mine = *reinterpret_cast<std::uintptr_t*>(static_cast<RE::MagicTarget*>(a_p));
+			std::string seen;
+			for (std::size_t i = 0; i < RE::VTABLE_PlayerCharacter.size(); ++i) {
+				REL::Relocation<std::uintptr_t> vtbl{ RE::VTABLE_PlayerCharacter[i] };
+				if (vtbl.address() == mine) {
+					AddTarget::func = vtbl.write_vfunc(0x1, AddTarget::thunk);
+					logger::info("shield: ward hooked (PlayerCharacter table {}: MagicTarget::AddTarget)", i);
+					return;
+				}
+				seen += fmt::format(" {}:{:X}", i, vtbl.address() - base);
+			}
+			logger::warn("shield: the player's MagicTarget table ({:X}, at +{:X} in the player) not among{}; the ward is not installed",
+				mine - base, reinterpret_cast<std::uintptr_t>(static_cast<RE::MagicTarget*>(a_p)) - reinterpret_cast<std::uintptr_t>(a_p), seen);
+		}
+	}
+
 	void Install()
 	{
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&g_hits);
-		// the ward: the player's own MagicTarget table, found by matching the player's table pointer (which of the
-		// class's tables is MagicTarget's is not assumed)
-		auto* p = RE::PlayerCharacter::GetSingleton();
-		if (!p) {
-			logger::warn("shield: no player yet; the ward is not installed");
-			return;
-		}
-		const auto mine = *reinterpret_cast<std::uintptr_t*>(static_cast<RE::MagicTarget*>(p));
-		for (std::size_t i = 0; i < RE::VTABLE_PlayerCharacter.size(); ++i) {
-			REL::Relocation<std::uintptr_t> vtbl{ RE::VTABLE_PlayerCharacter[i] };
-			if (vtbl.address() == mine) {
-				AddTarget::func = vtbl.write_vfunc(0x1, AddTarget::thunk);
-				logger::info("shield: ward hooked (PlayerCharacter table {}: MagicTarget::AddTarget)", i);
-				return;
-			}
-		}
-		logger::warn("shield: the player's MagicTarget table not found; the ward is not installed");
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESMagicEffectApplyEvent>(&g_effects);
+		HookWard(RE::PlayerCharacter::GetSingleton());
 	}
 
 	void OnFrame(float a_delta)
@@ -211,6 +262,10 @@ namespace protean::Shield
 			SetBlocked(perk, Stamina(p) >= Dial("Protean_ShieldBlockCost", 5.0f) ? 1.0f : 0.0f);
 		}
 		g_lastStamina = Stamina(p);
+		g_lastHealth = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
+		if (!AddTarget::func.address()) {
+			HookWard(p);  // the player may not have been made yet when Install ran
+		}
 		// the perk keeps the Shield in the inventory
 		static float since = 0.0f;
 		if ((since += a_delta) >= 2.0f) {
