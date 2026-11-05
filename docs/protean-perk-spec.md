@@ -242,6 +242,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04, user test): "Yes, it looks good": the female arm fits, no gaps at the shoulder.
   Status (2026-11-04, user): no faint ring, no nubs at the hand tip, the 1st-person blade angle is fine, and the blade appearing on R is good: the looks are done. Next: the numbers (user: significantly stronger than the claws).
   Status (2026-11-04): numbers agreed with the user and installed: damage 1.7x Rending Claws' full-bar damage at the player's level (the vanilla greatsword-over-sword gap: 18 at level 1, 32 at 10, 83 at 30, 162 at 50), always full strength (user: only costs Stamina), Two-Handed skill and perks on top; sword speed 1.0 (slices quickly), greatsword reach 1.3 and stagger 1.1; 8 Stamina a swing. Dials Protean_BladeDamageMult (0xA07), Protean_BladeSwingCost. Not yet tested.
+  Status (2026-11-04, user test): inventory showed claws 42, Blade 43, with +60% One-Handed perks and none in Two-Handed (the 1.7x lead and the perks cancel). User chose to keep it: the Blade rewards Two-Handed perks, as a greatsword would for a one-handed specialist.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
