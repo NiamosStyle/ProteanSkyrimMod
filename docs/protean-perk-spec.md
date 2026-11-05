@@ -247,6 +247,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
   Looks (user, 2026-11-05): inspired by Prototype's shield (Prototype/Shield_level_1_&_max.jpg, Shield_Menu.jpg); start from the shape of Dragonborn's Chitin Shield, add organic bits, and a sleeve so it looks grown out of the hand and arm.
+  User, 2026-11-05: the shield and sleeve vanish when weapons are put away (like the Blade; not hung on the back); one look, no change with level.
   **Sleeve sizes for all the weapon forms (user, 2026-11-05):** the Blade and Hammerfist have the biggest sleeves (they are "heavy"); the Shield a medium one, covering the hand, forearm and parts of the upper arm; the Tendril's and Rending Claws' sleeves (when made) mostly only the hand and forearm.
 
 ### Tendril
