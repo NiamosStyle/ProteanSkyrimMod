@@ -281,6 +281,7 @@ Open: numbers (damage, speed, Stamina per swing), looks.
 - **Activation rule:** Requires at least two stacks of the Unbound Form kill boost, so it can't be used to start a fight.
 - **Status:** Built and tested in game (2026-10-27). The Devastator power: own form, full Stamina, two kill boosts. Weapons are put away, then the ritual pose (2 s) with the change-into-a-beast sound and red tentacles over the body while the camera circles; at the burst slow motion (0.15, 3.5 s), the camera pulls farther out and circles faster, 8 red tendrils from the body (thrown again through a 4.5 s hold), the red lurker splash and blood burst, a stab, thunder and explosion sounds, and every hostile actor within 30 m knocked down (PushActorAway) for 100 + 8 per level damage. Its kills feed no kill boost (user's choices).
   Status (2026-11-05): misfire seen by the user twice so far (sound, no pose, player standing still). Test with animation-event logging: 2 tries, the 1st (claws out, put away first) fine, the 2nd (hands already empty) misfired. Log of the 2nd: the pose was accepted at once (0.01 s), then the game stopped it the same instant (IdleStop, AnimObjectUnequip). Cause not proven.
+  Fixed 2026-11-05: the pose waits for the player to stand (at most 0.6 s) and is asked for again if stopped at once. User test, 5 tries (3 with weapons away, 2 with claws drawn): the pose played every time. Log: one try waited 0.39 s for the player to stand, as running would; no retry was needed. Movement is the likely cause (not proven).
 
 ---
 
