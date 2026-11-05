@@ -79,6 +79,7 @@ Perks are not unlocked with normal Skyrim perk points. Instead, the player earns
 **Evolution points (2026-10-28):** earned solely by consuming biomass: small creatures 1, people and middling animals 2, large creatures 3, giants and mammoths 5; creatures with no form by their height (the user kept the size weighting). The page lists the bodies consumed per kind. The earlier sources below (hearts, combat stacks) are gone; points already earned are kept.
 
 **Progression like Growl and Sacrosanct (the user's picks, 2026-10-28):** each perk point costs one more evolution point than the last, as Growl's feedings do (1, 2, 3, ...; the whole tree 253, about 125 bodies). The perk screen shows a Protean level (perk points earned) and a bar to the next, like the werewolf tree, with the game's "Protean increased to N" message (Custom Skills Framework's level, ratio and showLevelup). Consuming one of the renowned people in the list below gives a perk point at once, once each (Sacrosanct: "feed on individuals of great strength and renown"); they are matched by name, so every record of the person counts. Hunger stages and rank titles were offered and not chosen.
+Status (2026-11-05): tested in game by the user. Consuming people and spiders gave +2 each (log); at 190 points the perk points earned rose from 18 to 19, and the user saw the "Protean increased to 19" message.
 
 Until 2026-10-28, evolution points came from four sources:
 
