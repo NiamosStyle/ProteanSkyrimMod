@@ -42,6 +42,10 @@ namespace protean::Shield
 
 		float g_lastStamina = -1.0f;  // the player's Stamina last frame: the hit event comes after the game's own block cost
 		float g_lastHealth = -1.0f;
+		// a paid block's damage given back (the game's own thread only): Health is held at g_refundHealth until then
+		float                                 g_refundHealth = 0.0f;
+		std::chrono::steady_clock::time_point g_refundUntil{};
+		float                                 g_refunded = 0.0f;
 
 		// every hostile effect landing on the player while blocking with the Shield (what still hurt, 2026-11-05)
 		class EffectSink : public RE::BSTEventSink<RE::TESMagicEffectApplyEvent>
@@ -101,16 +105,31 @@ namespace protean::Shield
 					logger::info("shield: hit check: health {:.1f} -> {:.1f}, stamina {:.1f} -> {:.1f}, perk held {}, share {:.1f}, blocking {}, source {:08X}",
 						g_lastHealth, hp, g_lastStamina, now, perk && p->HasPerk(perk), share, p->IsBlocking(), a_event->source);
 				}
-				if (paid) {
-					av->DamageActorValue(RE::ActorValue::kStamina, cost);
-					logger::info("shield: blocked a hit from '{}', stamina -{:.0f} (the game's own {:.1f} given back), now {:.0f}",
-						who ? who->GetName() : "?", cost, gameCost, Stamina(p));
-				} else {
-					p->SetGraphVariableFloat("staggerMagnitude", 0.5f);
-					p->NotifyAnimationGraph("staggerStart");
-					logger::info("shield: guard broken by '{}': stamina {:.0f} under {:.0f}, the hit went through", who ? who->GetName() : "?",
-						g_lastStamina, cost);
-				}
+				// the event comes before the hit's damage, from another thread: what it does is done on the game's own thread
+				const float hpNow = av->GetActorValue(RE::ActorValue::kHealth);
+				const std::string name = who ? who->GetName() : "?";
+				const float before = g_lastStamina;
+				SKSE::GetTaskInterface()->AddTask([paid, cost, gameCost, hpNow, name, before]() {
+					auto* p = RE::PlayerCharacter::GetSingleton();
+					if (!p) {
+						return;
+					}
+					auto* av = p->AsActorValueOwner();
+					if (paid) {
+						av->DamageActorValue(RE::ActorValue::kStamina, cost);
+						// the "percent blocked" perk did not stop all of a blocked hit (user's test, 2026-11-05: Health fell
+						// with it set to 1): whatever Health the hit takes in the next moment is given back
+						g_refundHealth = hpNow;
+						g_refundUntil = std::chrono::steady_clock::now() + std::chrono::milliseconds(300);
+						g_refunded = 0.0f;
+						logger::info("shield: blocked a hit from '{}', stamina -{:.0f} (the game's own {:.1f} given back), now {:.0f}",
+							name, cost, gameCost, Stamina(p));
+					} else {
+						p->SetGraphVariableFloat("staggerMagnitude", 0.5f);
+						p->NotifyAnimationGraph("staggerStart");
+						logger::info("shield: guard broken by '{}': stamina {:.0f} under {:.0f}, the hit went through", name, before, cost);
+					}
+				});
 				g_lastStamina = Stamina(p);
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -124,7 +143,7 @@ namespace protean::Shield
 		bool Ward(RE::MagicTarget* a_this, const RE::MagicTarget::AddTargetData& a_data)
 		{
 			auto* p = RE::PlayerCharacter::GetSingleton();
-			if (!p || a_this != static_cast<RE::MagicTarget*>(p) || !a_data.caster || a_data.caster == p || !a_data.effect ||
+			if (!p || a_this != p->AsMagicTarget() || !a_data.caster || a_data.caster == p || !a_data.effect ||
 				!a_data.effect->baseEffect || !a_data.effect->baseEffect->IsHostile() || !p->IsBlocking() || !Holds(p)) {
 				return false;
 			}
@@ -216,7 +235,7 @@ namespace protean::Shield
 				return;
 			}
 			const auto base = REL::Module::get().base();
-			const auto mine = *reinterpret_cast<std::uintptr_t*>(static_cast<RE::MagicTarget*>(a_p));
+			const auto mine = *reinterpret_cast<std::uintptr_t*>(a_p->AsMagicTarget());
 			std::string seen;
 			for (std::size_t i = 0; i < RE::VTABLE_PlayerCharacter.size(); ++i) {
 				REL::Relocation<std::uintptr_t> vtbl{ RE::VTABLE_PlayerCharacter[i] };
@@ -228,7 +247,7 @@ namespace protean::Shield
 				seen += fmt::format(" {}:{:X}", i, vtbl.address() - base);
 			}
 			logger::warn("shield: the player's MagicTarget table ({:X}, at +{:X} in the player) not among{}; the ward is not installed",
-				mine - base, reinterpret_cast<std::uintptr_t>(static_cast<RE::MagicTarget*>(a_p)) - reinterpret_cast<std::uintptr_t>(a_p), seen);
+				mine - base, reinterpret_cast<std::uintptr_t>(a_p->AsMagicTarget()) - reinterpret_cast<std::uintptr_t>(a_p), seen);
 		}
 	}
 
@@ -262,6 +281,21 @@ namespace protean::Shield
 			SetBlocked(perk, Stamina(p) >= Dial("Protean_ShieldBlockCost", 5.0f) ? 1.0f : 0.0f);
 		}
 		g_lastStamina = Stamina(p);
+		{
+			auto*       av = p->AsActorValueOwner();
+			const float hp = av->GetActorValue(RE::ActorValue::kHealth);
+			if (g_refundUntil.time_since_epoch().count() != 0) {
+				if (std::chrono::steady_clock::now() < g_refundUntil) {
+					if (hp < g_refundHealth) {
+						av->RestoreActorValue(RE::ActorValue::kHealth, g_refundHealth - hp);
+						g_refunded += g_refundHealth - hp;
+					}
+				} else {
+					logger::info("shield: the blocked hit's damage given back: {:.1f}", g_refunded);
+					g_refundUntil = {};
+				}
+			}
+		}
 		g_lastHealth = p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
 		if (!AddTarget::func.address()) {
 			HookWard(p);  // the player may not have been made yet when Install ran
