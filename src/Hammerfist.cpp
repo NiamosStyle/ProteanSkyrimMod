@@ -74,6 +74,79 @@ namespace protean::Hammerfist
 			a_weapon->attackDamage = static_cast<std::uint16_t>(std::clamp(std::lround(dmg), 0L, 65535L));
 		}
 
+		// ---- every power attack staggers (the spec): a hit staggers the one struck; a swing that strikes nothing comes
+		// down on the ground and staggers the enemies near, with a crash and a shake
+		using Clock = std::chrono::steady_clock;
+		std::atomic<bool> g_powerPending{ false };   // a power swing waiting to land (set on the swing, cleared by a hit)
+		std::atomic<bool> g_powerHit{ false };
+		Clock::time_point g_powerAt{};
+
+		void Stagger(RE::Actor* a_who, const RE::NiPoint3& a_from, float a_magnitude)
+		{
+			const float angle = a_who->GetHeadingAngle(a_from, false);
+			a_who->SetGraphVariableFloat("staggerDirection", (angle >= 0.0f ? angle : 360.0f + angle) / 360.0f);
+			a_who->SetGraphVariableFloat("staggerMagnitude", a_magnitude);
+			a_who->NotifyAnimationGraph("staggerStart");
+		}
+
+		void GroundSlam(RE::PlayerCharacter* a_p)
+		{
+			// where the fist comes down: a little ahead of the player
+			const float h = a_p->GetAngleZ();
+			auto        at = a_p->GetPosition();
+			at.x += std::sin(h) * 80.0f;
+			at.y += std::cos(h) * 80.0f;
+			const float radius = Dial("Protean_HammerfistSlamRadius", 300.0f);
+			int         n = 0;
+			if (auto* pl = RE::ProcessLists::GetSingleton()) {
+				for (auto& hd : pl->highActorHandles) {
+					auto a = hd.get();
+					if (!a || a.get() == a_p || a->IsDead() || a->IsPlayerTeammate() || !a->IsHostileToActor(a_p) ||
+						a->GetPosition().GetDistance(at) > radius) {
+						continue;
+					}
+					Stagger(a.get(), at, 0.7f);
+					logger::info("hammerfist: ground slam staggers '{}' {:08X}", a->GetName(), a->GetFormID());
+					++n;
+				}
+			}
+			RE::BSSoundHandle sound;
+			if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+				audio->GetSoundHandleByName(sound, "NPCDragonLandCrashShortSD", 0x1A);  // the dive's landing crash (Prey's Flight)
+			}
+			if (sound.IsValid()) {
+				sound.SetPosition(at);
+				sound.Play();
+			}
+			RE::ShakeCamera(0.5f, at, 0.4f);
+			logger::info("hammerfist: a power swing struck nothing: ground slam, {} staggered within {:.0f}", n, radius);
+		}
+
+		class HitSink : public RE::BSTEventSink<RE::TESHitEvent>
+		{
+		public:
+			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
+			{
+				auto* fist = Registry::Get().HammerfistWeapon();
+				if (!a_event || !fist || a_event->source != fist->GetFormID() || !a_event->cause || !a_event->cause->IsPlayerRef() ||
+					!a_event->target || !a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack)) {
+					return RE::BSEventNotifyControl::kContinue;
+				}
+				g_powerHit = true;
+				const auto id = a_event->target->GetFormID();
+				SKSE::GetTaskInterface()->AddTask([id]() {
+					auto* p = RE::PlayerCharacter::GetSingleton();
+					auto* a = RE::TESForm::LookupByID<RE::Actor>(id);
+					if (p && a && !a->IsDead()) {
+						Stagger(a, p->GetPosition(), 1.0f);
+						logger::info("hammerfist: power hit staggers '{}' {:08X}", a->GetName(), id);
+					}
+				});
+				return RE::BSEventNotifyControl::kContinue;
+			}
+		};
+		HitSink g_hits;
+
 		// every swing of a Hammerfist costs Stamina
 		class AnimSink : public RE::BSTEventSink<RE::BSAnimationGraphEvent>
 		{
@@ -93,7 +166,14 @@ namespace protean::Hammerfist
 					if (cost > 0.0f) {
 						p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
 					}
-					logger::info("hammerfist: {} swing, stamina -{:.0f}, damage {}", right ? "right" : "left", cost, weapon->attackDamage);
+					const bool power = p->IsPowerAttacking();
+					if (power) {
+						g_powerHit = false;
+						g_powerAt = Clock::now();
+						g_powerPending = true;
+					}
+					logger::info("hammerfist: {} {}swing, stamina -{:.0f}, damage {}", right ? "right" : "left", power ? "power " : "", cost,
+						weapon->attackDamage);
 				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
@@ -101,7 +181,10 @@ namespace protean::Hammerfist
 		AnimSink g_anim;
 	}
 
-	void Install() {}
+	void Install()
+	{
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESHitEvent>(&g_hits);
+	}
 
 	void OnFrame(float a_delta)
 	{
@@ -119,6 +202,13 @@ namespace protean::Hammerfist
 			p->AddAnimationGraphEventSink(&g_anim);
 		}
 		held = has;
+		// a power swing that struck nothing in its moment comes down on the ground
+		if (g_powerPending && Clock::now() - g_powerAt > std::chrono::milliseconds(static_cast<int>(Dial("Protean_HammerfistSlamWait", 0.35f) * 1000.0f))) {
+			g_powerPending = false;
+			if (!g_powerHit) {
+				GroundSlam(p);
+			}
+		}
 		for (const auto& side : kSides) {
 			if (auto* arm = reg.HammerfistArm(side.left)) {
 				Arm(p, weapon, arm, side);

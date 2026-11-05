@@ -279,6 +279,8 @@ GLOBALS = {
     # follows the Stamina bar) times a mace's lead over a sword (vanilla steel: 10 against 8), heavier swings
     "Protean_HammerfistDamageMult": (0xA18, 1.25, "Float", "Hammerfist damage as a multiple of Rending Claws' at the same Stamina and level"),
     "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
+    "Protean_HammerfistSlamRadius": (0xA1A, 300, "Float", "Hammerfist: a power swing that strikes nothing staggers the enemies within this of where it lands"),
+    "Protean_HammerfistSlamWait":  (0xA1B, 0.35, "Float", "Hammerfist: seconds after a power swing with no hit before it counts as striking the ground"),
     "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "unused since 2026-10-28 (bodies are consumed: Protean_ConsumeHealSurvivor)"),
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a plant takes to eat, standing still"),

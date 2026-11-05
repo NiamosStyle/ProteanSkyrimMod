@@ -216,6 +216,8 @@
   "Protean_ShieldWardAngle": 2577,
   "Protean_HammerfistDamageMult": 2584,
   "Protean_HammerfistSwingCost": 2585,
+  "Protean_HammerfistSlamRadius": 2586,
+  "Protean_HammerfistSlamWait": 2587,
   "Protean_FeedCorpseHeal": 2478,
   "Protean_FeedPlantHeal": 2479,
   "Protean_FeedSeconds": 2480,

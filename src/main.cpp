@@ -15,6 +15,7 @@
 #include "Provoke.h"
 #include "Move.h"
 #include "Registry.h"
+#include "Hammerfist.h"
 #include "Shield.h"
 #include "Shift.h"
 #include "State.h"
@@ -140,6 +141,7 @@ namespace
 				protean::Deceiver::Install();
 				protean::Metamorphosis::Install();
 				protean::Shield::Install();
+				protean::Hammerfist::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
