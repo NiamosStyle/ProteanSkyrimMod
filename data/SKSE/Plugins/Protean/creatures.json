@@ -245,7 +245,8 @@
   "Protean_Level": 2538,
   "Protean_LevelRatio": 2539,
   "Protean_ShowLevelup": 2540,
-  "Protean_BladeSwingCost": 2566
+  "Protean_BladeSwingCost": 2566,
+  "Protean_BladeDamageMult": 2567
  },
  "openInteriorKeywords": [
   {
