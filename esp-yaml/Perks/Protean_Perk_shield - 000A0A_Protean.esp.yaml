@@ -1,0 +1,10 @@
+FormKey: 000A0A:Protean.esp
+EditorID: Protean_Perk_shield
+Name:
+  TargetLanguage: English
+  Value: 'Shield'
+Description:
+  TargetLanguage: English
+  Value: 'A shield of dark chitin grows from your left forearm while your weapons are drawn, and melts back when you put them away. It is worn in your left hand and blocks like a shield.'
+NumRanks: 1
+Playable: True

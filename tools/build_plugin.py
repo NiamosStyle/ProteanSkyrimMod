@@ -72,7 +72,10 @@ PERKS = {
                      "to dive and stagger everyone around your landing."), 0, 2.2, ["devastator"]),
     "subtle_carapace": (0x96A, "Subtle Carapace", "A hidden carapace hardens your skin: 50 armor plus 4 per level and 10% "
                         "magic resistance, in animal form, or in your own when you wear no body armor (clothes and robes are fine).", -0.8, 0.9,
-                        ["regeneration", "devastator"]),
+                        ["regeneration", "devastator", "shield"]),
+    # its place on the tree is for now (2026-11-05), mirroring the Blade's
+    "shield": (0xA0A, "Shield", "A shield of dark chitin grows from your left forearm while your weapons are drawn, and "
+               "melts back when you put them away. It is worn in your left hand and blocks like a shield.", -0.45, 2.7, []),
     "regeneration": (0x96B, "Regeneration", "Cast Regeneration to switch it on or off: while on, Stamina drains and "
                      "Health returns by the same amount.",
                      -0.9, 2, []),
@@ -126,6 +129,11 @@ CLAW_SLOT_FLAG = {"R": "0x20000000", "L": "0x10000000"}  # body slot 59 (MOD_ARM
 # two-handed one, and a hidden sleeve (body slot 57: the flesh and the bone blade) that Protean's plugin puts on while
 # the Blade is drawn. 0xA00 and 0xA01 were test greatswords (2026-11-03); not reused.
 BLADE_ONEHAND, BLADE_SLEEVE_ARMA, BLADE_SLEEVE_ARMO = 0xA02, 0xA03, 0xA04
+# The Shield (tools/build_shield.py makes the models; the user's design, 2026-11-05): a light shield with an empty
+# model (nothing hangs on the back when put away), and a hidden sleeve (body slot 54: the flesh, the cords and the
+# plated shield) that Protean's plugin puts on while it is drawn
+SHIELD_ARMO, SHIELD_ARMA, SHIELD_SLEEVE_ARMA, SHIELD_SLEEVE_ARMO = 0xA0B, 0xA0C, 0xA0D, 0xA0E
+SHIELD_SLEEVE_FLAG = "0x01000000"  # body slot 54
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
 # tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
@@ -184,7 +192,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
          "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis",
-         "regeneration", "devastator", "blade"}
+         "regeneration", "devastator", "blade", "shield"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = set()
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -681,6 +689,40 @@ def main():
           + "MajorFlags:\n- NonPlayable\n" + name_block("Blade Sleeve") + template
           + "Description:\n  TargetLanguage: English\n  Value: ''\n"
           "Armature:\n- %s:%s\n" % (fid(BLADE_SLEEVE_ARMA), PLUGIN))
+    # ---- the Shield: the item (light, like Dragonborn's Chitin Shield it is drawn from) and its hidden sleeve
+    write(os.path.join(y, "ArmorAddons", "Protean_ShieldAA - %s_%s.yaml" % (fid(SHIELD_ARMA), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_ShieldAA\n" % (fid(SHIELD_ARMA), PLUGIN)
+          + "BodyTemplate:\n  FirstPersonFlags:\n  - 0x00000200\n  ArmorType: LightArmor\n  ActsLike44: True\n"
+          "Race: 000019:Skyrim.esm\nPriority:\n  Male: 0\n  Female: 0\n"
+          "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
+          + "".join("%s:\n  Male:\n    File: Protean\\Shield\\Shield.nif\n"
+                    "  Female:\n    File: Protean\\Shield\\Shield.nif\n" % field for field in ("WorldModel", "FirstPersonModel"))
+          + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
+    write(os.path.join(y, "Armors", "Protean_Shield - %s_%s.yaml" % (fid(SHIELD_ARMO), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_Shield\n" % (fid(SHIELD_ARMO), PLUGIN)
+          + "MajorFlags:\n- Shield\n" + name_block("Shield")
+          + "WorldModel:\n  Male:\n    Model:\n      File: Protean\\Shield\\Shield.nif\n"
+          "BodyTemplate:\n  FirstPersonFlags:\n  - 0x00000200\n  ArmorType: LightArmor\n  ActsLike44: True\n"
+          "Race: 000019:Skyrim.esm\nEquipmentType: 0141E8:Skyrim.esm\n"
+          "BashImpactDataSet: 0183FE:Skyrim.esm\nAlternateBlockMaterial: 016978:Skyrim.esm\n"
+          "Keywords:\n- 08F959:Skyrim.esm\n- 0965B2:Skyrim.esm\n"   # as the Chitin Shield (its DLC material left out)
+          "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "Armature:\n- %s:%s\nValue: 0\nWeight: 0\nArmorRating: 24.5\n" % (fid(SHIELD_ARMA), PLUGIN))
+    template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
+                "Race: 000019:Skyrim.esm\n" % SHIELD_SLEEVE_FLAG)
+    write(os.path.join(y, "ArmorAddons", "Protean_ShieldSleeveAA - %s_%s.yaml" % (fid(SHIELD_SLEEVE_ARMA), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_ShieldSleeveAA\n" % (fid(SHIELD_SLEEVE_ARMA), PLUGIN) + template
+          + "Priority:\n  Male: 10\n  Female: 10\n"
+          "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
+          + "".join("%s:\n  Male:\n    File: Protean\\Shield\\Sleeve_M.nif\n"
+                    "  Female:\n    File: Protean\\Shield\\Sleeve_F.nif\n" % field
+                    for field in ("WorldModel", "FirstPersonModel"))
+          + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
+    write(os.path.join(y, "Armors", "Protean_ShieldSleeve - %s_%s.yaml" % (fid(SHIELD_SLEEVE_ARMO), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_ShieldSleeve\n" % (fid(SHIELD_SLEEVE_ARMO), PLUGIN)
+          + "MajorFlags:\n- NonPlayable\n" + name_block("Shield Sleeve") + template
+          + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+          "Armature:\n- %s:%s\n" % (fid(SHIELD_SLEEVE_ARMA), PLUGIN))
     for side, arma, armo in (("R", CLAW_ARMA_R, CLAW_ARMO_R), ("L", CLAW_ARMA_L, CLAW_ARMO_L)):
         template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
                 "Race: 000019:Skyrim.esm\n" % CLAW_SLOT_FLAG[side])
@@ -1006,6 +1048,7 @@ def main():
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
                            "blade": {"weapon": BLADE_ONEHAND, "sleeve": BLADE_SLEEVE_ARMO},
+                           "shield": {"armor": SHIELD_ARMO, "sleeve": SHIELD_SLEEVE_ARMO},
                            "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},

@@ -19,6 +19,10 @@
   "weapon": 2562,
   "sleeve": 2564
  },
+ "shield": {
+  "armor": 2571,
+  "sleeve": 2574
+ },
  "tendril": {
   "spell": 2441,
   "projectile": 2438
@@ -52,6 +56,7 @@
   "predators_rush": 2408,
   "preys_flight": 2409,
   "subtle_carapace": 2410,
+  "shield": 2570,
   "regeneration": 2411,
   "devastator": 2412,
   "borrowed_visage": 2413,
@@ -79,6 +84,7 @@
   "preys_flight",
   "regeneration",
   "rending_claws",
+  "shield",
   "stalker",
   "stalker_2",
   "subtle_carapace",

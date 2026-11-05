@@ -121,8 +121,15 @@
           "y": 0.9,
           "links": [
             "regeneration",
-            "devastator"
+            "devastator",
+            "shield"
           ]
+        },
+        {
+          "id": "shield",
+          "perk": "Protean.esp|A0A",
+          "x": -0.45,
+          "y": 2.7
         },
         {
           "id": "regeneration",

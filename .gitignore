@@ -20,3 +20,5 @@ art/*/ref/*.jpg
 *.blend1
 art/blade/export*.json
 art/blade/textures/
+art/shield/export*.json
+art/shield/textures/

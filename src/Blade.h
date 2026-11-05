@@ -8,4 +8,8 @@ namespace protean::Blade
 	// away, and taking the Blade up empties the left hand.
 
 	void OnFrame(float a_delta);  // checks the hands a few times a second
+
+	// hangs (a_on) or takes away a skinned model in the 1st-person body, bound to its bones of the same names; the
+	// pattern's {} is M or F by the player's sex. The game draws no added body slots in 1st person (Blade, Shield).
+	void HangFirstPerson(RE::PlayerCharacter* a_p, const char* a_name, std::string_view a_pattern, bool a_on, const char* a_tag);
 }

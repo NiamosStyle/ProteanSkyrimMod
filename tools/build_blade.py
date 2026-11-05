@@ -180,7 +180,7 @@ def sleeve(skel):
     return verts, normals, uvs, faces, weights
 
 
-def skinned(nif, name, verts, faces, uvs, normals, weights, skel):
+def skinned(nif, name, verts, faces, uvs, normals, weights, skel, slot=None):
     shape = nif.createShapeFromData(name, verts, faces, uvs, normals)
     shape.skin()
     for b in sorted(weights):
@@ -189,7 +189,7 @@ def skinned(nif, name, verts, faces, uvs, normals, weights, skel):
     for b in sorted(weights):
         shape.set_skin_to_bone_xform(b, inverse(skel.nodes[b].global_transform))
         shape.setShapeWeights(b, weights[b])
-    shape.set_partitions([SkyPartition(part_id=SLEEVE_SLOT, flags=0, namedict=nif.dict)], [0] * len(faces))
+    shape.set_partitions([SkyPartition(part_id=slot or SLEEVE_SLOT, flags=0, namedict=nif.dict)], [0] * len(faces))
     set_shader(shape, True, "natural")
     return shape
 

@@ -7,6 +7,74 @@
 
 namespace protean::Blade
 {
+	// The game draws no body slot 57 in 1st person (seen 2026-11-04). There the plugin hangs a model (Sleeve1st_M/F.nif)
+	// in the 1st-person body itself and binds its skinned pieces to the 1st-person skeleton's bones of the same names,
+	// as the game does for worn armor, so the flesh bends with the wrist. Shared with the Shield (2026-11-05).
+	void HangFirstPerson(RE::PlayerCharacter* a_p, const char* kFirstName, std::string_view kFirstModel, bool a_on, const char* a_tag)
+	{
+		auto* root3d = a_p->Get3D(true);
+		auto* root = root3d ? root3d->AsNode() : nullptr;
+		if (!root) {
+			return;
+		}
+		auto* have = root->GetObjectByName(kFirstName);
+		if (!a_on) {
+			if (have && have->parent) {
+				have->parent->DetachChild2(have);
+				logger::info("{}: 1st person goes back", a_tag);
+			}
+			return;
+		}
+		if (have) {
+			return;
+		}
+		const auto* base = a_p->GetActorBase();
+		const auto  path = fmt::format(fmt::runtime(kFirstModel), base && base->GetSex() == RE::SEX::kFemale ? 'F' : 'M');
+		RE::NiPointer<RE::NiNode> model;
+		if ((RE::BSModelDB::Demand(path.c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
+			(RE::BSModelDB::Demand(("Meshes\\" + path).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
+			static std::set<std::string> warned;  // once per model
+			if (warned.insert(path).second) {
+				logger::warn("{}: could not load {}", a_tag, path);
+			}
+			return;
+		}
+		// the loaded model is shared: hang a copy
+		RE::NiPointer<RE::NiObject> clone(model->Clone());
+		auto*                       copy = clone ? clone->AsNode() : nullptr;
+		if (!copy) {
+			return;
+		}
+		copy->name = kFirstName;
+		int bound = 0, missing = 0;
+		RE::BSVisit::TraverseScenegraphGeometries(copy, [&](RE::BSGeometry* a_geo) {
+			auto* skin = a_geo->GetGeometryRuntimeData().skinInstance.get();
+			const auto n = skin && skin->skinData ? skin->skinData->bones : 0u;
+			for (std::uint32_t i = 0; i < n; ++i) {
+				auto* own = skin->bones[i];
+				auto* real = own ? root->GetObjectByName(own->name) : nullptr;
+				if (!real) {
+					logger::info("{}: 1st person has no bone '{}': it follows the body instead", a_tag, own ? own->name.c_str() : "?");
+					real = root;
+					++missing;
+				}
+				skin->bones[i] = real;
+				skin->boneWorldTransforms[i] = &real->world;
+				++bound;
+			}
+			if (skin) {
+				skin->rootParent = root;
+			}
+			// its bounds were measured where the 3rd-person arm is: never cull it for being "off screen"
+			a_geo->GetFlags().set(RE::NiAVObject::Flag::kAlwaysDraw);
+			return RE::BSVisit::BSVisitControl::kContinue;
+		});
+		root->AttachChild(copy, true);
+		RE::NiUpdateData update;
+		copy->Update(update);
+		logger::info("{}: 1st person grows ({} bones bound, {} missing)", a_tag, bound, missing);
+	}
+
 	namespace
 	{
 		constexpr auto kPerk = "blade";
@@ -83,74 +151,7 @@ namespace protean::Blade
 		constexpr auto kFirstName = "ProteanBlade1st";
 		constexpr auto kFirstModel = "Protean\\Blade\\Sleeve1st_{}.nif";  // M or F (the female arm, 2026-11-04)
 
-		// The game draws no body slot 57 in 1st person (seen 2026-11-04). There the plugin hangs Sleeve1st_M/F.nif in the
-		// 1st-person body itself and binds its skinned flesh and blade to the 1st-person skeleton's bones of the same
-		// names, as the game does for worn armor, so the flesh bends with the wrist.
-		void FirstPerson(RE::PlayerCharacter* a_p, bool a_on)
-		{
-			auto* root3d = a_p->Get3D(true);
-			auto* root = root3d ? root3d->AsNode() : nullptr;
-			if (!root) {
-				return;
-			}
-			auto* have = root->GetObjectByName(kFirstName);
-			if (!a_on) {
-				if (have && have->parent) {
-					have->parent->DetachChild2(have);
-					logger::info("blade: 1st person goes back");
-				}
-				return;
-			}
-			if (have) {
-				return;
-			}
-			const auto* base = a_p->GetActorBase();
-			const auto  path = fmt::format(kFirstModel, base && base->GetSex() == RE::SEX::kFemale ? 'F' : 'M');
-			RE::NiPointer<RE::NiNode> model;
-			if ((RE::BSModelDB::Demand(path.c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
-				(RE::BSModelDB::Demand(("Meshes\\" + path).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
-				static bool warned = false;
-				if (!warned) {
-					warned = true;
-					logger::warn("blade: could not load {}", path);
-				}
-				return;
-			}
-			// the loaded model is shared: hang a copy
-			RE::NiPointer<RE::NiObject> clone(model->Clone());
-			auto*                       copy = clone ? clone->AsNode() : nullptr;
-			if (!copy) {
-				return;
-			}
-			copy->name = kFirstName;
-			int bound = 0, missing = 0;
-			RE::BSVisit::TraverseScenegraphGeometries(copy, [&](RE::BSGeometry* a_geo) {
-				auto* skin = a_geo->GetGeometryRuntimeData().skinInstance.get();
-				const auto n = skin && skin->skinData ? skin->skinData->bones : 0u;
-				for (std::uint32_t i = 0; i < n; ++i) {
-					auto* own = skin->bones[i];
-					auto* real = own ? root->GetObjectByName(own->name) : nullptr;
-					if (!real) {
-						logger::info("blade: 1st person has no bone '{}': it follows the body instead", own ? own->name.c_str() : "?");
-						real = root;
-						++missing;
-					}
-					skin->bones[i] = real;
-					skin->boneWorldTransforms[i] = &real->world;
-					++bound;
-				}
-				if (skin) {
-					skin->rootParent = root;
-				}
-				// its bounds were measured where the 3rd-person arm is: never cull it for being "off screen"
-				a_geo->GetFlags().set(RE::NiAVObject::Flag::kAlwaysDraw);
-				return RE::BSVisit::BSVisitControl::kContinue;
-			});
-			root->AttachChild(copy, true);
-			RE::NiUpdateData update;
-			copy->Update(update);
-			logger::info("blade: 1st person grows ({} bones bound, {} missing)", bound, missing);
-		}
+		void FirstPerson(RE::PlayerCharacter* a_p, bool a_on) { HangFirstPerson(a_p, kFirstName, kFirstModel, a_on, "blade"); }
 
 		// the flesh and the bone blade are on the arm only while the Blade is drawn; never kept in the inventory
 		void Sleeve(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_blade, RE::TESObjectARMO* a_sleeve)
