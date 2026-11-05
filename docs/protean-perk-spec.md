@@ -237,6 +237,7 @@ More shapes for the player's hands, as in Prototype. All are stronger than norma
   Status (2026-11-04, user test): "It is quick, now." Draw and sheathe both fast. Next: the flesh's edge on the back/shoulder is a straight line with right angles, not organic (with or without clothes).
   Status (2026-11-04): installed: the shoulder edge is now cut on the finer points along a wandering line that reaches out from the shoulder further in some directions (make_base.py REACH, make_flesh.py EDGE*), and the flesh rises out of the skin over a shorter band (TAPER 4). Not yet tested.
   Status (2026-11-04, user test): "It looks much better": the shoulder edge is organic now.
+  Status (2026-11-04, user test, female via player.sexchange): the male model (used for both) mostly fits, but there are gaps near the shoulder (screenshots 59, 60: the flesh floats off her narrower shoulder by the neck). Next: a female model built on the female body.
 - **Shield** (requires Subtle Carapace): left hand only, like a normal shield. Blocks all damage of a blocked hit for a flat 5 Stamina a hit. With no Stamina it blocks nothing, and the player can be staggered as in a guard break.
 Open: numbers (damage, speed, Stamina per swing), looks.
 
