@@ -42,13 +42,14 @@ def build_textures():
     jobs = []
     for part in ("Arm", "Shell"):
         Image.open(os.path.join(BAKED, part + "_d.png")).convert("RGB").save(os.path.join(tmp, part + "_d.png"))
-        jobs.append((part + "_d.png", "BC1_UNORM"))
+        # BC7: the older BC1/BC3 banded the dark gradients into steps (user, screenshot 74, 2026-11-05)
+        jobs.append((part + "_d.png", "BC7_UNORM"))
         r, g, b = Image.open(os.path.join(BAKED, part + "_n.png")).convert("RGB").split()
         if build_blade.FLIP_GREEN:
             g = ImageChops.invert(g)
         a = Image.new("L", r.size, int(255 * SPEC[part]))
         Image.merge("RGBA", (r, g, b, a)).save(os.path.join(tmp, part + "_n.png"))
-        jobs.append((part + "_n.png", "BC3_UNORM"))
+        jobs.append((part + "_n.png", "BC7_UNORM"))
     for name, fmt in jobs:
         subprocess.run([build_blade.XTEXCONV, "-nologo", "-m", "0", "-f", fmt, "-o", TEX_OUT, os.path.join(tmp, name)],
                        check=True, stdout=subprocess.DEVNULL)
