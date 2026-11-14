@@ -1,5 +1,6 @@
 #include "Claws.h"
 
+#include "Blade.h"
 #include "Evolve.h"
 #include "Registry.h"
 
@@ -91,89 +92,40 @@ namespace protean::Claws
 			}
 		}
 
-		constexpr auto kPrefix = "ProteanClaw|"sv;
 		constexpr auto kFolder = "Protean\\Claws\\"sv;
 
-		std::string g_folder{ kFolder };  // the models in use (dev 'clawstyle' points it at a style's own folder)
+		std::string g_folder{ kFolder };  // the 3rd-person models in use (dev 'clawstyle' points it at a style's own folder)
 		float       g_rewear{ 0.0f };     // seconds until the claw pieces go back on after a style change
 
-		// the blades now hanging in a 1st-person body
-		std::vector<RE::NiAVObject*> Hung(RE::NiAVObject* a_root, char a_side)
+		struct Side
 		{
-			std::vector<RE::NiAVObject*> out;
-			const auto                   mine = std::string(kPrefix) + "NPC " + a_side + " ";
-			RE::BSVisit::TraverseScenegraphGeometries(a_root, [&](RE::BSGeometry* a_geo) {
-				if (std::string_view(a_geo->name.c_str()).starts_with(mine)) {
-					out.push_back(a_geo);
-				}
-				return RE::BSVisit::BSVisitControl::kContinue;
-			});
-			return out;
-		}
+			bool                                    left;
+			RE::BGSBipedObjectForm::BipedObjectSlot slot;
+			const char*                             firstName;
+			const char*                             firstModel;
+			const char*                             hand;
+			const char*                             tag;
+		};
+		constexpr Side kSides[] = {
+			{ false, RE::BGSBipedObjectForm::BipedObjectSlot::kModArmRight, "ProteanClaws1st_R", "Protean\\Claws\\Claws1st_R_{}.nif", "right", "claws right" },  // 59
+			{ true, RE::BGSBipedObjectForm::BipedObjectSlot::kModArmLeft, "ProteanClaws1st_L", "Protean\\Claws\\Claws1st_L_{}.nif", "left", "claws left" },     // 58
+		};
 
-		void Hang(RE::PlayerCharacter* a_p, bool a_left, bool a_on)
+		// The sleeve and claws (2026-11-13: the sinew arm and long claws of tools/build_claw_arms.py) are on a hand only
+		// while it holds the claws fully drawn, as the Blade, Shield and Hammerfist are; put away, the arm is the
+		// player's own. In 1st person the same skinned model (cut at the elbow) hangs in the 1st-person body, bound to
+		// its bones (Blade::HangFirstPerson): the game builds no slot 58/59 there.
+		void Show(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_weapon, bool a_allOff = false)
 		{
-			auto* root = a_p->Get3D(true);
-			if (!root) {
-				return;
+			using WS = RE::WEAPON_STATE;
+			const auto* st = a_p->AsActorState();
+			const bool  drawn = st && st->GetWeaponState() == WS::kDrawn;
+			const auto& reg = Registry::Get();
+			for (const auto& side : kSides) {
+				const bool want = !a_allOff && drawn && a_p->GetEquippedObject(side.left) == a_weapon;
+				Wear(a_p, reg.ClawPiece(side.left), side.slot, want, side.hand);
+				Blade::HangFirstPerson(a_p, side.firstName, side.firstModel, want, side.tag);
 			}
-			const char side = a_left ? 'L' : 'R';
-			const auto hung = Hung(root, side);
-			if (!a_on) {
-				for (auto* blade : hung) {
-					if (blade->parent) {
-						blade->parent->DetachChild2(blade);
-					}
-				}
-				return;
-			}
-			if (!hung.empty()) {
-				return;
-			}
-			const auto* base = a_p->GetActorBase();
-			const char  sex = base && base->GetSex() == RE::SEX::kFemale ? 'F' : 'M';
-			const auto  path = fmt::format("{}Claws1st_{}_{}.nif", g_folder, side, sex);
-			RE::NiPointer<RE::NiNode> model;
-			if ((RE::BSModelDB::Demand(path.c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model) &&
-				(RE::BSModelDB::Demand(("Meshes\\" + path).c_str(), model, {}) != RE::BSResource::ErrorCode::kNone || !model)) {
-				logger::warn("claws: could not load {}", path);
-				return;
-			}
-			// the loaded model is shared: hang a copy
-			RE::NiPointer<RE::NiObject> clone(model->Clone());
-			auto*                       copy = clone ? clone->AsNode() : nullptr;
-			if (!copy) {
-				return;
-			}
-			std::vector<RE::NiPointer<RE::NiAVObject>> blades;
-			for (auto& child : copy->GetChildren()) {
-				if (child) {
-					blades.emplace_back(child);
-				}
-			}
-			int n = 0;
-			for (auto& blade : blades) {
-				const std::string_view name(blade->name.c_str());
-				if (!name.starts_with(kPrefix)) {
-					continue;
-				}
-				auto* bone = root->GetObjectByName(RE::BSFixedString(std::string(name.substr(kPrefix.size()))));
-				if (auto* node = bone ? bone->AsNode() : nullptr) {
-					copy->DetachChild2(blade.get());
-					blade->local = RE::NiTransform();
-					node->AttachChild(blade.get(), true);
-					RE::NiUpdateData update;
-					blade->Update(update);
-					++n;
-				}
-			}
-			logger::info("claws: {} hand, {} blade(s) hung in 1st person", a_left ? "left" : "right", n);
-		}
-
-		void HangBoth(RE::PlayerCharacter* a_p, RE::TESObjectWEAP* a_weapon)
-		{
-			Hang(a_p, false, a_p->GetEquippedObject(false) == a_weapon);
-			Hang(a_p, true, a_p->GetEquippedObject(true) == a_weapon);
 		}
 	}
 
@@ -185,10 +137,7 @@ namespace protean::Claws
 		if (!p || !weapon) {
 			return;
 		}
-		using Slot = RE::BGSBipedObjectForm::BipedObjectSlot;
-		Wear(p, reg.ClawPiece(false), Slot::kModArmRight, p->GetEquippedObject(false) == weapon, "right");
-		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, p->GetEquippedObject(true) == weapon, "left");
-		HangBoth(p, weapon);
+		Show(p, weapon);
 		// the swing listener: the player's animation graphs are rebuilt on a race change, so add it again
 		// (claws go back on with an equip, which brings us here)
 		p->RemoveAnimationGraphEventSink(&g_anim);
@@ -217,11 +166,9 @@ namespace protean::Claws
 		if (!p) {
 			return;
 		}
-		using Slot = RE::BGSBipedObjectForm::BipedObjectSlot;
-		Wear(p, reg.ClawPiece(false), Slot::kModArmRight, false, "right");
-		Wear(p, reg.ClawPiece(true), Slot::kModArmLeft, false, "left");
-		Hang(p, false, false);
-		Hang(p, true, false);
+		if (auto* weapon = reg.ClawWeapon()) {
+			Show(p, weapon, true);
+		}
 		// back on a moment later: put straight back on, the 3rd-person body keeps the old model (seen in game)
 		g_rewear = 0.5f;
 		logger::info("claws: models now from {}", g_folder);
@@ -232,14 +179,17 @@ namespace protean::Claws
 		if (g_rewear > 0.0f && (g_rewear -= a_delta) <= 0.0f) {
 			Sync();
 		}
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		auto* weapon = Registry::Get().ClawWeapon();
+		if (p && weapon && g_rewear <= 0.0f) {
+			Show(p, weapon);  // every frame: they grow the moment the draw is done and go back as the sheathe starts
+		}
 		static float since = 0.0f;
 		if ((since += a_delta) < 0.25f) {
 			return;
 		}
 		since = 0.0f;
-		auto* p = RE::PlayerCharacter::GetSingleton();
-		if (auto* weapon = Registry::Get().ClawWeapon(); p && weapon) {
-			HangBoth(p, weapon);
+		if (p && weapon) {
 			SetDamage(p, weapon);
 			// the perk keeps one claw for each hand in the inventory (checked now and then: it counts the inventory)
 			static float sinceGive = 0.0f;

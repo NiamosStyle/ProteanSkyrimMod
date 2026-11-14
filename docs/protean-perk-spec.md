@@ -200,6 +200,13 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Stamina:** Costs a base amount of Stamina to use.
 - **Look:** Our own natural horn claws. The attack animations are the game's own beast-race claw animations (Feral uses the same ones), so Feral is not needed; Open Animation Replacer is.
 - **Status:** Done and tested in game (2026-10-23): damage follows the stamina bar, 5 Stamina a swing, werewolf hit sounds.
+- **New look (2026-11-13, the user's sculpt reference `Prototype/Razor_claws_sculpt.jpg`; replaces the horn claws):**
+  - The user's calls: the whole sleeve (from the shoulder), not just the forearm; the claws do not curl: each has one knuckle, which moves, and the rest of the blade is solid; length 80% of the reference to start.
+  - Built: a sleeve of stringy sinew from the shoulder (the Blade's ragged edge and dark flesh), loose cords standing off the arm, tendons over the back of the hand; one long curved claw a finger, saw-toothed on the inner edge, bone with dark chitin along the back. Lengths: index 17.5, middle 19, ring 17 game units; the thumb's 10 and the little finger's 9. Each claw hangs whole on its finger's first bone. The fingers themselves stay, thin and dark, under the claws.
+  - Measured (`tools/measure_claw_poses.py`): in every beast-race clip the claw tips stay at least 20 units above the ground; in the held stances they stay about 20 or more from the body's bones; during attacks they may brush the body.
+  - Design calls made for the user (to overrule if wanted): the sleeve and claws now show only while the claws are drawn, as the Blade, Shield and Hammerfist do (before, the horn claws showed whenever equipped); the little finger carries a short spur rather than nothing; the female claws are 0.92 the size.
+  - Files: `art/claws/` (Claws.blend, scripts run without Blender's window by `scripts/run.py`), `tools/build_claw_arms.py`, `src/Claws.cpp`. The perk, weapon, damage, Stamina and animations are unchanged.
+  - Status: built and installed 2026-11-13. Not yet seen in game.
 
 ### Proposed hand forms (the user's design, 2026-11-03; not built)
 More shapes for the player's hands, as in Prototype. All are stronger than normal weapons and armour because they cost Stamina to use (the user: a fight should drain Stamina fast while many biomass stacks refill it fast).
