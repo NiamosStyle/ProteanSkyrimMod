@@ -117,7 +117,8 @@ RENOWNED = ["ulfric stormcloak", "galmar", "general tullius", "legate rikke", "m
 # base id -> (local id, description)
 RANK2 = {
     "survivor": (0x972, "Increase the amount of Health you gain while wearing an animal's form by an even greater "
-                 "amount. Consuming a body heals half your Health, and in the form of a herbivore or an omnivore you can "
+                 "amount, and add all of a tougher animal's extra Health. You always arrive in an animal's form at full "
+                 "Health. Consuming a body heals half your Health, and in the form of a herbivore or an omnivore you can "
                  "eat plants to heal."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
@@ -281,6 +282,7 @@ GLOBALS = {
     "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
     "Protean_HammerfistSlamRadius": (0xA1A, 300, "Float", "Hammerfist: a power swing that strikes nothing staggers the enemies within this of where it lands"),
     "Protean_HammerfistSlamWait":  (0xA1B, 0.35, "Float", "Hammerfist: seconds after a power swing with no hit before it counts as striking the ground"),
+    "Protean_SurvivorGapShare2":   (0xA1C, 1.0,  "Float", "Survivor rank 2: replaces Protean_HealthGapShare; 1 = the animal's whole health surplus is added (user 2026-11-14)"),
     "Protean_FeedCorpseHeal":      (0x9AE, 0.25, "Float", "unused since 2026-10-28 (bodies are consumed: Protean_ConsumeHealSurvivor)"),
     "Protean_FeedPlantHeal":       (0x9AF, 0.2,  "Float", "Survivor rank 2: share of maximum health a plant heals (user: 20%)"),
     "Protean_FeedSeconds":         (0x9B0, 3,    "Float", "Survivor rank 2: seconds a plant takes to eat, standing still"),

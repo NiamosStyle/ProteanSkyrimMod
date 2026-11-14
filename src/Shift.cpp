@@ -707,8 +707,11 @@ namespace protean::Shift
 		// Survivor: each rank adds its share to the base (25% -> 50% -> 75%)
 		const float ranks = (Evolve::Has("survivor") ? 1.0f : 0.0f) + (Evolve::Has("survivor_2") ? 1.0f : 0.0f);
 		const float pct = reg0.Dial("Protean_HealthBonusPct", 0.25f) + ranks * reg0.Dial("Protean_SurvivorHealthPct", 0.25f);
-		const float bonus = std::floor(own * pct +
-		                               std::max(animal - own, 0.0f) * reg0.Dial("Protean_HealthGapShare", 0.25f));
+		// Survivor rank 2 (user, 2026-11-14): the whole surplus of a tougher animal is added, and the change always
+		// arrives at 100% health, whatever share the human form was at
+		const bool  rank2 = Evolve::Has("survivor_2");
+		const float gapShare = rank2 ? reg0.Dial("Protean_SurvivorGapShare2", 1.0f) : reg0.Dial("Protean_HealthGapShare", 0.25f);
+		const float bonus = std::floor(own * pct + std::max(animal - own, 0.0f) * gapShare);
 		s.realRace = p->GetRace() ? p->GetRace()->GetFormID() : 0;
 		s.healthBonus = bonus;
 		s.active = a_c.id;
@@ -728,7 +731,7 @@ namespace protean::Shift
 			// the fish drowned underwater without it (measured); the same value an Argonian or a potion raises
 			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, 1.0f);
 		}
-		SetHealthShare(p, share);
+		SetHealthShare(p, rank2 ? 1.0f : share);
 
 		// the way back: the revert power in the voice slot
 		auto& reg = Registry::Get();
