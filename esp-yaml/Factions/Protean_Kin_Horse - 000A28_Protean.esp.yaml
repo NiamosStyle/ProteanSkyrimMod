@@ -1,0 +1,10 @@
+FormKey: 000A28:Protean.esp
+EditorID: Protean_Kin_Horse
+Name:
+  TargetLanguage: English
+Relations:
+- Target: 000A28:Protean.esp
+  Reaction: Ally
+Flags:
+- HiddenFromPC
+VendorValues: {}

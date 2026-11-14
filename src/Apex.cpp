@@ -77,31 +77,46 @@ namespace protean::Apex
 				}
 			}
 		}
-		// Some animals have no faction of their own, only broad groups left out above (mudcrab, ash hopper, horse, fox,
-		// death hound, boar: found when mudcrabs still attacked, 2026-11-14). Apex's own kin faction covers every animal:
-		// the player is in it, and each animal of a form's race that comes near is added (members are allies).
-		if (auto* kin = Registry::Get().KinFaction()) {
-			if (!a_p->IsInFaction(kin)) {
-				a_p->AddToFaction(kin, 0);
+		// Some animals have no faction of their own, only the broad groups left out above: mudcrab, ash hopper, horse,
+		// fox, death hound, boar (found when mudcrabs still attacked, 2026-11-14). Each has a Protean faction of its own:
+		// the player joins them all, and an animal that comes near is added to its own species' only, so fights between
+		// kinds stay as vanilla has them. (A first try put every animal in ONE shared faction, which made them all allies
+		// of each other; anyone still in it is taken back out.)
+		auto* shared = Registry::Get().KinFaction();
+		if (shared && a_p->IsInFaction(shared)) {
+			a_p->RemoveFromFaction(shared);
+		}
+		for (const auto& c : Registry::Get().All()) {
+			if (c.kin && !a_p->IsInFaction(c.kin)) {
+				a_p->AddToFaction(c.kin, 0);
+				logger::info("apex: kin of the '{}' (Protean faction {:08X})", c.name, c.kin->GetFormID());
 				++joined;
 			}
-			if (auto* pl = RE::ProcessLists::GetSingleton()) {
-				int added = 0;
-				for (auto& h : pl->highActorHandles) {
-					auto a = h.get();
-					if (!a || a.get() == a_p || a->IsDead() || a->IsInFaction(kin) || !Registry::Get().ByRace(a->GetRace())) {
-						continue;
-					}
-					a->AddToFaction(kin, 0);
-					auto target = a->GetActorRuntimeData().currentCombatTarget.get();
-					if (target && target.get() == a_p) {
-						a->StopCombat();
-					}
-					++added;
+		}
+		if (auto* pl = RE::ProcessLists::GetSingleton()) {
+			int added = 0, released = 0;
+			for (auto& h : pl->highActorHandles) {
+				auto a = h.get();
+				if (!a || a.get() == a_p) {
+					continue;
 				}
-				if (added > 0) {
-					logger::info("apex: {} nearby animal(s) made kin", added);
+				if (shared && a->IsInFaction(shared)) {
+					a->RemoveFromFaction(shared);
+					++released;
 				}
+				const auto* c = a->IsDead() ? nullptr : Registry::Get().ByRace(a->GetRace());
+				if (!c || !c->kin || a->IsInFaction(c->kin)) {
+					continue;
+				}
+				a->AddToFaction(c->kin, 0);
+				auto target = a->GetActorRuntimeData().currentCombatTarget.get();
+				if (target && target.get() == a_p) {
+					a->StopCombat();
+				}
+				++added;
+			}
+			if (added > 0 || released > 0) {
+				logger::info("apex: {} nearby animal(s) made kin, {} taken out of the old shared faction", added, released);
 			}
 		}
 		if (joined > 0) {

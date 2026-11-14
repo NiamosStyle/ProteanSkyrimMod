@@ -1,0 +1,10 @@
+FormKey: 000A27:Protean.esp
+EditorID: Protean_Kin_AshHopper
+Name:
+  TargetLanguage: English
+Relations:
+- Target: 000A27:Protean.esp
+  Reaction: Ally
+Flags:
+- HiddenFromPC
+VendorValues: {}

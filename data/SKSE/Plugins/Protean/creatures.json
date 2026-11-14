@@ -6,6 +6,14 @@
  "tome": 2051,
  "beastFaction": 2053,
  "kinFaction": 2597,
+ "kinSpecies": {
+  "mudcrab": 2598,
+  "ash_hopper": 2599,
+  "horse": 2600,
+  "fox": 2601,
+  "death_hound": 2602,
+  "boar": 2603
+ },
  "witnessFaction": 2054,
  "facePower": 2055,
  "disguiseFaction": 2056,

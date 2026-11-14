@@ -309,6 +309,14 @@ namespace protean
 			}
 			_creatures.push_back(std::move(cr));
 		}
+		// Apex: a kin faction for each animal the game gives none of its own
+		for (const auto& [cid, local] : j.value("kinSpecies", nlohmann::json::object()).items()) {
+			for (auto& c : _creatures) {
+				if (c.id == cid) {
+					c.kin = dh->LookupForm<RE::TESFaction>(local.get<RE::FormID>(), plugin);
+				}
+			}
+		}
 		logger::info("registry: {} creature(s) loaded", _creatures.size());
 		return !_creatures.empty();
 	}
