@@ -34,6 +34,11 @@ JOBS = {
     "h2h_attackpowerforwardlefthand.hkx": ("1hm_attackpower.hkx", "R", 0.801, 1.667, True),
     "h2h_attackrightpowerforward.hkx": ("2hw_attackpower.hkx", "R", 1.461, 2.167, False),
 }
+# 2026-11-13, first try in game (user): every one of these "made the body go crazy", then it slowly relaxed into the
+# stance. The timing was right (the log: each slam on its landing). Suspect: PyNifly's writer with fast motion (the
+# glide it wrote is slow). Test: the right hand's and both hands' are the game's own files, untouched (their fists
+# land 0.07 s and 0.09 s before the HitFrame; the right one ends 0.3 s early); only the left (a mirror) is written.
+COPY = {"h2h_attackpowerforwardrighthand.hkx", "h2h_attackrightpowerforward.hkx"}
 
 
 def qmul(a, b):
@@ -110,6 +115,10 @@ def clips(person=""):
         ref_w = world(names, parents, ref)
         hand = {"R": names.index("NPC R Hand [RHnd]"), "L": names.index("NPC L Hand [LHnd]")}
         for target, (source, side, land, length, mirrored) in JOBS.items():
+            if target in COPY:
+                out[target] = bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source)
+                print("  %s%s <- %s, the game's own file" % (person, target, source))
+                continue
             p = os.path.join(tmp, source)
             with open(p, "wb") as f:
                 f.write(bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source))
