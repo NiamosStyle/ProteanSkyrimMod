@@ -320,8 +320,8 @@ namespace protean::Call
 				++it;
 			}
 		}
-		// helpers left from before a save and load (the list is not saved): anyone of the pack's faction that is a
-		// teammate and not in the list gets ten more seconds
+		// helpers left from before a save and load (the list is not saved): anyone in the pack's faction (Protean_BeastFaction;
+		// the Papyrus teammate flag never took, 2026-11-14) and not in the list gets ten more seconds
 		if ((g_scan -= a_delta) <= 0.0f) {
 			g_scan = 5.0f;
 			auto* pl = RE::ProcessLists::GetSingleton();
@@ -330,7 +330,7 @@ namespace protean::Call
 			if (pl && beast && p) {
 				for (auto& h : pl->highActorHandles) {
 					auto a = h.get();
-					if (a && a.get() != p && a->IsInFaction(beast) && a->IsPlayerTeammate() && !a->IsDead() &&
+					if (a && a.get() != p && a->IsInFaction(beast) && !a->IsDead() && !a->IsDisabled() &&
 						std::ranges::none_of(g_pack, [&](const Member& m) { return m.id == a->GetFormID(); })) {
 						g_pack.push_back({ a->GetFormID(), 10.0f, -1.0f });
 						logger::info("call: {:08X} '{}' is left from before; goes in 10 s", a->GetFormID(), a->GetName());
