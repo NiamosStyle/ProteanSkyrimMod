@@ -61,8 +61,8 @@
         {
           "id": "stalker",
           "perk": "Protean.esp|964",
-          "x": 1.75,
-          "y": 1.13,
+          "x": 1.92,
+          "y": 1.06,
           "links": [
             "apex"
           ]
@@ -70,8 +70,8 @@
         {
           "id": "apex",
           "perk": "Protean.esp|965",
-          "x": 1.9,
-          "y": 2.67
+          "x": 2.16,
+          "y": 3.62
         },
         {
           "id": "rending_claws",
@@ -94,14 +94,14 @@
         {
           "id": "blade",
           "perk": "Protean.esp|A05",
-          "x": 0.44,
+          "x": 0.09,
           "y": 2.74
         },
         {
           "id": "tendril",
           "perk": "Protean.esp|967",
-          "x": 0.9,
-          "y": 1.26
+          "x": 1.3,
+          "y": 1.47
         },
         {
           "id": "predators_rush",
@@ -135,14 +135,14 @@
         {
           "id": "shield",
           "perk": "Protean.esp|A0A",
-          "x": -1.05,
-          "y": 1.21
+          "x": -1.55,
+          "y": 1.06
         },
         {
           "id": "regeneration",
           "perk": "Protean.esp|96B",
-          "x": -1.04,
-          "y": 1.85
+          "x": -1.12,
+          "y": 1.91
         },
         {
           "id": "devastator",
@@ -169,8 +169,8 @@
         {
           "id": "inconspicuous",
           "perk": "Protean.esp|96F",
-          "x": -2.25,
-          "y": 1.21,
+          "x": -2.42,
+          "y": 1.31,
           "links": [
             "infected",
             "assassin"
