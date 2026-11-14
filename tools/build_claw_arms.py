@@ -19,6 +19,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_blade  # noqa: E402
+import first_person_cut  # noqa: E402
 from build_blade import NifFile, SKELETONS, skinned  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -100,7 +101,10 @@ def build_arm(side, sex):
     for name, part, key in (("ProteanClawsArm1st", "Arm", "flesh"), ("ProteanClawsClaws1st", "Claw", "claw")):
         d = data[key]
         upper = [sum(w for b, w in bw.items() if any(k in b for k in FIRST_PERSON_DROP)) for bw in d["weights"]]
-        counts.append(add_shape(nif, name, part, d, skel, SLOT[side], lambda i, upper=upper: upper[i] < 0.5))
+        # the cut end closed (2026-11-13: an open sleeve end showed in 1st person, screenshot 92)
+        d1, caps = first_person_cut.cut(d, lambda i, upper=upper: upper[i] < 0.5)
+        counts.append(add_shape(nif, name, part, d1, skel, SLOT[side]))
+        print("  1st person %s: %d opening(s) capped" % (key, caps))
     nif.save()
     print("wrote", path, counts[0], "+", counts[1], "verts")
 

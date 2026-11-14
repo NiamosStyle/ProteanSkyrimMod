@@ -18,6 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_blade  # noqa: E402
+import first_person_cut  # noqa: E402
 from build_blade import NifFile, SKELETONS, skinned  # noqa: E402
 from pyn.pynifly import NiStringExtraData  # noqa: E402
 
@@ -98,7 +99,10 @@ def build_arm(side, sex):
     nif.initialize("SKYRIMSE", path)
     fl = data["flesh"]
     upper = [sum(w for b, w in bw.items() if any(k in b for k in FIRST_PERSON_DROP)) for bw in fl["weights"]]
-    n = add_shape(nif, "ProteanHammerfistArm1st", "Arm", fl, skel, SLOT[side], lambda i: upper[i] < 0.5)
+    # the cut end closed (2026-11-13: the camera looked into the open sleeve during a swing, screenshot 92)
+    fl1, caps = first_person_cut.cut(fl, lambda i: upper[i] < 0.5)
+    n = add_shape(nif, "ProteanHammerfistArm1st", "Arm", fl1, skel, SLOT[side])
+    print("  1st person: %d opening(s) capped" % caps)
     m = add_shape(nif, "ProteanHammerfistFist1st", "Fist", data["fist"], skel, SLOT[side])
     nif.save()
     print("wrote", path, n, "+", m, "verts")
