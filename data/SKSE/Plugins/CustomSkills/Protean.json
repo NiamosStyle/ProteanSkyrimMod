@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Exit-9B/CustomSkills/main/docs/schema/CustomSkill.json",
   "version": 1,
   "skydome": {
-    "model": "DLC01/Interface/INTVampirePerkSkydome.nif",
+    "model": "Protean/Interface/ProteanPerkSkydome.nif",
     "cameraRightPoint": 2
   },
   "showMenu": "Protean.esp|952",

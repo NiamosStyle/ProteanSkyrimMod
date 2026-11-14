@@ -39,6 +39,10 @@ for rel in build_glide_anim.build():
 import build_devastator_fx  # noqa: E402
 for rel in build_devastator_fx.build():
     files[rel] = os.path.join(ROOT, "data", rel)
+# the perk tree's constellation and skydome (tools/build_constellation.py)
+import build_constellation  # noqa: E402
+for rel in build_constellation.build():
+    files[rel] = os.path.join(ROOT, "data", rel)
 for name, path in files.items():
     if not os.path.isfile(path):
         sys.exit("missing " + path)

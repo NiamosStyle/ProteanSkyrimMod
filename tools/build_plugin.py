@@ -1038,7 +1038,8 @@ def main():
     write(os.path.join(ROOT, "data", "SKSE", "Plugins", "CustomSkills", "Protean.json"), json.dumps({
         "$schema": "https://raw.githubusercontent.com/Exit-9B/CustomSkills/main/docs/schema/CustomSkill.json",
         "version": 1,
-        "skydome": {"model": "DLC01/Interface/INTVampirePerkSkydome.nif", "cameraRightPoint": 2},
+        # Protean's own skydome: the vampire-lord one with the tentacle constellation (tools/build_constellation.py)
+        "skydome": {"model": "Protean/Interface/ProteanPerkSkydome.nif", "cameraRightPoint": 2},
         "showMenu": ref(GLOBALS["Protean_ShowPerkMenu"][0]),
         "perkPoints": ref(GLOBALS["Protean_PerkPoints"][0]),
         "skills": [{
