@@ -68,30 +68,32 @@ namespace protean::Call
 			vm->DispatchMethodCall2(handle, "Actor", "SetPlayerTeammate", RE::MakeFunctionArguments(std::move(a_on), std::move(a_on)), cb);
 		}
 
-		// The Papyrus call that makes an actor keep station beside another (the game's own formation-following, used
-		// for followers): offsets are relative to the target's facing.
-		void Follow(RE::Actor* a_actor, RE::Actor* a_target, float a_x, float a_y)
+		// Following, the way vanilla's Howl of the Pack does it: its "Pack Member" wolf (HowlSummonWolf, 0CF79E) has one AI
+		// package, HowlSummonedWolfFollowPlayer (10ACD1: follow the player, 300-500 units). The placed animals are given
+		// that same package. (Papyrus KeepOffsetFromActor and SetPlayerTeammate, sent through the script machine to an
+		// animal with no script of its own, did nothing: 2026-11-14.)
+		RE::TESPackage* FollowPackage()
 		{
-			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
-				return;
-			}
-			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_actor->GetFormType(), a_actor);
-			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
-			vm->DispatchMethodCall2(handle, "Actor", "KeepOffsetFromActor",
-				RE::MakeFunctionArguments(std::move(a_target), std::move(a_x), std::move(a_y), 0.0f, 0.0f, 0.0f, 0.0f, 250.0f, 180.0f), cb);
+			static RE::TESPackage* pkg = RE::TESDataHandler::GetSingleton()->LookupForm<RE::TESPackage>(0x10ACD1, "Skyrim.esm");
+			return pkg;
 		}
 
-		void StopFollowing(RE::Actor* a_actor)
+		RE::TESPackage* CurrentPackage(RE::Actor* a_actor)
 		{
-			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
-				return;
-			}
-			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_actor->GetFormType(), a_actor);
-			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
-			vm->DispatchMethodCall2(handle, "Actor", "ClearKeepOffsetFromActor", RE::MakeFunctionArguments(), cb);
+			auto* proc = a_actor->GetActorRuntimeData().currentProcess;
+			return proc ? proc->currentPackage.package : nullptr;
 		}
+
+		void Follow(RE::Actor* a_actor, RE::Actor*, float, float)
+		{
+			auto* pkg = FollowPackage();
+			if (!pkg || a_actor->IsInCombat() || CurrentPackage(a_actor) == pkg) {
+				return;  // in a fight the combat AI leads; afterwards the package is given again
+			}
+			a_actor->PutCreatedPackage(pkg, true, true, false);
+		}
+
+		void StopFollowing(RE::Actor*) {}  // they are disabled a moment later, which ends the package
 
 		// Taking a helper away is done in two steps, never a delete: the first call-time (2026-11-14) deleted the
 		// animals mid-fight and the game crashed (an enemy's combat code still held them). Step 1: stop being a
@@ -301,13 +303,14 @@ namespace protean::Call
 		for (auto it = g_pack.begin(); it != g_pack.end();) {
 			it->left -= a_delta;
 			if (it->followIn >= 0.0f && (it->followIn -= a_delta) < 0.0f) {
-				it->followIn = 15.0f;  // and again every 15 s, in case the game dropped it
+				it->followIn = 3.0f;  // and checked every 3 s: after a fight, or if the game dropped it
 				auto* me = RE::TESForm::LookupByID<RE::Actor>(it->id);
 				auto* pl = RE::PlayerCharacter::GetSingleton();
 				if (me && pl && !me->IsDead()) {
 					Follow(me, pl, it->ox, it->oy);
-					logger::info("call: {:08X} told to keep station ({:.0f}, {:.0f}), {:.0f} away, 3D {}", it->id, it->ox, it->oy,
-						pl->GetPosition().GetDistance(me->GetPosition()), me->Is3DLoaded());
+					auto* cur = CurrentPackage(me);
+					logger::info("call: {:08X} {:.0f} away, combat {}, package {:08X}{}", it->id, pl->GetPosition().GetDistance(me->GetPosition()),
+						me->IsInCombat(), cur ? cur->GetFormID() : 0u, cur && cur == FollowPackage() ? " (following)" : "");
 				}
 			}
 			if (it->left <= 0.0f) {
