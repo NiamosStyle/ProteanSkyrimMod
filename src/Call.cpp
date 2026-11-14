@@ -51,6 +51,8 @@ namespace protean::Call
 		{
 			RE::FormID id;
 			float      left;
+			float      followIn{ -1.0f };  // seconds until the follow order is given again; negative = never
+			float      ox{ 0.0f }, oy{ 0.0f };  // where it keeps station beside the player
 		};
 		std::vector<Member> g_pack;
 		float               g_scan{ 0.0f };
@@ -259,9 +261,8 @@ namespace protean::Call
 					actor->AddToFaction(f, 0);
 				}
 				SetTeammate(actor, true);
-				// they keep station behind the player, spread side to side
-				Follow(actor, a_p, (static_cast<float>(i) - (static_cast<float>(a_count) - 1.0f) / 2.0f) * 130.0f, -170.0f);
-				g_pack.push_back({ actor->GetFormID(), a_seconds });
+				// the follow order is given a moment later: a placed animal has no AI running yet and drops it
+				g_pack.push_back({ actor->GetFormID(), a_seconds, 1.5f, (static_cast<float>(i) - (static_cast<float>(a_count) - 1.0f) / 2.0f) * 130.0f, -170.0f });
 				logger::info("call: placed {:08X} '{}' {} ({:.0f} away)", actor->GetFormID(), actor->GetName(), tier ? tier : "ON THE PLAYER (no open spot)",
 					std::sqrt((spot.x - here.x) * (spot.x - here.x) + (spot.y - here.y) * (spot.y - here.y)));
 			}
@@ -289,7 +290,7 @@ namespace protean::Call
 		}
 	}
 
-	void Reset() { g_cooldown = 0.0f; }
+	void Reset() { g_cooldown = 0.0f; }  // a load: the cooldown is not saved, so a save that never used Call must not inherit one
 
 	void OnFrame(float a_delta)
 	{
@@ -299,6 +300,16 @@ namespace protean::Call
 		FinishLeaving(a_delta);
 		for (auto it = g_pack.begin(); it != g_pack.end();) {
 			it->left -= a_delta;
+			if (it->followIn >= 0.0f && (it->followIn -= a_delta) < 0.0f) {
+				it->followIn = 15.0f;  // and again every 15 s, in case the game dropped it
+				auto* me = RE::TESForm::LookupByID<RE::Actor>(it->id);
+				auto* pl = RE::PlayerCharacter::GetSingleton();
+				if (me && pl && !me->IsDead()) {
+					Follow(me, pl, it->ox, it->oy);
+					logger::info("call: {:08X} told to keep station ({:.0f}, {:.0f}), {:.0f} away, 3D {}", it->id, it->ox, it->oy,
+						pl->GetPosition().GetDistance(me->GetPosition()), me->Is3DLoaded());
+				}
+			}
 			if (it->left <= 0.0f) {
 				Dismiss(it->id);
 				it = g_pack.erase(it);
@@ -318,7 +329,7 @@ namespace protean::Call
 					auto a = h.get();
 					if (a && a.get() != p && a->IsInFaction(beast) && a->IsPlayerTeammate() && !a->IsDead() &&
 						std::ranges::none_of(g_pack, [&](const Member& m) { return m.id == a->GetFormID(); })) {
-						g_pack.push_back({ a->GetFormID(), 10.0f });
+						g_pack.push_back({ a->GetFormID(), 10.0f, -1.0f });
 						logger::info("call: {:08X} '{}' is left from before; goes in 10 s", a->GetFormID(), a->GetName());
 					}
 				}

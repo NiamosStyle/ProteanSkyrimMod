@@ -177,6 +177,7 @@ namespace
 				protean::Skills::OnGameLoaded();
 				protean::Registry::Get().SettleDials(protean::State::Get().dialDefaults);
 				protean::Claws::Sync();
+				protean::Call::Reset();
 				ReportAfterLoad();
 			}
 			break;
