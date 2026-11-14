@@ -297,6 +297,20 @@ namespace protean::Shift
 					}
 					forgiven += nv - snv;
 				}
+				if (a_forgive && (v > sv || nv > snv)) {
+					// Taking the bounty off leaves the game's record of who witnessed the crime: those people kept
+					// attacking on sight, for example Alva and Brutius in Morthal (2026-11-14, found live: ending their combat
+					// did not hold, the game's own "pay the fine" did). Paying wipes the record; what the player owed before
+					// the change is put back, so it is not paid off with it.
+					f->PlayerPayCrimeGold(false, false);
+					if (sv > 0) {
+						f->ModCrimeGold(sv, true);
+					}
+					if (snv > 0) {
+						f->ModCrimeGold(snv, false);
+					}
+					logger::info("  crime record of '{}' cleared (earlier bounty kept: {} violent, {} other)", f->GetName(), sv, snv);
+				}
 			}
 			int calmed = 0;
 			if (!a_forgive) {
