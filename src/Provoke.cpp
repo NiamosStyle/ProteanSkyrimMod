@@ -1,5 +1,6 @@
 #include "Provoke.h"
 
+#include "Call.h"
 #include "Shift.h"
 #include "State.h"
 
@@ -64,7 +65,7 @@ namespace protean::Provoke
 					const auto target = a_event->target->GetHandle();
 					SKSE::GetTaskInterface()->AddTask([target] {
 						if (auto t = target.get()) {
-							if (auto* a = t->As<RE::Actor>()) {
+							if (auto* a = t->As<RE::Actor>(); a && !Call::OnPlayerHit(a)) {
 								Provoke(a);
 							}
 						}

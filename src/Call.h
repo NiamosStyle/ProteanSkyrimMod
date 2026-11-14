@@ -9,5 +9,6 @@ namespace protean::Call
 
 	void OnCast();                     // the player cast the Call power
 	void OnFrame(float a_delta);       // counts the cooldown down
+	bool OnPlayerHit(RE::Actor* a_target);  // true if it is a pack member (handled here: a stray bite is forgiven)
 	void Reset();                      // a change of form or a load
 }

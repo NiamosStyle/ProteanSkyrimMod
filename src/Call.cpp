@@ -53,7 +53,14 @@ namespace protean::Call
 			float      left;
 			float      followIn{ -1.0f };  // seconds until the follow order is given again; negative = never
 			float      ox{ 0.0f }, oy{ 0.0f };  // where it keeps station beside the player
+			int        bites{ 0 };              // the player's hits on it within the last kBiteWindow seconds
+			float      biteWindow{ 0.0f };
+			float      forgiveIn{ -1.0f };      // seconds until a stray bite is forgiven (it stops fighting the player)
 		};
+		// A stray bite on a pack member is an accident, as with a follower: it is forgiven. Three within this many
+		// seconds are not, and the animal turns on the player (the user, 2026-11-14).
+		constexpr float kBiteWindow = 10.0f;
+		constexpr int   kBitesForgiven = 2;
 		std::vector<Member> g_pack;
 		float               g_scan{ 0.0f };
 
@@ -302,6 +309,20 @@ namespace protean::Call
 		FinishLeaving(a_delta);
 		for (auto it = g_pack.begin(); it != g_pack.end();) {
 			it->left -= a_delta;
+			if (it->biteWindow > 0.0f && (it->biteWindow -= a_delta) <= 0.0f) {
+				it->bites = 0;
+			}
+			if (it->forgiveIn >= 0.0f && (it->forgiveIn -= a_delta) < 0.0f) {
+				auto* me = RE::TESForm::LookupByID<RE::Actor>(it->id);
+				auto* pl = RE::PlayerCharacter::GetSingleton();
+				if (me && pl && !me->IsDead()) {
+					auto target = me->GetActorRuntimeData().currentCombatTarget.get();
+					if (target && target.get() == pl) {
+						me->StopCombat();
+						logger::info("call: {:08X} forgives the bite", it->id);
+					}
+				}
+			}
 			if (it->followIn >= 0.0f && (it->followIn -= a_delta) < 0.0f) {
 				it->followIn = 3.0f;  // and checked every 3 s: after a fight, or if the game dropped it
 				auto* me = RE::TESForm::LookupByID<RE::Actor>(it->id);
@@ -338,6 +359,26 @@ namespace protean::Call
 				}
 			}
 		}
+	}
+
+	bool OnPlayerHit(RE::Actor* a_target)
+	{
+		const auto id = a_target->GetFormID();
+		auto       it = std::ranges::find_if(g_pack, [&](const Member& m) { return m.id == id; });
+		if (it == g_pack.end()) {
+			return false;
+		}
+		++it->bites;
+		it->biteWindow = kBiteWindow;
+		if (it->bites <= kBitesForgiven) {
+			it->forgiveIn = 0.4f;  // after the game's own reaction to the hit has started
+			logger::info("call: {:08X} bitten by the player ({} of {} forgiven)", id, it->bites, kBitesForgiven);
+		} else {
+			it->forgiveIn = -1.0f;
+			logger::info("call: {:08X} bitten {} times: it turns on the player", id, it->bites);
+			a_target->StartCombat(RE::PlayerCharacter::GetSingleton());
+		}
+		return true;
 	}
 
 	void OnCast()
