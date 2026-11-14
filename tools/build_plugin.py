@@ -281,8 +281,8 @@ GLOBALS = {
     # follows the Stamina bar) times a mace's lead over a sword (vanilla steel: 10 against 8), heavier swings
     "Protean_ApexDamageBase":      (0xA1D, 17,   "Float", "Apex: an animal's hit is lifted to at least this + Protean_ApexDamagePerLevel x level (a two-hander's hit, user 2026-11-14)"),
     "Protean_ApexDamagePerLevel":  (0xA1E, 2.6,  "Float", "Apex: the per-level part of the damage floor"),
-    "Protean_CallSeconds":         (0xA1F, 60,   "Float", "Apex Call: seconds the summoned pack stays"),
-    "Protean_CallCooldown":        (0xA20, 180,  "Float", "Apex Call: seconds before the next call"),
+    "Protean_CallSeconds":         (0xA1F, 180,  "Float", "Apex Call: seconds the summoned pack stays (user 2026-11-14: was 60)"),
+    "Protean_CallCooldown":        (0xA20, 60,   "Float", "Apex Call: seconds before the next call (user 2026-11-14: was 180)"),
     "Protean_CallCountMult":       (0xA22, 1.0,  "Float", "Apex Call: multiplies the pack size (small 5, medium 3, large 2, mammoth and giant 1)"),
     "Protean_HammerfistDamageMult": (0xA18, 1.25, "Float", "Hammerfist damage as a multiple of Rending Claws' at the same Stamina and level"),
     "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
@@ -962,7 +962,7 @@ def main():
     power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Detect Dead",
           "In animal form, sense the dead and undead through walls, at a steady cost in Stamina. Cast again to stop.")
     power(CALL_POWER, "Protean_CallPower", "Call",
-          "In animal form, make your kind's call: a pack of the same animal comes to fight for you for a minute.")
+          "In animal form, make your kind's call: a pack of the same animal comes to fight for you for three minutes.")
     power(STALKER_POWER, "Protean_StalkPower", "Stalk",
           "In animal form, while on, keep still or walk to fade from sight; moving while hidden costs Stamina. Cast again to stop.")
     # Detect Dead as fire-and-forget: the game's held Detect Undead effects (DetectUndead*ConcSelf), same looks and

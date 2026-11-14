@@ -359,13 +359,13 @@ namespace protean::Call
 			return;
 		}
 		const int   count = Count(*c);
-		const float seconds = reg.Dial("Protean_CallSeconds", 60.0f);
+		const float seconds = reg.Dial("Protean_CallSeconds", 180.0f);
 		if (!c->npc) {
 			logger::error("call: '{}' has no NPC record to place", c->id);
 			return;
 		}
 		av->DamageActorValue(RE::ActorValue::kStamina, cost);
-		g_cooldown = reg.Dial("Protean_CallCooldown", 180.0f);
+		g_cooldown = reg.Dial("Protean_CallCooldown", 60.0f);
 		Noise(p, *c);
 		Place(p, *c, count, seconds);
 		logger::info("call: '{}' called {} for {:.0f} s", c->id, count, seconds);
