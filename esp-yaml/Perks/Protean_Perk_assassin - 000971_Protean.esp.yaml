@@ -5,6 +5,6 @@ Name:
   Value: 'Assassin'
 Description:
   TargetLanguage: English
-  Value: 'Your sneak attacks do ten times the damage against anyone who is not hostile to you. Consume a person while nobody can see you and it goes unnoticed: no crime, the alarm their death raised is called off, and their face goes on at once at no Stamina cost. Comes with Stealth Consume: for a minute, every person you kill with a melee sneak attack is consumed at once.'
+  Value: 'In human form, sneak attacks do ten times the damage to anyone not hostile to you. Consume someone unseen and it goes unnoticed: no crime, the alarm is called off, and their face goes on free. Stealth Consume: for a minute, melee sneak attack kills are consumed at once.'
 NumRanks: 1
 Playable: True

@@ -5,6 +5,6 @@ Name:
   Value: 'Shield'
 Description:
   TargetLanguage: English
-  Value: 'A shield of dark chitin grows from your left forearm while your weapons are drawn, and melts back when you put them away. It is worn in your left hand and blocks like a shield.'
+  Value: 'A shield of dark chitin grows from your left forearm while your weapons are drawn. Blocking with it stops all damage from the front, spells too, for 5 Stamina a hit. With no Stamina left it blocks nothing.'
 NumRanks: 1
 Playable: True

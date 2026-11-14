@@ -74,7 +74,7 @@ PERKS = {
     "tendril": (0x967, "Tendril", "Learn Tendril, a whip of flesh cast from either hand: it tears at health, drains "
                 "Stamina into you, yanks light foes to you and hauls you to large ones. Each lash costs Stamina.",
                 0.9, 2, []),
-    "predators_rush": (0x968, "Predator's Rush", "In your own form you move faster and jump far higher, and a held sprint keeps building speed "
+    "predators_rush": (0x968, "Predator's Rush", "In human form you move faster and jump far higher, and a held sprint keeps building speed "
                        "until it is dangerously fast. Sprinting still costs Stamina.", 0, 1.1,
                        ["preys_flight"]),
     "preys_flight": (0x969, "Prey's Flight", ("No fall damage. In human form, jump again in mid-air, hold Jump to glide, and power attack in the air "
@@ -83,12 +83,13 @@ PERKS = {
                         "magic resistance, in animal form, or in your own when you wear no body armor (clothes and robes are fine).", -0.8, 0.9,
                         ["regeneration", "devastator", "shield"]),
     # its place on the tree is for now (2026-11-05), mirroring the Blade's
-    "shield": (0xA0A, "Shield", "A shield of dark chitin grows from your left forearm while your weapons are drawn, and "
-               "melts back when you put them away. It is worn in your left hand and blocks like a shield.", -0.45, 2.7, []),
+    "shield": (0xA0A, "Shield", "A shield of dark chitin grows from your left forearm while your weapons are drawn. "
+               "Blocking with it stops all damage from the front, spells too, for 5 Stamina a hit. With no Stamina "
+               "left it blocks nothing.", -0.45, 2.7, []),
     "regeneration": (0x96B, "Regeneration", "Cast Regeneration to switch it on or off: while on, Stamina drains and "
                      "Health returns by the same amount.",
                      -0.9, 2, []),
-    "devastator": (0x96C, "Devastator", "In your own form, with full Stamina and at least two biomass boosts, cast "
+    "devastator": (0x96C, "Devastator", "In human form, with full Stamina and at least two biomass boosts, cast "
                    "Devastator: tendrils burst from your body, knocking down and tearing into every enemy within 30 "
                    "meters. Uses all your Stamina. Requires Rending Claws, Prey's Flight and Subtle Carapace.", 0, 3.4, []),
     # Deceiver
@@ -100,16 +101,14 @@ PERKS = {
     "metamorphosis": (0x96E, "Metamorphosis", "Out of a fight, in your own face and with full Stamina, reshape yourself: "
                       "choose a new race, face and body, keeping your skills and perks. Every bounty on you is cleared. "
                       "Uses all your Stamina.", -3.3, 1.9, []),
-    "inconspicuous": (0x96F, "Inconspicuous", "In your own form, every friendly person within 15 meters adds 5 to your "
+    "inconspicuous": (0x96F, "Inconspicuous", "In human form, every friendly person within 15 meters adds 5 to your "
                       "Sneak, up to 30: the bigger the crowd, the harder you are to notice.",
                       -1.9, 2, ["infected", "assassin"]),
     "infected": (0x970, "Infected", "Cast Infect to grow an infection (costs Stamina), then slip it into someone's "
                  "pocket: for a day they fight at your side. Only one person carries it at a time.", -1.4, 3.1, []),
-    "assassin": (0x971, "Assassin", "Your sneak attacks do ten times the damage against anyone who is not hostile "
-                 "to you. Consume a person while nobody "
-                 "can see you and it goes unnoticed: no crime, the alarm their death raised is called off, and their "
-                 "face goes on at once at no Stamina cost. Comes with Stealth Consume: for a minute, every person you kill "
-                 "with a melee sneak attack is consumed at once.",
+    "assassin": (0x971, "Assassin", "In human form, sneak attacks do ten times the damage to anyone not hostile to "
+                 "you. Consume someone unseen and it goes unnoticed: no crime, the alarm is called off, and their face "
+                 "goes on free. Stealth Consume: for a minute, melee sneak attack kills are consumed at once.",
                  -2.5, 3.3, []),
 }
 # Renowned victims (Sacrosanct's "feed on the powerful", the user's pick 2026-10-28; the list from the perk spec):
@@ -121,10 +120,9 @@ RENOWNED = ["ulfric stormcloak", "galmar", "general tullius", "legate rikke", "m
 # Second ranks: their own records, chained from the first rank (NextPerk); the menu shows them on the same node.
 # base id -> (local id, description)
 RANK2 = {
-    "survivor": (0x972, "Increase the amount of Health you gain while wearing an animal's form by an even greater "
-                 "amount, and add all of a tougher animal's extra Health. You always arrive in an animal's form at full "
-                 "Health. Consuming a body heals half your Health, and in the form of a herbivore or an omnivore you can "
-                 "eat plants to heal."),
+    "survivor": (0x972, "Even more Health in animal form, plus all of a tougher animal's extra Health, and you always "
+                 "arrive at full Health. Consuming a body heals half your Health, and as a herbivore or an omnivore you "
+                 "can eat plants to heal."),
     "predator": (0x973, "Your animal forms' power attacks also poison, 5 damage a second plus 0.3 per level, for 5 "
                  "seconds. The undead and Dwarven machines are immune."),
     "stalker": (0x974, "Stalk works in a fight too, once no enemy can see you: break their line of sight and keep "
