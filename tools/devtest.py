@@ -17,9 +17,12 @@ import subprocess
 import sys
 import time
 
-MO2_MOD = r"C:\Users\user\AppData\Local\ModOrganizer\Skyrim Special Edition\mods\Protean"
+MO2_MOD = os.path.join(os.environ.get("LOCALAPPDATA", ""), "ModOrganizer", "Skyrim Special Edition", "mods", "Protean")
 CMD = os.path.join(MO2_MOD, "SKSE", "Plugins", "Protean.cmd")
-LOG = r"C:\Users\user\OneDrive\Documents\My Games\Skyrim Special Edition\SKSE\Protean.log"
+# Documents may live under OneDrive
+_DOCS = next((d for d in (os.path.join(os.environ.get("USERPROFILE", ""), "OneDrive", "Documents"),
+                          os.path.join(os.environ.get("USERPROFILE", ""), "Documents")) if os.path.isdir(d)), "")
+LOG = os.path.join(_DOCS, "My Games", "Skyrim Special Edition", "SKSE", "Protean.log")
 GAME = "C:/Games/steamapps/common/Skyrim Special Edition"
 # Git's bash: a bare "bash" from Python finds Windows' own (WSL) first, which prints nothing here
 BASH = r"C:\Program Files\Git\bin\bash.exe" if os.path.exists(r"C:\Program Files\Git\bin\bash.exe") else "bash"

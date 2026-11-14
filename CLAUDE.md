@@ -29,7 +29,7 @@ docs/INTEGRATION.md  the contract for mods built on Protean
 
 ## Building and installing
 
-- MO2 mod folder: `C:/Users/user/AppData/Local/ModOrganizer/Skyrim Special Edition/mods/Protean`.
+- MO2 mod folder: `%LOCALAPPDATA%/ModOrganizer/Skyrim Special Edition/mods/Protean`.
   Test profile: MO2 `Protean`.
 - `python -I tools/build_plugin.py`, then `cmd /c tools\build.bat "<mod folder>"`.
 - **Installing fails while Skyrim runs.** If the game is running, build without the folder and install
@@ -50,5 +50,5 @@ docs/INTEGRATION.md  the contract for mods built on Protean
   `<number> <command> [arg]` to the installed `SKSE/Plugins/Protean.cmd`; numbers must increase and stay
   below 2,147,483,647 (use `date +%s`, then +1 per line). Commands: see `Run()` in `src/Dev.cpp`
   (transform, revert, learn, anim, graph, dial, sound, spawn, attack, leap, fly, cc...).
-- Log: `C:/Users/user/OneDrive/Documents/My Games/Skyrim Special Edition/SKSE/Protean.log`.
+- Log: `<Documents>/My Games/Skyrim Special Edition/SKSE/Protean.log` (Documents is under OneDrive on the dev machine).
 - Release builds must have `Commands=0` (`tools/package.py` does it).

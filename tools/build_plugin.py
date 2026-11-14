@@ -546,7 +546,7 @@ def main():
     write(os.path.join(y, "RecordData.yaml"),
           "SpriggitSource:\n  PackageName: Spriggit.Yaml.Skyrim\n  Version: 0.41\n"
           "ModKey: %s\nGameRelease: SkyrimSE\nModHeader:\n  Flags:\n  - Small\n  Stats:\n    Version: 1.7\n"
-          "  Author: NiamosStyle mods\n  Description: Protean - animal shapeshifting\n"
+          "  Author: NiamosStyle\n  Description: Protean - animal shapeshifting\n"
           "  MasterReferences:\n  - Master: Skyrim.esm\n    FileSize: 0\n" % PLUGIN)
 
     # One shared Script-archetype effect: every power is a self-cast spell using it; the SKSE plugin

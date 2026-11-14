@@ -1,6 +1,7 @@
 # Preview renders to files (no window needed): preview(name, show=[objects], target, rot_deg, dist)
 import bpy, mathutils, os
-OUT = r"C:\Users\user\AppData\Local\Temp\claude\8ebe18ea4c2d0b20\90dd2234-655e-4455-a606-f11d4cc1e8a7\scratchpad"
+OUT = os.path.join(os.environ.get("TEMP", "."), "protean_previews")
+os.makedirs(OUT, exist_ok=True)
 
 def preview(name, show, target, rot_deg, dist, lens=50, size=(1000, 1000), color='MATERIAL'):
     sc = bpy.data.scenes["Claws"]
