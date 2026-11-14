@@ -214,6 +214,8 @@
   "Protean_Carapace2Magic": 2569,
   "Protean_ShieldBlockCost": 2576,
   "Protean_ShieldWardAngle": 2577,
+  "Protean_ApexDamageBase": 2589,
+  "Protean_ApexDamagePerLevel": 2590,
   "Protean_HammerfistDamageMult": 2584,
   "Protean_HammerfistSwingCost": 2585,
   "Protean_HammerfistSlamRadius": 2586,

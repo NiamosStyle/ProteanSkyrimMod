@@ -605,13 +605,13 @@ namespace protean::Shift
 
 		// armour and damage dials, as the player changes: what was added is kept in the co-save and taken off
 		// on changing back, so a dial changed meanwhile cannot leave anything behind
-		void AddDialStats(RE::PlayerCharacter* a_p)
+		void AddDialStats(RE::PlayerCharacter* a_p, const Creature& a_c)
 		{
 			auto&       reg = Registry::Get();
 			auto&       s = State::Get();
 			auto*       av = a_p->AsActorValueOwner();
 			s.armorBonus = reg.Dial("Protean_ArmorBonus", 0.0f);
-			s.damageBonus = reg.Dial("Protean_DamageMult", 1.0f) - 1.0f + Predator::DamageShare(a_p);
+			s.damageBonus = reg.Dial("Protean_DamageMult", 1.0f) - 1.0f + Predator::DamageShare(a_p, a_c.race);
 			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kDamageResist, s.armorBonus);
 			av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kAttackDamageMult, s.damageBonus);
 		}
@@ -726,7 +726,7 @@ namespace protean::Shift
 		p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth, bonus);
 		PutOnMarkers(p, a_c);
 		SetHeadTracking(false);
-		AddDialStats(p);
+		AddDialStats(p, a_c);
 		if (a_c.swims) {
 			// the fish drowned underwater without it (measured); the same value an Argonian or a potion raises
 			p->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kWaterBreathing, 1.0f);

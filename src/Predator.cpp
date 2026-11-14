@@ -51,12 +51,21 @@ namespace protean::Predator
 		};
 	}
 
-	float DamageShare(RE::PlayerCharacter* a_p)
+	float DamageShare(RE::PlayerCharacter* a_p, const RE::TESRace* a_race)
 	{
 		if (!Evolve::Has("predator")) {
 			return 0.0f;
 		}
-		return std::min(Dial("Protean_PredatorDamagePerLevel", 0.02f) * a_p->GetLevel(), Dial("Protean_PredatorDamageMax", 1.0f));
+		float share = std::min(Dial("Protean_PredatorDamagePerLevel", 0.02f) * a_p->GetLevel(), Dial("Protean_PredatorDamageMax", 1.0f));
+		if (a_race && a_race->data.unarmedDamage > 0.0f && Evolve::Has("apex")) {
+			const float floor = Dial("Protean_ApexDamageBase", 17.0f) + Dial("Protean_ApexDamagePerLevel", 2.6f) * a_p->GetLevel();
+			const float needed = floor / a_race->data.unarmedDamage - 1.0f;
+			if (needed > share) {
+				logger::info("apex: base hit {:.1f} lifted to {:.1f} (x{:.2f})", a_race->data.unarmedDamage, floor, needed + 1.0f);
+				share = needed;
+			}
+		}
+		return share;
 	}
 
 	void Install()

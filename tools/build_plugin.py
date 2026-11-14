@@ -54,7 +54,7 @@ PERKS = {
     "stalker": (0x964, "Stalker", "In animal form, open Favorites to switch on Stalk: stand still or walk for a moment "
                 "out of a fight to fade from sight. Moving while hidden costs Stamina (running twice as much), standing "
                 "still is free; sprinting, being hit or attacking ends it, and a bite from hiding does double damage.", 1.4, 1.9, ["apex"]),
-    "apex": (0x965, "Apex", "Take the form of a dragon. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
+    "apex": (0x965, "Apex", "Animals treat you as one of their own in any form, your animal forms hit at least as hard as a two-hander of your level, and in animal form you can call a pack of your kind to fight for you. Requires Survivor, Predator and Stalker.", 2.3, 3.4, []),
     # Hunter
     "rending_claws": (0x966, "Rending Claws", "Claws grow from your hands, a weapon for each hand. They strike hardest when your Stamina is full, and every swing costs Stamina.",
                       0.8, 0.9, ["tendril", "devastator", "blade", "hammerfist"]),
@@ -278,6 +278,8 @@ GLOBALS = {
     "Protean_ShieldWardAngle":     (0xA11, 60,   "Float", "Shield: a spell is stopped when its caster is within this many degrees of where the player faces"),
     # the Hammerfist (set by the Claude on the user's brief, 2026-11-05; to be tuned in play): the claws' damage (it
     # follows the Stamina bar) times a mace's lead over a sword (vanilla steel: 10 against 8), heavier swings
+    "Protean_ApexDamageBase":      (0xA1D, 17,   "Float", "Apex: an animal's hit is lifted to at least this + Protean_ApexDamagePerLevel x level (a two-hander's hit, user 2026-11-14)"),
+    "Protean_ApexDamagePerLevel":  (0xA1E, 2.6,  "Float", "Apex: the per-level part of the damage floor"),
     "Protean_HammerfistDamageMult": (0xA18, 1.25, "Float", "Hammerfist damage as a multiple of Rending Claws' at the same Stamina and level"),
     "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
     "Protean_HammerfistSlamRadius": (0xA1A, 300, "Float", "Hammerfist: a power swing that strikes nothing staggers the enemies within this of where it lands"),
