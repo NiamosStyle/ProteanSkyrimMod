@@ -190,15 +190,52 @@ def sinew(bm, shoulder, elbow, wrist, a, up, side, root, neck):
     return f
 
 
-def make_concept(variant="barbed"):
+def palm_frame():
+    """The palm's centre, its outward normal (the side a spell leaves from), and the hand's line (wrist to fingers)."""
+    arm = bpy.data.objects["MaleBody_1.nif:ARMATURE"]
+    mw = arm.matrix_world
+    b = arm.data.bones
+    h = lambda n: mw @ b[n].head_local
+    w, f1, f2, f4 = h("NPC R Hand [RHnd]"), h("NPC R Finger10 [RF10]"), h("NPC R Finger20 [RF20]"), h("NPC R Finger40 [RF40]")
+    along = (f2 - w).normalized()
+    across = (f1 - f4).normalized()
+    n = along.cross(across).normalized()
+    thumb = h("NPC R Finger02 [RF02]")
+    if (thumb - w).dot(n) < 0:   # the thumb tip curls toward the palm side
+        n = -n
+    centre = w + (f2 - w) * 0.55
+    return centre, n, along
+
+
+PALM_OUT = 20.0   # "palm": how far the point stands out of the palm (short: the arm hangs beside the thigh)
+FINGER_OUT = 30.0 # "fingers": how far past the palm's centre along the fingers
+
+
+def make_concept(variant="barbed", mount="back"):
+    """mount: "back" along the back of the forearm and past the knuckles (first concepts); "palm" straight out of the
+    palm, pointing where a spell is cast; "fingers" out of the heel of the palm and along the fingers."""
     shoulder, elbow, wrist, a, up, side = arm_frame()
     L = (wrist - elbow).length
-    # the shaft grows out of the forearm's flesh a third of the way down and rides along its back
-    root = elbow + a * (L * 0.3) + up * (flesh_top(elbow + a * (L * 0.3), a, up) - SHAFT_R * 1.2)
-    tip = wrist + a * OUT_PAST + up * (flesh_top(wrist, a, up) * 0.75)
+    if mount == "palm":
+        centre, n, along = palm_frame()
+        root = centre - n * 1.5 - along * 2.0
+        tip = centre + n * PALM_OUT
+    elif mount == "fingers":
+        centre, n, along = palm_frame()
+        nf = (n - a * n.dot(a)).normalized()   # the palm side of the forearm
+        at = elbow + a * (L * 0.55)
+        root = at + nf * (flesh_top(at, a, nf) - SHAFT_R * 1.2)
+        tip = centre + along * FINGER_OUT + n * 3.0
+    else:
+        # the shaft grows out of the forearm's flesh a third of the way down and rides along its back
+        root = elbow + a * (L * 0.3) + up * (flesh_top(elbow + a * (L * 0.3), a, up) - SHAFT_R * 1.2)
+        tip = wrist + a * OUT_PAST + up * (flesh_top(wrist, a, up) * 0.75)
+    ax = (tip - root).normalized()
+    u = (up - ax * up.dot(ax)).normalized() if abs(up.dot(ax)) < 0.95 else (side - ax * side.dot(ax)).normalized()
+    sd = ax.cross(u).normalized()
     bm = bmesh.new()
-    bone = set(harpoon(bm, variant, root, tip, a, up, side))
-    sinew(bm, shoulder, elbow, wrist, a, up, side, root, tip - a * POINT)
+    bone = set(harpoon(bm, variant, root, tip, ax, u, sd))
+    sinew(bm, shoulder, elbow, wrist, a, up, side, root, tip - ax * POINT)
     for f in bm.faces:
         f.material_index = 0 if f in bone else 1
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
@@ -219,19 +256,26 @@ def make_concept(variant="barbed"):
     fl.diffuse_color = (0.55, 0.30, 0.28, 1)
     me.materials.append(bonem); me.materials.append(sin)
     for f in me.polygons: f.use_smooth = True
-    return name, variant
+    return name, variant, mount
 
 
-def shots(variants=("barbed",)):
-    """Each head on the arm: the whole arm from the front and from behind, and the head close up (needs preview_t)."""
+def look(name, show, target, eye):
+    q = (target - eye).to_track_quat('-Z', 'Y')
+    return preview(name, show, target, [math.degrees(x) for x in q.to_euler()], (eye - target).length)
+
+
+def shots(mounts=("palm", "fingers")):
+    """The whole arm from the front and behind, the hand from the palm side, and the casting view: looking back at
+    the palm from where the spell goes (needs preview_t)."""
     shoulder, elbow, wrist, a, up, side = arm_frame()
+    centre, n, along = palm_frame()
     mid = (shoulder + wrist + a * 25) / 2
     show = ["MaleUnderwearBody:0", "HandMaleBig3rd", "TendrilFlesh", "TendrilConcept"]
     out = []
-    for v in variants:
-        make_concept(v)
-        out.append(preview("tendril_%s_front" % v, show, mid + Vector((0, 0, 8)), (90, 0, 165), 125))
-        out.append(preview("tendril_%s_back" % v, show, mid + Vector((0, 0, 8)), (80, 0, 30), 125))
-        out.append(preview("tendril_%s_head" % v, ["TendrilConcept", "HandMaleBig3rd", "TendrilFlesh"],
-                           wrist + a * 12, (75, 0, 120), 70))
+    for m in mounts:
+        make_concept("barbed", m)
+        out.append(preview("tendril_%s_front" % m, show, mid + Vector((0, 0, 8)), (90, 0, 165), 125))
+        out.append(preview("tendril_%s_back" % m, show, mid + Vector((0, 0, 8)), (80, 0, 30), 125))
+        out.append(look("tendril_%s_palm" % m, show, centre + along * 8, centre + along * 8 + Vector((0.35, 1.0, 0.1)).normalized() * 60))
+        out.append(look("tendril_%s_cast" % m, show, centre + along * 8, centre + along * 8 + Vector((1.0, 0.5, 0.15)).normalized() * 60))
     return out
