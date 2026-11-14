@@ -77,6 +77,33 @@ namespace protean::Apex
 				}
 			}
 		}
+		// Some animals have no faction of their own, only broad groups left out above (mudcrab, ash hopper, horse, fox,
+		// death hound, boar: found when mudcrabs still attacked, 2026-11-14). Apex's own kin faction covers every animal:
+		// the player is in it, and each animal of a form's race that comes near is added (members are allies).
+		if (auto* kin = Registry::Get().KinFaction()) {
+			if (!a_p->IsInFaction(kin)) {
+				a_p->AddToFaction(kin, 0);
+				++joined;
+			}
+			if (auto* pl = RE::ProcessLists::GetSingleton()) {
+				int added = 0;
+				for (auto& h : pl->highActorHandles) {
+					auto a = h.get();
+					if (!a || a.get() == a_p || a->IsDead() || a->IsInFaction(kin) || !Registry::Get().ByRace(a->GetRace())) {
+						continue;
+					}
+					a->AddToFaction(kin, 0);
+					auto target = a->GetActorRuntimeData().currentCombatTarget.get();
+					if (target && target.get() == a_p) {
+						a->StopCombat();
+					}
+					++added;
+				}
+				if (added > 0) {
+					logger::info("apex: {} nearby animal(s) made kin", added);
+				}
+			}
+		}
 		if (joined > 0) {
 			// animals already after the player lose interest
 			if (auto* pl = RE::ProcessLists::GetSingleton()) {

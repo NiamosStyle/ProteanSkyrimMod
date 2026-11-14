@@ -93,6 +93,7 @@ namespace protean
 		_starter = dh->LookupForm<RE::SpellItem>(j.at("starter").get<RE::FormID>(), plugin);
 		_revert = dh->LookupForm<RE::SpellItem>(j.at("revert").get<RE::FormID>(), plugin);
 		_beast = dh->LookupForm<RE::TESFaction>(j.value("beastFaction", 0u), plugin);
+		_kin = dh->LookupForm<RE::TESFaction>(j.value("kinFaction", 0u), plugin);
 		_witness = dh->LookupForm<RE::TESFaction>(j.value("witnessFaction", 0u), plugin);
 		if (!_beast || !_witness) {
 			logger::warn("beast/witness factions missing: witnesses will not keep their hostility");

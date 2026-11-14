@@ -68,6 +68,7 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* Starter() const { return _starter; }
 		[[nodiscard]] RE::SpellItem* Revert() const { return _revert; }
 		[[nodiscard]] RE::TESFaction* BeastFaction() const { return _beast; }
+		[[nodiscard]] RE::TESFaction* KinFaction() const { return _kin; }  // Apex: the player and nearby animals of the forms' races
 		[[nodiscard]] RE::TESFaction* WitnessFaction() const { return _witness; }
 		[[nodiscard]] RE::SpellItem* FacePower() const { return _facePower; }
 		[[nodiscard]] RE::SpellItem* Evolution() const { return _evolution; }  // opens the perk tree
@@ -185,6 +186,7 @@ namespace protean
 		std::set<std::string, std::less<>> _perksBuilt;
 		RE::TESFaction*       _disguise{ nullptr };
 		RE::TESFaction*       _exposed{ nullptr };
+		RE::TESFaction*       _kin{ nullptr };
 		std::vector<RE::BGSKeyword*> _openKeywords;
 		std::vector<Creature> _creatures;
 	};

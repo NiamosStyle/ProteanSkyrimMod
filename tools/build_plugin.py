@@ -25,6 +25,7 @@ EFFECT, STARTER, REVERT, TOME = 0x800, 0x801, 0x802, 0x803
 # 0x804 was the hearts' effect, and FIRST_CREATURE + 2 * index each creature's heart, until 2026-10-28 (bodies are
 # consumed instead): not reused.
 BEAST_FACTION, WITNESS_FACTION = 0x805, 0x806
+KIN_FACTION = 0xA25  # Apex: the player and every nearby animal of a form's race (src/Apex.cpp); members are allies
 FACE_POWER, DISGUISE_FACTION, EXPOSED_FACTION = 0x807, 0x808, 0x809  # face stealing
 # Integration markers (docs/INTEGRATION.md). Per form, by its index in data/creatures.json (stable):
 # keyword Protean_Form_<id> = FORM_KEYWORD + index, its effect FORM_EFFECT + index, the hidden ability FORM_ABILITY + index.
@@ -576,6 +577,12 @@ def main():
               "Relations:\n- Target: %s:%s\n  Reaction: Enemy\n" % (fid(target), PLUGIN)
               + "Flags:\n- HiddenFromPC\nVendorValues: {}\n")
 
+    # Apex's kin: allies of each other (the player, and the animals Protean adds as they come near)
+    write(os.path.join(y, "Factions", "Protean_KinFaction - %s_%s.yaml" % (fid(KIN_FACTION), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_KinFaction\n" % (fid(KIN_FACTION), PLUGIN)
+          + "Name:\n  TargetLanguage: English\n"
+          "Relations:\n- Target: %s:%s\n  Reaction: Ally\n" % (fid(KIN_FACTION), PLUGIN)
+          + "Flags:\n- HiddenFromPC\nVendorValues: {}\n")
     faction(BEAST_FACTION, "Protean_BeastFaction", WITNESS_FACTION)
     faction(WITNESS_FACTION, "Protean_WitnessFaction", BEAST_FACTION)
     # Face stealing: same idea. The player is in Protean_DisguiseFaction while wearing a stolen face; whoever saw
@@ -1114,7 +1121,7 @@ def main():
 
     out = os.path.join(ROOT, "data", "SKSE", "Plugins", "Protean", "creatures.json")
     write(out, json.dumps({"plugin": PLUGIN, "effect": EFFECT, "starter": STARTER, "revert": REVERT,
-                           "tome": TOME, "beastFaction": BEAST_FACTION, "witnessFaction": WITNESS_FACTION,
+                           "tome": TOME, "beastFaction": BEAST_FACTION, "kinFaction": KIN_FACTION, "witnessFaction": WITNESS_FACTION,
                            "facePower": FACE_POWER, "disguiseFaction": DISGUISE_FACTION, "exposedFaction": EXPOSED_FACTION,
                            "evolution": EVOLUTION,
                            "claws": {"weapon": CLAW_WEAPON, "right": CLAW_ARMO_R, "left": CLAW_ARMO_L},
