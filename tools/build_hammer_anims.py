@@ -42,7 +42,12 @@ COPY = {"h2h_attackpowerforwardrighthand.hkx", "h2h_attackrightpowerforward.hkx"
 # 2026-11-13, second try (user): the two game files look fine, the written left mirror still goes crazy. Test 2: the
 # left slot holds the game's right-hand slam passed through PyNifly's reader and writer UNCHANGED (no retiming, no
 # mirror; the right arm slams). Crazy -> the writer itself is at fault; fine -> my retiming/mirroring is.
-ROUND_TRIP = {"h2h_attackpowerforwardlefthand.hkx"}
+ROUND_TRIP = set()
+# Result (user, 2026-11-13): the round trip played fine, so the writer is sound and the fault was mine: the block
+# duration. Havok reads a frame within a block as (time into the block) / blockDuration * (maxFramesPerBlock - 1),
+# so blockDuration must be (maxFramesPerBlock - 1) frames long (the game's files: 255 / 30 = 8.5 s), whatever the
+# clip's length. These clips had it set to the clip's own length (1.67 s): the game read frames ~5 times too fast,
+# far past the end. (The glide had it 24 s against 25.5: 6% fast, unseen.)
 
 
 def qmul(a, b):
@@ -170,7 +175,8 @@ def clips(person=""):
                     local = to_local(names, parents, mw)
                 new.append(local)
             an.num_frames, an.duration, an.frame_duration = n, (n - 1) / FPS, 1.0 / FPS
-            an.num_blocks, an.block_duration, an.max_frames_per_block = 1, (n - 1) / FPS, 256
+            an.num_blocks, an.max_frames_per_block = 1, 256
+            an.block_duration = (an.max_frames_per_block - 1) / FPS
             for b, tr in enumerate(an.tracks):
                 tr.translations = [list(new[k][b][0]) for k in range(n)]
                 tr.rotations = [list(new[k][b][1]) for k in range(n)]
