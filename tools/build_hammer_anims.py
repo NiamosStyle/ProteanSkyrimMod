@@ -39,6 +39,10 @@ JOBS = {
 # glide it wrote is slow). Test: the right hand's and both hands' are the game's own files, untouched (their fists
 # land 0.07 s and 0.09 s before the HitFrame; the right one ends 0.3 s early); only the left (a mirror) is written.
 COPY = {"h2h_attackpowerforwardrighthand.hkx", "h2h_attackrightpowerforward.hkx"}
+# 2026-11-13, second try (user): the two game files look fine, the written left mirror still goes crazy. Test 2: the
+# left slot holds the game's right-hand slam passed through PyNifly's reader and writer UNCHANGED (no retiming, no
+# mirror; the right arm slams). Crazy -> the writer itself is at fault; fine -> my retiming/mirroring is.
+ROUND_TRIP = {"h2h_attackpowerforwardlefthand.hkx"}
 
 
 def qmul(a, b):
@@ -115,6 +119,17 @@ def clips(person=""):
         ref_w = world(names, parents, ref)
         hand = {"R": names.index("NPC R Hand [RHnd]"), "L": names.index("NPC L Hand [LHnd]")}
         for target, (source, side, land, length, mirrored) in JOBS.items():
+            if target in ROUND_TRIP:
+                p = os.path.join(tmp, "rt_" + source)
+                with open(p, "wb") as f:
+                    f.write(bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source))
+                an = hkx.load_skyrim_animation(p)
+                q = os.path.join(tmp, "rt_out_" + target)
+                hkx.write_skyrim_animation(q, an, ptr_size=8)
+                with open(q, "rb") as f:
+                    out[target] = f.read()
+                print("  %s%s <- %s through PyNifly unchanged (test)" % (person, target, source))
+                continue
             if target in COPY:
                 out[target] = bsa.read(ANIMATIONS, "meshes/actors/character/" + person + "animations/" + source)
                 print("  %s%s <- %s, the game's own file" % (person, target, source))
