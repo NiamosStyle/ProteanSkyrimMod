@@ -19,11 +19,16 @@ namespace protean::Carapace
 		float Dial(std::string_view a_name, float a_fallback) { return Registry::Get().Dial(a_name, a_fallback); }
 
 		// light body armor of these materials leaves the carapace on (the user's list, 2026-10-25: fur, hide, leather,
-		// chitin, dragonscale): their keywords, Skyrim.esm and Dragonborn.esm
+		// chitin, dragonscale; 2026-11-14 added the shrouded armors, Thieves Guild, Guild Master's, Linwe's, Morag Tong
+		// and Forsworn, all tempered with leather alone, but not the leather-tempered sets with metal on them, such as
+		// the hold guards'): their keywords, Skyrim.esm and Dragonborn.esm
 		constexpr std::string_view kNatural[] = { "ArmorMaterialHide", "ArmorMaterialLeather", "ArmorMaterialDragonscale",
-			"DLC2ArmorMaterialChitinLight" };
-		// the game's Fur Armor has no material keyword: its four cuirasses, Skyrim.esm
-		constexpr RE::FormID kFur[] = { 0x06F393, 0x10594B, 0x10594D, 0x10594F };
+			"DLC2ArmorMaterialChitinLight",
+			"ArmorDarkBrotherhood",              // Shrouded, Ancient Shrouded and Worn Shrouded Armor
+			"ArmorMaterialThievesGuild", "ArmorMaterialThievesGuildLeader", "DLC2ArmorMaterialMoragTong",
+			"ArmorMaterialForsworn", "ArmorMaterialMS02Forsworn" };   // Forsworn Armor, Armor of the Old Gods
+		// cuirasses with no material keyword: the game's Fur Armor (four) and Linwe's Armor, Skyrim.esm
+		constexpr RE::FormID kFur[] = { 0x06F393, 0x10594B, 0x10594D, 0x10594F, 0x108544 };
 
 		bool WearsBodyArmor(RE::PlayerCharacter* a_p)
 		{

@@ -381,7 +381,7 @@ namespace protean::Devastator
 			return;
 		}
 		if (Shift::ActiveCreature()) {
-			Shift::Notify("Devastator needs your own form.");
+			Shift::Notify("Devastator needs human form.");
 			return;
 		}
 		const auto need = static_cast<std::uint32_t>(Dial("Protean_DevastatorStacks", 2.0f));
