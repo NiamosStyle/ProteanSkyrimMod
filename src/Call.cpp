@@ -66,20 +66,71 @@ namespace protean::Call
 			vm->DispatchMethodCall2(handle, "Actor", "SetPlayerTeammate", RE::MakeFunctionArguments(std::move(a_on), std::move(a_on)), cb);
 		}
 
+		// The Papyrus call that makes an actor keep station beside another (the game's own formation-following, used
+		// for followers): offsets are relative to the target's facing.
+		void Follow(RE::Actor* a_actor, RE::Actor* a_target, float a_x, float a_y)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			if (!vm) {
+				return;
+			}
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_actor->GetFormType(), a_actor);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchMethodCall2(handle, "Actor", "KeepOffsetFromActor",
+				RE::MakeFunctionArguments(std::move(a_target), std::move(a_x), std::move(a_y), 0.0f, 0.0f, 0.0f, 0.0f, 250.0f, 180.0f), cb);
+		}
+
+		void StopFollowing(RE::Actor* a_actor)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			if (!vm) {
+				return;
+			}
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_actor->GetFormType(), a_actor);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchMethodCall2(handle, "Actor", "ClearKeepOffsetFromActor", RE::MakeFunctionArguments(), cb);
+		}
+
+		// Taking a helper away is done in two steps, never a delete: the first call-time (2026-11-14) deleted the
+		// animals mid-fight and the game crashed (an enemy's combat code still held them). Step 1: stop being a
+		// helper and have everyone drop them as a target. Step 2, a moment later: disable (they fade out).
+		std::vector<Member> g_leaving;
+
 		void Dismiss(RE::FormID a_id)
 		{
-			if (auto* a = RE::TESForm::LookupByID<RE::Actor>(a_id)) {
-				SetTeammate(a, false);
-				if (auto* f = Registry::Get().BeastFaction()) {
-					a->RemoveFromFaction(f);
+			auto* a = RE::TESForm::LookupByID<RE::Actor>(a_id);
+			if (!a) {
+				return;
+			}
+			SetTeammate(a, false);
+			StopFollowing(a);
+			if (auto* f = Registry::Get().BeastFaction()) {
+				a->RemoveFromFaction(f);
+			}
+			if (a->IsDead()) {
+				return;  // a fallen helper stays as the body it is
+			}
+			a->StopCombat();
+			if (auto* pl = RE::ProcessLists::GetSingleton()) {
+				pl->StopCombatAndAlarmOnActor(a, false);
+			}
+			g_leaving.push_back({ a_id, 1.0f });
+		}
+
+		void FinishLeaving(float a_delta)
+		{
+			for (auto it = g_leaving.begin(); it != g_leaving.end();) {
+				it->left -= a_delta;
+				if (it->left > 0.0f) {
+					++it;
+					continue;
 				}
-				if (a->IsDead()) {
-					return;  // a fallen helper stays as the body it is
+				if (auto* a = RE::TESForm::LookupByID<RE::Actor>(it->id); a && !a->IsDead()) {
+					a->StopCombat();
+					a->Disable();
+					logger::info("call: {:08X} '{}' goes", it->id, a->GetName());
 				}
-				a->StopCombat();
-				a->Disable();
-				a->SetDelete(true);
-				logger::info("call: {:08X} '{}' goes", a_id, a->GetName());
+				it = g_leaving.erase(it);
 			}
 		}
 
@@ -208,6 +259,8 @@ namespace protean::Call
 					actor->AddToFaction(f, 0);
 				}
 				SetTeammate(actor, true);
+				// they keep station behind the player, spread side to side
+				Follow(actor, a_p, (static_cast<float>(i) - (static_cast<float>(a_count) - 1.0f) / 2.0f) * 130.0f, -170.0f);
 				g_pack.push_back({ actor->GetFormID(), a_seconds });
 				logger::info("call: placed {:08X} '{}' {} ({:.0f} away)", actor->GetFormID(), actor->GetName(), tier ? tier : "ON THE PLAYER (no open spot)",
 					std::sqrt((spot.x - here.x) * (spot.x - here.x) + (spot.y - here.y) * (spot.y - here.y)));
@@ -243,6 +296,7 @@ namespace protean::Call
 		if (g_cooldown > 0.0f) {
 			g_cooldown = std::max(0.0f, g_cooldown - a_delta);
 		}
+		FinishLeaving(a_delta);
 		for (auto it = g_pack.begin(); it != g_pack.end();) {
 			it->left -= a_delta;
 			if (it->left <= 0.0f) {
