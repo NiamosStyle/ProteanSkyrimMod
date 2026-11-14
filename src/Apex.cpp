@@ -2,6 +2,7 @@
 
 #include "Evolve.h"
 #include "Registry.h"
+#include "Shift.h"
 
 namespace protean::Apex
 {
@@ -49,7 +50,21 @@ namespace protean::Apex
 			return;
 		}
 		g_wait = 1.0f;
-		if (!a_p || !Owned()) {
+		if (!a_p) {
+			return;
+		}
+		// the Call power is known only by an animal with the perk
+		if (auto* power = Registry::Get().CallPower()) {
+			const bool want = Owned() && Shift::ActiveCreature();
+			if (want != a_p->HasSpell(power)) {
+				if (want) {
+					a_p->AddSpell(power);
+				} else {
+					a_p->RemoveSpell(power);
+				}
+			}
+		}
+		if (!Owned()) {
 			return;
 		}
 		int joined = 0;

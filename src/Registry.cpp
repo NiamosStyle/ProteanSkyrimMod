@@ -149,6 +149,7 @@ namespace protean
 		_stalkerFade = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("fade", 0u), plugin);
 		_stalkerAmbush = dh->LookupForm<RE::BGSPerk>(j.value("stalker", nlohmann::json::object()).value("ambush", 0u), plugin);
 		_stalkerPower = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("power", 0u), plugin);
+		_callPower = dh->LookupForm<RE::SpellItem>(j.value("call", nlohmann::json::object()).value("power", 0u), plugin);
 		_animalArms = dh->LookupForm<RE::BGSPerk>(j.value("skills", nlohmann::json::object()).value("arms", 0u), plugin);
 		_deft = dh->LookupForm<RE::BGSPerk>(j.value("skills", nlohmann::json::object()).value("deft", 0u), plugin);
 		if (!_animalArms || !_deft || _animalArms->perkEntries.size() < 2 || _deft->perkEntries.empty()) {
@@ -241,6 +242,10 @@ namespace protean
 			cr.name = c.at("name");
 			cr.size = c.value("size", "medium");
 			cr.cameraHeight = c.value("camera_height", 60.0f);
+			if (c.contains("npc_form")) {
+				const auto& nf = c["npc_form"];
+				cr.npc = dh->LookupForm<RE::TESNPC>(nf.at("id").get<RE::FormID>(), nf.at("file").get<std::string>());
+			}
 			if (c.contains("skin")) {
 				const auto& sk = c["skin"];
 				cr.skin = dh->LookupForm<RE::TESObjectARMO>(sk.at("id").get<RE::FormID>(), sk.at("file").get<std::string>());

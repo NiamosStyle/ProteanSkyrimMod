@@ -6,6 +6,7 @@
 
 #include "Apex.h"
 #include "Attacks.h"
+#include "Call.h"
 #include "Camera.h"
 #include "Carapace.h"
 #include "Blade.h"
@@ -50,6 +51,7 @@ namespace protean::Hooks
 				Consume::OnFrame(a_this, a_delta);
 				Stalker::OnFrame(a_this, a_delta);
 				Apex::OnFrame(a_this, a_delta);
+				Call::OnFrame(a_delta);
 				Skills::OnFrame(a_this, a_delta);
 				Deceiver::OnFrame(a_this, a_delta);
 				Devastator::OnFrame(a_this);

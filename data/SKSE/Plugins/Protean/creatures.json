@@ -77,6 +77,7 @@
   "subtle_carapace_2": 2421
  },
  "perksBuilt": [
+  "apex",
   "assassin",
   "blade",
   "borrowed_visage",
@@ -107,6 +108,9 @@
   "fade": 2483,
   "ambush": 2484,
   "power": 2488
+ },
+ "call": {
+  "power": 2593
  },
  "skills": {
   "arms": 2491,
@@ -216,6 +220,9 @@
   "Protean_ShieldWardAngle": 2577,
   "Protean_ApexDamageBase": 2589,
   "Protean_ApexDamagePerLevel": 2590,
+  "Protean_CallSeconds": 2591,
+  "Protean_CallCooldown": 2592,
+  "Protean_CallCountMult": 2594,
   "Protean_HammerfistDamageMult": 2584,
   "Protean_HammerfistSwingCost": 2585,
   "Protean_HammerfistSlamRadius": 2586,
@@ -460,6 +467,10 @@
    ],
    "height": 1.0,
    "npc": "EncWolf",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146110
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 787195
@@ -558,6 +569,10 @@
    ],
    "height": 1.15,
    "npc": "EncWolfIce",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146111
+   },
    "reach": 120,
    "strike_angle": 50,
    "diet": "meat",
@@ -656,6 +671,10 @@
    ],
    "height": 1.0,
    "npc": "EncBanditWolf",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 908496
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 787195
@@ -720,6 +739,10 @@
    ],
    "height": 1.0,
    "npc": "EncDeer",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 850077
+   },
    "diet": "plants",
    "feed_event": ""
   },
@@ -776,6 +799,10 @@
    ],
    "height": 1.0,
    "npc": "EncElk",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146065
+   },
    "sprint": 40,
    "diet": "plants",
    "feed_event": ""
@@ -852,6 +879,10 @@
    ],
    "height": 0.6,
    "npc": "EncFox",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 534963
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 534964
@@ -900,6 +931,10 @@
    ],
    "height": 1.3,
    "npc": "EncHare",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 449693
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 449691
@@ -975,6 +1010,10 @@
    ],
    "height": 1.0,
    "npc": "EncDog",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146066
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 307913
@@ -1050,6 +1089,10 @@
    ],
    "height": 1.0,
    "npc": "EncGoatWild",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 191458
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 455288
@@ -1124,6 +1167,10 @@
    ],
    "height": 1.0,
    "npc": "EncCow",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146064
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 321412
@@ -1217,6 +1264,10 @@
    ],
    "height": 1.0,
    "npc": "EncBear",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146058
+   },
    "reach": 120,
    "strike_angle": 50,
    "taps": [
@@ -1314,6 +1365,10 @@
    ],
    "height": 1.0,
    "npc": "EncBearCave",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146059
+   },
    "reach": 120,
    "strike_angle": 50,
    "taps": [
@@ -1409,6 +1464,10 @@
    ],
    "height": 1.0,
    "npc": "EncBearSnow",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146060
+   },
    "reach": 120,
    "strike_angle": 50,
    "taps": [
@@ -1513,6 +1572,10 @@
    ],
    "height": 1.0,
    "npc": "EncSabreCat",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146101
+   },
    "reach": 120,
    "strike_angle": 50,
    "taps": [
@@ -1617,6 +1680,10 @@
    ],
    "height": 1.0,
    "npc": "EncSabreCatSnow",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146102
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 645733
@@ -1725,6 +1792,10 @@
    ],
    "height": 1.0,
    "npc": "DLC1EncSabreCatDEAD",
+   "npc_form": {
+    "file": "Dawnguard.esm",
+    "id": 63384
+   },
    "skin": {
     "file": "Dawnguard.esm",
     "id": 15465
@@ -1803,6 +1874,10 @@
    ],
    "height": 1.0,
    "npc": "DLC1encDeathHound",
+   "npc_form": {
+    "file": "Dawnguard.esm",
+    "id": 50671
+   },
    "skin": {
     "file": "Dawnguard.esm",
     "id": 90062
@@ -1874,6 +1949,10 @@
    ],
    "height": 1.0,
    "npc": "DLC2EncBoar01",
+   "npc_form": {
+    "file": "Dragonborn.esm",
+    "id": 147515
+   },
    "skin": {
     "file": "Dragonborn.esm",
     "id": 147513
@@ -1954,6 +2033,10 @@
    ],
    "height": 1.0,
    "npc": "EncSkeever",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146103
+   },
    "diet": "both",
    "feed_event": ""
   },
@@ -1991,6 +2074,10 @@
    ],
    "height": 1.3,
    "npc": "EncChicken",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 692640
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 692636
@@ -2086,6 +2173,10 @@
    ],
    "height": 1.0,
    "npc": "DLC2EncAshHopper",
+   "npc_form": {
+    "file": "Dragonborn.esm",
+    "id": 112215
+   },
    "reach": 120,
    "strike_angle": 50,
    "taps": [
@@ -2179,6 +2270,10 @@
    ],
    "height": 1.0,
    "npc": "EncMudcrabMedium",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 933904
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 934074
@@ -2300,6 +2395,10 @@
    ],
    "height": 1.0,
    "npc": "EncChaurus",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 677376
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 364074
@@ -2444,6 +2543,10 @@
    ],
    "height": 1.0,
    "npc": "EncTroll",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146106
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 93924
@@ -2594,6 +2697,10 @@
    ],
    "height": 1.0,
    "npc": "EncTrollFrost",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146107
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 93924
@@ -2649,6 +2756,10 @@
    ],
    "height": 1.0,
    "npc": "EncHorseGrey",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 429421
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 550159
@@ -2725,6 +2836,10 @@
    ],
    "height": 1.0,
    "npc": "EncHorker",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146097
+   },
    "reach": 120,
    "strike_angle": 50,
    "sprint": 0,
@@ -2804,6 +2919,10 @@
    ],
    "height": 1.0,
    "npc": "EncMammothWild",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146100
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 365139
@@ -2894,6 +3013,10 @@
    ],
    "height": 1.0,
    "npc": "EncGiant01",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146094
+   },
    "skin": {
     "file": "Skyrim.esm",
     "id": 298384
@@ -3010,6 +3133,10 @@
    ],
    "height": 1.0,
    "npc": "EncWerewolf01",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146108
+   },
    "own_sprint": true,
    "diet": "meat",
    "feed_event": ""
@@ -3140,6 +3267,10 @@
    ],
    "height": 1.0,
    "npc": "DLC2EncWerebear",
+   "npc_form": {
+    "file": "Dragonborn.esm",
+    "id": 205489
+   },
    "own_sprint": true,
    "diet": "both",
    "feed_event": ""
@@ -3199,6 +3330,10 @@
    ],
    "height": 1.0,
    "npc": "EncSlaughterfish",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146104
+   },
    "reach": 120,
    "strike_angle": 50,
    "swims": true,
@@ -3269,6 +3404,10 @@
    ],
    "height": 1.0,
    "npc": "DLC1EncChaurusHunter",
+   "npc_form": {
+    "file": "Dawnguard.esm",
+    "id": 20996
+   },
    "skin": {
     "file": "Dawnguard.esm",
     "id": 20990
@@ -3343,6 +3482,10 @@
    ],
    "height": 1.0,
    "npc": "DLC1EncChaurusHunterFledgling",
+   "npc_form": {
+    "file": "Dawnguard.esm",
+    "id": 10657
+   },
    "skin": {
     "file": "Dawnguard.esm",
     "id": 10663
@@ -3438,6 +3581,10 @@
    ],
    "height": 1.0,
    "npc": "EncFrostbiteSpider",
+   "npc_form": {
+    "file": "Skyrim.esm",
+    "id": 146090
+   },
    "reach": 120,
    "strike_angle": 50,
    "rmb_spell": {

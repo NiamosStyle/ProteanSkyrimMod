@@ -1,3 +1,4 @@
+#include "Call.h"
 #include "Attacks.h"
 #include "Camera.h"
 #include "Claws.h"
@@ -80,6 +81,9 @@ namespace
 				}
 				if (spell && spell == reg.StalkerPower()) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Stalker::OnPowerCast(); });
+				}
+				if (spell && spell == reg.CallPower()) {
+					SKSE::GetTaskInterface()->AddTask([]() { protean::Call::OnCast(); });
 				}
 				if (spell && spell == reg.StealthPower()) {
 					SKSE::GetTaskInterface()->AddTask([]() { protean::Consume::OnStealthCast(); });

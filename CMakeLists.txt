@@ -26,6 +26,7 @@ add_commonlibsse_plugin(
 	SOURCES
 		src/main.cpp
 		src/Apex.cpp
+		src/Call.cpp
 		src/Attacks.cpp
 		src/Blade.cpp
 		src/Shield.cpp

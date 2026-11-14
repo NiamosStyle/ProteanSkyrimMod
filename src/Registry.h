@@ -29,6 +29,7 @@ namespace protean
 		std::vector<RE::TESFaction*>      factions;  // the factions this animal's own records share
 		std::vector<std::pair<int, int>>  ladder;    // (level, health) rungs from the vanilla NPC records
 		std::vector<Attack>               attacks;   // the animal's attack events (race record)
+		RE::TESNPC*                       npc{ nullptr };       // the vanilla animal's own NPC record (Apex: Call summons it)
 		RE::TESObjectARMO*                skin{ nullptr };      // the vanilla animal's own skin; null = the race's
 		float                             height{ 1.0f };       // the vanilla animal's size (Fox 0.6, Ice Wolf 1.15)
 		float                             reach{ 0.0f };        // player's melee reach in this form; 0 = the race's own
@@ -89,6 +90,7 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* PredatorPoison() const { return _predatorPoison; }  // Predator rank 2; its effect [0] damages health
 		[[nodiscard]] RE::SpellItem* StalkerFade() const { return _stalkerFade; }        // Stalker: the game's Invisibility, cast on the player
 		[[nodiscard]] RE::BGSPerk*   StalkerAmbush() const { return _stalkerAmbush; }    // Stalker: hidden, multiplies the bite from hiding
+		[[nodiscard]] RE::SpellItem* CallPower() const { return _callPower; }  // Apex: Call, in the animal's Favorites menu
 		[[nodiscard]] RE::SpellItem* StalkerPower() const { return _stalkerPower; }      // Stalker: Stalk, switches stalking on or off
 		[[nodiscard]] RE::BGSPerk*   AnimalArmsPerk() const { return _animalArms; }     // hidden: One-Handed perks for bites
 		[[nodiscard]] RE::BGSPerk*   DeftPerk() const { return _deft; }                 // hidden: Deft Movement, animal or carapace
@@ -160,6 +162,7 @@ namespace protean
 		RE::SpellItem*        _stalkerFade{ nullptr };
 		RE::BGSPerk*          _stalkerAmbush{ nullptr };
 		RE::SpellItem*        _stalkerPower{ nullptr };
+		RE::SpellItem*        _callPower{ nullptr };
 		RE::BGSPerk*          _animalArms{ nullptr };
 		RE::BGSPerk*          _deft{ nullptr };
 		RE::TESFaction*       _assassinMark{ nullptr };

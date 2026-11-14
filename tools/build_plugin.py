@@ -173,6 +173,7 @@ PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
 # on an attack) and the hidden perk held from a bite thrown from hiding to its hit (Protean sets its multiplier).
 # xx9B2 was a test perk installed once (2026-10-24, never committed); not reused.
 STALKER_FADE_SPELL, STALKER_AMBUSH_PERK = 0x9B3, 0x9B4
+CALL_POWER = 0xA21  # Apex: Call, in the animal's Favorites menu (the summon itself is made at runtime, src/Call.cpp)
 STALKER_POWER = 0x9B8  # Stalk: the toggle in the animal's Favorites menu, beside Keen's powers
 # Skills (src/Skills.cpp): hidden perks Protean holds and sets live. Bites have no weapon for the One-Handed perks to
 # check, so ANIMAL_ARMS (held in animal form) carries Armsman / Savage Strike (attack damage) and Fighting Stance (power
@@ -205,7 +206,7 @@ CLAW_RACES = ["013740:Skyrim.esm", "08883A:Skyrim.esm", "013741:Skyrim.esm", "08
 # Perks that work. The rest are placeholders: Protean takes them back and returns the point.
 BUILT = {"unbound_form", "rending_claws", "tendril", "keen", "predators_rush", "preys_flight", "survivor", "predator",
          "subtle_carapace", "stalker", "borrowed_visage", "inconspicuous", "assassin", "infected", "metamorphosis",
-         "regeneration", "devastator", "blade", "shield", "hammerfist"}
+         "regeneration", "devastator", "blade", "shield", "hammerfist", "apex"}
 # second ranks not built yet, though their first rank is
 RANK2_UNBUILT = set()
 FORM_KEYWORD, FORM_EFFECT, FORM_ABILITY = 0x880, 0x8C0, 0x900
@@ -280,6 +281,9 @@ GLOBALS = {
     # follows the Stamina bar) times a mace's lead over a sword (vanilla steel: 10 against 8), heavier swings
     "Protean_ApexDamageBase":      (0xA1D, 17,   "Float", "Apex: an animal's hit is lifted to at least this + Protean_ApexDamagePerLevel x level (a two-hander's hit, user 2026-11-14)"),
     "Protean_ApexDamagePerLevel":  (0xA1E, 2.6,  "Float", "Apex: the per-level part of the damage floor"),
+    "Protean_CallSeconds":         (0xA1F, 60,   "Float", "Apex Call: seconds the summoned pack stays"),
+    "Protean_CallCooldown":        (0xA20, 180,  "Float", "Apex Call: seconds before the next call"),
+    "Protean_CallCountMult":       (0xA22, 1.0,  "Float", "Apex Call: multiplies the pack size (small 5, medium 3, large 2, mammoth and giant 1)"),
     "Protean_HammerfistDamageMult": (0xA18, 1.25, "Float", "Hammerfist damage as a multiple of Rending Claws' at the same Stamina and level"),
     "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
     "Protean_HammerfistSlamRadius": (0xA1A, 300, "Float", "Hammerfist: a power swing that strikes nothing staggers the enemies within this of where it lands"),
@@ -487,7 +491,8 @@ def body(c, npcs):
                 bound = (j.get("OBND - Object Bounds") or {}).get("Z2", 0)
                 # the plain Enc record first: EncMudcrab, not EncMudcrabGiant (twice the size)
                 rows.append((not edid.startswith("Enc"), "TPLT - Template" in j, len(edid), edid,
-                             j.get("WNAM - Worn Armor"), j.get("NAM6 - Height", 1.0), bound))
+                             j.get("WNAM - Worn Armor"), j.get("NAM6 - Height", 1.0), bound,
+                             (j.get("Record Header") or {}).get("FormID")))
         return sorted(rows)
 
     rows = pick(True) or pick(False)  # the game calls hares "Rabbit"
@@ -495,11 +500,14 @@ def body(c, npcs):
         rows = [r for r in rows if r[3] == NPC_PICK[c["id"]]] or rows
     if not rows:
         return {}
-    _, _, _, edid, skin, height, bound = rows[0]
+    _, _, _, edid, skin, height, bound, npc_fid = rows[0]
     if not bound:  # some records leave the bounds empty; any record of the same race has the model's
         bound = max(((x["json"].get("OBND - Object Bounds") or {}).get("Z2", 0) for x in npcs if x["race"] == c["race"]),
                     default=0) or c.get("bound_height") or 0
     out = {"height": round(height, 3), "npc": edid}
+    if npc_fid:
+        nf, ni = npc_fid.split(":")
+        out["npc_form"] = {"file": nf, "id": int(ni, 16)}
     if skin:
         f, i = skin.split(":")
         out["skin"] = {"file": f, "id": int(i, 16)}
@@ -953,6 +961,8 @@ def main():
           "In animal form, sense the living through walls, at a steady cost in Stamina. Cast again to stop.")
     power(KEEN_POWERS["dead"], "Protean_KeenDeadPower", "Detect Dead",
           "In animal form, sense the dead and undead through walls, at a steady cost in Stamina. Cast again to stop.")
+    power(CALL_POWER, "Protean_CallPower", "Call",
+          "In animal form, make your kind's call: a pack of the same animal comes to fight for you for a minute.")
     power(STALKER_POWER, "Protean_StalkPower", "Stalk",
           "In animal form, while on, keep still or walk to fade from sight; moving while hidden costs Stamina. Cast again to stop.")
     # Detect Dead as fire-and-forget: the game's held Detect Undead effects (DetectUndead*ConcSelf), same looks and
@@ -1117,6 +1127,7 @@ def main():
                            "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),
                            "predatorPoison": PREDATOR_POISON_SPELL,
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
+                           "call": {"power": CALL_POWER},
                            "skills": {"arms": ANIMAL_ARMS_PERK, "deft": DEFT_PERK},
                            "renowned": RENOWNED,
                            "deceiver": {"assassinMark": ASSASSIN_MARK, "assassinPerk": ASSASSIN_PERK, "infection": INFECTION,

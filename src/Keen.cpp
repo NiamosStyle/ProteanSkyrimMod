@@ -46,6 +46,9 @@ namespace protean::Keen
 						g_list->forms.push_back(power);
 					}
 				}
+				if (auto* call = Registry::Get().CallPower(); call && p->HasSpell(call)) {
+					g_list->forms.push_back(call);  // Apex's Call
+				}
 				if (auto* stalk = Registry::Get().StalkerPower()) {
 					g_list->forms.push_back(stalk);  // Stalker's toggle; known only while the animal has that perk
 				}
