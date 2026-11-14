@@ -22,10 +22,17 @@ files = {
     # the perk tree, shown by Custom Skills Framework (a requirement since the perk tree)
     "SKSE/Plugins/CustomSkills/Protean.json": os.path.join(ROOT, "data", "SKSE", "Plugins", "CustomSkills", "Protean.json"),
 }
-# the claw models (tools/build_claws.py)
-for name in ("Claws_R_M", "Claws_L_M", "Claws_R_F", "Claws_L_F",
-             "Claws1st_R_M", "Claws1st_L_M", "Claws1st_R_F", "Claws1st_L_F"):
-    files["meshes/Protean/Claws/%s.nif" % name] = os.path.join(ROOT, "data", "meshes", "Protean", "Claws", name + ".nif")
+# every Protean model and texture: the claws, Blade, Shield, Hammerfist, the Tendril and its sleeve (tools/build_*.py).
+# Until 2026-11-14 only the claw models were listed by name, so the skill tree's models and every texture were left out.
+UNUSED = {"meshes/Protean/Blade/Blade_half.nif"}   # the Blade's other angle, tried 2026-11-03 and not chosen
+for top in ("meshes", "textures"):
+    base = os.path.join(ROOT, "data", top, "Protean")
+    for folder, _, names in os.walk(base):
+        for name in names:
+            path = os.path.join(folder, name)
+            rel = os.path.relpath(path, os.path.join(ROOT, "data")).replace("\\", "/")
+            if rel not in UNUSED:
+                files[rel] = path
 # the claw attack animations (Open Animation Replacer; from the game's archive by tools/build_claw_anims.py)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_claw_anims  # noqa: E402
@@ -43,6 +50,8 @@ for rel in build_devastator_fx.build():
 import build_constellation  # noqa: E402
 for rel in build_constellation.build():
     files[rel] = os.path.join(ROOT, "data", rel)
+# one entry per file however the builders spell their paths (the walk above already holds some of theirs)
+files = {name.replace("\\", "/"): path for name, path in files.items()}
 for name, path in files.items():
     if not os.path.isfile(path):
         sys.exit("missing " + path)
