@@ -141,3 +141,23 @@ game twice (render code, Protean not in the stack).
 - Survivor 2: arrive at 100% health, whole surplus of tougher animals added. Apex (damage floor, kin, Call) built; Call's summon untested.
 - Bug found and fixed (f5f6543): taking a stolen face off forgave the bounty but left the game's witness record, so witnesses (Alva, Brutius in Morthal) kept attacking. `ForgiveSince` now also calls `PlayerPayCrimeGold(false,false)` on the faction and restores the earlier bounty. Verified live by the user with a new crime.
 - Logging: the previous session's log is kept as `Protean.1.log`; every load logs the Protean factions and who is hostile 3 s later.
+- Apex verified by the user (kin, damage floor, Call incl. caves).
+- **Perk tree constellation (user-verified):** seven smooth tentacles, three great ones for the branches, curls inward, no
+  suckers. Drawn in Blender from hand-placed curves (`art/constellation/draw_tentacles.py`, render `lines.png`);
+  `tools/build_constellation.py` makes the glow texture and Protean's own skydome: the vampire-lord skydome with
+  `cImage00` (the picture CSF shows at `Point00`, was the werewolf) re-pathed to ours, turned 40 degrees upright and
+  scaled 0.55 so the tentacles gather at the root star. `tools/fit_constellation.py` holds the hand-placed star
+  positions (drawing units) and the screen mappings measured from the user's screenshots; `build_plugin.py` takes the
+  node coordinates from it, and it draws `build/constellation_mock.png`. User tweaks: Apex touching the tall thin
+  tentacle; siblings fanned so no line runs through another star.
+- **Perk texts:** the menu shows only ~300 characters of a description: keep them under 280. "In human form" (works in
+  a stolen face) replaced "your own form" on Inconspicuous, Assassin, Predator's Rush, Devastator.
+- **Subtle Carapace natural armor:** the old list plus Shrouded (all), Thieves Guild, Guild Master's, Linwe's, Morag
+  Tong, Forsworn/Old Gods (user: not the metal-studded leather-tempered sets such as the hold guards').
+- **Stamina never slowed** from Unbound Form (user's core design: spend and refill, faster with every kill): the combat
+  slowdown (`fCombatStaminaRegenRateMult`) is cancelled by a temporary StaminaRateMult modifier (co-save 28), and the
+  recovery pause is held at zero. Measured in a fight: 11.7/s = full speed. Dials `Protean_StaminaNoCombatSlow`,
+  `Protean_StaminaNoRegenDelay`.
+- **Public identity:** the author is **NiamosStyle**; history rewritten so no real name, email or time zone remains;
+  repo `github.com/NiamosStyle/Protean` (private until the Nexus release; merge `skill-tree` into `main` first).
+  Never put a Windows user path or personal detail in tracked files.
