@@ -4,6 +4,7 @@
 #include "Feed.h"
 #include "Face.h"
 
+#include "Apex.h"
 #include "Attacks.h"
 #include "Camera.h"
 #include "Carapace.h"
@@ -48,6 +49,7 @@ namespace protean::Hooks
 				Feed::OnFrame(a_this, a_delta);
 				Consume::OnFrame(a_this, a_delta);
 				Stalker::OnFrame(a_this, a_delta);
+				Apex::OnFrame(a_this, a_delta);
 				Skills::OnFrame(a_this, a_delta);
 				Deceiver::OnFrame(a_this, a_delta);
 				Devastator::OnFrame(a_this);

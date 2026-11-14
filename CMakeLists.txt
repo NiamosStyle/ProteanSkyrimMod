@@ -25,6 +25,7 @@ add_commonlibsse_plugin(
 	VERSION ${PROJECT_VERSION}
 	SOURCES
 		src/main.cpp
+		src/Apex.cpp
 		src/Attacks.cpp
 		src/Blade.cpp
 		src/Shield.cpp
