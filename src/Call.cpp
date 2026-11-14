@@ -86,7 +86,17 @@ namespace protean::Call
 		void Place(RE::PlayerCharacter* a_p, const Creature& a_c, int a_count, float a_seconds)
 		{
 			static std::mt19937 rng{ std::random_device{}() };
-			std::uniform_real_distribution<float> angle(0.0f, 6.2831853f), dist(180.0f, 320.0f);
+			std::uniform_real_distribution<float> jitter(-0.12f, 0.12f), dist(260.0f, 400.0f);
+			// out of the player's view: the camera's heading (in animal form the camera and the body can point apart),
+			// else the body's; the animals stand in the arc 125-235 degrees from it, spread across it
+			float heading = a_p->GetAngleZ();
+			if (auto* cam = RE::PlayerCamera::GetSingleton(); cam && cam->cameraRoot) {
+				const auto fwd = cam->cameraRoot->world.rotate * RE::NiPoint3(0.0f, 1.0f, 0.0f);
+				if (std::abs(fwd.x) + std::abs(fwd.y) > 0.01f) {
+					heading = std::atan2(fwd.x, fwd.y);
+				}
+			}
+			constexpr float kFrom = 125.0f * 3.14159265f / 180.0f, kSpan = 110.0f * 3.14159265f / 180.0f;
 			for (int i = 0; i < a_count; ++i) {
 				auto ref = a_p->PlaceObjectAtMe(a_c.npc, false);
 				auto* actor = ref ? ref->As<RE::Actor>() : nullptr;
@@ -94,9 +104,11 @@ namespace protean::Call
 					logger::warn("call: could not place a '{}'", a_c.id);
 					continue;
 				}
-				const float t = angle(rng), d = dist(rng);
+				// heading is clockwise from north (+Y): a direction at angle h has x = sin h, y = cos h
+				const float h = heading + kFrom + kSpan * (static_cast<float>(i) + 0.5f) / static_cast<float>(a_count) + jitter(rng);
+				const float d = dist(rng);
 				auto        pos = a_p->GetPosition();
-				actor->SetPosition(RE::NiPoint3{ pos.x + std::cos(t) * d, pos.y + std::sin(t) * d, pos.z }, true);
+				actor->SetPosition(RE::NiPoint3{ pos.x + std::sin(h) * d, pos.y + std::cos(h) * d, pos.z }, true);
 				if (auto* f = Registry::Get().BeastFaction()) {
 					actor->AddToFaction(f, 0);
 				}
