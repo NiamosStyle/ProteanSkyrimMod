@@ -83,12 +83,65 @@ namespace protean::Call
 			}
 		}
 
+		// ---- where the pack may stand ----------------------------------------------------------
+		// A spot is good when: the player has a clear line to it (no wall between, so it is the same room or cave, not
+		// the next tunnel over or rock), there is floor under it within a step or two of the player's level (no pit, no
+		// ledge far below), there is headroom, and it is not on top of another pack member. Collision comes from the
+		// game's own line-of-sight rays.
+
+		// fraction of the way from a_from to a_to a ray travels before it hits the world (1 = nothing in the way)
+		float Ray(RE::bhkWorld* a_world, const RE::NiPoint3& a_from, const RE::NiPoint3& a_to)
+		{
+			auto* filter = RE::bhkCollisionFilter::GetSingleton();
+			if (!a_world || !filter) {
+				return 1.0f;
+			}
+			const float     scale = RE::bhkWorld::GetWorldScale();
+			RE::bhkPickData pick;
+			pick.rayInput.from = RE::hkVector4(a_from.x * scale, a_from.y * scale, a_from.z * scale, 0.0f);
+			pick.rayInput.to = RE::hkVector4(a_to.x * scale, a_to.y * scale, a_to.z * scale, 0.0f);
+			pick.rayInput.filterInfo.filter = (filter->GetNewSystemGroup() << 16) | static_cast<std::uint32_t>(RE::COL_LAYER::kLOS);
+			a_world->PickObject(pick);
+			return pick.rayOutput.HasHit() ? pick.rayOutput.hitFraction : 1.0f;
+		}
+
+		bool GoodSpot(RE::bhkWorld* a_world, const RE::NiPoint3& a_player, float a_x, float a_y, const std::vector<RE::NiPoint3>& a_taken,
+			RE::NiPoint3& a_out)
+		{
+			// a clear line at chest height from the player
+			if (Ray(a_world, { a_player.x, a_player.y, a_player.z + 70.0f }, { a_x, a_y, a_player.z + 70.0f }) < 1.0f) {
+				return false;
+			}
+			// floor below: found within a step up or two down
+			const float top = a_player.z + 120.0f, reach = 320.0f;
+			const float f = Ray(a_world, { a_x, a_y, top }, { a_x, a_y, top - reach });
+			if (f >= 1.0f) {
+				return false;  // nothing underneath: a drop
+			}
+			const float floorZ = top - reach * f;
+			if (floorZ > a_player.z + 90.0f || floorZ < a_player.z - 140.0f) {
+				return false;  // on a ledge above, or a pit below
+			}
+			// headroom for an animal (about a man's height)
+			if (Ray(a_world, { a_x, a_y, floorZ + 8.0f }, { a_x, a_y, floorZ + 170.0f }) < 1.0f) {
+				return false;
+			}
+			for (const auto& t : a_taken) {
+				if ((t.x - a_x) * (t.x - a_x) + (t.y - a_y) * (t.y - a_y) < 90.0f * 90.0f) {
+					return false;
+				}
+			}
+			a_out = { a_x, a_y, floorZ + 6.0f };
+			return true;
+		}
+
 		void Place(RE::PlayerCharacter* a_p, const Creature& a_c, int a_count, float a_seconds)
 		{
 			static std::mt19937 rng{ std::random_device{}() };
-			std::uniform_real_distribution<float> jitter(-0.12f, 0.12f), dist(260.0f, 400.0f);
 			// out of the player's view: the camera's heading (in animal form the camera and the body can point apart),
-			// else the body's; the animals stand in the arc 125-235 degrees from it, spread across it
+			// else the body's. Preferred: the arc 125-235 degrees from it. If nothing there is open (a tunnel, a
+			// cave wall), the arc widens to 95-265, then to everything but the 60 degrees straight ahead, and last to
+			// anywhere close by; the distance shrinks within each arc.
 			float heading = a_p->GetAngleZ();
 			if (auto* cam = RE::PlayerCamera::GetSingleton(); cam && cam->cameraRoot) {
 				const auto fwd = cam->cameraRoot->world.rotate * RE::NiPoint3(0.0f, 1.0f, 0.0f);
@@ -96,25 +149,71 @@ namespace protean::Call
 					heading = std::atan2(fwd.x, fwd.y);
 				}
 			}
-			constexpr float kFrom = 125.0f * 3.14159265f / 180.0f, kSpan = 110.0f * 3.14159265f / 180.0f;
+			constexpr float kRad = 3.14159265f / 180.0f;
+			struct Arc
+			{
+				float from, to;
+				const char* name;
+			};
+			const Arc arcs[] = { { 125.0f, 235.0f, "behind" }, { 95.0f, 265.0f, "behind and sides" }, { 30.0f, 330.0f, "all but straight ahead" },
+				{ 0.0f, 360.0f, "anywhere" } };
+			const float ranges[] = { 400.0f, 320.0f, 250.0f, 190.0f, 140.0f, 100.0f };
+
+			auto*       cell = a_p->GetParentCell();
+			auto*       world = cell ? cell->GetbhkWorld() : nullptr;
+			const auto  here = a_p->GetPosition();
+			std::vector<RE::NiPoint3> taken;
+			int         fallbacks = 0;
+
 			for (int i = 0; i < a_count; ++i) {
-				auto ref = a_p->PlaceObjectAtMe(a_c.npc, false);
+				RE::NiPoint3 spot = here;
+				const char*  tier = nullptr;
+				for (const auto& arc : arcs) {
+					for (float range : ranges) {
+						// the angles of the arc, tried in a random order
+						std::vector<float> angles;
+						for (float deg = arc.from; deg <= arc.to; deg += 15.0f) {
+							angles.push_back(deg);
+						}
+						std::ranges::shuffle(angles, rng);
+						for (float deg : angles) {
+							const float h = heading + deg * kRad;
+							if (GoodSpot(world, here, here.x + std::sin(h) * range, here.y + std::cos(h) * range, taken, spot)) {
+								tier = arc.name;
+								break;
+							}
+						}
+						if (tier) {
+							break;
+						}
+					}
+					if (tier) {
+						break;
+					}
+				}
+				if (!tier) {
+					// nowhere open at all (a closet): stand on the player's own spot; the game pushes them clear
+					++fallbacks;
+					spot = here;
+				}
+				auto  ref = a_p->PlaceObjectAtMe(a_c.npc, false);
 				auto* actor = ref ? ref->As<RE::Actor>() : nullptr;
 				if (!actor) {
 					logger::warn("call: could not place a '{}'", a_c.id);
 					continue;
 				}
-				// heading is clockwise from north (+Y): a direction at angle h has x = sin h, y = cos h
-				const float h = heading + kFrom + kSpan * (static_cast<float>(i) + 0.5f) / static_cast<float>(a_count) + jitter(rng);
-				const float d = dist(rng);
-				auto        pos = a_p->GetPosition();
-				actor->SetPosition(RE::NiPoint3{ pos.x + std::sin(h) * d, pos.y + std::cos(h) * d, pos.z }, true);
+				actor->SetPosition(spot, true);
+				taken.push_back(spot);
 				if (auto* f = Registry::Get().BeastFaction()) {
 					actor->AddToFaction(f, 0);
 				}
 				SetTeammate(actor, true);
 				g_pack.push_back({ actor->GetFormID(), a_seconds });
-				logger::info("call: placed {:08X} '{}'", actor->GetFormID(), actor->GetName());
+				logger::info("call: placed {:08X} '{}' {} ({:.0f} away)", actor->GetFormID(), actor->GetName(), tier ? tier : "ON THE PLAYER (no open spot)",
+					std::sqrt((spot.x - here.x) * (spot.x - here.x) + (spot.y - here.y) * (spot.y - here.y)));
+			}
+			if (fallbacks > 0) {
+				logger::warn("call: {} of {} had no open spot nearby", fallbacks, a_count);
 			}
 		}
 
