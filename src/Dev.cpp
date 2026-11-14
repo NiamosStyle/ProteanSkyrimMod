@@ -320,9 +320,10 @@ namespace protean::Dev
 				} else {
 					logger::warn("dev: clawimpact: no impact data set {}", a_arg);
 				}
-			} else if (a_cmd == "tendrilblood" || a_cmd == "tendrilthrow") {
-				// tendrilblood <hex ARTO or EFSH>: the blood on a hit; tendrilthrow <SNDR editor ID>: the throw's sound
-				Tendril::SetLooks(a_cmd == "tendrilblood" ? "blood" : "sound", a_arg);
+			} else if (a_cmd == "tendrilblood" || a_cmd == "tendrilthrow" || a_cmd == "tendrilswap") {
+				// tendrilblood <hex ARTO or EFSH>: the blood on a hit; tendrilthrow <SNDR editor ID>: the throw's sound;
+				// tendrilswap <SNDR editor ID, or "none">: the sound as the sleeve's harpoon shifts on a draw or sheathe
+				Tendril::SetLooks(a_cmd == "tendrilblood" ? "blood" : a_cmd == "tendrilswap" ? "swap" : "sound", a_arg);
 			} else if (a_cmd == "tendril") {
 				Tendril::Give();  // the Tendril spell, as the perk teaches it
 			} else if (a_cmd == "tendrilimpact" && !a_arg.empty()) {

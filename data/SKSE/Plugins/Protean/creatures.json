@@ -40,7 +40,17 @@
  },
  "tendril": {
   "spell": 2441,
-  "projectile": 2438
+  "projectile": 2438,
+  "sleeve": {
+   "rest": {
+    "right": 2610,
+    "left": 2611
+   },
+   "drawn": {
+    "right": 2612,
+    "left": 2613
+   }
+  }
  },
  "keen": {
   "powers": {

@@ -1,5 +1,6 @@
 #include "Tendril.h"
 
+#include "Blade.h"
 #include "Evolve.h"
 #include "Registry.h"
 #include "Shift.h"
@@ -27,6 +28,88 @@ namespace protean::Tendril
 		float             g_paid{ 0.0f };  // what the throw in flight cost: a miss gives it back (the user)
 		Clock::time_point g_toldAt{};
 		Clock::time_point g_thrownAt{};  // the last paid throw: the gate leaves its own cast alone a moment
+
+		// The sleeve (2026-11-14): flesh, sinew and a bone harpoon on each arm whose hand holds the Tendril, in two
+		// versions (user: "look like 2 when relaxed and 1 when you draw your weapon"): with weapons away the harpoon lies
+		// along the fingers; from partway through the draw it stands out of the palm, where the spell leaves from. One
+		// hidden piece per version and hand, never kept in the inventory; 1st person shows the drawn one only (with
+		// weapons away the arms are off screen).
+		struct Side
+		{
+			bool                                    left;
+			RE::BGSBipedObjectForm::BipedObjectSlot slot;
+			const char*                             firstName;
+			const char*                             firstModel;
+			const char*                             tag;
+		};
+		constexpr Side kSides[] = {
+			{ false, RE::BGSBipedObjectForm::BipedObjectSlot::kModMisc1, "ProteanTendril1st_R", "Protean\\Tendril\\Sleeve1st_R_{}.nif", "tendril sleeve right" },  // 48
+			{ true, RE::BGSBipedObjectForm::BipedObjectSlot::kFX01, "ProteanTendril1st_L", "Protean\\Tendril\\Sleeve1st_L_{}.nif", "tendril sleeve left" },       // 61
+		};
+		std::string g_swapSound{};  // as the harpoon shifts (none yet: to be chosen by ear, dev 'tendrilswap')
+
+		std::int32_t Count(RE::PlayerCharacter* a_p, RE::TESBoundObject* a_item)
+		{
+			const auto counts = a_p->GetInventoryCounts([a_item](RE::TESBoundObject& a_obj) { return &a_obj == a_item; });
+			const auto it = counts.find(a_item);
+			return it != counts.end() ? it->second : 0;
+		}
+
+		void Sleeves(RE::PlayerCharacter* a_p, RE::SpellItem* a_spell)
+		{
+			using WS = RE::WEAPON_STATE;
+			const auto* st = a_p->AsActorState();
+			const auto  ws = st ? st->GetWeaponState() : WS::kSheathed;
+			const bool  drawn = ws == WS::kDrawing || ws == WS::kDrawn || ws == WS::kWantToSheathe;
+			const bool  human = !Shift::ActiveCreature();
+			const auto& reg = Registry::Get();
+			auto*       mgr = RE::ActorEquipManager::GetSingleton();
+			for (const auto& side : kSides) {
+				auto* rest = reg.TendrilSleeve(false, side.left);
+				auto* out = reg.TendrilSleeve(true, side.left);
+				if (!rest || !out) {
+					continue;
+				}
+				const bool holds = human && a_p->GetEquippedObject(side.left) == a_spell;
+				auto*      want = holds ? (drawn ? out : rest) : nullptr;
+				auto*      worn = a_p->GetWornArmor(side.slot);
+				Blade::HangFirstPerson(a_p, side.firstName, side.firstModel, holds && drawn, side.tag);
+				bool swapped = false;
+				for (auto* piece : { rest, out }) {
+					if (piece == want) {
+						continue;
+					}
+					if (worn == piece) {
+						mgr->UnequipObject(a_p, piece, nullptr, 1, nullptr, false, true, false, true);
+						swapped = want != nullptr;
+						worn = nullptr;
+						if (!want) {
+							logger::info("{}: goes back", side.tag);
+						}
+					}
+					if (const auto n = Count(a_p, piece); n > 0) {
+						a_p->RemoveItem(piece, n, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
+					}
+				}
+				if (want && worn != want) {
+					if (Count(a_p, want) == 0) {
+						a_p->AddObjectToContainer(want, nullptr, 1, nullptr);
+					}
+					mgr->EquipObject(a_p, want, nullptr, 1, nullptr, false, false, false, true);
+					logger::info("{}: {} (weapon state {})", side.tag, want == out ? "drawn" : "at rest", static_cast<int>(ws));
+					if (swapped && !g_swapSound.empty()) {
+						RE::BSSoundHandle sound;
+						if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+							audio->GetSoundHandleByName(sound, g_swapSound.c_str(), 0x1A);
+						}
+						if (sound.IsValid()) {
+							sound.SetPosition(a_p->GetPosition());
+							sound.Play();
+						}
+					}
+				}
+			}
+		}
 
 		// the player hauled toward a large target (set every frame after the player's update, as a leap is)
 		struct Haul
@@ -206,6 +289,7 @@ namespace protean::Tendril
 		}
 		UpdateHaul(a_p, a_delta);
 		Gate(a_p, spell);
+		Sleeves(a_p, spell);
 		static float since = 0.0f;
 		if ((since += a_delta) < 0.25f) {
 			return;
@@ -297,8 +381,10 @@ namespace protean::Tendril
 			g_throwSound = a_value;
 		} else if (a_what == "blood") {
 			g_blood = static_cast<RE::FormID>(std::strtoul(a_value.c_str(), nullptr, 16));
+		} else if (a_what == "swap") {
+			g_swapSound = a_value == "none" ? std::string{} : a_value;
 		}
-		logger::info("tendril: throw sound '{}', blood {:08X}", g_throwSound, g_blood);
+		logger::info("tendril: throw sound '{}', blood {:08X}, sleeve swap sound '{}'", g_throwSound, g_blood, g_swapSound);
 	}
 
 	void Give()

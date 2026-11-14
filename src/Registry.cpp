@@ -129,6 +129,14 @@ namespace protean
 		}
 		if (const auto& t = j.value("tendril", nlohmann::json::object()); !t.empty()) {
 			_tendril = dh->LookupForm<RE::SpellItem>(t.value("spell", 0u), plugin);
+			// the sleeve: [rest/drawn][right/left] (2026-11-14)
+			const auto& s = t.value("sleeve", nlohmann::json::object());
+			for (int d = 0; d < 2; ++d) {
+				const auto& m = s.value(d ? "drawn" : "rest", nlohmann::json::object());
+				for (int l = 0; l < 2; ++l) {
+					_tendrilSleeve[d][l] = dh->LookupForm<RE::TESObjectARMO>(m.value(l ? "left" : "right", 0u), plugin);
+				}
+			}
 		}
 		if (!_tendril || _tendril->effects.size() < 2) {
 			logger::warn("Tendril records missing from {}", plugin);

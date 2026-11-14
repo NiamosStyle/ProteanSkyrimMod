@@ -150,6 +150,13 @@ HAMMERFIST_WEAPON = 0xA13
 HAMMERFIST_ARMA = {"R": 0xA14, "L": 0xA15}
 HAMMERFIST_ARMO = {"R": 0xA16, "L": 0xA17}
 HAMMERFIST_SLOT_FLAG = {"R": "0x04000000", "L": "0x40000000"}  # body slots 56, 60
+# The Tendril sleeve (tools/build_tendril_sleeve.py makes the models; the user's design, 2026-11-14): flesh, sinew and a
+# bone harpoon on the arm whose hand holds the Tendril spell, in two versions Protean swaps (src/Tendril.cpp): "Rest"
+# with weapons away (the harpoon along the fingers), "Drawn" with them out (it stands out of the palm). One hidden
+# piece per version and hand; right body slot 48, left 61 (the least used free ones)
+TENDRIL_SLEEVE_ARMA = {("Rest", "R"): 0xA2E, ("Rest", "L"): 0xA2F, ("Drawn", "R"): 0xA30, ("Drawn", "L"): 0xA31}
+TENDRIL_SLEEVE_ARMO = {("Rest", "R"): 0xA32, ("Rest", "L"): 0xA33, ("Drawn", "R"): 0xA34, ("Drawn", "L"): 0xA35}
+TENDRIL_SLEEVE_FLAG = {"R": "0x00040000", "L": "0x80000000"}  # body slots 48, 61
 # Tendril (tools/build_tendril.py makes the model): a spell for either hand that the perk teaches (the user chose a
 # spell over an inventory item, 2026-10-23: the casting motion is fine). Damage + absorb stamina; its projectile is the
 # tendril, sent out like a flame spell's stream (the way Pull Mastery sends its chain; studied 2026-10-23, nothing
@@ -770,6 +777,24 @@ def main():
               + "MajorFlags:\n- NonPlayable\n" + name_block("Hammerfist Arm") + template
               + "Description:\n  TargetLanguage: English\n  Value: ''\n"
               "Armature:\n- %s:%s\n" % (fid(HAMMERFIST_ARMA[side]), PLUGIN))
+    # ---- the Tendril sleeve: a hidden piece per version and hand
+    for (mode, side), arma in TENDRIL_SLEEVE_ARMA.items():
+        armo = TENDRIL_SLEEVE_ARMO[(mode, side)]
+        template = ("BodyTemplate:\n  FirstPersonFlags:\n  - %s\n  ArmorType: Clothing\n  ActsLike44: True\n"
+                    "Race: 000019:Skyrim.esm\n" % TENDRIL_SLEEVE_FLAG[side])
+        write(os.path.join(y, "ArmorAddons", "Protean_TendrilSleeveAA_%s_%s - %s_%s.yaml" % (mode, side, fid(arma), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_TendrilSleeveAA_%s_%s\n" % (fid(arma), PLUGIN, mode, side) + template
+              + "Priority:\n  Male: 10\n  Female: 10\n"
+              "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
+              + "".join("%s:\n  Male:\n    File: Protean\\Tendril\\Sleeve_%s_%s_M.nif\n"
+                        "  Female:\n    File: Protean\\Tendril\\Sleeve_%s_%s_F.nif\n" % (field, mode, side, mode, side)
+                        for field in ("WorldModel", "FirstPersonModel"))
+              + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
+        write(os.path.join(y, "Armors", "Protean_TendrilSleeve_%s_%s - %s_%s.yaml" % (mode, side, fid(armo), PLUGIN)),
+              "FormKey: %s:%s\nEditorID: Protean_TendrilSleeve_%s_%s\n" % (fid(armo), PLUGIN, mode, side)
+              + "MajorFlags:\n- NonPlayable\n" + name_block("Tendril Sleeve") + template
+              + "Description:\n  TargetLanguage: English\n  Value: ''\n"
+              "Armature:\n- %s:%s\n" % (fid(arma), PLUGIN))
     # ---- the Shield: the item (light, like Dragonborn's Chitin Shield it is drawn from) and its hidden sleeve
     write(os.path.join(y, "ArmorAddons", "Protean_ShieldAA - %s_%s.yaml" % (fid(SHIELD_ARMA), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_ShieldAA\n" % (fid(SHIELD_ARMA), PLUGIN)
@@ -1143,7 +1168,9 @@ def main():
                            "blade": {"weapon": BLADE_ONEHAND, "sleeve": BLADE_SLEEVE_ARMO},
                            "shield": {"armor": SHIELD_ARMO, "sleeve": SHIELD_SLEEVE_ARMO, "blockPerk": SHIELD_BLOCK_PERK},
                            "hammerfist": {"weapon": HAMMERFIST_WEAPON, "right": HAMMERFIST_ARMO["R"], "left": HAMMERFIST_ARMO["L"]},
-                           "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE},
+                           "tendril": {"spell": TENDRIL_SPELL, "projectile": TENDRIL_PROJECTILE,
+                                       "sleeve": {m.lower(): {"right": TENDRIL_SLEEVE_ARMO[(m, "R")], "left": TENDRIL_SLEEVE_ARMO[(m, "L")]}
+                                                  for m in ("Rest", "Drawn")}},
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),

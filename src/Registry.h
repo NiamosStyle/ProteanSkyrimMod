@@ -83,6 +83,8 @@ namespace protean
 		[[nodiscard]] RE::TESObjectWEAP* HammerfistWeapon() const { return _hammerfistWeapon; }  // either hand, no model
 		[[nodiscard]] RE::TESObjectARMO* HammerfistArm(bool a_left) const { return a_left ? _hammerfistLeft : _hammerfistRight; }  // worn while drawn
 		[[nodiscard]] RE::SpellItem* Tendril() const { return _tendril; }  // its effects: [0] damage health, [1] absorb stamina
+		// the flesh and harpoon on the arm holding the Tendril: the rest version (weapons away) or the drawn one
+		[[nodiscard]] RE::TESObjectARMO* TendrilSleeve(bool a_drawn, bool a_left) const { return _tendrilSleeve[a_drawn][a_left]; }
 		// Keen, in the order night vision, Detect Life, Detect Dead: the powers the Favorites menu offers, and the
 		// senses (self spells) Protean casts and dispels
 		[[nodiscard]] const std::array<RE::SpellItem*, 3>& KeenPowers() const { return _keenPowers; }
@@ -158,6 +160,7 @@ namespace protean
 		RE::TESObjectARMO*    _hammerfistRight{ nullptr };
 		RE::TESObjectARMO*    _hammerfistLeft{ nullptr };
 		RE::SpellItem*        _tendril{ nullptr };
+		RE::TESObjectARMO*    _tendrilSleeve[2][2]{};
 		RE::SpellItem*        _killBoost{ nullptr };
 		std::vector<RE::SpellItem*> _glideMarkers;
 		RE::SpellItem*        _predatorPoison{ nullptr };
