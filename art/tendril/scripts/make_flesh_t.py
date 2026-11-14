@@ -28,8 +28,7 @@ def make_flesh(slim=SLIM, gap=GAP):
     se = evaluated(skin).to_mesh()
     bvh = BVHTree.FromPolygons([skin.matrix_world @ v.co for v in se.vertices], [tuple(f.vertices) for f in se.polygons])
     evaluated(skin).to_mesh_clear()
-    me = bpy.data.meshes.new_from_object(evaluated(src), preserve_all_data_layers=True,
-                                         depsgraph=bpy.context.evaluated_depsgraph_get())
+    me = src.data.copy()   # the points as shaped, without the Smooth modifier (~9,000, as the Blade's export), weights kept
     shoulder, elbow, wrist, a, up, side = arm_frame()
     total = (elbow - shoulder).length + (wrist - elbow).length
     for v in me.vertices:
@@ -66,9 +65,14 @@ def make_flesh(slim=SLIM, gap=GAP):
         ob = bpy.data.objects.new(name, me)
         bpy.data.scenes[SCENE].collection.objects.link(ob)
     ob.matrix_world = src.matrix_world.copy()
+    # the groups' names, in BladeFlesh's order (the weights came with the copied points; clearing the groups wipes them)
+    if [g.name for g in ob.vertex_groups] != [g.name for g in src.vertex_groups]:
+        assert not ob.vertex_groups, "TendrilFlesh has other groups: delete it and run again"
+        for g in src.vertex_groups:
+            ob.vertex_groups.new(name=g.name)
+    sub = ob.modifiers.get("Smooth") or ob.modifiers.new("Smooth", 'SUBSURF'); sub.levels = 1
     fl = bpy.data.materials.get("ConceptFlesh") or bpy.data.materials.new("ConceptFlesh")
     fl.diffuse_color = (0.55, 0.30, 0.28, 1)
     me.materials.clear(); me.materials.append(fl)
     for f in me.polygons: f.use_smooth = True
-    _BVH.pop(name, None)
-    return name, len(me.vertices)
+    return name, len(me.vertices), len(ob.vertex_groups)
