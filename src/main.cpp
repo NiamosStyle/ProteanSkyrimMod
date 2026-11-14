@@ -1,3 +1,5 @@
+#include <ShlObj.h>
+
 #include "Call.h"
 #include "Attacks.h"
 #include "Camera.h"
@@ -30,6 +32,7 @@
 
 namespace
 {
+	void ReportAfterLoad();
 	// Everything the game tells us arrives through these sinks. They only look and queue: the actual
 	// work runs on the main thread through SKSE's task interface.
 	class Sink : public RE::BSTEventSink<RE::TESEquipEvent>,
@@ -174,6 +177,7 @@ namespace
 				protean::Skills::OnGameLoaded();
 				protean::Registry::Get().SettleDials(protean::State::Get().dialDefaults);
 				protean::Claws::Sync();
+				ReportAfterLoad();
 			}
 			break;
 		default:
@@ -182,8 +186,61 @@ namespace
 	}
 }
 
+namespace
+{
+	// The previous session's log is kept as Protean.1.log (the game starts a new Protean.log each launch)
+	void KeepPreviousLog()
+	{
+		PWSTR docs = nullptr;
+		if (SUCCEEDED(::SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &docs)) && docs) {
+			std::error_code ec;
+			const std::filesystem::path dir = std::filesystem::path(docs) / "My Games" / "Skyrim Special Edition" / "SKSE";
+			if (std::filesystem::exists(dir / "Protean.log", ec)) {
+				std::filesystem::copy_file(dir / "Protean.log", dir / "Protean.1.log", std::filesystem::copy_options::overwrite_existing, ec);
+			}
+			::CoTaskMemFree(docs);
+		}
+	}
+
+	// On every load, say what could make people hostile: Protean's factions, and who is after the player 3 s later
+	void ReportAfterLoad()
+	{
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		auto& reg = protean::Registry::Get();
+		if (!p) {
+			return;
+		}
+		auto in = [&](RE::TESFaction* f) { return f && p->IsInFaction(f); };
+		logger::info("load report: beast {}, witness {}, disguise {}, exposed {}, infected-ally {}", in(reg.BeastFaction()),
+			in(reg.WitnessFaction()), in(reg.DisguiseFaction()), in(reg.ExposedFaction()), in(reg.InfectedFaction()));
+		std::thread([] {
+			std::this_thread::sleep_for(std::chrono::seconds(3));
+			SKSE::GetTaskInterface()->AddTask([] {
+				auto* p = RE::PlayerCharacter::GetSingleton();
+				auto* pl = RE::ProcessLists::GetSingleton();
+				if (!p || !pl) {
+					return;
+				}
+				int n = 0;
+				for (auto& h : pl->highActorHandles) {
+					auto a = h.get();
+					if (a && a.get() != p && !a->IsDead() && a->IsHostileToActor(p) && n < 12) {
+						auto* crime = a->GetCrimeFaction();
+						logger::info("load report: hostile to the player: {:08X} '{}', in combat {}, crime faction {:08X}, {:.0f} away",
+							a->GetFormID(), a->GetName(), a->IsInCombat(), crime ? crime->GetFormID() : 0u,
+							p->GetPosition().GetDistance(a->GetPosition()));
+						++n;
+					}
+				}
+				logger::info("load report: {} actor(s) hostile to the player (up to 12 listed)", n);
+			});
+		}).detach();
+	}
+}
+
 SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 {
+	KeepPreviousLog();
 	SKSE::Init(a_skse, { .logName = "Protean" });  // -> Documents/My Games/<game>/SKSE/Protean.log
 	spdlog::set_level(spdlog::level::info);
 	spdlog::flush_on(spdlog::level::info);
