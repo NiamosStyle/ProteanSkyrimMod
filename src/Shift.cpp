@@ -1073,7 +1073,7 @@ namespace protean::Shift
 			case RE::ActorValue::kSpeedMult:
 				return s.rushApplied;  // the sprint's part is taken off on load by Move::ClearSprint
 			case RE::ActorValue::kStaminaRateMult:
-				return s.boostApplied;
+				return s.boostApplied + s.staminaCombatApplied;
 			case RE::ActorValue::kResistDisease:
 				return s.diseaseApplied;
 			case RE::ActorValue::kMovementNoiseMult:

@@ -232,6 +232,9 @@ GLOBALS = {
     "Protean_KillBoostSeconds":    (0x94E, 90,   "Float", "how long one kill's stamina-regeneration stack lasts (the biomass boost; consumed bodies gave it 2026-10-28 to 2026-11-03)"),
     "Protean_KillBoostPct":        (0x94F, 15,   "Float", "stamina regeneration each stack adds, in percentage points of the normal rate"),
     "Protean_KillBoostMax":        (0x950, 0,    "Float", "most stacks at once (0 = no limit)"),
+    # Stamina never slowed (the user's design, 2026-11-14: spend and refill, faster with every kill), from Unbound Form
+    "Protean_StaminaNoCombatSlow": (0xA2C, 1,    "Float", "1 = in combat the player's Stamina recovers at full speed (cancels fCombatStaminaRegenRateMult)"),
+    "Protean_StaminaNoRegenDelay": (0xA2D, 1,    "Float", "1 = spending Stamina never pauses the player's Stamina recovery"),
     "Protean_PerkPoints":          (0x951, 0,    "Float", "Protean perk points to spend (kept by Protean; the perk menu spends them)"),
     "Protean_ShowPerkMenu":        (0x952, 0,    "Short", "set to 1 to open the Protean perk menu (Custom Skills Framework clears it)"),
     # Rending Claws damage on a full stamina bar = Max + PerLevel x level + PerLevelSq x level^2 (about 25% over a

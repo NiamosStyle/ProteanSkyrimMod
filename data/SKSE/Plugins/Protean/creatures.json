@@ -184,6 +184,8 @@
   "Protean_KillBoostSeconds": 2382,
   "Protean_KillBoostPct": 2383,
   "Protean_KillBoostMax": 2384,
+  "Protean_StaminaNoCombatSlow": 2604,
+  "Protean_StaminaNoRegenDelay": 2605,
   "Protean_PerkPoints": 2385,
   "Protean_ShowPerkMenu": 2386,
   "Protean_ClawDamageMin": 2387,

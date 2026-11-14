@@ -294,6 +294,42 @@ namespace protean::Evolve
 		logger::info("biomass boost: {} stack(s), +{:.0f} stamina regeneration", s.boosts.size(), s.boostApplied);
 	}
 
+	namespace
+	{
+		// Stamina is never slowed once the player is Protean (the user's design, 2026-11-14: spend it on everything and
+		// watch it refill, faster with every kill). Two vanilla brakes come off, for the player only:
+		// - in combat the game multiplies Stamina recovery by fCombatStaminaRegenRateMult (0.35). A matching temporary
+		//   modifier on StaminaRateMult cancels it while in combat: the rest of the multiplier (100 + the biomass
+		//   boosts + anything else) times (1 / mult - 1). Remembered in the co-save like the boosts' part.
+		// - spending Stamina sets a recovery pause (up to fStaminaRegenDelayMax, 5 s); it is held at zero.
+		void SyncStamina(RE::PlayerCharacter* a_p)
+		{
+			auto&      s = State::Get();
+			auto&      reg = Registry::Get();
+			auto*      av = a_p->AsActorValueOwner();
+			const bool protean = Has(kUnbound) && !a_p->IsDead();
+			float      want = 0.0f;
+			if (protean && reg.Dial("Protean_StaminaNoCombatSlow", 1.0f) != 0.0f && a_p->IsInCombat()) {
+				const auto* setting = RE::GameSettingCollection::GetSingleton()->GetSetting("fCombatStaminaRegenRateMult");
+				const float mult = setting ? setting->GetFloat() : 0.35f;
+				if (mult > 0.01f && mult < 1.0f) {
+					const float rest = av->GetActorValue(RE::ActorValue::kStaminaRateMult) - s.staminaCombatApplied;
+					want = std::max(rest, 0.0f) * (1.0f / mult - 1.0f);
+				}
+			}
+			if (std::abs(want - s.staminaCombatApplied) > 0.5f || (want == 0.0f && s.staminaCombatApplied != 0.0f)) {
+				av->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kStaminaRateMult, want - s.staminaCombatApplied);
+				if ((want == 0.0f) != (s.staminaCombatApplied == 0.0f)) {
+					logger::info("stamina: combat slowdown {} (+{:.0f} StaminaRateMult)", want > 0.0f ? "cancelled" : "back to normal", want);
+				}
+				s.staminaCombatApplied = want;
+			}
+			if (protean && reg.Dial("Protean_StaminaNoRegenDelay", 1.0f) != 0.0f && a_p->GetRegenDelay(RE::ActorValue::kStamina) > 0.0f) {
+				a_p->UpdateRegenDelay(RE::ActorValue::kStamina, 0.0f);
+			}
+		}
+	}
+
 	void OnFrame(float a_delta)
 	{
 		auto* p = RE::PlayerCharacter::GetSingleton();
@@ -301,6 +337,7 @@ namespace protean::Evolve
 		if (!p) {
 			return;
 		}
+		SyncStamina(p);
 		// a perk bought in the menu shows up here: a few times a second is plenty
 		static float sinceSync = 0.0f;
 		if ((sinceSync += a_delta) >= 0.25f) {

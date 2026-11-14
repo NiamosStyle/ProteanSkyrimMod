@@ -110,6 +110,7 @@ namespace protean
 		std::map<std::string, std::uint32_t> feeds;            // creature id -> hearts eaten (until 2026-10-28; kept)
 		std::vector<float>                   boosts;           // biomass boost stacks: seconds left on each
 		float                                boostApplied{ 0.0f };    // StaminaRateMult added now
+		float                                staminaCombatApplied{ 0.0f };  // StaminaRateMult cancelling the combat slowdown now (co-save 28)
 		float                                diseaseApplied{ 0.0f };  // ResistDisease added now
 		float                                rushApplied{ 0.0f };     // SpeedMult Predator's Rush added now
 		float                                carapaceApplied{ 0.0f };  // DamageResist Subtle Carapace added now
