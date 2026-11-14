@@ -76,10 +76,20 @@ namespace protean::Hammerfist
 
 		// ---- every power attack staggers (the spec): a hit staggers the one struck; a swing that strikes nothing comes
 		// down on the ground and staggers the enemies near, with a crash and a shake
+		// When (2026-11-13): the power attacks now come down to the ground (tools/build_hammer_anims.py), each fist
+		// landing on its clip's HitFrame: the one-hand slam's first, the both-hands smash's third (its first two are
+		// the raise). Then, with no hit in kLandWait, the ground slam.
 		using Clock = std::chrono::steady_clock;
-		std::atomic<bool> g_powerPending{ false };   // a power swing waiting to land (set on the swing, cleared by a hit)
-		std::atomic<bool> g_powerHit{ false };
-		Clock::time_point g_powerAt{};
+		constexpr auto    kLandWait = std::chrono::milliseconds(150);
+		constexpr auto    kAttackGap = std::chrono::milliseconds(2600);  // a power swing this long after the last starts a new attack
+		std::atomic<bool> g_powerPending{ false };   // a fist landed with no hit yet
+		std::atomic<bool> g_powerHit{ false };       // a power hit since the fist landed (or just before)
+		Clock::time_point g_powerAt{};               // when the fist landed
+		Clock::time_point g_attackAt{};              // when this power attack's first swing came
+		bool              g_inAttack{ false };
+		bool              g_combo{ false };          // the both-hands smash
+		int               g_hitFrames{ 0 };
+		std::atomic<Clock::rep> g_lastHit{ 0 };    // the last power hit (worker thread), as a clock count
 
 		void Stagger(RE::Actor* a_who, const RE::NiPoint3& a_from, float a_magnitude)
 		{
@@ -133,6 +143,7 @@ namespace protean::Hammerfist
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				g_powerHit = true;
+				g_lastHit = Clock::now().time_since_epoch().count();
 				const auto id = a_event->target->GetFormID();
 				SKSE::GetTaskInterface()->AddTask([id]() {
 					auto* p = RE::PlayerCharacter::GetSingleton();
@@ -159,6 +170,18 @@ namespace protean::Hammerfist
 					return RE::BSEventNotifyControl::kContinue;
 				}
 				const std::string_view tag(a_event->tag.c_str());
+				if (tag == "HitFrame" && g_inAttack) {
+					// the fist comes down: the one-hand slam's first HitFrame, the both-hands smash's third
+					++g_hitFrames;
+					if (g_hitFrames == (g_combo ? 3 : 1)) {
+						const auto now = Clock::now();
+						g_powerHit = now - Clock::time_point(Clock::duration(g_lastHit.load())) < std::chrono::milliseconds(200);
+						g_powerAt = now;
+						g_powerPending = true;
+						g_inAttack = false;
+					}
+					return RE::BSEventNotifyControl::kContinue;
+				}
 				const bool right = tag == "weaponSwing" && p->GetEquippedObject(false) == weapon;
 				const bool left = tag == "weaponLeftSwing" && p->GetEquippedObject(true) == weapon;
 				if (right || left) {
@@ -167,10 +190,25 @@ namespace protean::Hammerfist
 						p->AsActorValueOwner()->DamageActorValue(RE::ActorValue::kStamina, cost);
 					}
 					const bool power = p->IsPowerAttacking();
-					if (power) {
-						g_powerHit = false;
-						g_powerAt = Clock::now();
-						g_powerPending = true;
+					const auto now = Clock::now();
+					if (power && (!g_inAttack || now - g_attackAt > kAttackGap)) {
+						// a new power attack: the both-hands smash when both hands hold a Hammerfist and the attack is
+						// the dual one (its name, logged to check)
+						std::string ev;
+						if (auto* proc = p->GetActorRuntimeData().currentProcess; proc && proc->high && proc->high->attackData) {
+							ev = proc->high->attackData->event.c_str();
+						}
+						const bool both = p->GetEquippedObject(false) == weapon && p->GetEquippedObject(true) == weapon;
+						const auto has = [&ev](std::string_view a_part) {
+							std::string low(ev);
+							std::ranges::transform(low, low.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+							return low.find(a_part) != std::string::npos;
+						};
+						g_combo = both && (has("dual") || has("combo"));
+						g_inAttack = true;
+						g_attackAt = now;
+						g_hitFrames = 0;
+						logger::info("hammerfist: power attack '{}'{}", ev, g_combo ? " (both hands)" : "");
 					}
 					logger::info("hammerfist: {} {}swing, stamina -{:.0f}, damage {}", right ? "right" : "left", power ? "power " : "", cost,
 						weapon->attackDamage);
@@ -203,7 +241,10 @@ namespace protean::Hammerfist
 		}
 		held = has;
 		// a power swing that struck nothing in its moment comes down on the ground
-		if (g_powerPending && Clock::now() - g_powerAt > std::chrono::milliseconds(static_cast<int>(Dial("Protean_HammerfistSlamWait", 0.35f) * 1000.0f))) {
+		if (g_inAttack && Clock::now() - g_attackAt > kAttackGap) {
+			g_inAttack = false;   // never landed (interrupted)
+		}
+		if (g_powerPending && Clock::now() - g_powerAt > kLandWait) {
 			g_powerPending = false;
 			if (!g_powerHit) {
 				GroundSlam(p);

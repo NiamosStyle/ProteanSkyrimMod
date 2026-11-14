@@ -89,7 +89,14 @@ def with_signals(raw, signals):
         assert [(round(a.time, 2), a.text) for a in back.annotations] == [(round(t, 2), x) for t, x in sorted(signals)], back.annotations
         with open(path, "rb") as f:
             return f.read()
-SUBMODS = ("RendingClaws", "Blade")
+SUBMODS = ("RendingClaws", "Blade", "HammerfistRight", "HammerfistLeft", "HammerfistBoth")
+# The Hammerfist's power attacks come down to the ground (2026-11-13; tools/build_hammer_anims.py): a hand's own power
+# attack while that hand holds a Hammerfist, the both-hands one while both do. Above Rending Claws' set (15100).
+HAMMER_SUBMODS = (
+    ("HammerfistRight", "Hammerfist right", 15102, (False,), "h2h_attackpowerforwardrighthand.hkx"),
+    ("HammerfistLeft", "Hammerfist left", 15102, (True,), "h2h_attackpowerforwardlefthand.hkx"),
+    ("HammerfistBoth", "Hammerfist both hands", 15103, (False, True), "h2h_attackrightpowerforward.hkx"),
+)
 
 
 def build():
@@ -141,6 +148,23 @@ def build():
                 f.write(raw)
             written.append(rel + "/Blade/" + name)
         print("wrote", len(BLADE), "animations to", dst)
+        import build_hammer_anims
+        made = build_hammer_anims.clips(person)
+        for sub, title, prio, hands, name in HAMMER_SUBMODS:
+            dst = os.path.join(root, sub)
+            if os.path.isdir(dst):
+                shutil.rmtree(dst)
+            os.makedirs(dst)
+            with open(os.path.join(dst, "config.json"), "w", encoding="utf-8") as f:
+                json.dump({"name": title, "description": "The Hammerfist's power attack comes down to the ground.",
+                           "priority": prio,
+                           "conditions": [{"condition": "IsEquipped", "requiredVersion": "1.0.0.0",
+                                           "Form": {"pluginName": "Protean.esp", "formID": HAMMERFIST_WEAPON},
+                                           "Left hand": left} for left in hands]}, f, indent=2)
+            with open(os.path.join(dst, name), "wb") as f:
+                f.write(made[name])
+            written += [rel + "/" + sub + "/config.json", rel + "/" + sub + "/" + name]
+        print("wrote the Hammerfist's power attacks to", root)
     return written
 
 
