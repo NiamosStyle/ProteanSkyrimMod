@@ -27,8 +27,16 @@ def mirror(src_name, dst_name):
     ob.matrix_world = src.matrix_world.copy()
     ob.matrix_world.translation.x = -ob.matrix_world.translation.x
     # the same groups in the same order (the weights came with the copied points), named for the left
-    for g in src.vertex_groups:
-        ob.vertex_groups.new(name=swap(g.name))
+    # The groups' names live on the mesh, so the copy brought the RIGHT arm's names with it. Adding new left-named
+    # groups (as this did until 2026-11-13) left every point following the right arm's bones: in game the left arm
+    # was a mess stretched across the body (user, screenshots 85-91). Rename the copy's own groups instead, through
+    # spare names first so that L and R can trade places.
+    gs = list(ob.vertex_groups)
+    assert len(gs) == len(src.vertex_groups), (len(gs), len(src.vertex_groups))
+    for i, g in enumerate(gs):
+        g.name = "__swap%d" % i
+    for g, sg in zip(gs, src.vertex_groups):
+        g.name = swap(sg.name)
     for mod in src.modifiers:
         if mod.type == 'SUBSURF':
             m = ob.modifiers.get(mod.name) or ob.modifiers.new(mod.name, 'SUBSURF'); m.levels = mod.levels

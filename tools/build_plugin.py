@@ -721,7 +721,8 @@ def main():
           "EquipSound: 0C06CF:Skyrim.esm\nUnequipSound: 0C06D0:Skyrim.esm\n"
           "Keywords:\n- 01E714:Skyrim.esm\n"  # WeapTypeMace: the One-Handed mace perks (Bone Breaker)
           "BasicStats:\n  Damage: 8\n  Weight: 1\n"  # Protean sets the damage (Protean_HammerfistDamageMult)
-          "Data:\n  Speed: 1\n  Reach: 0.8\n  Stagger: 1\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
+          # Speed 0.8, a mace's (2026-11-13; at 1 the user found the big fists felt light, "balloon hands")
+          "Data:\n  Speed: 0.8\n  Reach: 0.8\n  Stagger: 1\n  NumProjectiles: 1\n  RangeMin: 500\n  RangeMax: 2000\n"
           "  AnimationAttackMult: 1\n  RumbleLeftMotorStrength: 0.5\n  RumbleRightMotorStrength: 1\n  RumbleDuration: 0.33\n"
           "Critical:\n  Damage: 4\n  PercentMult: 1\n  Flags:\n  - OnDeath\n"
           "DetectionSoundLevel: Normal\n")

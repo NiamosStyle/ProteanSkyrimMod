@@ -19,7 +19,7 @@ BasicStats:
   Damage: 8
   Weight: 1
 Data:
-  Speed: 1
+  Speed: 0.8
   Reach: 0.8
   Stagger: 1
   NumProjectiles: 1
