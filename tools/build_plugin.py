@@ -1035,6 +1035,11 @@ def main():
     def ref(local):
         return "%s|%X" % (PLUGIN, local)
 
+    # the stars sit on the constellation's tentacles (tools/fit_constellation.py); PERKS' own x, y are the old layout
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python -I leaves the script's folder out
+    import fit_constellation
+    star = fit_constellation.layout()
+    assert set(star) == set(PERKS), "every perk needs a star: %s" % (set(star) ^ set(PERKS))
     write(os.path.join(ROOT, "data", "SKSE", "Plugins", "CustomSkills", "Protean.json"), json.dumps({
         "$schema": "https://raw.githubusercontent.com/Exit-9B/CustomSkills/main/docs/schema/CustomSkill.json",
         "version": 1,
@@ -1049,7 +1054,7 @@ def main():
             "showLevelup": ref(GLOBALS["Protean_ShowLevelup"][0]),
             "name": "Protean",
             "description": "New perks come with consuming. Perk points take a little more biomass as you go.",
-            "nodes": [{"id": pid, "perk": ref(local), "x": round(x * TREE_SCALE_X, 2), "y": round(yy * TREE_SCALE_Y, 2),
+            "nodes": [{"id": pid, "perk": ref(local), "x": star[pid][0], "y": star[pid][1],
                        **({"links": links} if links else {})}
                       for pid, (local, _, _, x, yy, links) in PERKS.items()],
         }],

@@ -90,6 +90,14 @@ CIMAGE00_XFORM = (
     ((-0.5000001192092896, 0.0, 0.8660253286361694), (0.8660253286361694, 0.0, 0.5000001192092896), (0.0, 1.0, 0.0)),
     0.30420517921447754)
 CIMAGE00_CORNERS_UV = ((0, 1), (1, 1), (1, 0), (0, 0))
+# Size and place (measured from the user's screenshot, 2026-11-14, 2560x1600): at its original size the picture showed
+# 448 px per drawing unit (the drawing spans -1.05..1.05) with the drawing's centre at screen (1298, 648), and the
+# tree's root star at (1280, 797). The picture is scaled by PICTURE_SCALE about its centre and moved so the drawing
+# point ROOT_AT (where the tentacles gather) lands on the root star. tools/fit_constellation.py places the stars.
+PICTURE_SCALE = 0.55
+ROOT_AT = (0.02, -0.75)
+SHOT_CENTRE, SHOT_PX_PER_UNIT, SHOT_ROOT_STAR = (1298, 648), 448, (1280, 797)
+WORLD_PER_DRAWING_UNIT = 53.2 / 2.1    # cImage00 is 53.2 model units across, the drawing 2.1 units
 
 
 def upright(d):
@@ -118,10 +126,16 @@ def upright(d):
     c, sn = math.cos(th), math.sin(th)
     rot = ((c, 0, -sn), (0, 1, 0), (sn, 0, c))                     # turns it back (x right, z up)
     R2 = tuple(tuple(sum(rot[i][k] * R[k][j] for k in range(3)) for j in range(3)) for i in range(3))
-    tc = tuple(a - b for a, b in zip(t, centre))
-    t2 = tuple(sum(rot[i][k] * tc[k] for k in range(3)) + centre[i] for i in range(3))
-    print("cImage00 turned %.1f degrees" % math.degrees(th))
-    new = struct.pack("<3f9ff", *t2, *R2[0], *R2[1], *R2[2], s)
+    k = PICTURE_SCALE
+    tc = tuple((a - b) * k for a, b in zip(t, centre))
+    # where ROOT_AT lands once scaled about the centre, and the shift that puts it on the root star (screen y is down;
+    # the model's x is screen right and z screen up)
+    px_per_world = SHOT_PX_PER_UNIT / WORLD_PER_DRAWING_UNIT
+    lands = (SHOT_CENTRE[0] + ROOT_AT[0] * SHOT_PX_PER_UNIT * k, SHOT_CENTRE[1] - ROOT_AT[1] * SHOT_PX_PER_UNIT * k)
+    shift = ((SHOT_ROOT_STAR[0] - lands[0]) / px_per_world, 0.0, -(SHOT_ROOT_STAR[1] - lands[1]) / px_per_world)
+    t2 = tuple(sum(rot[i][j] * tc[j] for j in range(3)) + centre[i] + shift[i] for i in range(3))
+    print("cImage00 turned %.1f degrees, scaled %.2f, moved %.2f right %.2f up" % (math.degrees(th), k, shift[0], shift[2]))
+    new = struct.pack("<3f9ff", *t2, *R2[0], *R2[1], *R2[2], s * k)
     return d.replace(old, new)
 
 
