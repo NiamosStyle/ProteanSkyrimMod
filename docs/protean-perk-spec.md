@@ -165,7 +165,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
 - **Requires:** Keen
 - **What it does:**
   - Rank 1: the health bonus rises from 25% of your health to 50%, plus a quarter of the size gap as before. See "Changes to Protean itself."
-  - Rank 2: it rises to 75%, plus the same quarter of the gap. Predator animals also gain the ability to "activate" a corpse and eat it, like a werewolf, which restores health.
+  - Rank 2 (changed 2026-11-14): it rises to 75%, the animal's whole health surplus is added (`Protean_SurvivorGapShare2`) and every change into an animal arrives at 100% health. Predator animals also gain the ability to "activate" a corpse and eat it, like a werewolf, which restores health.
   - Idea to explore: herbivores could "activate" plants and mushrooms to eat them for the same health restoration. If this can't be done, herbivores instead get an extra health regeneration bonus outside of combat.
 - **Changed 2026-10-28 (user):** rank 2's body-eating is replaced by consuming: with rank 2 a consumed body heals 50% instead of 20%. Eating plants stays.
 - **Status:** Done, tested in game (2026-10-24). The health bonus is 50% / 75% (each rank adds `Protean_SurvivorHealthPct`). Rank 2: press Activate in animal form by a body (meat eaters) or a harvestable plant (plant eaters; omnivores both, diets from Wikipedia and the games' lore) to eat for 3 s standing still; a body heals 25% of maximum health (once per body), a plant 20% (it counts as harvested and grows back; the ingredient is not kept). Moving ends the meal without healing. Eating a person in sight of people turns them hostile until the change back. Sounds: the player's eating sound twice for a plant, the werewolf's feeding sound once for a body, with a hit's blood splashing twice from the animal's mouth. No eating animation: the animal just stands (user: plenty of vanilla actions have none). The few the game has (deer, goat, cow, sabre cats, were-forms) were dropped, as the deer's outlasted the meal and held the player in place for several seconds.
@@ -186,7 +186,10 @@ Stealing the face of any of these characters grants one automatic perk point. No
 
 ### Apex (capstone)
 - **Requires:** Survivor, Predator, and Stalker, each taken at least once
-- **What it does:** Lets you transform into a dragon, which you fully control.
+- **What it does (redesigned by the user, 2026-11-14; built, untested in game except as noted):**
+  1. Kin: while owned, the player belongs to every animal's species faction in any form (`src/Apex.cpp`; the broad groups, Bandit, Riekling, Vampire-companion and PlayerWerewolf factions are left out).
+  2. Damage: an animal's hit never falls below a two-hander's, 17 + 2.6 x level (`Protean_ApexDamageBase`, `Protean_ApexDamagePerLevel`; `Predator::DamageShare`). A melee-focused level-50 one-hander does about 75 per hit, a two-hander about 135.
+  3. Call: a power in the animal's Favorites list; plays the animal's noise and summons a pack of its kind (small 5, medium 3, large 2, mammoth and giant 1) for 60 s, cooldown 180 s, costs the change-form Stamina (`src/Call.cpp`; runtime Summon Creature spell per kind; the summon is the riskiest part).
 - **Status:** Dragon dropped (the user, 2026-11-02): Play as a Dragon (Nexus 28854) and True Dragon Aspect were both tried in game and were jerky and buggy to move and attack with (the dragon's head also bent hard to one side); neither will be used, required or copied. The user will choose a new capstone.
 - **Kept from the trial:** True Dragon Aspect's jump-and-glide flight (jump lowers gravity to glide; extra jumps in the air; Sneak drops fast) felt natural to the user for winged flight. An idea for winged forms; the chaurus hunter's bug-wing flight works and stays as it is.
 

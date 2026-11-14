@@ -136,3 +136,8 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
 Live-testing notes: DevBench calls take ~1.5 s (time samples by wall clock). `devbench-cli.sh call CustomSkills
 DebugReload '[]'` reloads the tree after copying the json. Moving cells (`coc`) right after a death reload crashed the
 game twice (render code, Protean not in the stack).
+
+## 2026-11-14
+- Survivor 2: arrive at 100% health, whole surplus of tougher animals added. Apex (damage floor, kin, Call) built; Call's summon untested.
+- Bug found and fixed (f5f6543): taking a stolen face off forgave the bounty but left the game's witness record, so witnesses (Alva, Brutius in Morthal) kept attacking. `ForgiveSince` now also calls `PlayerPayCrimeGold(false,false)` on the faction and restores the earlier bounty. Verified live by the user with a new crime.
+- Logging: the previous session's log is kept as `Protean.1.log`; every load logs the Protean factions and who is hostile 3 s later.
