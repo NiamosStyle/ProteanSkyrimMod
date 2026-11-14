@@ -34,7 +34,7 @@ namespace protean::Call
 			int n = 3;
 			if (a_c.size == "small") {
 				n = 5;
-			} else if (a_c.size == "large_cave_ok") {
+			} else if (a_c.size == "large" || a_c.size == "large_cave_ok") {
 				n = 2;
 			} else if (a_c.size == "outdoor_only") {
 				n = 1;
