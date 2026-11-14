@@ -4,6 +4,8 @@
 #include "Registry.h"
 #include "Shift.h"
 
+#include <random>
+
 namespace protean::Call
 {
 	namespace
@@ -41,53 +43,67 @@ namespace protean::Call
 		}
 
 		float g_cooldown{ 0.0f };
-		std::unordered_map<std::string, RE::SpellItem*> g_spells;  // per kind, made when first needed
 
-		RE::SpellItem* SpellFor(const Creature& a_c, int a_count, float a_seconds)
+		// The pack: animals placed beside the player, made followers, taken away when their time is up. (A Summon
+		// Creature effect built at runtime ran its countdown but spawned nothing, 2026-11-14: the game sets the
+		// effect's behaviour up only when it loads an effect from a plugin.)
+		struct Member
 		{
-			auto& slot = g_spells[a_c.id];
-			if (slot && static_cast<int>(slot->effects.size()) == a_count) {
-				for (auto* e : slot->effects) {
-					e->effectItem.duration = static_cast<std::uint32_t>(a_seconds);
-				}
-				return slot;
-			}
-			auto* mgefFactory = RE::IFormFactory::GetConcreteFormFactoryByType<RE::EffectSetting>();
-			auto* spellFactory = RE::IFormFactory::GetConcreteFormFactoryByType<RE::SpellItem>();
-			if (!mgefFactory || !spellFactory || !a_c.npc) {
-				return nullptr;
-			}
-			auto* mgef = mgefFactory->Create();
-			auto* spell = spellFactory->Create();
-			if (!mgef || !spell) {
-				return nullptr;
-			}
-			mgef->magicItemDescription = "Summons a pack of the animal's kind.";
-			mgef->data.archetype = RE::EffectArchetypes::ArchetypeID::kSummonCreature;
-			mgef->data.associatedForm = a_c.npc;
-			mgef->data.castingType = RE::MagicSystem::CastingType::kFireAndForget;
-			mgef->data.delivery = RE::MagicSystem::Delivery::kSelf;
-			mgef->data.baseCost = 0.0f;
-			mgef->data.flags.set(RE::EffectSetting::EffectSettingData::Flag::kNoArea);
+			RE::FormID id;
+			float      left;
+		};
+		std::vector<Member> g_pack;
+		float               g_scan{ 0.0f };
 
-			spell->fullName = "Call";
-			spell->data.spellType = RE::MagicSystem::SpellType::kSpell;
-			spell->data.castingType = RE::MagicSystem::CastingType::kFireAndForget;
-			spell->data.delivery = RE::MagicSystem::Delivery::kSelf;
-			spell->data.costOverride = 0;
-			spell->data.flags.set(RE::SpellItem::SpellFlag::kCostOverride);
-			for (int i = 0; i < a_count; ++i) {
-				auto* eff = new RE::Effect();
-				eff->baseEffect = mgef;
-				eff->effectItem.magnitude = 0.0f;
-				eff->effectItem.area = 0;
-				eff->effectItem.duration = static_cast<std::uint32_t>(a_seconds);
-				eff->cost = 0.0f;
-				spell->effects.push_back(eff);
+		void SetTeammate(RE::Actor* a_actor, bool a_on)
+		{
+			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
+			if (!vm) {
+				return;
 			}
-			slot = spell;
-			logger::info("call: made the summon for '{}' ({} x {:08X}, {:.0f} s)", a_c.id, a_count, a_c.npc->GetFormID(), a_seconds);
-			return slot;
+			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_actor->GetFormType(), a_actor);
+			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
+			vm->DispatchMethodCall2(handle, "Actor", "SetPlayerTeammate", RE::MakeFunctionArguments(std::move(a_on), std::move(a_on)), cb);
+		}
+
+		void Dismiss(RE::FormID a_id)
+		{
+			if (auto* a = RE::TESForm::LookupByID<RE::Actor>(a_id)) {
+				SetTeammate(a, false);
+				if (auto* f = Registry::Get().BeastFaction()) {
+					a->RemoveFromFaction(f);
+				}
+				if (a->IsDead()) {
+					return;  // a fallen helper stays as the body it is
+				}
+				a->StopCombat();
+				a->Disable();
+				a->SetDelete(true);
+				logger::info("call: {:08X} '{}' goes", a_id, a->GetName());
+			}
+		}
+
+		void Place(RE::PlayerCharacter* a_p, const Creature& a_c, int a_count, float a_seconds)
+		{
+			static std::mt19937 rng{ std::random_device{}() };
+			std::uniform_real_distribution<float> angle(0.0f, 6.2831853f), dist(180.0f, 320.0f);
+			for (int i = 0; i < a_count; ++i) {
+				auto ref = a_p->PlaceObjectAtMe(a_c.npc, false);
+				auto* actor = ref ? ref->As<RE::Actor>() : nullptr;
+				if (!actor) {
+					logger::warn("call: could not place a '{}'", a_c.id);
+					continue;
+				}
+				const float t = angle(rng), d = dist(rng);
+				auto        pos = a_p->GetPosition();
+				actor->SetPosition(RE::NiPoint3{ pos.x + std::cos(t) * d, pos.y + std::sin(t) * d, pos.z }, true);
+				if (auto* f = Registry::Get().BeastFaction()) {
+					actor->AddToFaction(f, 0);
+				}
+				SetTeammate(actor, true);
+				g_pack.push_back({ actor->GetFormID(), a_seconds });
+				logger::info("call: placed {:08X} '{}'", actor->GetFormID(), actor->GetName());
+			}
 		}
 
 		void Noise(RE::PlayerCharacter* a_p, const Creature& a_c)
@@ -116,6 +132,33 @@ namespace protean::Call
 		if (g_cooldown > 0.0f) {
 			g_cooldown = std::max(0.0f, g_cooldown - a_delta);
 		}
+		for (auto it = g_pack.begin(); it != g_pack.end();) {
+			it->left -= a_delta;
+			if (it->left <= 0.0f) {
+				Dismiss(it->id);
+				it = g_pack.erase(it);
+			} else {
+				++it;
+			}
+		}
+		// helpers left from before a save and load (the list is not saved): anyone of the pack's faction that is a
+		// teammate and not in the list gets ten more seconds
+		if ((g_scan -= a_delta) <= 0.0f) {
+			g_scan = 5.0f;
+			auto* pl = RE::ProcessLists::GetSingleton();
+			auto* beast = Registry::Get().BeastFaction();
+			auto* p = RE::PlayerCharacter::GetSingleton();
+			if (pl && beast && p) {
+				for (auto& h : pl->highActorHandles) {
+					auto a = h.get();
+					if (a && a.get() != p && a->IsInFaction(beast) && a->IsPlayerTeammate() && !a->IsDead() &&
+						std::ranges::none_of(g_pack, [&](const Member& m) { return m.id == a->GetFormID(); })) {
+						g_pack.push_back({ a->GetFormID(), 10.0f });
+						logger::info("call: {:08X} '{}' is left from before; goes in 10 s", a->GetFormID(), a->GetName());
+					}
+				}
+			}
+		}
 	}
 
 	void OnCast()
@@ -138,17 +181,14 @@ namespace protean::Call
 		}
 		const int   count = Count(*c);
 		const float seconds = reg.Dial("Protean_CallSeconds", 60.0f);
-		auto*       spell = SpellFor(*c, count, seconds);
-		if (!spell) {
-			logger::error("call: no summon could be made for '{}'", c->id);
+		if (!c->npc) {
+			logger::error("call: '{}' has no NPC record to place", c->id);
 			return;
 		}
 		av->DamageActorValue(RE::ActorValue::kStamina, cost);
 		g_cooldown = reg.Dial("Protean_CallCooldown", 180.0f);
 		Noise(p, *c);
-		if (auto* caster = p->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
-			caster->CastSpellImmediate(spell, false, p, 1.0f, false, 0.0f, p);
-		}
+		Place(p, *c, count, seconds);
 		logger::info("call: '{}' called {} for {:.0f} s", c->id, count, seconds);
 	}
 }
