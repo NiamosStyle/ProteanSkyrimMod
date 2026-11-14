@@ -34,6 +34,11 @@ SHINE = {"Fist": (80.0, 1.0, (0.94, 1.0, 0.87))}   # the Shield's chaurus chitin
 FIRST_PERSON_DROP = ("UpperArm", "UpperarmTwist", "Clavicle")
 
 
+# the game's textures at most this wide: painted at 4096, the fist and shell came to ~22 MB each, most of the release
+# zip; 2048, like the other sleeves', is hard to tell apart in game (2026-11-14)
+MAX_SIZE = 2048
+
+
 def build_textures():
     from PIL import Image, ImageChops
     tmp = os.path.join(BAKED, "_game")
@@ -53,7 +58,8 @@ def build_textures():
         Image.merge("RGBA", (r, g, b, a)).save(os.path.join(tmp, part + "_n.png"))
         jobs.append((part + "_n.png", "BC7_UNORM"))
     for name, fmt in jobs:
-        subprocess.run([build_blade.XTEXCONV, "-nologo", "-m", "0", "-f", fmt, "-o", TEX_OUT, os.path.join(tmp, name)],
+        subprocess.run([build_blade.XTEXCONV, "-nologo", "-m", "0", "-f", fmt, "-w", str(MAX_SIZE), "-h", str(MAX_SIZE),
+                        "-o", TEX_OUT, os.path.join(tmp, name)],
                        check=True, stdout=subprocess.DEVNULL)
     print("wrote", len(jobs), "textures to", TEX_OUT)
 

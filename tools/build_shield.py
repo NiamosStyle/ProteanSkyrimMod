@@ -34,6 +34,11 @@ SPEC = {"Arm": 0.7, "Shell": 0.6}   # the shine where no mask is baked (the shel
 FIRST_PERSON_DROP = ("NPC L UpperArm", "NPC L UpperarmTwist", "NPC L Clavicle")
 
 
+# the game's textures at most this wide: painted at 4096, the fist and shell came to ~22 MB each, most of the release
+# zip; 2048, like the other sleeves', is hard to tell apart in game (2026-11-14)
+MAX_SIZE = 2048
+
+
 def build_textures():
     from PIL import Image, ImageChops
     tmp = os.path.join(BAKED, "_game")
@@ -54,7 +59,8 @@ def build_textures():
         Image.merge("RGBA", (r, g, b, a)).save(os.path.join(tmp, part + "_n.png"))
         jobs.append((part + "_n.png", "BC7_UNORM"))
     for name, fmt in jobs:
-        subprocess.run([build_blade.XTEXCONV, "-nologo", "-m", "0", "-f", fmt, "-o", TEX_OUT, os.path.join(tmp, name)],
+        subprocess.run([build_blade.XTEXCONV, "-nologo", "-m", "0", "-f", fmt, "-w", str(MAX_SIZE), "-h", str(MAX_SIZE),
+                        "-o", TEX_OUT, os.path.join(tmp, name)],
                        check=True, stdout=subprocess.DEVNULL)
     print("wrote", len(jobs), "textures to", TEX_OUT)
 
