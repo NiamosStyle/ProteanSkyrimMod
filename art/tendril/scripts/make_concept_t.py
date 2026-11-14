@@ -12,6 +12,9 @@ SCENE = "Blade"
 SHAFT_R = 2.3        # the shaft's radius at its root (it tapers to the head)
 OUT_PAST = 30.0      # how far the head's point reaches past the wrist joint
 POINT = 15.0         # the head's length
+TENTACLES = 6        # off the shoulder (8 of 16-28 units, root 2.4, were too big: user, 2026-11-14)
+TENT_LEN = (8.0, 14.0)
+TENT_R = 1.3
 
 
 def arm_frame():
@@ -27,7 +30,7 @@ def arm_frame():
     return shoulder, elbow, wrist, a, up, side
 
 
-def flesh_top(at, a, up, ob_name="BladeFlesh", slab=3.0):
+def flesh_top(at, a, up, ob_name="TendrilFlesh", slab=3.0):
     """How far the flesh stands above the forearm's line at a point: where the shaft must lie."""
     ob = bpy.data.objects[ob_name]
     dg = bpy.context.evaluated_depsgraph_get()
@@ -44,7 +47,7 @@ def flesh_top(at, a, up, ob_name="BladeFlesh", slab=3.0):
 _BVH = {}
 
 
-def surface(p, c, lift, ob_name="BladeFlesh"):
+def surface(p, c, lift, ob_name="TendrilFlesh"):
     """p pushed out from the axis point c to just above the flesh's outer surface (lift above it)."""
     if ob_name not in _BVH:
         ob = bpy.data.objects[ob_name]
@@ -171,19 +174,19 @@ def sinew(bm, shoulder, elbow, wrist, a, up, side, root, neck):
                 s = root + (neck - root) * (0.3 + 0.55 * k)
                 q = s + (up * math.cos(ang * 1.4) + side * math.sin(ang * 1.4)) * SHAFT_R * 1.05
                 p = p.lerp(q, min(1, k * 1.6))
-            pts.append(p); rad.append(1.1 + 0.4 * math.sin(math.pi * t) - 0.5 * max(0, t - 0.7))
+            pts.append(p); rad.append(0.8 + 0.3 * math.sin(math.pi * t) - 0.3 * max(0, t - 0.7))
         f += tube(bm, pts, rad, 8)
     # tentacles curling off the shoulder and down the upper arm
     ua = (elbow - shoulder).normalized()
     sup = Vector((0, 0, 1)); sup = (sup - ua * sup.dot(ua)).normalized()
     sside = ua.cross(sup)
-    for c in range(8):
-        ang = -1.6 + 3.2 * c / 7
+    for c in range(TENTACLES):
+        ang = -1.5 + 3.0 * c / (TENTACLES - 1)
         out = (sup * math.cos(ang) + sside * math.sin(ang))
         c0 = shoulder + ua * (2 + 4 * (c % 3))
         base = surface(c0 + out * 6.0, c0, -1.0)
-        length = 16 + 12 * ((c * 37) % 5) / 4
-        f += curling(bm, base, (out * 0.7 - ua * 0.7).normalized(), ua, length, 2.4 - 0.2 * (c % 3), (c % 2) * 2 - 1)
+        length = TENT_LEN[0] + (TENT_LEN[1] - TENT_LEN[0]) * ((c * 37) % 5) / 4
+        f += curling(bm, base, (out * 0.7 - ua * 0.7).normalized(), ua, length, TENT_R - 0.15 * (c % 3), (c % 2) * 2 - 1)
     return f
 
 
@@ -216,21 +219,19 @@ def make_concept(variant="barbed"):
     fl.diffuse_color = (0.55, 0.30, 0.28, 1)
     me.materials.append(bonem); me.materials.append(sin)
     for f in me.polygons: f.use_smooth = True
-    flesh = bpy.data.objects["BladeFlesh"]   # the concept shows the flesh in one plain colour
-    flesh.data.materials.clear(); flesh.data.materials.append(fl)
     return name, variant
 
 
-def shots(variants=("barbed", "rows", "toggle")):
+def shots(variants=("barbed",)):
     """Each head on the arm: the whole arm from the front and from behind, and the head close up (needs preview_t)."""
     shoulder, elbow, wrist, a, up, side = arm_frame()
     mid = (shoulder + wrist + a * 25) / 2
-    show = ["MaleUnderwearBody:0", "HandMaleBig3rd", "BladeFlesh", "TendrilConcept"]
+    show = ["MaleUnderwearBody:0", "HandMaleBig3rd", "TendrilFlesh", "TendrilConcept"]
     out = []
     for v in variants:
         make_concept(v)
         out.append(preview("tendril_%s_front" % v, show, mid + Vector((0, 0, 8)), (90, 0, 165), 125))
         out.append(preview("tendril_%s_back" % v, show, mid + Vector((0, 0, 8)), (80, 0, 30), 125))
-        out.append(preview("tendril_%s_head" % v, ["TendrilConcept", "HandMaleBig3rd", "BladeFlesh"],
+        out.append(preview("tendril_%s_head" % v, ["TendrilConcept", "HandMaleBig3rd", "TendrilFlesh"],
                            wrist + a * 12, (75, 0, 120), 70))
     return out
