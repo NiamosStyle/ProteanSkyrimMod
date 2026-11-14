@@ -206,6 +206,7 @@ Stealing the face of any of these characters grants one automatic perk point. No
   - Measured (`tools/measure_claw_poses.py`): in every beast-race clip the claw tips stay at least 20 units above the ground; in the held stances they stay about 20 or more from the body's bones; during attacks they may brush the body.
   - Design calls made for the user (to overrule if wanted): the sleeve and claws now show only while the claws are drawn, as the Blade, Shield and Hammerfist do (before, the horn claws showed whenever equipped); the little finger carries a short spur rather than nothing; the female claws are 0.92 the size.
   - Files: `art/claws/` (Claws.blend, scripts run without Blender's window by `scripts/run.py`), `tools/build_claw_arms.py`, `src/Claws.cpp`. The perk, weapon, damage, Stamina and animations are unchanged.
+  - Sneaking tested 2026-11-13 (user): the claws do not dip into the ground.
   - Status: built and installed 2026-11-13. First look in game 2026-11-13 (user, screenshots 85-89): the right arm and claws show; the LEFT arm was a mess stretched across the body. Cause: the mirrored left meshes still carried the right arm's bone names (the names live on the mesh; the mirror script added new ones instead of renaming). Fixed and reinstalled the same day. Seen again 2026-11-13 (user): both arms right now; "I like the claws". 1st person: the open end of the sleeve's elbow cut could show; now closed with a cap (tools/first_person_cut.py), not yet seen.
 
 ### Proposed hand forms (the user's design, 2026-11-03; not built)
@@ -420,8 +421,7 @@ Nothing in this document has been applied to your project. Let me know your answ
 - **Shield blocking (pinned since 2026-11-05):** test option 1 (the hit patch) and the ward: block hits, arrows and a spell from the front, then read the log ("hit patch written", "hit seen", "blocked ... damage", "ward hooked", "warded"). If it fails: option 3 (a hidden perk cancelling all damage while blocking).
 - **Subtle Carapace magic resistance:** built, untested (`player.getav magicresist`: 10 at rank 1, 20 at rank 2).
 - **Infected:** built, untested.
-- **1st-person sleeve cap (Hammerfist, Claws):** installed; the user has not said whether the inside of the sleeve still shows during a swing. The Blade and Shield sleeves are cut the same way (offer the same fix if it shows there).
-- **Rending Claws:** sneaking not checked for claws in the ground.
+- **1st-person sleeve cap (Hammerfist, Claws):** tested 2026-11-13 (user): "looks good". The Blade and Shield sleeves are cut the same way (offer the same fix if it shows there).
 - **Hammerfist gorilla stance** (user, postponed): hunched over, arms hanging heavily, while the Hammerfists are out. Either a written animation (tools/build_hammer_anims.py's way; mind the block duration) or the body bent at runtime on top of the normal animations.
 - **Proposed hand forms still to make:** the Tendril's sleeve (hands and forearm only, like the claws' size rule).
 - **Later:** perk tree positions (several perks placed for now), the Blade's optional blood burst, then a release (tools/package.py; dev channel off) and merging skill-tree into main.
