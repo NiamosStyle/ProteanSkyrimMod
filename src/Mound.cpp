@@ -225,10 +225,15 @@ namespace protean::Mound
 		g_check = 0.0f;
 	}
 
-	void Here(RE::PlayerCharacter* a_p)
+	void Here(RE::PlayerCharacter* a_p, bool a_atSpot)
 	{
 		Remove(Placed());
 		State::Get().moundRef = 0;
+		if (a_atSpot && g_spot) {   // dev 'moundhere spot': at its own spot, wherever the player is
+			g_kept = true;
+			Place(a_p, *g_spot);
+			return;
+		}
 		const auto pos = a_p->GetPosition();
 		g_spot = Spot{ pos, a_p->GetAngleZ() };
 		g_kept = true;

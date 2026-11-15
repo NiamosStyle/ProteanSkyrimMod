@@ -14,6 +14,6 @@ namespace protean::Mound
 
 	// dev 'moundhere': the mound at the player's feet now (to line it up in game; logs the spot to copy into kSpot);
 	// dev 'moundreset': the mound unused again, and the placed one removed
-	void Here(RE::PlayerCharacter* a_p);
+	void Here(RE::PlayerCharacter* a_p, bool a_atSpot = false);  // 'moundhere spot': at its own spot instead
 	void Reset();
 }

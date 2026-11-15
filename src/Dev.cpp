@@ -326,7 +326,7 @@ namespace protean::Dev
 				// tendrilaim [seconds]: log where the 1st-person hands point (ready, and at each throw), in hand space
 				Tendril::SetLooks("aim", a_arg);
 			} else if (a_cmd == "moundhere") {
-				Mound::Here(p);  // the Strange Mound at the player's feet, its spot logged
+				Mound::Here(p, a_arg == "spot");  // the Strange Mound at the player's feet (its spot logged), or "spot": at its own
 			} else if (a_cmd == "moundreset") {
 				Mound::Reset();  // unused again, the placed one removed
 			} else if (a_cmd == "growtest") {
