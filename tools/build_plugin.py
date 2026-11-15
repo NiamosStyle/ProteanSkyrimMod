@@ -786,9 +786,12 @@ def main():
               "FormKey: %s:%s\nEditorID: Protean_TendrilSleeveAA_%s_%s\n" % (fid(arma), PLUGIN, mode, side) + template
               + "Priority:\n  Male: 10\n  Female: 10\n"
               "WeightSliderEnabled:\n  Male: False\n  Female: False\n"
-              + "".join("%s:\n  Male:\n    File: Protean\\Tendril\\Sleeve_%s_%s_M.nif\n"
-                        "  Female:\n    File: Protean\\Tendril\\Sleeve_%s_%s_F.nif\n" % (field, mode, side, mode, side)
-                        for field in ("WorldModel", "FirstPersonModel"))
+              + "WorldModel:\n  Male:\n    File: Protean\\Tendril\\Sleeve_%s_%s_M.nif\n"
+                "  Female:\n    File: Protean\\Tendril\\Sleeve_%s_%s_F.nif\n" % (mode, side, mode, side)
+              # nothing in 1st person: the game draws slot 61 there (the resting harpoon showed beside the 1st-person
+              # spike, 2026-11-14); Protean hangs its own 1st-person sleeve (src/Tendril.cpp)
+              + "FirstPersonModel:\n  Male:\n    File: Protean\\Tendril\\Sleeve_None.nif\n"
+                "  Female:\n    File: Protean\\Tendril\\Sleeve_None.nif\n"
               + "AdditionalRaces:\n" + "".join("- %s\n" % r for r in CLAW_RACES))
         write(os.path.join(y, "Armors", "Protean_TendrilSleeve_%s_%s - %s_%s.yaml" % (mode, side, fid(armo), PLUGIN)),
               "FormKey: %s:%s\nEditorID: Protean_TendrilSleeve_%s_%s\n" % (fid(armo), PLUGIN, mode, side)

@@ -33,8 +33,9 @@ namespace protean::Tendril
 		// versions (user: "look like 2 when relaxed and 1 when you draw your weapon"): with weapons away the harpoon lies
 		// along the fingers; from partway through the draw it stands out of the palm, where the spell leaves from. One
 		// hidden piece per version and hand, never kept in the inventory; 1st person shows the drawn one only (with
-		// weapons away the arms are off screen). Since the first look in game (2026-11-14) 3rd person wears the resting
-		// one throughout, and the 1st-person spike runs through the 1st-person spell's starting point.
+		// weapons away the arms are off screen). The 1st-person spike runs through the 1st-person spell's starting
+		// point (2026-11-14); the 3rd-person pieces draw nothing in 1st person (slot 61 is drawn there, and showed the
+		// resting harpoon beside the 1st-person spike).
 		struct Side
 		{
 			bool                                    left;
@@ -48,6 +49,33 @@ namespace protean::Tendril
 			{ true, RE::BGSBipedObjectForm::BipedObjectSlot::kFX01, "ProteanTendril1st_L", "Protean\\Tendril\\Sleeve1st_L_{}.nif", "tendril sleeve left" },       // 61
 		};
 		std::string g_swapSound{};  // as the harpoon shifts (none yet: to be chosen by ear, dev 'tendrilswap')
+
+		// dev 'tendrilaim <seconds>': where the 1st-person hands point while the Tendril is ready and as it is thrown, in
+		// each hand's own space, so the 1st-person spike can be laid along the throw (tools/measure_magic_node.py turns
+		// the logged numbers into the body's space). 2026-11-14: the right spike looked angled too low.
+		float g_aimFor{ 0.0f };
+
+		void LogAim(RE::PlayerCharacter* a_p, const char* a_when)
+		{
+			auto* root = a_p->Get3D(true);
+			if (!root) {
+				return;
+			}
+			const float  pitch = a_p->data.angle.x, yaw = a_p->data.angle.z;
+			const auto   ahead = RE::NiPoint3(std::sin(yaw) * std::cos(pitch), std::cos(yaw) * std::cos(pitch), -std::sin(pitch));
+			for (const auto* s : { "R", "L" }) {
+				auto* hand = root->GetObjectByName(fmt::format("NPC {} Hand [{}Hnd]", s, s));
+				auto* magic = root->GetObjectByName(fmt::format("NPC {} MagicNode [{}Mag]", s, s));
+				if (!hand || !magic) {
+					continue;
+				}
+				const auto back = hand->world.rotate.Transpose();
+				const auto dir = back * ahead;
+				const auto at = back * (magic->world.translate - hand->world.translate) / hand->world.scale;
+				logger::info("tendril aim {} {}: ahead in hand space ({:.3f}, {:.3f}, {:.3f}), magic node ({:.2f}, {:.2f}, {:.2f})", s, a_when,
+					dir.x, dir.y, dir.z, at.x, at.y, at.z);
+			}
+		}
 
 		std::int32_t Count(RE::PlayerCharacter* a_p, RE::TESBoundObject* a_item)
 		{
@@ -72,9 +100,9 @@ namespace protean::Tendril
 					continue;
 				}
 				const bool holds = human && a_p->GetEquippedObject(side.left) == a_spell;
-				// 3rd person keeps the resting harpoon with weapons out too: out of the palm it could not be seen (user,
-				// 2026-11-14). The drawn one is left for 1st person, where the thrown tendril leaves from its spike.
-				auto*      want = holds ? rest : nullptr;
+				// weapons out: the palm harpoon. Tried keeping the resting one on instead (2026-11-14): it stuck up past the
+				// fingers on every throw (user: "that won't do").
+				auto*      want = holds ? (drawn ? out : rest) : nullptr;
 				auto*      worn = a_p->GetWornArmor(side.slot);
 				Blade::HangFirstPerson(a_p, side.firstName, side.firstModel, holds && drawn, side.tag);
 				bool swapped = false;
@@ -293,6 +321,14 @@ namespace protean::Tendril
 		UpdateHaul(a_p, a_delta);
 		Gate(a_p, spell);
 		Sleeves(a_p, spell);
+		if (g_aimFor > 0.0f) {
+			static float sinceAim = 0.0f;
+			g_aimFor -= a_delta;
+			if ((sinceAim += a_delta) >= 0.25f) {
+				sinceAim = 0.0f;
+				LogAim(a_p, "ready");
+			}
+		}
 		static float since = 0.0f;
 		if ((since += a_delta) < 0.25f) {
 			return;
@@ -313,6 +349,9 @@ namespace protean::Tendril
 		auto* p = RE::PlayerCharacter::GetSingleton();
 		if (!p || !a_spell || a_spell != Registry::Get().Tendril()) {
 			return;
+		}
+		if (g_aimFor > 0.0f) {
+			LogAim(p, "thrown");
 		}
 		if (!Ready(p)) {
 			logger::info("tendril: a throw slipped past the gate (cooldown {:.1f} s): no pull", g_cooldown);
@@ -386,6 +425,10 @@ namespace protean::Tendril
 			g_blood = static_cast<RE::FormID>(std::strtoul(a_value.c_str(), nullptr, 16));
 		} else if (a_what == "swap") {
 			g_swapSound = a_value == "none" ? std::string{} : a_value;
+		} else if (a_what == "aim") {
+			g_aimFor = a_value.empty() ? 10.0f : std::strtof(a_value.c_str(), nullptr);
+			logger::info("tendril: logging the 1st-person aim for {:.0f} s", g_aimFor);
+			return;
 		}
 		logger::info("tendril: throw sound '{}', blood {:08X}, sleeve swap sound '{}'", g_throwSound, g_blood, g_swapSound);
 	}

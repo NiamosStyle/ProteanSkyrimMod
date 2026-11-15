@@ -98,7 +98,18 @@ def build(side, sex):
     print("wrote", path, counts, "(%d opening(s) capped)" % caps)
 
 
+def build_none():
+    """The 3rd-person pieces' 1st-person model: nothing. The game draws slot 61 in 1st person, so the left resting
+    harpoon stood beside the 1st-person spike (user, screenshot 105, 2026-11-14); the 1st-person sleeve is Protean's own."""
+    path = os.path.join(OUT, "Sleeve_None.nif")
+    nif = NifFile()
+    nif.initialize("SKYRIMSE", path, "BSFadeNode", "ProteanTendrilNone")
+    nif.save()
+    print("wrote", path, "(empty)")
+
+
 if __name__ == "__main__":
+    build_none()
     for side in ("R", "L"):
         for sex in ("M", "F"):
             build(side, sex)

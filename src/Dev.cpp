@@ -320,6 +320,9 @@ namespace protean::Dev
 				} else {
 					logger::warn("dev: clawimpact: no impact data set {}", a_arg);
 				}
+			} else if (a_cmd == "tendrilaim") {
+				// tendrilaim [seconds]: log where the 1st-person hands point (ready, and at each throw), in hand space
+				Tendril::SetLooks("aim", a_arg);
 			} else if (a_cmd == "tendrilblood" || a_cmd == "tendrilthrow" || a_cmd == "tendrilswap") {
 				// tendrilblood <hex ARTO or EFSH>: the blood on a hit; tendrilthrow <SNDR editor ID>: the throw's sound;
 				// tendrilswap <SNDR editor ID, or "none">: the sound as the sleeve's harpoon shifts on a draw or sheathe
