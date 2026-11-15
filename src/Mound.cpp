@@ -34,6 +34,7 @@ namespace protean::Mound
 		float             g_time{ 0.0f };
 		float             g_shrivel{ -1.0f };  // seconds since the search while it shrivels, < 0 = not
 		RE::ObjectRefHandle g_searched{};
+		bool              g_kept{ false };  // placed by dev 'moundhere': stays even for a player who has Protean (lining it up)
 
 		RE::TESObjectREFR* Placed()
 		{
@@ -177,7 +178,7 @@ namespace protean::Mound
 		}
 		g_check = 0.0f;
 		if (s.moundUsed || Evolve::Has("unbound_form")) {
-			if (placed && !s.moundUsed) {  // Protean came another way (dev, an older save): no use for it
+			if (placed && !s.moundUsed && !g_kept) {  // Protean came another way (dev, an older save): no use for it
 				Remove(placed);
 				s.moundRef = 0;
 				logger::info("mound: the player already has Protean: removed");
@@ -207,6 +208,7 @@ namespace protean::Mound
 		State::Get().moundRef = 0;
 		const auto pos = a_p->GetPosition();
 		g_spot = Spot{ pos, a_p->GetAngleZ() };
+		g_kept = true;
 		logger::info("mound: SPOT ({:.1f}, {:.1f}, {:.1f}) angle {:.3f} in {} (copy into Mound.cpp kSpot)", pos.x, pos.y, pos.z,
 			a_p->GetAngleZ(), a_p->GetWorldspace() ? a_p->GetWorldspace()->GetFormEditorID() : "an interior");
 		Place(a_p, *g_spot);
