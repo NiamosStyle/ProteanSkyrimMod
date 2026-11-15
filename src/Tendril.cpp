@@ -89,7 +89,9 @@ namespace protean::Tendril
 			using WS = RE::WEAPON_STATE;
 			const auto* st = a_p->AsActorState();
 			const auto  ws = st ? st->GetWeaponState() : WS::kSheathed;
-			const bool  drawn = ws == WS::kDrawing || ws == WS::kDrawn || ws == WS::kWantToSheathe;
+			// only while fully drawn, as the Blade, Shield and Hammerfist: with weapons away the sleeve is gone (user,
+			// 2026-11-14: a sleeve left on while sheathed was "too incongruent" beside the others)
+			const bool  drawn = ws == WS::kDrawn;
 			const bool  human = !Shift::ActiveCreature();
 			const auto& reg = Registry::Get();
 			auto*       mgr = RE::ActorEquipManager::GetSingleton();
@@ -102,7 +104,9 @@ namespace protean::Tendril
 				const bool holds = human && a_p->GetEquippedObject(side.left) == a_spell;
 				// weapons out: the palm harpoon. Tried keeping the resting one on instead (2026-11-14): it stuck up past the
 				// fingers on every throw (user: "that won't do").
-				auto*      want = holds ? (drawn ? out : rest) : nullptr;
+				// The resting piece is no longer worn (2026-11-14: nothing while sheathed); kept here so a save that still
+				// wears it loses it.
+				auto*      want = holds && drawn ? out : nullptr;
 				auto*      worn = a_p->GetWornArmor(side.slot);
 				Blade::HangFirstPerson(a_p, side.firstName, side.firstModel, holds && drawn, side.tag);
 				bool swapped = false;
