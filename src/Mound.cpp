@@ -11,21 +11,24 @@ namespace protean::Mound
 	{
 		using Clock = std::chrono::steady_clock;
 
-		// Its spot in Helgen's ruins, over rubble the user picks in game (dev 'moundhere' logs it). Unset = not placed
-		// on its own yet.
+		// Its spot in Helgen's ruins, picked by the user in game with dev 'moundhere' (2026-11-15); 'moundhere' moves it
+		// for the session.
 		struct Spot
 		{
 			RE::NiPoint3 pos;
 			float        angle;
 		};
-		std::optional<Spot> g_spot{};
+		std::optional<Spot> g_spot{ Spot{ RE::NiPoint3(18224.8f, -77421.0f, 8335.4f), 0.286f } };
 
 		constexpr RE::FormID kTamriel = 0x0000003C;      // the Skyrim worldspace
 		constexpr RE::FormID kHelgenIntro = 0x0003372B;  // MQ101, Unbound: the mound stays away while it runs
 		constexpr float      kPlaceWithin = 8000.0f;     // placed once the player is this near its spot
 		constexpr RE::FormID kShadow = 0x0EBECD;         // WerewolfTrans02FXS: the shapeshift's shadow over the body
 		constexpr float      kShadowSeconds = 3.0f;
-		constexpr RE::FormID kBlood = 0x000A6EF5;        // BloodSprayDecap01: a gush of blood (the Tendril's hits)
+		// blood (an art object on the mound showed nothing, 2026-11-15): the burst consuming a body makes, and the impact
+		// set consuming uses, played from the mound down and outward so it splatters the rubble and ground around it
+		constexpr RE::FormID kBloodBurst = 0x015373;     // DLC1VampChangeExplosion (Dawnguard.esm)
+		constexpr RE::FormID kBloodSplat = 0x01F82A;     // the impact data set Consume's Blood uses (Skyrim.esm)
 		constexpr auto       kSound = "QSTMiraakDeathTentacleStab";  // Dragonborn: tentacles spearing Miraak
 		constexpr float      kShrivelAfter = 1.5f;       // seconds after the search before it shrinks away
 		constexpr float      kShrivelSeconds = 1.2f;
@@ -97,9 +100,20 @@ namespace protean::Mound
 			}
 			s.moundUsed = true;
 			PlaySound(a_mound, kSound);
-			if (auto* art = RE::TESForm::LookupByID<RE::BGSArtObject>(kBlood)) {
-				a_mound->ApplyArtObject(art, 2.0f);
+			if (auto* burst = RE::TESDataHandler::GetSingleton()->LookupForm<RE::BGSExplosion>(kBloodBurst, "Dawnguard.esm")) {
+				a_mound->PlaceObjectAtMe(burst, false);
 			}
+			int splats = 0;
+			if (auto* set = RE::TESForm::LookupByID<RE::BGSImpactDataSet>(kBloodSplat); set && a_mound->Get3D()) {
+				auto* im = RE::BGSImpactManager::GetSingleton();
+				const char* node = a_mound->Get3D()->name.c_str();
+				for (int k = 0; im && k < 10; ++k) {   // a ring of sprays leaning out, and one straight down
+					const float a = 6.2831853f * k / 9.0f;
+					RE::NiPoint3 way = k == 9 ? RE::NiPoint3(0.0f, 0.0f, -1.0f) : RE::NiPoint3(0.6f * std::sin(a), 0.6f * std::cos(a), -0.8f);
+					splats += im->PlayImpactEffect(a_mound, set, node, way, 250.0f, false, false) ? 1 : 0;
+				}
+			}
+			logger::info("mound: {} blood splatters", splats);
 			// the poison, cast by the mound itself (as a poison dart trap's): a real hit on the player
 			if (auto* poison = Registry::Get().MoundPoison()) {
 				if (auto* caster = a_mound->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)) {
