@@ -74,8 +74,11 @@ namespace protean::Mound
 
 		bool InIntro()
 		{
+			// running = started and not stopped (Papyrus's IsRunning). CommonLib's IsRunning() is only "not stopping, no
+			// start pending", true for a quest long finished: it held the mound back forever (2026-11-15, a new character
+			// in Helgen after the intro, MQ101 at stage 1000)
 			auto* q = RE::TESForm::LookupByID<RE::TESQuest>(kHelgenIntro);
-			return q && q->IsRunning();
+			return q && q->IsEnabled() && !q->IsStopping();
 		}
 
 		void PlaySound(RE::TESObjectREFR* a_at, const char* a_name)
