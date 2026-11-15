@@ -33,7 +33,8 @@ namespace protean::Tendril
 		// versions (user: "look like 2 when relaxed and 1 when you draw your weapon"): with weapons away the harpoon lies
 		// along the fingers; from partway through the draw it stands out of the palm, where the spell leaves from. One
 		// hidden piece per version and hand, never kept in the inventory; 1st person shows the drawn one only (with
-		// weapons away the arms are off screen).
+		// weapons away the arms are off screen). Since the first look in game (2026-11-14) 3rd person wears the resting
+		// one throughout, and the 1st-person spike runs through the 1st-person spell's starting point.
 		struct Side
 		{
 			bool                                    left;
@@ -71,7 +72,9 @@ namespace protean::Tendril
 					continue;
 				}
 				const bool holds = human && a_p->GetEquippedObject(side.left) == a_spell;
-				auto*      want = holds ? (drawn ? out : rest) : nullptr;
+				// 3rd person keeps the resting harpoon with weapons out too: out of the palm it could not be seen (user,
+				// 2026-11-14). The drawn one is left for 1st person, where the thrown tendril leaves from its spike.
+				auto*      want = holds ? rest : nullptr;
 				auto*      worn = a_p->GetWornArmor(side.slot);
 				Blade::HangFirstPerson(a_p, side.firstName, side.firstModel, holds && drawn, side.tag);
 				bool swapped = false;

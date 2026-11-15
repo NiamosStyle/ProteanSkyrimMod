@@ -1,6 +1,8 @@
 # The Tendril sleeve's sinew and bone, for the game (2026-11-14; the concepts are make_concept_t.py). Two versions:
 #   "rest"   weapons away: the harpoon grows out of the heel of the palm and lies along the fingers
-#   "drawn"  weapons out: it stands straight out of the palm, where the spell leaves from
+#   "drawn"  weapons out, 1st person only: it stands straight out of the palm through the 1st-person spell's starting
+#            point, so the thrown tendril leaves from the spike (user, 2026-11-14: at the palm's centre it sat below
+#            where the tendril came out). In 3rd person the "rest" one stays on with weapons out too (user, same day).
 # (user: "look like 2 when relaxed and 1 when you draw your weapon"). Each makes two objects, TBone_<mode> (the
 # harpoon, head A: a spear point with three hooks raking back, like the whip's barb) and TSinew_<mode> (cords wound
 # down the forearm onto the shaft, and small tentacles curling off the shoulder), with texture coordinates and the
@@ -16,7 +18,11 @@ from mathutils.kdtree import KDTree
 SCENE = "Blade"
 SHAFT_R = 2.3        # the shaft's radius at its root (tapering to the head)
 POINT = 15.0         # the head's length
-PALM_OUT = 20.0      # drawn: how far the point stands out of the palm (to tune in game: the arm hangs by the thigh)
+PALM_OUT = 20.0      # drawn: how far the point stands out of the palm
+# drawn: the 1st-person skeleton's "NPC R MagicNode [RMag]" (where the spell leaves the hand) carried onto the
+# 3rd-person hand, in the body's space: tools/measure_magic_node.py. 8.4 units along the hand from the wrist, 3.4 out
+# of the palm; the palm's centre, where the harpoon stood first, is 4.6 along.
+MAGIC_1ST = Vector((28.204, 6.431, 64.578))
 FINGER_OUT = 30.0    # rest: how far past the palm's centre along the fingers
 TENTACLES = 6        # off the shoulder (8 of 16-28 units were too big: user, 2026-11-14)
 TENT_LEN = (8.0, 14.0)
@@ -193,8 +199,9 @@ def make_parts(mode="drawn"):
     centre, n, along = palm_frame()
     L = (wrist - elbow).length
     if mode == "drawn":
-        root = centre - n * 1.5 - along * 2.0
-        tip = centre + n * PALM_OUT
+        out = (MAGIC_1ST - wrist).dot(n)                  # the node's height above the palm's line
+        root = MAGIC_1ST - n * (out + 1.5) - along * 1.0  # rooted in the hand, under the node
+        tip = MAGIC_1ST + n * (PALM_OUT - out)
         harpoon_w = lambda p, t: {HAND: 1.0}   # the whole harpoon rides on the hand
     else:
         nf = (n - a * n.dot(a)).normalized()   # the palm side of the forearm
