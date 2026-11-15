@@ -161,3 +161,32 @@ game twice (render code, Protean not in the stack).
 - **Public identity:** the author is **NiamosStyle**; history rewritten so no real name, email or time zone remains;
   repo `github.com/NiamosStyle/Protean` (private until the Nexus release; merge `skill-tree` into `main` first).
   Never put a Windows user path or personal detail in tracked files.
+
+## 2026-11-14/15: sleeves, Tendril sleeve, Strange Mound (all user-verified in game unless noted)
+- **Tendril sleeve** (`art/tendril/`, `tools/build_tendril_sleeve.py`): flesh, cords, shoulder tentacles and a bone
+  harpoon. Shown only while the Tendril is fully drawn (user: a sleeve left on when sheathed was "too incongruent");
+  3rd person shows the palm harpoon. The "Rest" pieces/records (harpoon along the fingers) are unused but KEPT (user).
+  1st person: the spike runs through the 1st-person MagicNode (`tools/measure_magic_node.py`); the right spike is turned
+  16 deg (`THROW_*` in `make_parts_t.py`, measured live at sgtm 0.1 by `tools/measure_aim_live.py watch B`) because the
+  right throw animation is not the mirrored left. Sleeve pieces have an empty 1st-person model (`Sleeve_None.nif`):
+  the game draws slot 61 in 1st person.
+- **Draw/sheathe sound** for every sleeve and the claws: `NPCKillStabIn` / `NPCKillStabOut` (user: "perfect");
+  dev `drawsound` / `sheathesound`. **Grow**: each new skinned Protean piece grows from 15% to full over 0.6 s on a
+  draw, by scaling its skin-to-bone transforms (`Blade::UpdateGrow`); dev `growtest [s]`.
+- **Strange Mound** (the way into Protean): a heap of burnt flesh in Helgen's ruins at (18224.8, -77421.0, 8335.4)
+  angle 0.286. "Search" it: Miraak tentacle-stab sound, Dawnguard blood burst + 10 blood splatters, the mound casts
+  the Strange Infection poison at the player (real hit, so they cry out), the shapeshift shadow (WerewolfTrans02FXS),
+  then `Evolve::Infect` (a free point spent on Unbound Form); it shrivels and is deleted. Placed at runtime by
+  `src/Mound.cpp` (no cell edit) when a player without Protean comes within 8000 units and MQ101 is not running.
+  Model `tools/build_mound.py` (box collision; needs BSX 130), art `art/mound/`. Co-save 29 (ref, used).
+  Dev `moundhere [spot]`, `moundreset`. Verified with a new character (Realm of Lorkhan start).
+  **Open:** gate on Helgen's ruins being enabled instead of MQ101 (safety for untested alternate starts) - recommended,
+  not done.
+- **Assassin fix**: Very Aggressive (2) no longer counts as "attacks on sight" for a friend/ally (a stolen face's
+  people): bandits passing a bandit-faced player now take x10 (verified).
+- **Textures**: Fist/Shell shrunk to 2048; release zip ~71 MB. `tools/package.py` now packs every Protean mesh/texture.
+- **Privacy**: `.blend` files are zstd-compressed and hid `C:\Users\<account>` paths; `tools/blend_privacy.py`
+  cleans/scans them. HEAD versions clean; OLD .blend versions in git history still hold it - rewrite history before
+  the repo goes public (needs the user's OK + force push).
+- Perk pace: the user is at Protean 26 / character 16 with the tree full; left as is for now (may tune animal
+  evolution points later).
