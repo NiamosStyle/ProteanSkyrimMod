@@ -81,10 +81,12 @@ namespace protean::Claws
 				// no prevent-removal lock (see Shift::RestoreGear): unequipping the weapon takes the piece off
 				mgr->EquipObject(a_p, a_piece, nullptr, 1, nullptr, false, false, false, true);
 				logger::info("claws: {} hand on", a_hand);
+				Blade::SleeveSound(a_p, true, "claws");  // the sleeves' grow sound (user, 2026-11-14: the claws had none)
 			} else if (!a_on) {
 				if (worn) {
 					mgr->UnequipObject(a_p, a_piece, nullptr, 1, nullptr, false, true, false, true);
 					logger::info("claws: {} hand off", a_hand);
+					Blade::SleeveSound(a_p, false, "claws");
 				}
 				if (const auto n = Count(a_p, a_piece); n > 0) {
 					a_p->RemoveItem(a_piece, n, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
