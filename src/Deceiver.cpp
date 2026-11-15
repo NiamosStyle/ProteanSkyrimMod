@@ -319,15 +319,22 @@ namespace protean::Deceiver
 		if (auto t = a_a->GetActorRuntimeData().currentCombatTarget.get(); t && t.get() == a_p) {
 			return "fighting you";
 		}
-		if (a_a->GetFactionReaction(a_p) == RE::FIGHT_REACTION::kEnemy) {
+		const auto reaction = a_a->GetFactionReaction(a_p);
+		if (reaction == RE::FIGHT_REACTION::kEnemy) {
 			return "an enemy by faction";
 		}
-		if (a_a->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAggression) >= 2.0f) {
+		// Very Aggressive (2) attacks anyone but friends and allies; only Frenzied (3) attacks everyone. Bandits are
+		// Very Aggressive, so a bandit's stolen face (their ally) was still counted hostile and Assassin's x10 never came
+		// on bandits who walked right past (user, 2026-11-15; the log: "attacks on sight: attacks anyone")
+		const float aggression = a_a->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAggression);
+		const bool  friendly = reaction == RE::FIGHT_REACTION::kAlly || reaction == RE::FIGHT_REACTION::kFriend;
+		if (aggression >= 3.0f || (aggression >= 2.0f && !friendly)) {
 			return "attacks anyone";
 		}
 		// the engine's own answer is trusted only for those outside the law (bandits, necromancers...): it called four
-		// calm Markarth guards hostile with no bounty (2026-10-28), who then talked to the player as usual
-		if (!a_a->GetCrimeFaction() && a_a->IsHostileToActor(a_p)) {
+		// calm Markarth guards hostile with no bounty (2026-10-28), who then talked to the player as usual. Not for a
+		// friend or ally (a worn face's own people): they walk past (anyone actually fighting the player is caught above)
+		if (!friendly && !a_a->GetCrimeFaction() && a_a->IsHostileToActor(a_p)) {
 			return "hostile, outside the law";
 		}
 		return std::nullopt;
