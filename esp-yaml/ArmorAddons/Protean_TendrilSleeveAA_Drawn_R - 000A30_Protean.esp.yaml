@@ -19,9 +19,9 @@ WorldModel:
     File: Protean\Tendril\Sleeve_Drawn_R_F.nif
 FirstPersonModel:
   Male:
-    File: Protean\Tendril\Sleeve_Drawn_R_M.nif
+    File: Protean\Tendril\Sleeve_None.nif
   Female:
-    File: Protean\Tendril\Sleeve_Drawn_R_F.nif
+    File: Protean\Tendril\Sleeve_None.nif
 AdditionalRaces:
 - 013740:Skyrim.esm
 - 08883A:Skyrim.esm
