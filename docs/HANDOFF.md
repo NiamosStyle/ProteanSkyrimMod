@@ -190,3 +190,9 @@ game twice (render code, Protean not in the stack).
   the repo goes public (needs the user's OK + force push).
 - Perk pace: the user is at Protean 26 / character 16 with the tree full; left as is for now (may tune animal
   evolution points later).
+- **Equip Enchantment Fix dropped from the requirements** (2026-11-15, the user's decision): tested with it off -
+  six enchanted worn items (Shrouded set, Amulet of Arkay, Silver-Blood ring) all kept every effect through a
+  transform + change back, and through a save made in animal form loaded from the main menu, then changed back.
+  The README now names it as the fix to install **if** anyone sees an enchantment missing after changing back
+  (Protean re-equips by code in `Shift::RestoreGear`, the path where the engine is known to drop enchantments).
+  If such a report ever comes in, point them to it first.

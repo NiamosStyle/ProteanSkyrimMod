@@ -34,10 +34,17 @@ Status: **1.0.0**. 35 forms. Built to be part of a larger mod: see `docs/INTEGRA
 
 ## Requirements
 
-Skyrim SE 1.7.104, SKSE64, Address Library, Dawnguard and Dragonborn, Equip Enchantment Fix, the monster
-race crash fix, Custom Skills Framework (the perk tree), Open Animation Replacer (the claw animations and the
-glide pose).
+Skyrim SE 1.7.104, SKSE64, Address Library, Dawnguard and Dragonborn, the monster race crash fix, Custom
+Skills Framework (the perk tree), Open Animation Replacer (the claw animations and the glide pose).
 DevBench is for development only.
+
+Optional: SKSE Menu Framework (the Evolution journal page).
+
+**If an enchantment stops working after you change back** (the item is worn but its effect is missing until you
+re-equip it), install **Equip Enchantment Fix** (the "1.6.629 and newer" build). Protean puts your gear back on
+for you, and gear equipped by a mod rather than by hand is where the game sometimes drops enchantments. It was
+tested without the fix (2026-11-15: six enchanted items, a transform and change back, and a save made in animal
+form loaded from the main menu) and nothing was lost, so it is not required.
 
 ## Credits
 
@@ -46,7 +53,7 @@ This mod is a new build on the ideas of two existing mods. No files or scripts f
 - **Shapeshifting** by PeenCoach (Nexus SE 107629): the transform-by-race-swap approach, the
   werewolf-style "no inventory or spells, press again to revert" design.
 - **Shapeshift - Hare** by Bobiguy (Nexus SE 142327): unequip-everything handling across armor slots,
-  Equip Enchantment Fix use, the craftable spell tome.
+  the craftable spell tome.
 - **Pull Mastery** by xzax (Nexus SE 35134) and **Xyn's Simple Rope Arrow** (Nexus SE 77707): the ideas behind
   Tendril (a long model fired as a flame-type projectile; a negative knock that pulls the target in). Studied
   only; Tendril's model, records and code are Protean's own.
