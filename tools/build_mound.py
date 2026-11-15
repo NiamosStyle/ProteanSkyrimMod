@@ -19,7 +19,7 @@ import build_blade  # noqa: E402
 from build_claws import NifFile  # noqa: E402
 from pyn.nifdefs import bhkBoxShapeProps, bhkRigidBodyProps  # noqa: E402
 from pyn.nifconstants import ShaderFlags1, ShaderFlags2, HAVOC_SCALE_FACTOR  # noqa: E402
-from pyn.pynifly import PynBufferTypes  # noqa: E402
+from pyn.pynifly import PynBufferTypes, BSXFlags  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "art", "mound")
@@ -34,6 +34,7 @@ TEX = {
 ARCHIVE = r"C:/Games/steamapps/common/Skyrim Special Edition/Data/Skyrim - Meshes1.bsa"
 DONOR = "meshes\\landscape\\rocks\\wetrocks\\rockpilem01wet.nif"   # a static rock pile: its body's settings
 MEAT = "meshes\\clutter\\ingredients\\venison.nif"                 # a box of flesh: its surface material (footsteps, hits)
+BSX = 130   # the rock pile's BSX flags: Havok (2) + articulated (128)
 
 
 def build_textures():
@@ -126,6 +127,9 @@ def build():
     body.rotation[3] = 1.0
     coll = nif.rootNode.add_collision(None, flags=flags)
     coll.add_body(body)
+    # BSX flags, as the rock pile's (130: Havok + articulated): without them the game leaves the collision out, and the
+    # crosshair passed straight through the mound, so "Search" never came up (2026-11-15, in game)
+    BSXFlags.New(nif, flags=BSX, parent=nif.rootNode)
     nif.save()
     print("wrote", OUT, counts, "box", [round(hi[i] - lo[i], 1) for i in range(3)])
 

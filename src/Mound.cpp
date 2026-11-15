@@ -171,7 +171,16 @@ namespace protean::Mound
 		auto* placed = Placed();
 		// a slow, faint breathing while it waits
 		if (placed) {
-			Pulse(placed, 1.0f + 0.025f * std::sin(g_time * 1.6f));
+			Pulse(placed, 1.0f + 0.015f * std::sin(g_time * 1.6f));  // 0.025 was a little much (user, 2026-11-15)
+			// once per placed mound, when its model is in: has the game given it collision (the crosshair needs it)?
+			static RE::FormID told = 0;
+			if (auto* node = placed->Get3D(); node && told != placed->GetFormID()) {
+				told = placed->GetFormID();
+				auto* co = node->GetCollisionObject();
+				const RE::BSXFlags* bsx = node->GetExtraData<RE::BSXFlags>("BSX");
+				logger::info("mound: {:08X} loaded: collision {}, BSX {}", told, co ? "yes" : "NO",
+					bsx ? std::to_string(bsx->value) : std::string("none"));
+			}
 		}
 		if ((g_check += a_delta) < 1.0f) {
 			return;
