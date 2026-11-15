@@ -98,10 +98,19 @@ def surface_point(ob, direction):
 
 def tube(bm, uv, pts, radii, sides=8, u=SINEW_U, tile=SINEW_TILE, vband=None):
     rings, vs, run = [], [], 0.0
+    x = prev = None
     for i, p in enumerate(pts):
         t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
-        ref = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((1, 0, 0))
-        x = t.cross(ref).normalized(); y = t.cross(x)
+        if x is None:
+            ref = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((1, 0, 0))
+            x = t.cross(ref).normalized()
+        else:
+            # each ring turned from the last by the bend between them: a fixed "up" flipped where a tendril curled past
+            # it and twisted the tube into a pinched joint there (user, 2026-11-14: "a segmented look")
+            x = prev.rotation_difference(t) @ x
+            x = (x - t * x.dot(t)).normalized()
+        prev = t
+        y = t.cross(x)
         rings.append([bm.verts.new(p + (x * math.cos(2 * math.pi * k / sides) + y * math.sin(2 * math.pi * k / sides)) * radii[i])
                       for k in range(sides)])
         if i:
@@ -142,7 +151,7 @@ def tendrils(base):
             d = Matrix.Rotation(0.03 + 0.55 * t ** 3, 3, axis) @ d       # rising, then curling over at the tip
             d = (Matrix.Rotation(((k % 2) * 2 - 1) * 0.05, 3, Vector((0, 0, 1))) @ d).normalized()
             p = p + d * (length / steps)
-        tube(bm, uv, pts, rad)
+        tube(bm, uv, pts, rad, vband=(0.02, 0.98))   # once along it: the strip does not tile, every repeat left a seam ring (user: "segmented")
     me = bpy.data.meshes.new("MoundTendrils")
     bm.to_mesh(me); bm.free()
     for p in me.polygons:
