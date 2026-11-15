@@ -1,6 +1,7 @@
 # The Tendril sleeve's sinew and bone, for the game (2026-11-14; the concepts are make_concept_t.py). Two versions:
 #   "rest"   weapons away: the harpoon grows out of the heel of the palm and lies along the fingers
-#   "drawn"  weapons out: it stands straight out of the palm, where the spell leaves from
+#   "drawn"  weapons out: it slides forward from the wrist along the little-finger edge, a wrist-blade reaching past
+#            the knuckles (2026-11-14, after the first in-game look; it first stood out of the palm, "drawn_palm")
 # (user: "look like 2 when relaxed and 1 when you draw your weapon"). Each makes two objects, TBone_<mode> (the
 # harpoon, head A: a spear point with three hooks raking back, like the whip's barb) and TSinew_<mode> (cords wound
 # down the forearm onto the shaft, and small tentacles curling off the shoulder), with texture coordinates and the
@@ -16,7 +17,10 @@ from mathutils.kdtree import KDTree
 SCENE = "Blade"
 SHAFT_R = 2.3        # the shaft's radius at its root (tapering to the head)
 POINT = 15.0         # the head's length
-PALM_OUT = 20.0      # drawn: how far the point stands out of the palm (to tune in game: the arm hangs by the thigh)
+PALM_OUT = 20.0      # drawn_palm (retired): how far the point stood out of the palm
+REACH = 13.0         # drawn: how far the point reaches past the knuckles (about a hand's length)
+WRIST_BACK = 9.0     # drawn: how far behind the wrist the shaft roots in the forearm
+EDGE_BACK = 1.0      # drawn: how far the blade sits toward the back of the hand from the little-finger edge
 FINGER_OUT = 30.0    # rest: how far past the palm's centre along the fingers
 TENTACLES = 6        # off the shoulder (8 of 16-28 units were too big: user, 2026-11-14)
 TENT_LEN = (8.0, 14.0)
@@ -53,6 +57,16 @@ def palm_frame():
     if (h("NPC R Finger02 [RF02]") - w).dot(n) < 0:   # the thumb tip curls toward the palm side
         n = -n
     return w + (f2 - w) * 0.55, n, along
+
+
+class HandMesh:
+    """The bare hand, to keep the wrist-blade clear of it."""
+    def __init__(self, name="HandMaleBig3rd"):
+        ob = bpy.data.objects[name]
+        self.co = [ob.matrix_world @ v.co for v in ob.data.vertices]
+
+    def extent(self, wrist, d):
+        return max((c - wrist).dot(d) for c in self.co)
 
 
 class Flesh:
@@ -192,10 +206,24 @@ def make_parts(mode="drawn"):
     shoulder, elbow, wrist, a, up, side = arm_frame()
     centre, n, along = palm_frame()
     L = (wrist - elbow).length
-    if mode == "drawn":
-        root = centre - n * 1.5 - along * 2.0
+    if mode == "drawn_palm":   # the first drawn version (2026-11-14), out of the palm: unseen in 3rd person, and in
+        root = centre - n * 1.5 - along * 2.0   # 1st person the bent wrist carried it away from its cords (user)
         tip = centre + n * PALM_OUT
-        harpoon_w = lambda p, t: {HAND: 1.0}   # the whole harpoon rides on the hand
+        harpoon_w = lambda p, t: {HAND: 1.0}
+    elif mode == "drawn":
+        # a wrist-blade along the little-finger edge, the whole of it on the forearm with its cords, so a bent wrist
+        # can neither part them nor fold the hand into it (user, 2026-11-14: "I like it better from the wrists")
+        h = bones()
+        pk = h("NPC R Finger40 [RF40]") - h("NPC R Finger10 [RF10]")
+        pk = (pk - a * pk.dot(a)).normalized()   # toward the little finger, across the forearm
+        hw = HandMesh().extent(wrist, pk)        # how far the hand reaches that way
+        knuckle = (h("NPC R Finger20 [RF20]") - wrist).dot(a)
+        at = wrist - a * 3.0
+        d = max(fl.top(at, a, pk) - SHAFT_R * 0.5, hw + SHAFT_R + 0.6)
+        off = pk * d - n * EDGE_BACK
+        root = wrist - a * WRIST_BACK + off
+        tip = wrist + a * (knuckle + REACH) + off
+        harpoon_w = lambda p, t: {FOREARM: 1.0}
     else:
         nf = (n - a * n.dot(a)).normalized()   # the palm side of the forearm
         at = elbow + a * (L * 0.7)
