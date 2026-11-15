@@ -89,11 +89,14 @@ def build(side, sex):
     fl = data["flesh"]
     up = upper(fl)
     fl1, caps = first_person_cut.cut(fl, lambda i: up[i] < 0.5)
-    sw = data["sinew_drawn"]
+    # the right hand's own spike, turned to where its throw leaves (art/tendril/scripts/make_parts_t.py THROW_*); the
+    # left's sat right already (user, 2026-11-14)
+    mode = "drawn1st" if side == "R" else "drawn"
+    sw = data["sinew_" + mode]
     sup = upper(sw)
     counts = [add_shape(nif, "ProteanTendrilFlesh1st", "flesh", fl1, skel, SLOT[side]),
               add_shape(nif, "ProteanTendrilSinew1st", "sinew", sw, skel, SLOT[side], keep=lambda i: sup[i] < 0.5),
-              add_shape(nif, "ProteanTendrilBone1st", "bone", data["bone_drawn"], skel, SLOT[side])]
+              add_shape(nif, "ProteanTendrilBone1st", "bone", data["bone_" + mode], skel, SLOT[side])]
     nif.save()
     print("wrote", path, counts, "(%d opening(s) capped)" % caps)
 

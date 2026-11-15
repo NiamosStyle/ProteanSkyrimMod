@@ -23,6 +23,12 @@ PALM_OUT = 20.0      # drawn: how far the point stands out of the palm
 # 3rd-person hand, in the body's space: tools/measure_magic_node.py. 8.4 units along the hand from the wrist, 3.4 out
 # of the palm; the palm's centre, where the harpoon stood first, is 4.6 along.
 MAGIC_1ST = Vector((28.204, 6.431, 64.578))
+# drawn1st: where the throw leaves each 1st-person hand mid-throw, in the right hand's body space (the left's mirrored),
+# read live at sgtm 0.1 by tools/measure_aim_live.py (2026-11-14). The left spike sat right against its throw (user);
+# the right hand's throw animation turns the hand ~16 degrees differently, so the right spike looked angled too low.
+# The right 1st-person spike is turned by the rotation carrying the left's throw onto the right's; the left keeps "drawn".
+THROW_L = (-0.797, 0.144, -0.587)
+THROW_R = (-0.614, 0.066, -0.786)
 FINGER_OUT = 30.0    # rest: how far past the palm's centre along the fingers
 TENTACLES = 6        # off the shoulder (8 of 16-28 units were too big: user, 2026-11-14)
 TENT_LEN = (8.0, 14.0)
@@ -198,10 +204,14 @@ def make_parts(mode="drawn"):
     shoulder, elbow, wrist, a, up, side = arm_frame()
     centre, n, along = palm_frame()
     L = (wrist - elbow).length
-    if mode == "drawn":
+    if mode in ("drawn", "drawn1st"):
         out = (MAGIC_1ST - wrist).dot(n)                  # the node's height above the palm's line
         root = MAGIC_1ST - n * (out + 1.5) - along * 1.0  # rooted in the hand, under the node
         tip = MAGIC_1ST + n * (PALM_OUT - out)
+        if mode == "drawn1st":   # the right hand's 1st-person spike, turned about the spell's start (see THROW_*)
+            q = Vector(THROW_L).normalized().rotation_difference(Vector(THROW_R).normalized())
+            root = MAGIC_1ST + q @ (root - MAGIC_1ST)
+            tip = MAGIC_1ST + q @ (tip - MAGIC_1ST)
         harpoon_w = lambda p, t: {HAND: 1.0}   # the whole harpoon rides on the hand
     else:
         nf = (n - a * n.dot(a)).normalized()   # the palm side of the forearm
@@ -292,4 +302,4 @@ def make_parts(mode="drawn"):
 
 
 def make_all():
-    return [make_parts("rest"), make_parts("drawn")]
+    return [make_parts("rest"), make_parts("drawn"), make_parts("drawn1st")]

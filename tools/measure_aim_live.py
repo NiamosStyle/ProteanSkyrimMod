@@ -100,5 +100,35 @@ def angle(axis):
     return call("ObjectReference", "GetAngle" + axis, [], {"form": "0x14"})
 
 
+def watch(side, seconds):
+    """Sample one hand as fast as DevBench allows (only the knuckles needed for the frame), printing the aim in the
+    body's space with the time, so a throw's pose shows up against the ready pose."""
+    import time
+    first, third = mm.load(mm.FIRST), mm.load(mm.THIRD)
+    hands = {}
+    for s in (("R", "L") if side == "B" else (side,)):   # "B": both hands each sample (slow the game with sgtm)
+        hand = "NPC %s Hand [%sHnd]" % (s, s)
+        names = ["NPC %s " % s + c.format(s=s) for c in CHILDREN]
+        h1 = mm.world(first, hand)
+        hands[s] = (hand, names, [mm.in_space(mm.world(first, n), h1)[0] for n in names], mm.world(third, hand)[0])
+    t0 = time.time()
+    while time.time() - t0 < seconds:
+        pitch = math.radians(angle("X")); yaw = math.radians(angle("Z"))
+        ahead = [math.sin(yaw) * math.cos(pitch), math.cos(yaw) * math.cos(pitch), -math.sin(pitch)]
+        row = []
+        for s, (hand, names, local, R3) in hands.items():
+            hp = node(hand)
+            live = [None, None, None, None, None, None]
+            for i in (1, 2, 4):
+                p = node(names[i])
+                live[i] = [p[k] - hp[k] for k in range(3)]
+            R = kabsch(local, live)
+            row.append("%s %s" % (s, [round(x, 3) for x in mul(R3, tmul(R, ahead))]))
+        print("%5.2f s  aim in body space  %s" % (time.time() - t0, "   ".join(row)), flush=True)
+
+
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 3)
+    if len(sys.argv) > 1 and sys.argv[1] == "watch":
+        watch(sys.argv[2], float(sys.argv[3]))
+    else:
+        main(int(sys.argv[1]) if len(sys.argv) > 1 else 3)

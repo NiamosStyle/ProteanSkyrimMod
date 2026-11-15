@@ -12,7 +12,7 @@ from mathutils.bvhtree import BVHTree
 SCENE = "Blade"
 MALE = ("MaleUnderwearBody:0", "HandMaleBig3rd")
 FEMALE = ("FemaleUnderwearBody:0", "HandFemale3rd")
-MODES = ("rest", "drawn")
+MODES = ("rest", "drawn", "drawn1st")   # drawn1st: the right 1st-person spike, turned to its throw (make_parts_t)
 
 
 def pieces():
