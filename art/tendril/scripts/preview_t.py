@@ -28,5 +28,6 @@ def preview(name, show, target, rot_deg, dist, lens=50, size=(900, 900), color='
     sc.render.filepath = os.path.join(OUT, name + ".png")
     bpy.ops.render.render(write_still=True, scene=sc.name)
     out = sc.render.filepath
-    sc.render.filepath = "//"   # not left in the saved .blend: the temp path holds the Windows user name
+    sc.render.filepath = "_" * 1023   # the whole fixed-size field overwritten first: a shorter value
+    sc.render.filepath = "//"         # alone leaves the temp path (with the Windows user name) after it
     return out
