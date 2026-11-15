@@ -27,6 +27,7 @@ namespace protean::Evolve
 	// The player's perk list is the record of what was bought; Protean_PerkPoints is kept at the points left.
 	[[nodiscard]] bool Has(std::string_view a_perk);  // the player has this perk
 	bool               Buy(std::string_view a_perk);  // dev: spends one perk point without the menu
+	bool               Infect(std::string_view a_why);  // Unbound Form given (a free point spent on it): the Strange Mound
 	void               OpenMenu();                    // the Evolution power was cast
 
 	// The biomass boost (Unbound Form; the kill boost until 2026-10-28, user: consuming gives it, kills no longer do):

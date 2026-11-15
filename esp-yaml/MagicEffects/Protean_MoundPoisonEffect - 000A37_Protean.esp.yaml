@@ -1,0 +1,22 @@
+FormKey: 000A37:Protean.esp
+EditorID: Protean_MoundPoisonEffect
+Name:
+  TargetLanguage: English
+  Value: 'Strange Infection'
+Flags:
+- Hostile
+- Detrimental
+- NoArea
+BaseCost: 0
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: ValueModifier
+  ActorValue: Health
+ResistValue: PoisonResist
+CastType: FireAndForget
+TargetType: TargetActor
+SkillUsageMultiplier: 0
+DualCastScale: 1
+Description:
+  TargetLanguage: English
+  Value: 'Something burrows through you: <mag> points of damage a second for <dur> seconds.'

@@ -81,6 +81,9 @@ def main():
     nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True)
     save("Mound_d", colour)
     save("Mound_n", nrm * 0.5 + 0.5, flip_green=True)
+    # shine (the normal map's alpha in game): the char dull, the open flesh wet
+    shine = np.clip(0.08 + 0.55 * open_, 0, 1)
+    save("Mound_s", np.repeat(shine[..., None], 3, -1))
     return OUT
 
 

@@ -26,6 +26,7 @@
 #include "Keen.h"
 #include "Flight.h"
 #include "Rush.h"
+#include "Mound.h"
 #include "Predator.h"
 #include "Skills.h"
 #include "Stalker.h"
@@ -149,6 +150,7 @@ namespace
 				protean::Metamorphosis::Install();
 				protean::Shield::Install();
 				protean::Hammerfist::Install();
+				protean::Mound::Install();
 				g_ready = true;
 				logger::info("Protean is active");
 			}
@@ -175,6 +177,7 @@ namespace
 				protean::Shift::OnGameLoaded();
 				protean::Stalker::OnGameLoaded();
 				protean::Skills::OnGameLoaded();
+				protean::Mound::OnGameLoaded();
 				protean::Registry::Get().SettleDials(protean::State::Get().dialDefaults);
 				protean::Claws::Sync();
 				protean::Call::Reset();

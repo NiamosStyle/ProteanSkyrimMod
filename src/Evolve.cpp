@@ -264,6 +264,22 @@ namespace protean::Evolve
 		return true;
 	}
 
+	bool Infect(std::string_view a_why)
+	{
+		// the way in (the Strange Mound, 2026-11-14): Unbound Form for nothing, through the ordinary accounting, one
+		// point given and that point spent on it, so the menu's totals stay right
+		auto* p = RE::PlayerCharacter::GetSingleton();
+		auto* perk = Registry::Get().Perk(kUnbound);
+		if (!p || !perk || p->HasPerk(perk)) {
+			return false;
+		}
+		++State::Get().facePoints;
+		p->AddPerk(perk);
+		logger::info("evolution: infected ({}): Unbound Form given, points left {}", a_why, PointsAvailable());
+		Sync();
+		return true;
+	}
+
 	void OpenMenu()
 	{
 		Sync();  // the menu shows Protean_PerkPoints: make it current first

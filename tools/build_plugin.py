@@ -179,6 +179,9 @@ GLIDE_EFFECTS = [0x99C]
 GLIDE_SPELLS = [0x99F]
 # Predator rank 2: the poison a power attack in animal form leaves (Protean casts it on the hit, magnitude from the level)
 PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
+# The Strange Mound (2026-11-14): a heap of burnt flesh in Helgen's ruins ("Search" it) that poisons the player and
+# infects them with Protean (Unbound Form). Placed and handled by src/Mound.cpp; the model is tools/build_mound.py's.
+MOUND_ACTI, MOUND_POISON_EFFECT, MOUND_POISON = 0xA36, 0xA37, 0xA38
 # Stalker rank 1: the fade (the game's own Invisibility effect in Protean's spell, so it shimmers and the game ends it
 # on an attack) and the hidden perk held from a bite thrown from hiding to its hit (Protean sets its multiplier).
 # xx9B2 was a test perk installed once (2026-10-24, never committed); not reused.
@@ -904,6 +907,30 @@ def main():
           "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 5\n    Duration: %d\n"  # Protean sets both before each cast
           % (fid(PREDATOR_POISON_EFFECT), PLUGIN, GLOBALS["Protean_PredatorPoisonSeconds"][1]))
 
+    # ---- the Strange Mound: the activator ("Search"), and the poison its touch leaves, cast by the mound itself like a
+    # poison dart trap's, so the player is hit (and cries out) as by any poison
+    lo, hi = (-58, -47, -5), (50, 40, 56)   # the model's extent (art/mound/export.json "box", rounded out)
+    write(os.path.join(y, "Activators", "Protean_StrangeMound - %s_%s.yaml" % (fid(MOUND_ACTI), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_StrangeMound\n" % (fid(MOUND_ACTI), PLUGIN)
+          + "ObjectBounds:\n  First: %d, %d, %d\n  Second: %d, %d, %d\n" % (lo + hi)
+          + name_block("Strange Mound")
+          + "Model:\n  File: Protean\\Mound\\Mound.nif\n"
+          "ActivateTextOverride:\n  TargetLanguage: English\n  Value: Search\n")
+    write(os.path.join(y, "MagicEffects", "Protean_MoundPoisonEffect - %s_%s.yaml" % (fid(MOUND_POISON_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_MoundPoisonEffect\n" % (fid(MOUND_POISON_EFFECT), PLUGIN)
+          + name_block("Strange Infection")
+          + "Flags:\n- Hostile\n- Detrimental\n- NoArea\nBaseCost: 0\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: ValueModifier\n  ActorValue: Health\n"
+          "ResistValue: PoisonResist\nCastType: FireAndForget\nTargetType: TargetActor\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: %s\n" % yq("Something burrows through you: <mag> points of damage a second for <dur> seconds."))
+    write(os.path.join(y, "Spells", "Protean_MoundPoison - %s_%s.yaml" % (fid(MOUND_POISON), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_MoundPoison\n" % (fid(MOUND_POISON), PLUGIN)
+          + name_block("Strange Infection")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "CastType: FireAndForget\nTargetType: TargetActor\n"
+          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 3\n    Duration: 6\n" % (fid(MOUND_POISON_EFFECT), PLUGIN))
+
     # ---- Stalker: the fade (lasts until Protean or the game ends it) and the ambush perk
     write(os.path.join(y, "Spells", "Protean_StalkerFade - %s_%s.yaml" % (fid(STALKER_FADE_SPELL), PLUGIN)),
           "FormKey: %s:%s\nEditorID: Protean_StalkerFade\n" % (fid(STALKER_FADE_SPELL), PLUGIN)
@@ -1178,6 +1205,7 @@ def main():
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),
                            "predatorPoison": PREDATOR_POISON_SPELL,
+                           "mound": {"activator": MOUND_ACTI, "poison": MOUND_POISON},
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
                            "call": {"power": CALL_POWER},
                            "skills": {"arms": ANIMAL_ARMS_PERK, "deft": DEFT_PERK},

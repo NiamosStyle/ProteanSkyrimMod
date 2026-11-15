@@ -227,6 +227,54 @@ def render(name, target, rot_deg, dist, lens=40):
     return out
 
 
+PARTS = {"Mound": "mound", "MoundTendrils": "sinew", "MoundRibs": "bone"}
+
+
+def shape(ob):
+    """An object's triangles in game units: one point per corner that differs in place, texture spot or normal."""
+    me = ob.data
+    me.calc_loop_triangles()
+    uv = me.uv_layers.active.data
+    index, verts, normals, uvs, tris = {}, [], [], [], []
+    for t in me.loop_triangles:
+        tri = []
+        for li, vi in zip(t.loops, t.vertices):
+            u, v = uv[li].uv
+            n = me.corner_normals[li].vector
+            key = (vi, round(u, 5), round(v, 5), round(n.x, 3), round(n.y, 3), round(n.z, 3))
+            if key not in index:
+                index[key] = len(verts)
+                verts.append(list(ob.matrix_world @ me.vertices[vi].co))
+                normals.append(list((ob.matrix_world.to_3x3() @ n).normalized()))
+                uvs.append([u, 1.0 - v])   # the game counts down from the top
+            tri.append(index[key])
+        tris.append(tri)
+    return dict(verts=verts, normals=normals, uvs=uvs, tris=tris)
+
+
+def export():
+    """art/mound/export.json for tools/build_mound.py: each part's shape, and the box the collision takes."""
+    import json
+    out = {part: shape(bpy.data.objects[name]) for name, part in PARTS.items()}
+    pts = [p for d in out.values() for p in d["verts"]]
+    out["box"] = [[min(p[i] for p in pts) for i in range(3)], [max(p[i] for p in pts) for i in range(3)]]
+    path = os.path.join(ART, "export.json")
+    with open(path, "w") as f:
+        json.dump(out, f)
+    return {k: len(v["verts"]) for k, v in out.items() if k != "box"}, out["box"]
+
+
+def forget_folders():
+    """The default layout's file browser starts in the user's Documents (under their Windows account name) and the
+    .blend saves it: blanked, its whole field first (a shorter value alone leaves the old one's tail behind)."""
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            for space in area.spaces:
+                if space.type == 'FILE_BROWSER' and space.params is not None:
+                    space.params.directory = b"_" * 767
+                    space.params.directory = b"//"
+
+
 def main():
     reset()
     base = mound()
@@ -234,7 +282,9 @@ def main():
     ribs(base)
     scale_figure()
     os.makedirs(ART, exist_ok=True)
+    forget_folders()
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(ART, "Mound.blend"))
+    print("EXPORT", export())
     if "render" in sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []:
         print("RENDER", render("mound_front", (0, 0, 15), (68, 0, 20), 230))
         print("RENDER", render("mound_side", (0, 0, 15), (75, 0, 110), 230))

@@ -12,6 +12,7 @@
 #include "Blade.h"
 #include "Shield.h"
 #include "Hammerfist.h"
+#include "Mound.h"
 #include "Claws.h"
 #include "Consume.h"
 #include "Deceiver.h"
@@ -70,6 +71,7 @@ namespace protean::Hooks
 				Shield::OnFrame(a_delta);
 				Hammerfist::OnFrame(a_delta);
 				Blade::UpdateGrow(a_delta);
+				Mound::OnFrame(a_this, a_delta);
 				Face::OnFrame();
 				Hud::OnFrame(a_this);
 				Dev::Poll();

@@ -123,6 +123,8 @@ namespace protean
 		float                                infectedUntil{ 0.0f };    // game days passed when it runs its course
 		float                                infectedAssistance{ 0.0f };  // their own Assistance and Confidence, put back
 		float                                infectedConfidence{ 0.0f };
+		RE::FormID                           moundRef{ 0 };      // the Strange Mound placed in Helgen (co-save 29), 0 = none
+		bool                                 moundUsed{ false };  // it has been searched: it is gone and never comes back
 		// The temporary modifiers of the actor values Protean changes (kTempChecked), as they were at the save. A load
 		// lost some of them (2026-10-24: the health bonus and AttackDamageMult were gone after a load as the wolf,
 		// DamageResist was kept); Shift::OnGameLoaded puts back Protean's part when exactly that much is missing.

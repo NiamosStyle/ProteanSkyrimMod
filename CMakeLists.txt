@@ -45,6 +45,7 @@ add_commonlibsse_plugin(
 		src/State.cpp
 		src/Shift.cpp
 		src/Tendril.cpp
+		src/Mound.cpp
 		src/Keen.cpp
 		src/Rush.cpp
 		src/Flight.cpp

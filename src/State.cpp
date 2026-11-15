@@ -8,7 +8,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 28;  // 3 to 16 are still read
+		constexpr std::uint32_t kVersion = 29;  // 3 to 16 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -271,6 +271,8 @@ namespace protean
 			Put<std::uint8_t>(a, s.stealthLoot ? 1 : 0);
 			Put(a, s.carapaceMagicApplied);
 			Put(a, s.staminaCombatApplied);
+			Put(a, s.moundRef);
+			Put<std::uint8_t>(a, s.moundUsed ? 1 : 0);
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -526,6 +528,13 @@ namespace protean
 							}
 							if (version >= 28) {
 								Get(a, s.staminaCombatApplied);
+							}
+							if (version >= 29) {
+								// a reference the game made (FF...): its id is the same after a load, no resolving
+								Get(a, s.moundRef);
+								if (std::uint8_t used = 0; Get(a, used)) {
+									s.moundUsed = used != 0;
+								}
 							}
 						}
 					}

@@ -123,6 +123,10 @@
   "unbound_form"
  ],
  "predatorPoison": 2467,
+ "mound": {
+  "activator": 2614,
+  "poison": 2616
+ },
  "stalker": {
   "fade": 2483,
   "ambush": 2484,

@@ -155,6 +155,12 @@ namespace protean
 			logger::warn("Predator poison missing from {}", plugin);
 			_predatorPoison = nullptr;
 		}
+		const auto& mound = j.value("mound", nlohmann::json::object());
+		_moundActivator = dh->LookupForm<RE::TESObjectACTI>(mound.value("activator", 0u), plugin);
+		_moundPoison = dh->LookupForm<RE::SpellItem>(mound.value("poison", 0u), plugin);
+		if (!_moundActivator || !_moundPoison) {
+			logger::warn("the Strange Mound's records are missing from {}", plugin);
+		}
 		_stalkerFade = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("fade", 0u), plugin);
 		_stalkerAmbush = dh->LookupForm<RE::BGSPerk>(j.value("stalker", nlohmann::json::object()).value("ambush", 0u), plugin);
 		_stalkerPower = dh->LookupForm<RE::SpellItem>(j.value("stalker", nlohmann::json::object()).value("power", 0u), plugin);

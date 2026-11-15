@@ -8,6 +8,7 @@
 #include "Evolve.h"
 #include "Face.h"
 #include "Fly.h"
+#include "Mound.h"
 #include "Move.h"
 #include "Registry.h"
 #include "Shift.h"
@@ -324,6 +325,10 @@ namespace protean::Dev
 			} else if (a_cmd == "tendrilaim") {
 				// tendrilaim [seconds]: log where the 1st-person hands point (ready, and at each throw), in hand space
 				Tendril::SetLooks("aim", a_arg);
+			} else if (a_cmd == "moundhere") {
+				Mound::Here(p);  // the Strange Mound at the player's feet, its spot logged
+			} else if (a_cmd == "moundreset") {
+				Mound::Reset();  // unused again, the placed one removed
 			} else if (a_cmd == "growtest") {
 				// growtest [seconds]: every Protean piece on the player shrinks into the arm and swells back out (default 0.3 s)
 				if (auto* pc = RE::PlayerCharacter::GetSingleton()) {

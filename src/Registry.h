@@ -92,6 +92,8 @@ namespace protean
 		[[nodiscard]] RE::SpellItem* KillBoostDisplay() const { return _killBoost; }  // shows the biomass boost in Active Effects
 		[[nodiscard]] const std::vector<RE::SpellItem*>& GlideMarkers() const { return _glideMarkers; }  // OAR glide pose conditions
 		[[nodiscard]] RE::SpellItem* PredatorPoison() const { return _predatorPoison; }  // Predator rank 2; its effect [0] damages health
+		[[nodiscard]] RE::TESObjectACTI* MoundActivator() const { return _moundActivator; }  // the Strange Mound (Helgen)
+		[[nodiscard]] RE::SpellItem*     MoundPoison() const { return _moundPoison; }        // its touch's poison
 		[[nodiscard]] RE::SpellItem* StalkerFade() const { return _stalkerFade; }        // Stalker: the game's Invisibility, cast on the player
 		[[nodiscard]] RE::BGSPerk*   StalkerAmbush() const { return _stalkerAmbush; }    // Stalker: hidden, multiplies the bite from hiding
 		[[nodiscard]] RE::SpellItem* CallPower() const { return _callPower; }  // Apex: Call, in the animal's Favorites menu
@@ -164,6 +166,8 @@ namespace protean
 		RE::SpellItem*        _killBoost{ nullptr };
 		std::vector<RE::SpellItem*> _glideMarkers;
 		RE::SpellItem*        _predatorPoison{ nullptr };
+		RE::TESObjectACTI*    _moundActivator{ nullptr };
+		RE::SpellItem*        _moundPoison{ nullptr };
 		RE::SpellItem*        _stalkerFade{ nullptr };
 		RE::BGSPerk*          _stalkerAmbush{ nullptr };
 		RE::SpellItem*        _stalkerPower{ nullptr };
