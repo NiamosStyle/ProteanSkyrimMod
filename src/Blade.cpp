@@ -7,12 +7,21 @@
 
 namespace protean::Blade
 {
-	// draw: a kill move's blade going in; sheathe: pulled back out (first picks, 2026-11-14, to be chosen by ear)
+	// draw: a kill move's blade going in; sheathe: pulled back out (user, 2026-11-14: "perfect")
 	std::string g_growSound{ "NPCKillStabIn" };
 	std::string g_backSound{ "NPCKillStabOut" };
 
+	namespace
+	{
+		float g_growWatch{ 0.0f };  // seconds left to watch for newly shown pieces to grow (after a draw)
+	}
+
 	void SleeveSound(RE::PlayerCharacter* a_p, bool a_grow, const char* a_tag)
 	{
+		if (a_grow) {
+			// the 3rd-person piece is put on by the game a few frames after it is equipped: watch for it a moment
+			g_growWatch = 1.5f;
+		}
 		const auto& name = a_grow ? g_growSound : g_backSound;
 		static std::chrono::steady_clock::time_point last[2]{};
 		const auto now = std::chrono::steady_clock::now();
@@ -57,38 +66,80 @@ namespace protean::Blade
 		}
 	}
 
+	namespace
+	{
+		constexpr float kGrowSeconds = 0.6f;  // chosen live (user, 2026-11-14: 3 s too slow, 0.3 too fast, 0.6 "just right")
+
+		// the skinned Protean pieces shown on the player now, 1st and 3rd person
+		std::vector<RE::BSGeometry*> Pieces(RE::PlayerCharacter* a_p)
+		{
+			std::vector<RE::BSGeometry*> out;
+			for (const bool first : { false, true }) {
+				auto* root = a_p->Get3D(first);
+				if (!root) {
+					continue;
+				}
+				RE::BSVisit::TraverseScenegraphGeometries(root, [&](RE::BSGeometry* a_geo) {
+					const char* n = a_geo->name.c_str();
+					auto*       skin = a_geo->GetGeometryRuntimeData().skinInstance.get();
+					if (n && std::string_view(n).rfind("Protean", 0) == 0 && skin && skin->skinData) {
+						out.push_back(a_geo);
+					}
+					return RE::BSVisit::BSVisitControl::kContinue;
+				});
+			}
+			return out;
+		}
+
+		bool StartGrow(RE::BSGeometry* a_geo, float a_seconds)
+		{
+			auto* data = a_geo->GetGeometryRuntimeData().skinInstance->skinData.get();
+			if (std::any_of(g_growing.begin(), g_growing.end(), [&](const Growing& g) { return g.data.get() == data; })) {
+				return false;
+			}
+			Growing g{ RE::NiPointer<RE::NiSkinData>(data), {}, 0.0f, std::max(0.05f, a_seconds) };
+			for (std::uint32_t i = 0; i < data->GetBoneCount(); ++i) {
+				g.full.push_back(data->GetBoneDataSkinToBone(i));
+			}
+			SetSize(g, kGrowFrom);
+			g_growing.push_back(std::move(g));
+			return true;
+		}
+
+		// pieces already grown (held, so a new piece can never take a gone one's address): a second weapon drawn
+		// while one is out grows only its own
+		std::vector<RE::NiPointer<RE::BSGeometry>> g_grown;
+	}
+
 	void GrowAll(RE::PlayerCharacter* a_p, float a_seconds)
 	{
 		int pieces = 0;
-		for (const bool first : { false, true }) {
-			auto* root = a_p->Get3D(first);
-			if (!root) {
-				continue;
-			}
-			RE::BSVisit::TraverseScenegraphGeometries(root, [&](RE::BSGeometry* a_geo) {
-				if (!a_geo->name.c_str() || std::string_view(a_geo->name.c_str()).rfind("Protean", 0) != 0) {
-					return RE::BSVisit::BSVisitControl::kContinue;
-				}
-				auto* skin = a_geo->GetGeometryRuntimeData().skinInstance.get();
-				auto* data = skin ? skin->skinData.get() : nullptr;
-				if (!data || std::any_of(g_growing.begin(), g_growing.end(), [&](const Growing& g) { return g.data.get() == data; })) {
-					return RE::BSVisit::BSVisitControl::kContinue;
-				}
-				Growing g{ RE::NiPointer<RE::NiSkinData>(data), {}, 0.0f, std::max(0.05f, a_seconds) };
-				for (std::uint32_t i = 0; i < data->GetBoneCount(); ++i) {
-					g.full.push_back(data->GetBoneDataSkinToBone(i));
-				}
-				SetSize(g, kGrowFrom);
-				g_growing.push_back(std::move(g));
-				++pieces;
-				return RE::BSVisit::BSVisitControl::kContinue;
-			});
+		for (auto* geo : Pieces(a_p)) {
+			pieces += StartGrow(geo, a_seconds);
 		}
 		logger::info("grow: {} piece(s) over {:.2f} s", pieces, a_seconds);
 	}
 
 	void UpdateGrow(float a_delta)
 	{
+		if (g_growWatch > 0.0f) {
+			g_growWatch -= a_delta;
+			if (auto* p = RE::PlayerCharacter::GetSingleton()) {
+				const auto now = Pieces(p);
+				// forget pieces no longer shown
+				std::erase_if(g_grown, [&](const RE::NiPointer<RE::BSGeometry>& a_g) {
+					return std::find(now.begin(), now.end(), a_g.get()) == now.end();
+				});
+				for (auto* geo : now) {
+					if (std::none_of(g_grown.begin(), g_grown.end(), [&](const auto& a_g) { return a_g.get() == geo; })) {
+						g_grown.emplace_back(geo);
+						if (StartGrow(geo, kGrowSeconds)) {
+							logger::info("grow: '{}'", geo->name.c_str());
+						}
+					}
+				}
+			}
+		}
 		for (auto it = g_growing.begin(); it != g_growing.end();) {
 			it->t += a_delta / it->seconds;
 			if (it->t >= 1.0f) {

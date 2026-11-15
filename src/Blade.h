@@ -21,7 +21,8 @@ namespace protean::Blade
 
 	// The grow (2026-11-14, a test first: user, "rapidly expand to normal size so that it looks like it grew from inside
 	// the arm"): every skinned Protean piece on the player (1st and 3rd person) is drawn shrunk toward its own bones and
-	// swells back to full size over a_seconds, by scaling its skin-to-bone transforms. Dev 'growtest [seconds]'.
+	// swells back to full size over a_seconds, by scaling its skin-to-bone transforms. Dev 'growtest [seconds]'. Every
+	// draw (SleeveSound) does the same to each piece that newly appears, over 0.6 s.
 	void GrowAll(RE::PlayerCharacter* a_p, float a_seconds);
 	void UpdateGrow(float a_delta);  // every frame
 }
