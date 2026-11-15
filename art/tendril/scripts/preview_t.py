@@ -27,4 +27,6 @@ def preview(name, show, target, rot_deg, dist, lens=50, size=(900, 900), color='
     os.makedirs(OUT, exist_ok=True)
     sc.render.filepath = os.path.join(OUT, name + ".png")
     bpy.ops.render.render(write_still=True, scene=sc.name)
-    return sc.render.filepath
+    out = sc.render.filepath
+    sc.render.filepath = "//"   # not left in the saved .blend: the temp path holds the Windows user name
+    return out
