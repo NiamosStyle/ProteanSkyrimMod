@@ -1,6 +1,7 @@
 #include "Dev.h"
 
 #include "Attacks.h"
+#include "Blade.h"
 #include "Claws.h"
 #include "Consume.h"
 #include "Deceiver.h"
@@ -323,10 +324,17 @@ namespace protean::Dev
 			} else if (a_cmd == "tendrilaim") {
 				// tendrilaim [seconds]: log where the 1st-person hands point (ready, and at each throw), in hand space
 				Tendril::SetLooks("aim", a_arg);
-			} else if (a_cmd == "tendrilblood" || a_cmd == "tendrilthrow" || a_cmd == "tendrilswap") {
-				// tendrilblood <hex ARTO or EFSH>: the blood on a hit; tendrilthrow <SNDR editor ID>: the throw's sound;
-				// tendrilswap <SNDR editor ID, or "none">: the sound as the sleeve's harpoon shifts on a draw or sheathe
-				Tendril::SetLooks(a_cmd == "tendrilblood" ? "blood" : a_cmd == "tendrilswap" ? "swap" : "sound", a_arg);
+			} else if (a_cmd == "growtest") {
+				// growtest [seconds]: every Protean piece on the player shrinks into the arm and swells back out (default 0.3 s)
+				if (auto* pc = RE::PlayerCharacter::GetSingleton()) {
+					Blade::GrowAll(pc, a_arg.empty() ? 0.3f : std::strtof(a_arg.c_str(), nullptr));
+				}
+			} else if (a_cmd == "drawsound" || a_cmd == "sheathesound") {
+				// drawsound / sheathesound <SNDR editor ID, or "none">: every sleeve's grow and suck-back sound, chosen by ear
+				Blade::SetSleeveSound(a_cmd == "drawsound", a_arg);
+			} else if (a_cmd == "tendrilblood" || a_cmd == "tendrilthrow") {
+				// tendrilblood <hex ARTO or EFSH>: the blood on a hit; tendrilthrow <SNDR editor ID>: the throw's sound
+				Tendril::SetLooks(a_cmd == "tendrilblood" ? "blood" : "sound", a_arg);
 			} else if (a_cmd == "tendril") {
 				Tendril::Give();  // the Tendril spell, as the perk teaches it
 			} else if (a_cmd == "tendrilimpact" && !a_arg.empty()) {

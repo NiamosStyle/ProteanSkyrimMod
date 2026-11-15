@@ -48,7 +48,6 @@ namespace protean::Tendril
 			{ false, RE::BGSBipedObjectForm::BipedObjectSlot::kModMisc1, "ProteanTendril1st_R", "Protean\\Tendril\\Sleeve1st_R_{}.nif", "tendril sleeve right" },  // 48
 			{ true, RE::BGSBipedObjectForm::BipedObjectSlot::kFX01, "ProteanTendril1st_L", "Protean\\Tendril\\Sleeve1st_L_{}.nif", "tendril sleeve left" },       // 61
 		};
-		std::string g_swapSound{};  // as the harpoon shifts (none yet: to be chosen by ear, dev 'tendrilswap')
 
 		// dev 'tendrilaim <seconds>': where the 1st-person hands point while the Tendril is ready and as it is thrown, in
 		// each hand's own space, so the 1st-person spike can be laid along the throw (tools/measure_magic_node.py turns
@@ -109,17 +108,16 @@ namespace protean::Tendril
 				auto*      want = holds && drawn ? out : nullptr;
 				auto*      worn = a_p->GetWornArmor(side.slot);
 				Blade::HangFirstPerson(a_p, side.firstName, side.firstModel, holds && drawn, side.tag);
-				bool swapped = false;
 				for (auto* piece : { rest, out }) {
 					if (piece == want) {
 						continue;
 					}
 					if (worn == piece) {
 						mgr->UnequipObject(a_p, piece, nullptr, 1, nullptr, false, true, false, true);
-						swapped = want != nullptr;
 						worn = nullptr;
-						if (!want) {
-							logger::info("{}: goes back", side.tag);
+						logger::info("{}: goes back", side.tag);
+						if (piece == out) {
+							Blade::SleeveSound(a_p, false, side.tag);
 						}
 					}
 					if (const auto n = Count(a_p, piece); n > 0) {
@@ -131,17 +129,8 @@ namespace protean::Tendril
 						a_p->AddObjectToContainer(want, nullptr, 1, nullptr);
 					}
 					mgr->EquipObject(a_p, want, nullptr, 1, nullptr, false, false, false, true);
-					logger::info("{}: {} (weapon state {})", side.tag, want == out ? "drawn" : "at rest", static_cast<int>(ws));
-					if (swapped && !g_swapSound.empty()) {
-						RE::BSSoundHandle sound;
-						if (auto* audio = RE::BSAudioManager::GetSingleton()) {
-							audio->GetSoundHandleByName(sound, g_swapSound.c_str(), 0x1A);
-						}
-						if (sound.IsValid()) {
-							sound.SetPosition(a_p->GetPosition());
-							sound.Play();
-						}
-					}
+					logger::info("{}: grows (weapon state {})", side.tag, static_cast<int>(ws));
+					Blade::SleeveSound(a_p, true, side.tag);
 				}
 			}
 		}
@@ -427,14 +416,12 @@ namespace protean::Tendril
 			g_throwSound = a_value;
 		} else if (a_what == "blood") {
 			g_blood = static_cast<RE::FormID>(std::strtoul(a_value.c_str(), nullptr, 16));
-		} else if (a_what == "swap") {
-			g_swapSound = a_value == "none" ? std::string{} : a_value;
 		} else if (a_what == "aim") {
 			g_aimFor = a_value.empty() ? 10.0f : std::strtof(a_value.c_str(), nullptr);
 			logger::info("tendril: logging the 1st-person aim for {:.0f} s", g_aimFor);
 			return;
 		}
-		logger::info("tendril: throw sound '{}', blood {:08X}, sleeve swap sound '{}'", g_throwSound, g_blood, g_swapSound);
+		logger::info("tendril: throw sound '{}', blood {:08X}", g_throwSound, g_blood);
 	}
 
 	void Give()

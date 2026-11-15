@@ -7,6 +7,107 @@
 
 namespace protean::Blade
 {
+	// draw: a kill move's blade going in; sheathe: pulled back out (first picks, 2026-11-14, to be chosen by ear)
+	std::string g_growSound{ "NPCKillStabIn" };
+	std::string g_backSound{ "NPCKillStabOut" };
+
+	void SleeveSound(RE::PlayerCharacter* a_p, bool a_grow, const char* a_tag)
+	{
+		const auto& name = a_grow ? g_growSound : g_backSound;
+		static std::chrono::steady_clock::time_point last[2]{};
+		const auto now = std::chrono::steady_clock::now();
+		if (name.empty() || now - last[a_grow] < std::chrono::milliseconds(150)) {  // the other hand, the same moment
+			return;
+		}
+		last[a_grow] = now;
+		RE::BSSoundHandle sound;
+		if (auto* audio = RE::BSAudioManager::GetSingleton()) {
+			audio->GetSoundHandleByName(sound, name.c_str(), 0x1A);
+		}
+		if (!sound.IsValid()) {
+			logger::warn("{}: no sound '{}'", a_tag, name);
+			return;
+		}
+		sound.SetPosition(a_p->GetPosition());
+		sound.Play();
+	}
+
+	namespace
+	{
+		constexpr float kGrowFrom = 0.15f;  // the starting size, as a share of full size about each bone
+		struct Growing
+		{
+			RE::NiPointer<RE::NiSkinData> data;
+			std::vector<RE::NiTransform>  full;  // each bone's skin-to-bone transform at full size
+			float                         t{ 0.0f };
+			float                         seconds{ 0.3f };
+		};
+		std::vector<Growing> g_growing;
+
+		// each bone's piece drawn at a_s of its size about the bone: v_bone = s * (R v + t)
+		void SetSize(Growing& a_g, float a_s)
+		{
+			for (std::uint32_t i = 0; i < a_g.full.size(); ++i) {
+				auto&       x = a_g.data->GetBoneDataSkinToBone(i);
+				const auto& f = a_g.full[i];
+				x.rotate = f.rotate;
+				x.scale = f.scale * a_s;
+				x.translate = f.translate * a_s;
+			}
+		}
+	}
+
+	void GrowAll(RE::PlayerCharacter* a_p, float a_seconds)
+	{
+		int pieces = 0;
+		for (const bool first : { false, true }) {
+			auto* root = a_p->Get3D(first);
+			if (!root) {
+				continue;
+			}
+			RE::BSVisit::TraverseScenegraphGeometries(root, [&](RE::BSGeometry* a_geo) {
+				if (!a_geo->name.c_str() || std::string_view(a_geo->name.c_str()).rfind("Protean", 0) != 0) {
+					return RE::BSVisit::BSVisitControl::kContinue;
+				}
+				auto* skin = a_geo->GetGeometryRuntimeData().skinInstance.get();
+				auto* data = skin ? skin->skinData.get() : nullptr;
+				if (!data || std::any_of(g_growing.begin(), g_growing.end(), [&](const Growing& g) { return g.data.get() == data; })) {
+					return RE::BSVisit::BSVisitControl::kContinue;
+				}
+				Growing g{ RE::NiPointer<RE::NiSkinData>(data), {}, 0.0f, std::max(0.05f, a_seconds) };
+				for (std::uint32_t i = 0; i < data->GetBoneCount(); ++i) {
+					g.full.push_back(data->GetBoneDataSkinToBone(i));
+				}
+				SetSize(g, kGrowFrom);
+				g_growing.push_back(std::move(g));
+				++pieces;
+				return RE::BSVisit::BSVisitControl::kContinue;
+			});
+		}
+		logger::info("grow: {} piece(s) over {:.2f} s", pieces, a_seconds);
+	}
+
+	void UpdateGrow(float a_delta)
+	{
+		for (auto it = g_growing.begin(); it != g_growing.end();) {
+			it->t += a_delta / it->seconds;
+			if (it->t >= 1.0f) {
+				SetSize(*it, 1.0f);  // exactly the model's own transforms again
+				it = g_growing.erase(it);
+				continue;
+			}
+			const float e = 1.0f - (1.0f - it->t) * (1.0f - it->t) * (1.0f - it->t);  // fast, then settling
+			SetSize(*it, kGrowFrom + (1.0f - kGrowFrom) * e);
+			++it;
+		}
+	}
+
+	void SetSleeveSound(bool a_grow, const std::string& a_sound)
+	{
+		(a_grow ? g_growSound : g_backSound) = a_sound == "none" ? std::string{} : a_sound;
+		logger::info("sleeves: draw sound '{}', sheathe sound '{}'", g_growSound, g_backSound);
+	}
+
 	// The game draws no body slot 57 in 1st person (seen 2026-11-04). There the plugin hangs a model (Sleeve1st_M/F.nif)
 	// in the 1st-person body itself and binds its skinned pieces to the 1st-person skeleton's bones of the same names,
 	// as the game does for worn armor, so the flesh bends with the wrist. Shared with the Shield (2026-11-05).
@@ -178,10 +279,12 @@ namespace protean::Blade
 				}
 				mgr->EquipObject(a_p, a_sleeve, nullptr, 1, nullptr, false, false, false, true);
 				logger::info("blade: grows (weapon state {})", static_cast<int>(ws));
+				SleeveSound(a_p, true, "blade");
 			} else if (!want) {
 				if (worn) {
 					mgr->UnequipObject(a_p, a_sleeve, nullptr, 1, nullptr, false, true, false, true);
 					logger::info("blade: goes back (weapon state {})", static_cast<int>(ws));
+					SleeveSound(a_p, false, "blade");
 				}
 				if (const auto n = Count(a_p, a_sleeve); n > 0) {
 					a_p->RemoveItem(a_sleeve, n, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);

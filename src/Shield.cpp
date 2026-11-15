@@ -174,10 +174,12 @@ namespace protean::Shield
 				}
 				mgr->EquipObject(a_p, a_sleeve, nullptr, 1, nullptr, false, false, false, true);
 				logger::info("shield: grows (weapon state {})", static_cast<int>(ws));
+				Blade::SleeveSound(a_p, true, "shield");
 			} else if (!want) {
 				if (worn) {
 					mgr->UnequipObject(a_p, a_sleeve, nullptr, 1, nullptr, false, true, false, true);
 					logger::info("shield: goes back (weapon state {})", static_cast<int>(ws));
+					Blade::SleeveSound(a_p, false, "shield");
 				}
 				if (const auto n = Count(a_p, a_sleeve); n > 0) {
 					a_p->RemoveItem(a_sleeve, n, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);

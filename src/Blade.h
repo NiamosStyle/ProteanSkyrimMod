@@ -12,4 +12,16 @@ namespace protean::Blade
 	// hangs (a_on) or takes away a skinned model in the 1st-person body, bound to its bones of the same names; the
 	// pattern's {} is M or F by the player's sex. The game draws no added body slots in 1st person (Blade, Shield).
 	void HangFirstPerson(RE::PlayerCharacter* a_p, const char* a_name, std::string_view a_pattern, bool a_on, const char* a_tag);
+
+	// the sound of a sleeve growing out of the arm (a_grow) or sucking back in, shared by the Blade, Shield, Hammerfist
+	// and Tendril (user, 2026-11-14: "something fleshy"); both hands at once sound once
+	void SleeveSound(RE::PlayerCharacter* a_p, bool a_grow, const char* a_tag);
+	// dev 'drawsound' / 'sheathesound' <SNDR editor ID, or "none">: to choose them by ear
+	void SetSleeveSound(bool a_grow, const std::string& a_sound);
+
+	// The grow (2026-11-14, a test first: user, "rapidly expand to normal size so that it looks like it grew from inside
+	// the arm"): every skinned Protean piece on the player (1st and 3rd person) is drawn shrunk toward its own bones and
+	// swells back to full size over a_seconds, by scaling its skin-to-bone transforms. Dev 'growtest [seconds]'.
+	void GrowAll(RE::PlayerCharacter* a_p, float a_seconds);
+	void UpdateGrow(float a_delta);  // every frame
 }

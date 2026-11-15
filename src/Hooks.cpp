@@ -69,6 +69,7 @@ namespace protean::Hooks
 				Blade::OnFrame(a_delta);
 				Shield::OnFrame(a_delta);
 				Hammerfist::OnFrame(a_delta);
+				Blade::UpdateGrow(a_delta);
 				Face::OnFrame();
 				Hud::OnFrame(a_this);
 				Dev::Poll();

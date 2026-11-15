@@ -47,10 +47,12 @@ namespace protean::Hammerfist
 				}
 				mgr->EquipObject(a_p, a_arm, nullptr, 1, nullptr, false, false, false, true);
 				logger::info("hammerfist: {} arm grows", a_side.left ? "left" : "right");
+				Blade::SleeveSound(a_p, true, "hammerfist");
 			} else if (!want) {
 				if (worn) {
 					mgr->UnequipObject(a_p, a_arm, nullptr, 1, nullptr, false, true, false, true);
 					logger::info("hammerfist: {} arm goes back", a_side.left ? "left" : "right");
+					Blade::SleeveSound(a_p, false, "hammerfist");
 				}
 				if (const auto n = Count(a_p, a_arm); n > 0) {
 					a_p->RemoveItem(a_arm, n, RE::ITEM_REMOVE_REASON::kRemove, nullptr, nullptr);
