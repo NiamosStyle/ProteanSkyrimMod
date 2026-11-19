@@ -1,0 +1,23 @@
+FormKey: 000A39:Protean.esp
+EditorID: Protean_ApexCalmEffect
+Name:
+  TargetLanguage: English
+  Value: 'Kin'
+Flags:
+- Recover
+- NoArea
+- HideInUI
+- Painless
+- NoHitEffect
+BaseCost: 0
+MagicSkill: Illusion
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: Calm
+CastType: FireAndForget
+TargetType: TargetActor
+SkillUsageMultiplier: 0
+DualCastScale: 1
+Description:
+  TargetLanguage: English
+  Value: ''
