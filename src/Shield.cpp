@@ -48,6 +48,33 @@ namespace protean::Shield
 
 		float Stamina(RE::PlayerCharacter* a_p) { return a_p->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina); }
 
+		// degrees between where the player faces and an actor (0 = straight ahead)
+		float OffFront(RE::PlayerCharacter* a_p, const RE::Actor* a_other)
+		{
+			const auto  d = a_other->GetPosition() - a_p->GetPosition();
+			const float h = a_p->GetAngleZ();
+			const float len = std::hypot(d.x, d.y);
+			const float cosA = len > 1.0f ? (d.x * std::sin(h) + d.y * std::cos(h)) / len : 1.0f;
+			return std::acos(std::clamp(cosA, -1.0f, 1.0f)) * 57.29578f;
+		}
+
+		// One arrow reaches the apply-hit function twice, a few ms apart, on different threads (measured 2026-11-19):
+		// the Stamina is paid once. Same aggressor within 0.1 s = the same arrow.
+		std::mutex                            g_arrowLock;
+		RE::FormID                            g_lastArrowFrom{ 0 };
+		std::chrono::steady_clock::time_point g_lastArrowAt{};
+		std::atomic<bool>                     g_lastArrowPaid{ false };  // the last arrow was blocked (its second pass is too)
+
+		bool NewArrow(RE::FormID a_from)
+		{
+			std::lock_guard lock(g_arrowLock);
+			const auto      now = std::chrono::steady_clock::now();
+			const bool      repeat = a_from == g_lastArrowFrom && now - g_lastArrowAt < std::chrono::milliseconds(100);
+			g_lastArrowFrom = a_from;
+			g_lastArrowAt = now;
+			return !repeat;
+		}
+
 		struct ProcessHit
 		{
 			// the game's call that applies a worked-out hit to its target (as established combat mods hook it)
@@ -55,13 +82,25 @@ namespace protean::Shield
 			{
 				auto* p = RE::PlayerCharacter::GetSingleton();
 				if (p && a_target == p) {   // a plain address check first: nothing of the hit is read for anyone else
-					Block(p, a_hit);
+					Block(p, a_hit, reinterpret_cast<std::uintptr_t>(_ReturnAddress()));
 				}
 				func(a_target, a_hit);
 			}
 			static inline REL::Relocation<decltype(thunk)> func;
 
-			static void Block(RE::PlayerCharacter* a_p, RE::HitData& a_hit)
+			// An arrow or bolt from the front while blocking with the Shield: the game never counts it blocked (vanilla
+			// blocks arrows by the shield model's collision, and the Shield's model has none), so Protean does, by the
+			// spell ward's angle rule (user, 2026-11-19: arrows went through).
+			static bool RangedFromFront(RE::PlayerCharacter* a_p, const RE::HitData& a_hit)
+			{
+				if (!a_hit.weapon || !(a_hit.weapon->IsBow() || a_hit.weapon->IsCrossbow())) {
+					return false;
+				}
+				auto who = a_hit.aggressor.get();
+				return who && OffFront(a_p, who.get()) <= Dial("Protean_ShieldWardAngle", 60.0f);
+			}
+
+			static void Block(RE::PlayerCharacter* a_p, RE::HitData& a_hit, std::uintptr_t a_from)
 			{
 				static int seen = 0;
 				if (seen < 3) {   // the first few hits on the player, to show the patch reads real hits
@@ -70,20 +109,37 @@ namespace protean::Shield
 					logger::info("shield: hit seen: from '{}', damage {:.1f}, blocked {:.2f}, flags {:X}", who ? who->GetName() : "?",
 						a_hit.totalDamage, a_hit.percentBlocked, a_hit.flags.underlying());
 				}
-				if (Holds(a_p) && a_p->IsBlocking()) {  // every hit while blocking with the Shield: what it was, and what the game made of it
+				const bool blocking = Holds(a_p) && a_p->IsBlocking();
+				if (blocking) {  // every hit while blocking with the Shield: what it was, what the game made of it, and from where
 					auto who = a_hit.aggressor.get();
-					logger::info("shield: hit while blocking: from '{}', weapon '{}', damage {:.1f}, blocked {:.2f}, flags {:X}{}",
-						who ? who->GetName() : "?", a_hit.weapon ? a_hit.weapon->GetName() : "-", a_hit.totalDamage, a_hit.percentBlocked,
-						a_hit.flags.underlying(), a_hit.flags.any(RE::HitData::Flag::kBlocked) ? " (blocked)" : " (NOT blocked)");
+					logger::info("shield: hit while blocking: from '{}' ({:.0f} deg off), weapon '{}', damage {:.1f}, blocked {:.2f}, flags {:X}{}, call +{:X}",
+						who ? who->GetName() : "?", who ? OffFront(a_p, who.get()) : -1.0f, a_hit.weapon ? a_hit.weapon->GetName() : "-",
+						a_hit.totalDamage, a_hit.percentBlocked, a_hit.flags.underlying(),
+						a_hit.flags.any(RE::HitData::Flag::kBlocked) ? " (blocked)" : " (NOT blocked)", a_from - REL::Module::get().base() - 5);
 				}
-				if (!a_hit.flags.any(RE::HitData::Flag::kBlocked) || !Holds(a_p)) {
+				const bool ranged = blocking && !a_hit.flags.any(RE::HitData::Flag::kBlocked) && RangedFromFront(a_p, a_hit);
+				if (!ranged && (!a_hit.flags.any(RE::HitData::Flag::kBlocked) || !Holds(a_p))) {
 					return;
 				}
 				auto*       av = a_p->AsActorValueOwner();
 				const float cost = Dial("Protean_ShieldBlockCost", 5.0f);
 				auto        who = a_hit.aggressor.get();
 				const std::string name = who ? who->GetName() : "?";
+				if (ranged && !NewArrow(who ? who->GetFormID() : 0)) {
+					// the same arrow's second pass: blocked again, paid once (a guard break already let the first through)
+					if (g_lastArrowPaid) {
+						a_hit.totalDamage = 0.0f;
+						a_hit.physicalDamage = 0.0f;
+						a_hit.percentBlocked = 1.0f;
+					}
+					return;
+				}
+				if (ranged) {
+					a_hit.flags.set(RE::HitData::Flag::kBlocked);
+				}
+				g_lastArrowPaid = false;
 				if (av->GetActorValue(RE::ActorValue::kStamina) >= cost) {
+					g_lastArrowPaid = ranged;
 					const float was = a_hit.totalDamage;
 					a_hit.totalDamage = 0.0f;       // nothing of it lands
 					a_hit.physicalDamage = 0.0f;

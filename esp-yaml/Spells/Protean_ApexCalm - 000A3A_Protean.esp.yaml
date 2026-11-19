@@ -18,5 +18,5 @@ TargetType: TargetActor
 Effects:
 - BaseEffect: 000A39:Protean.esp
   Data:
-    Magnitude: 1000
+    Magnitude: 100
     Duration: 3

@@ -14,6 +14,7 @@ MagicSkill: Illusion
 Archetype:
   MutagenObjectType: MagicEffectArchetype
   Type: Calm
+  ActorValue: Aggression
 CastType: FireAndForget
 TargetType: TargetActor
 SkillUsageMultiplier: 0

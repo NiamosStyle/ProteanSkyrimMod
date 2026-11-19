@@ -52,6 +52,10 @@ namespace protean::Apex
 			RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, RE::BSTEventSource<RE::TESHitEvent>*) override
 			{
 				if (a_event && a_event->cause && a_event->cause->IsPlayerRef() && a_event->target && !a_event->target->IsPlayerRef()) {
+					// the aura's own calm counts as a "hit" by the player: not an attack
+					if (auto* calm = Registry::Get().ApexCalm(); calm && a_event->source == calm->GetFormID()) {
+						return RE::BSEventNotifyControl::kContinue;
+					}
 					std::lock_guard lock(g_hitLock);
 					g_hit[a_event->target->GetFormID()] = std::chrono::steady_clock::now();
 				}
@@ -118,6 +122,28 @@ namespace protean::Apex
 			if (!spell || range <= 0.0f || !pl || !caster) {
 				return;
 			}
+			// safety (2026-11-19: a calm with no actor value killed every animal it touched): an animal that dies within 2 s
+			// of its first calm switches the aura off for the session
+			static std::map<RE::FormID, std::chrono::steady_clock::time_point> first;
+			static bool                                                        off = false;
+			if (off) {
+				return;
+			}
+			const auto now = std::chrono::steady_clock::now();
+			for (auto it = first.begin(); it != first.end();) {
+				auto* a = RE::TESForm::LookupByID<RE::Actor>(it->first);
+				if (now - it->second > std::chrono::seconds(2)) {
+					it = first.erase(it);
+					continue;
+				}
+				if (a && a->IsDead() && !HitRecently(it->first, 5.0f)) {
+					off = true;
+					logger::error("apex: '{}' {:08X} died within 2 s of the kin aura's calm; the aura is OFF until the game restarts", a->GetName(), it->first);
+					Shift::Notify("Protean: the Apex aura harmed an animal and was switched off (see Protean.log).");
+					return;
+				}
+				++it;
+			}
 			int calmed = 0, stood = 0;
 			for (auto& h : pl->highActorHandles) {
 				auto a = h.get();
@@ -132,6 +158,9 @@ namespace protean::Apex
 				const bool onPlayer = target && target.get() == a_p;
 				if (a->IsInCombat() && target && !onPlayer) {
 					continue;  // its own fight
+				}
+				if (!a->AsMagicTarget()->HasMagicEffect(spell->effects[0]->baseEffect)) {
+					first.try_emplace(a->GetFormID(), now);  // a first calm (or one after it lapsed): watched for 2 s
 				}
 				caster->CastSpellImmediate(spell, false, a.get(), 1.0f, false, 0.0f, a_p);
 				++calmed;

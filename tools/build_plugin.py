@@ -918,7 +918,9 @@ def main():
           "FormKey: %s:%s\nEditorID: Protean_ApexCalmEffect\n" % (fid(APEX_CALM_EFFECT), PLUGIN)
           + name_block("Kin")
           + "Flags:\n- Recover\n- NoArea\n- HideInUI\n- Painless\n- NoHitEffect\nBaseCost: 0\nMagicSkill: Illusion\n"
-          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Calm\n"
+          # the actor value must be Aggression, as every vanilla Calm's: left at None (-1) the calm killed every animal it
+          # touched (2026-11-19)
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Calm\n  ActorValue: Aggression\n"
           "CastType: FireAndForget\nTargetType: TargetActor\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
           "Description:\n  TargetLanguage: English\n  Value: ''\n")
     write(os.path.join(y, "Spells", "Protean_ApexCalm - %s_%s.yaml" % (fid(APEX_CALM_SPELL), PLUGIN)),
@@ -927,7 +929,7 @@ def main():
           + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
           "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
           "CastType: FireAndForget\nTargetType: TargetActor\n"
-          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 1000\n    Duration: 3\n" % (fid(APEX_CALM_EFFECT), PLUGIN))
+          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 100\n    Duration: 3\n" % (fid(APEX_CALM_EFFECT), PLUGIN))  # magnitude: highest level calmed
 
     # ---- the Strange Mound: the activator ("Search"), and the poison its touch leaves, cast by the mound itself like a
     # poison dart trap's, so the player is hit (and cries out) as by any poison
