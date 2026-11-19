@@ -265,5 +265,6 @@ game twice (render code, Protean not in the stack).
   load (from race-asset numbers); a race/sex change keeps the old list. A save made in a female stolen face loads
   with the female list, and taking it off left a male player on it. Fix f619d29: RebuildMasks() makes the list the
   look's race+sex asset list before painting (main thread only). Round trip VERIFIED by the user 2026-11-19 (female
-  Redguard face: 33 -> 31 -> 34 masks, all 34 own layers painted, truecheck unchanged). Untested: a female player
-  wearing a male face (Meiya saves in the Protean profile).
+  Redguard face: 33 -> 31 -> 34 masks, all 34 own layers painted, truecheck unchanged). Female player wearing a male
+  face also VERIFIED (Meiya, Wood Elf: 34 -> 30 masks, all 30 painted; her true face matches her character-creation
+  save exactly; truecheck unchanged).
