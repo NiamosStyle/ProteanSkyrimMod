@@ -116,8 +116,14 @@ namespace protean::Face
 		std::vector<ListedMask> AllMasks(RE::PlayerCharacter* a_p)
 		{
 			std::vector<ListedMask> out;
-			auto* overlay = REL::RelocateMemberIfNewer<RE::BSTArray<RE::TintMask*>*>(SKSE::RUNTIME_SSE_1_6_629, a_p, 0xB28, 0xB30);
-			auto& base = REL::RelocateMemberIfNewer<RE::BSTArray<RE::TintMask*>>(SKSE::RUNTIME_SSE_1_6_629, a_p, 0xB10, 0xB18);
+			// through CommonLib's runtime-data accessor: the fields sit 8 bytes later from 1.7.99 on (a hard-coded 1.6
+			// offset crashed on 1.7.104, 2026-11-19)
+			auto& rd = a_p->GetPlayerRuntimeData();
+			auto* overlay = rd.overlayTintMasks;
+			auto& base = rd.tintMasks;
+			if (reinterpret_cast<std::uintptr_t>(overlay) < 0x10000) {
+				overlay = nullptr;
+			}
 			auto  add = [&](RE::BSTArray<RE::TintMask*>& a_list, char a_name) {
 				if (a_list.size() > 256) {
 					return;
@@ -132,6 +138,12 @@ namespace protean::Face
 			add(base, 'b');
 			if (overlay) {
 				add(*overlay, 'o');
+			}
+			// check the lists against the game's own lookup: its skin-tone mask must be among them
+			const auto skin = static_cast<std::uint32_t>(RE::TintMask::Type::kSkinTone);
+			if (auto* gm = Mask(a_p, skin, 0); gm && std::ranges::none_of(out, [&](const ListedMask& m) { return m.mask == gm; })) {
+				logger::error("colour masks: the lists read ({} mask(s)) do not hold the game's skin-tone mask; not used", out.size());
+				out.clear();
 			}
 			return out;
 		}
@@ -343,6 +355,21 @@ namespace protean::Face
 			}
 			// every mask of the list the game draws from (the overlay list when there is one), as WriteTintsExact sees them
 			const auto masks = AllMasks(p);
+			if (masks.empty()) {  // the lists could not be read: the game's own lookup, by type and position
+				for (std::uint32_t type = 0; type < kTintTypes; ++type) {
+					for (std::uint32_t i = 0, n = MaskCount(p, type); i < n; ++i) {
+						if (auto* m = Mask(p, type, i)) {
+							Tint t;
+							t.type = static_cast<std::uint8_t>(type);
+							t.index = static_cast<std::uint8_t>(i);
+							std::copy_n(&m->color.red, 4, t.rgba);
+							t.alpha = m->alpha;
+							t.texture = MaskTexture(m);
+							l.tints.push_back(std::move(t));
+						}
+					}
+				}
+			}
 			const char drawn = std::ranges::any_of(masks, [](const ListedMask& m) { return m.list == 'o'; }) ? 'o' : 'b';
 			std::uint8_t nth[kTintTypes]{};
 			for (const auto& lm : masks) {
@@ -543,7 +570,7 @@ namespace protean::Face
 
 		void Paint(const std::vector<Tint>& a_tints, bool a_exact)
 		{
-			if (a_exact) {
+			if (a_exact && !AllMasks(Player()).empty()) {
 				WriteTintsExact(a_tints);
 			} else {
 				WriteTints(a_tints);
