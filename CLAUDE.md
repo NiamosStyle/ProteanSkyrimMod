@@ -52,3 +52,39 @@ docs/INTEGRATION.md  the contract for mods built on Protean
   (transform, revert, learn, anim, graph, dial, sound, spawn, attack, leap, fly, cc...).
 - Log: `<Documents>/My Games/Skyrim Special Edition/SKSE/Protean.log` (Documents is under OneDrive on the dev machine).
 - Release builds must have `Commands=0` (`tools/package.py` does it).
+
+## Map the connections before building (user's rule, 2026-11-19)
+
+Protean leans on the game's own records and engine behaviour, and those carry connections that aren't visible from
+where we touch them. Four bugs in one day came from that, each found only in the user's game, each a few minutes of
+checking up front:
+
+- **Faction kin:** joining the Goat, Skeever and Spider factions also made Forsworn, draugr, Falmer and vampires
+  friendly, because those factions list them as friends.
+- **Kin aura:** a Calm effect built without vanilla's actor value (Aggression) killed every animal it touched.
+- **Face drift:** "changing race or sex rebuilds the colour slots" was assumed, never measured. It doesn't; a save
+  made in a female face left a male player on the female list.
+- **Shield arrows:** "one arrow, one hit" was assumed. Each arrow goes through the hit code twice.
+
+So, **before writing a feature, and again before building on anything new mid-feature:**
+
+1. **List what it touches in the game**, not in our code: every vanilla record it uses, copies, joins or imitates
+   (faction, spell, effect, race, perk, package), every engine state it changes (race, sex, factions, actor values,
+   face, equipment, AI) and every engine call or event it hooks or listens to.
+2. **For each, find what else is connected:**
+   - a record: read it whole (xelib from the game folder, or Spriggit), with everything it links to: a faction's
+     relations, a spell's effects and conditions, a race's lists. Whatever we borrow, we get all of.
+   - something we imitate: compare our record with the vanilla one **field by field** (name the vanilla model in a
+     comment by the record in `tools/build_plugin.py`). Any field we leave out or set differently needs a reason.
+   - an engine state: when does the game itself rebuild, save, reload or reset it (load, race/sex change, death,
+     cell change, menus), and what else reads it? Assume nothing: measure it.
+   - a hook or event: how many times it fires per action, on which threads, from which paths (melee, arrow,
+     spell, script), and whether our own actions fire it too (our spells raise hit events).
+   - our own code: which other Protean modules react to the same event or state (`grep` the sink type or the call).
+3. **Write the assumptions down with how each was checked:** vanilla record, DevBench measurement, knowledgebase
+   entry, or "unverified". Put the list in the plan shown to the user, and engine findings in HANDOFF.
+4. **Unverified means measure first:** a short spike with DevBench, the dev channel or an offline read,
+   before building on it. Most take minutes. When something can't be measured offline, say so and fold the check
+   into the first live test.
+5. **Test the transitions, not just the feature:** save and load in every state the feature creates, the other sex
+   and another race, animal form and back. That is where state the engine rebuilds behind our back shows up.
