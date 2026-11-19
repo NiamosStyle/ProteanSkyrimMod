@@ -29,4 +29,6 @@ namespace protean::Face
 
 	[[nodiscard]] bool Disguised();
 	void               Dump();  // dev: log what the player's record looks like now
+	void               DumpTints(std::string_view a_name);     // dev: every colour mask to <log dir>/Protean-tints-<name>.txt
+	void               RestoreTints(std::string_view a_name);  // dev: paint such a dump back onto the player's own face
 }

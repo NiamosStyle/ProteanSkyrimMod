@@ -207,6 +207,10 @@ namespace protean::Dev
 				Face::TakeOff("dev command");
 			} else if (a_cmd == "facedump") {
 				Face::Dump();
+			} else if (a_cmd == "tintdump") {
+				Face::DumpTints(a_arg);
+			} else if (a_cmd == "tintrestore" && !a_arg.empty()) {
+				Face::RestoreTints(a_arg);
 			} else if (a_cmd == "fly") {
 				// fly [mode] [speed]: tune, then take off (mode 1 = in-air state, 2 = flying state); "fly 0" lands
 				std::istringstream in(a_arg);

@@ -105,6 +105,37 @@ namespace protean::Face
 			return a_m->texture ? Lower(a_m->texture->textureName.c_str()) : std::string{};
 		}
 
+		// Every colour mask the player has, in the game's own order: the base list and, when the game keeps one, the
+		// overlay list it draws from (GetTintMask reads only the list in use).
+		struct ListedMask
+		{
+			char          list;  // 'b' base, 'o' overlay
+			std::uint32_t pos;
+			RE::TintMask* mask;
+		};
+		std::vector<ListedMask> AllMasks(RE::PlayerCharacter* a_p)
+		{
+			std::vector<ListedMask> out;
+			auto* overlay = REL::RelocateMemberIfNewer<RE::BSTArray<RE::TintMask*>*>(SKSE::RUNTIME_SSE_1_6_629, a_p, 0xB28, 0xB30);
+			auto& base = REL::RelocateMemberIfNewer<RE::BSTArray<RE::TintMask*>>(SKSE::RUNTIME_SSE_1_6_629, a_p, 0xB10, 0xB18);
+			auto  add = [&](RE::BSTArray<RE::TintMask*>& a_list, char a_name) {
+				if (a_list.size() > 256) {
+					return;
+				}
+				for (std::uint32_t i = 0; i < a_list.size(); ++i) {
+					auto* m = a_list[i];
+					if (reinterpret_cast<std::uintptr_t>(m) >= 0x10000 && static_cast<std::uint32_t>(m->type.get()) < kTintTypes) {
+						out.push_back({ a_name, i, m });
+					}
+				}
+			};
+			add(base, 'b');
+			if (overlay) {
+				add(*overlay, 'o');
+			}
+			return out;
+		}
+
 		bool g_ignoreFaceFiles{ false };  // dev: build every face from the data, to test that path
 
 		// Does the game ship finished face files (head model and face texture) for this NPC?
@@ -310,22 +341,26 @@ namespace protean::Face
 				std::copy_n(base->faceData->morphs, l.morphs.size(), l.morphs.begin());
 				std::copy_n(base->faceData->parts, l.presets.size(), l.presets.begin());
 			}
-			for (std::uint32_t type = 0; type < kTintTypes; ++type) {
-				const auto n = MaskCount(p, type);
-				for (std::uint32_t i = 0; i < n; ++i) {
-					if (auto* m = Mask(p, type, i)) {
-						Tint t;
-						t.type = static_cast<std::uint8_t>(type);
-						t.index = static_cast<std::uint8_t>(i);
-						t.rgba[0] = m->color.red;
-						t.rgba[1] = m->color.green;
-						t.rgba[2] = m->color.blue;
-						t.rgba[3] = m->color.alpha;
-						t.alpha = m->alpha;
-						t.texture = MaskTexture(m);
-						l.tints.push_back(std::move(t));
-					}
+			// every mask of the list the game draws from (the overlay list when there is one), as WriteTintsExact sees them
+			const auto masks = AllMasks(p);
+			const char drawn = std::ranges::any_of(masks, [](const ListedMask& m) { return m.list == 'o'; }) ? 'o' : 'b';
+			std::uint8_t nth[kTintTypes]{};
+			for (const auto& lm : masks) {
+				if (lm.list != drawn) {
+					continue;
 				}
+				auto*      m = lm.mask;
+				const auto type = static_cast<std::uint8_t>(m->type.get());
+				Tint       t;
+				t.type = type;
+				t.index = nth[type]++;
+				t.rgba[0] = m->color.red;
+				t.rgba[1] = m->color.green;
+				t.rgba[2] = m->color.blue;
+				t.rgba[3] = m->color.alpha;
+				t.alpha = m->alpha;
+				t.texture = MaskTexture(m);
+				l.tints.push_back(std::move(t));
 			}
 			logger::info("own look saved: {} head part(s), {} colour layer(s)", l.headParts.size(), l.tints.size());
 			return l;
@@ -424,6 +459,62 @@ namespace protean::Face
 			logger::info("colour layers: {} painted, {} turned off, {} of the look's not placed", set, off, std::ranges::count(used, false));
 		}
 
+		// Paint the player's OWN colour layers back: every mask takes the layer with exactly its texture and type,
+		// never one picked by position (a list rebuilt by a load can be ordered or sized differently, and a position
+		// match put one layer's colour on another: Mercer's war paint, 2026-11-19). Masks the look has no layer for are
+		// turned off; layers with no mask to go on are named in the log.
+		void WriteTintsExact(const std::vector<Tint>& a_tints)
+		{
+			auto* p = Player();
+			const auto masks = AllMasks(p);
+			int set = 0, off = 0;
+			for (char list : { 'b', 'o' }) {
+				std::vector<bool> used(a_tints.size(), false);
+				std::uint32_t     inList = 0;
+				for (const auto& lm : masks) {
+					if (lm.list != list) {
+						continue;
+					}
+					++inList;
+					auto*       m = lm.mask;
+					const auto  type = static_cast<std::uint8_t>(m->type.get());
+					const auto  tex = MaskTexture(m);
+					std::size_t pick = a_tints.size();
+					for (std::size_t k = 0; k < a_tints.size() && pick == a_tints.size(); ++k) {
+						if (!used[k] && a_tints[k].type == type && a_tints[k].texture == tex) {
+							pick = k;
+						}
+					}
+					if (pick == a_tints.size()) {
+						if (m->alpha > 0.0f) {
+							logger::info("  colour mask {}{} type {} '{}' has no own layer: turned off (was alpha {:.2f})", list, lm.pos, type, tex, m->alpha);
+						}
+						m->alpha = 0.0f;
+						++off;
+						continue;
+					}
+					used[pick] = true;
+					const auto& t = a_tints[pick];
+					m->color.red = t.rgba[0];
+					m->color.green = t.rgba[1];
+					m->color.blue = t.rgba[2];
+					m->color.alpha = t.rgba[3];
+					m->alpha = t.alpha;
+					++set;
+				}
+				if (inList == 0) {
+					continue;
+				}
+				for (std::size_t k = 0; k < a_tints.size(); ++k) {
+					if (!used[k]) {
+						logger::warn("  own colour layer type {} '{}' (alpha {:.2f}) has no mask in list {} to go on", a_tints[k].type,
+							a_tints[k].texture, a_tints[k].alpha, list);
+					}
+				}
+			}
+			logger::info("own colour layers: {} painted, {} turned off ({} mask(s) in all)", set, off, masks.size());
+		}
+
 		void CallGame(const char* a_fn)
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
@@ -448,11 +539,23 @@ namespace protean::Face
 
 		// Put a look on: the record, colours and race now (a race change rebuilds the model), then the head, face
 		// colours and hair are redrawn a few frames later once the model is back.
-		void Wear(const Look& a_l)
+		bool g_pendingExact{ false };  // the pending layers are the player's own: painted by exact texture only
+
+		void Paint(const std::vector<Tint>& a_tints, bool a_exact)
+		{
+			if (a_exact) {
+				WriteTintsExact(a_tints);
+			} else {
+				WriteTints(a_tints);
+			}
+		}
+
+		// a_own: the look is the player's own (taking a stolen face off)
+		void Wear(const Look& a_l, bool a_own = false)
 		{
 			auto* p = Player();
 			WriteRecord(a_l);
-			WriteTints(a_l.tints);  // before the rebuild: the body takes its colour from these when the model is built
+			Paint(a_l.tints, a_own);  // before the rebuild: the body takes its colour from these when the model is built
 			auto* race = RE::TESForm::LookupByID<RE::TESRace>(a_l.race);
 			if (race && p->GetRace() != race) {
 				p->SwitchRace(race, true);
@@ -464,6 +567,7 @@ namespace protean::Face
 				});
 			}
 			g_pendingTints = a_l.tints;
+			g_pendingExact = a_own;
 			g_redraw = kRedrawDelay;
 		}
 
@@ -484,7 +588,7 @@ namespace protean::Face
 				CallPlayer("RegenerateHead");
 			}
 			if (std::ranges::find(kPaintAt, g_redraw) != std::end(kPaintAt)) {
-				WriteTints(g_pendingTints);
+				Paint(g_pendingTints, g_pendingExact);
 				CallGame("UpdateTintMaskColors");
 				CallGame("UpdateHairColor");
 				Player()->UpdateSkinColor();
@@ -732,7 +836,7 @@ namespace protean::Face
 		logger::info("=== take off the stolen face ({}) ===", a_why);
 		LeaveFactions();
 		if (s.own.valid) {
-			Wear(s.own);
+			Wear(s.own, true);
 		} else {
 			logger::error("no own look saved; cannot take the stolen face off cleanly");
 		}
@@ -803,6 +907,79 @@ namespace protean::Face
 	{
 		g_redraw = 0;
 		g_pendingTints.clear();
+	}
+
+	namespace
+	{
+		std::filesystem::path TintFile(std::string_view a_name)
+		{
+			auto dir = SKSE::log::log_directory().value_or(std::filesystem::path{});
+			return dir / std::format("Protean-tints-{}.txt", a_name.empty() ? "dump" : a_name);
+		}
+	}
+
+	// dev "tintdump <name>": every colour mask of both lists, one per line:
+	//   <list><pos> <type> <r> <g> <b> <a> <alpha> <texture>
+	void DumpTints(std::string_view a_name)
+	{
+		auto*      p = Player();
+		const auto path = TintFile(a_name);
+		std::ofstream out(path, std::ios::trunc);
+		const auto masks = AllMasks(p);
+		for (const auto& lm : masks) {
+			const auto* m = lm.mask;
+			out << std::format("{}{} {} {} {} {} {} {:.6f} {}\n", lm.list, lm.pos, static_cast<std::uint32_t>(m->type.get()), m->color.red,
+				m->color.green, m->color.blue, m->color.alpha, m->alpha, MaskTexture(m));
+		}
+		logger::info("tint dump: {} mask(s) ({} with colour) written to {}", masks.size(),
+			std::ranges::count_if(masks, [](const ListedMask& m) { return m.mask->alpha > 0.0f; }), path.string());
+		Shift::Notify(std::format("Protean: {} colour masks dumped ({}).", masks.size(), a_name));
+	}
+
+	// dev "tintrestore <name>": paint a dump back onto the player's own face (exact texture match), then redraw
+	void RestoreTints(std::string_view a_name)
+	{
+		auto& s = State::Get();
+		if (!s.active.empty() || s.disguised) {
+			Shift::Notify("Protean: wear your own face in your own form first.");
+			return;
+		}
+		const auto    path = TintFile(a_name);
+		std::ifstream in(path);
+		if (!in) {
+			Shift::Notify(std::format("Protean: no tint dump named {}.", a_name));
+			return;
+		}
+		std::vector<Tint> tints;
+		std::string       line;
+		while (std::getline(in, line)) {
+			std::istringstream ls(line);
+			std::string        where, tex;
+			std::uint32_t      type = 0, r = 0, g = 0, b = 0, a = 0;
+			float              alpha = 0.0f;
+			if (!(ls >> where >> type >> r >> g >> b >> a >> alpha) || where.empty()) {
+				continue;
+			}
+			std::getline(ls >> std::ws, tex);
+			if (where[0] != 'b') {  // the base list is the record of the face; an overlay copy would double it
+				continue;
+			}
+			Tint t;
+			t.type = static_cast<std::uint8_t>(type);
+			t.rgba[0] = static_cast<std::uint8_t>(r);
+			t.rgba[1] = static_cast<std::uint8_t>(g);
+			t.rgba[2] = static_cast<std::uint8_t>(b);
+			t.rgba[3] = static_cast<std::uint8_t>(a);
+			t.alpha = alpha;
+			t.texture = tex;
+			tints.push_back(std::move(t));
+		}
+		logger::info("=== tint restore from {}: {} layer(s) ===", path.string(), tints.size());
+		WriteTintsExact(tints);
+		g_pendingTints = tints;
+		g_pendingExact = true;
+		g_redraw = kRedrawDelay;
+		Shift::Notify(std::format("Protean: {} colour layers painted from {}.", tints.size(), a_name));
 	}
 
 	void Dump()
