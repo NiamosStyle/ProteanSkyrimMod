@@ -33,7 +33,10 @@ What the files depend on:
 - **Dawnguard and Dragonborn.** The plugin's only master is Skyrim.esm, but the code uses both DLCs at runtime
   (Death Hound, Chaurus Hunters, Boar, Ash Hopper, blood bursts, sounds), so both are needed.
 - **Custom Skills Framework**: the perk tree.
-- **Open Animation Replacer**: the claw, Hammerfist and Blade animations and the glide pose.
+- **Open Animation Replacer**: the claw, Hammerfist and Blade animations and the glide pose. OAR 3.2.1 crashes the
+  game on every exit (a ghost actor it makes at startup; bisected 2026-11-19, happens with OAR alone). Fix,
+  verified: `bLoadDefaultBehaviorsInMainMenu = false` in `OpenAnimationReplacer.ini`; claws, Hammerfist and glide
+  still work with it off. The README tells players.
 - **Optional: SKSE Menu Framework**: the Evolution journal page (see section 9).
 - **Optional: Equip Enchantment Fix** ("1.6.629 and newer" build), only if an enchantment goes missing after changing
   back. Tested without it on 2026-11-15; nothing was lost.
