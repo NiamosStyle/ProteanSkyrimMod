@@ -1,89 +1,121 @@
 # Protean
 
-Animal shapeshifting for Skyrim SE **1.7.104**. Consume the body of a slain animal to learn its form, then
-become it: its own model, animations, attacks, size and health, and the world treats you as that animal
-unless it watched you change.
+Become a shapeshifter for Skyrim SE **1.7.104**. Consume the dead to grow stronger, take the form of any animal
+you have consumed, steal the faces of the people you devour, and grow claws, blades and tendrils from your own
+flesh. Inspired by the Prototype games.
 
-Status: **1.0.0**. 35 forms. Built to be part of a larger mod: see `docs/INTEGRATION.md`.
+Version **1.1.0**. 35 animal forms, 21 perks in three branches, 5 weapons.
 
-## What it does
+## How to start
 
-- **35 forms**, from hare to mammoth: wolves, bears, sabre cats, deer, elk, livestock, skeever, mudcrab,
-  chaurus, trolls, horker, horse, giant, werewolf, werebear, frostbite spider, boar, ash hopper, and more.
-- **Controls:** A/S/D steer, the mouse turns the camera. Tap left/right mouse for the animal's attacks,
-  hold for its power attacks. Sprint (four-legged animals) costs stamina.
-- **Specials:** the slaughterfish swims and breathes water (and suffocates on land); the Chaurus Hunters
-  fly (Jump takes off, fly where you look); the ash hopper and hare leap; the frostbite spider spits poison
-  (hold right mouse); the giant fights bare-handed.
-- **Changing:** a 1.5 s transformation (shimmer, two sounds, a blood burst). Changing back is refused
-  once when it would kill you or drop you from the sky; cast again to insist.
-- **Health:** you gain half the animal's health. It heals faster out of combat until changing back is safe.
-  The health bar marks the danger line.
-- **The world:** people who see you change know it was you; guards attack werewolves and werebears on
-  sight, as in vanilla. Big animals cannot go indoors.
-- **Face stealing:** sneak to a corpse to copy its face, and wear it with the Stolen Face power.
-- **Perks (in progress):** feeding earns perk points for a Protean perk tree. Built so far: Unbound Form,
-  Keen (night vision, Detect Life and Detect Dead from an animal's Favorites menu, as the Vampire Lord has it),
-  Rending Claws (claws in either hand, strongest on a full stamina bar), Tendril (a whip of flesh cast from
-  either hand: it drains stamina into you, yanks light foes to you and hauls you to large ones), Predator's Rush
-  (a sprint that keeps building, big jumps, jumping while sprinting) and Prey's Flight (no fall damage, a jump in
-  mid-air, a wingsuit glide, and a diving slam that staggers everyone around the landing), Survivor (more health in
-  animal form; rank 2 lets animals eat bodies or plants to heal), Predator (animal damage that grows with your level;
-  rank 2 poisons with power attacks) and Subtle Carapace (armor that grows with your level, in animal form or when you
-  wear no body armor).
+Go to the ruins of **Helgen**. Once you're past the opening, a **Strange Mound**, a heap of burnt flesh, waits
+there. Search it. It poisons you and a shadow passes over you: you gain **Unbound Form** and the power
+**Shapeshifter's Instinct**.
+
+## Consuming
+
+- **Sneak and activate a body to consume it** (in animal form, just activate it). It takes 2 seconds (1 in combat).
+- Every body restores **50 Stamina** and heals **20%** of your Health.
+- **Consuming an animal teaches you its form.**
+- Consuming a person in front of witnesses is a crime (1,000 bounty).
+
+## Evolving
+
+- Bodies give **evolution points** by their size: small animals 1, medium animals and people 2, large animals 3,
+  mammoths and giants 5 (draugr give nothing).
+- Evolution points become **perk points**, each costing one more than the last (1, 2, 3...).
+- **21 renowned people** each give a perk point outright the first time you consume them: Ulfric Stormcloak,
+  General Tullius, Mercer Frey, Harkon, Ancano, the Ebony Warrior and more.
+- Cast **Evolution** to open the Protean perk tree.
+
+## Shapeshifting
+
+- **35 forms**, each with its own power: wolves (3), deer, elk, fox, hare, dog, goat, cow, bears (3), sabre cats (3),
+  Death Hound, boar, skeever, chicken, ash hopper, mudcrab, chaurus, trolls (2), horse, horker, mammoth, giant,
+  werewolf, werebear, slaughterfish, Chaurus Hunters (2) and the frostbite spider.
+- Changing costs **15 Stamina** and takes 1.5 seconds. Cast the power again, or use **Revert Form**, to change back.
+- Your Health keeps its percentage when you change, so changing back can't kill you. Animal forms add bonus Health,
+  more for tougher animals.
+- **Controls:** A/S/D steer and the mouse turns the camera. Tap the mouse buttons for the animal's attacks, hold for
+  power attacks. Sprinting costs Stamina.
+- **Specials:** the slaughterfish swims and breathes water; the Chaurus Hunters fly (Jump to take off); the hare and
+  ash hopper leap; the frostbite spider spits poison (right mouse); the giant fights bare-handed.
+- **Where:** small and medium animals go anywhere. Trolls and horkers fit into caves, mines and ruins but not
+  buildings. Mammoths and giants stay outdoors.
+- **The world:** people who see you change know it was you. Guards attack werewolves and werebears on sight.
+
+## The perk tree
+
+Three branches grow from **Unbound Form** (immunity to disease, and every kill speeds up your Stamina recovery for a
+while). Four perks have two ranks.
+
+**Beast:** your animal forms.
+- **Keen:** night vision, Detect Life and Detect Dead from an animal's Favorites.
+- **Survivor:** more Health in animal form; rank 2 makes consuming a body heal half your Health (instead of 20%)
+  and lets plant-eaters graze to heal.
+- **Predator:** animal attacks that grow with your level; rank 2 poisons with power attacks.
+- **Stalker:** fade from sight when still or walking, and strike from hiding for double damage.
+- **Apex:** animals treat you as one of their own, your animal forms hit at least as hard as a two-handed weapon of
+  your level, and you can **call a pack** to fight for you.
+
+**Hunter:** weapons, movement and toughness.
+- **Rending Claws:** claws in either hand. They use One-Handed and count as swords for perks.
+- **Hammerfist:** a huge armoured fist (One-Handed, as a mace).
+- **Blade:** your right arm becomes a great bone blade (Two-Handed).
+- **Tendril:** a whip of flesh that tears at Health, drains Stamina, and yanks foes to you or hauls you to big ones.
+- **Predator's Rush:** faster on foot, far higher jumps, and a sprint that keeps building speed.
+- **Prey's Flight:** no fall damage, a jump in mid-air, gliding, and a diving slam.
+- **Subtle Carapace:** armor and magic resistance that grow with your level, in animal form or with no body armor.
+- **Shield:** a chitin shield on your left forearm that blocks everything from the front, spells too.
+- **Regeneration:** turn Stamina into Health.
+- **Devastator:** tendrils burst from your body, knocking down and tearing into every enemy within 30 meters.
+
+**Deceiver:** faces and stealth.
+- **Borrowed Visage:** consume a person to take their face, body and race, and join their factions.
+- **Metamorphosis:** reshape your own race, face and body, and clear every bounty.
+- **Inconspicuous:** friendly crowds make you harder to notice.
+- **Infected:** plant an infection in someone's pocket and they fight at your side for a day.
+- **Assassin:** ten-times sneak attacks on the unsuspecting, unseen consuming, and **Stealth Consume**.
+
+Most weapons and powers cost Stamina. Protean is built around keeping your Stamina bar full.
 
 ## Requirements
 
-Skyrim SE 1.7.104, SKSE64, Address Library, Dawnguard and Dragonborn, the monster race crash fix, Custom
-Skills Framework (the perk tree), Open Animation Replacer (the claw animations and the glide pose).
-DevBench is for development only.
+- Skyrim SE **1.7.104** (the version Protean is built and tested on)
+- SKSE64
+- Address Library for SKSE Plugins
+- Dawnguard and Dragonborn
+- The monster race crash fix: https://www.nexusmods.com/skyrimspecialedition/mods/19899
+- Custom Skills Framework (the perk tree)
+- Open Animation Replacer (the weapon animations and the glide)
 
-Optional: SKSE Menu Framework (the Evolution journal page).
+**Optional:** SKSE Menu Framework (the Evolution journal page, with a few switches).
 
 **If an enchantment stops working after you change back** (the item is worn but its effect is missing until you
-re-equip it), install **Equip Enchantment Fix** (the "1.6.629 and newer" build). Protean puts your gear back on
-for you, and gear equipped by a mod rather than by hand is where the game sometimes drops enchantments. It was
-tested without the fix (2026-11-15: six enchanted items, a transform and change back, and a save made in animal
-form loaded from the main menu) and nothing was lost, so it is not required.
+re-equip it), install **Equip Enchantment Fix** (the "1.6.629 and newer" build). Protean puts your gear back on for
+you, and gear equipped by a mod rather than by hand is where the game sometimes drops enchantments. It was tested
+without the fix and nothing was lost, so it is not required.
+
+**A crash log every time you quit the game?** That comes from Open Animation Replacer, not Protean (it happens
+with OAR alone, even quitting from the main menu). It is harmless, but to stop it: open
+`SKSE/Plugins/OpenAnimationReplacer.ini` (in Mod Organizer it is usually in the **Overwrite** folder) and set
+`bLoadDefaultBehaviorsInMainMenu = false`. Protean's animations work the same with it off.
 
 ## Credits
 
-This mod is a new build on the ideas of two existing mods. No files or scripts from them are reused.
+Protean is a new build on the ideas of these mods. No files or scripts from them are reused.
 
-- **Shapeshifting** by PeenCoach (Nexus SE 107629): the transform-by-race-swap approach, the
-  werewolf-style "no inventory or spells, press again to revert" design.
-- **Shapeshift - Hare** by Bobiguy (Nexus SE 142327): unequip-everything handling across armor slots,
-  the craftable spell tome.
+- **Shapeshifting** by PeenCoach (Nexus SE 107629): the transform-by-race-swap approach, the werewolf-style
+  "no inventory or spells, press again to revert" design.
+- **Shapeshift - Hare** by Bobiguy (Nexus SE 142327): unequip-everything handling across armor slots.
 - **Pull Mastery** by xzax (Nexus SE 35134) and **Xyn's Simple Rope Arrow** (Nexus SE 77707): the ideas behind
-  Tendril (a long model fired as a flame-type projectile; a negative knock that pulls the target in). Studied
-  only; Tendril's model, records and code are Protean's own.
-- **Feral** (Nexus SE 34552): showed that the game's own beast-race animations make good claw attacks.
-  Protean takes them from the game's archive, not from Feral.
+  Tendril (a long model fired as a flame-type projectile; a negative knock that pulls the target in). Studied only;
+  Tendril's model, records and code are Protean's own.
+- **Feral** (Nexus SE 34552): showed that the game's own beast-race animations make good claw attacks. Protean takes
+  them from the game's archive, not from Feral.
 - **Skyrim's Paraglider** (Nexus SE 53256, MIT): how a glide eases in, and resetting the fall to avoid fall damage.
   Studied only.
 - **PyNifly** by BadDog (GPL-3.0): its HKX writer is used at build time to write Protean's own glide animation.
   None of its code ships with Protean.
 
-## Layout
-
-```
-docs/INTEGRATION.md      for a larger mod: markers, events, dials, every form ID
-docs/PLAN.md             decisions and phases
-docs/creature-table.md   generated creature table (facts from game data + choices)
-data/creatures.json      the table that drives every creature (generated)
-tools/                   extraction, table and plugin builders, packager
-esp-yaml/                Spriggit source of Protean.esp (generated by tools/build_plugin.py)
-src/                     the SKSE plugin
-```
-
-## Building
-
-```
-python -I tools/build_creature_table.py   # data/creatures.json from research/raw (game data dumps)
-python -I tools/build_plugin.py           # Protean.esp + SKSE/Plugins/Protean/creatures.json
-tools\build.bat [MO2 mod folder]          # the DLL; with a folder, also installs everything there
-python -I tools/package.py 1.0.0          # dist/Protean-1.0.0.zip, dev channel off
-```
-
-A new creature is always appended to `tools/build_creature_table.py`, never inserted: each creature's
-records take their IDs from its position, and saves remember those IDs.
+**For mod authors:** `docs/Protean-INTEGRATION.md` lists everything a larger mod can read, listen to and tune.
