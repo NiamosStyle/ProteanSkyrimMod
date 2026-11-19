@@ -31,4 +31,9 @@ namespace protean::Face
 	void               Dump();  // dev: log what the player's record looks like now
 	void               DumpTints(std::string_view a_name);     // dev: every colour mask to <log dir>/Protean-tints-<name>.txt
 	void               RestoreTints(std::string_view a_name);  // dev: paint such a dump back onto the player's own face
+
+	// The true face (the player's own look when Protean was gained, or last set in RaceMenu): checked against the face
+	// and repaired after each load and each change back; painted back when a stolen face comes off.
+	void AfterRevert();  // Shift: the player is human again
+	void TrueFaceCommand(std::string_view a_cmd, std::string_view a_arg);  // dev: truetake | truetints <dump> | truecheck
 }

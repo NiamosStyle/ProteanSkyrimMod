@@ -507,10 +507,16 @@ namespace protean::Face
 					const auto  type = static_cast<std::uint8_t>(m->type.get());
 					const auto  tex = MaskTexture(m);
 					std::size_t pick = a_tints.size();
+					// a mask is known by its texture; its type label must agree but can be wrong (Mercer's dirt #03 was
+					// labelled freckles, 2026-11-19), so it does not decide the match. Untextured masks match by type.
 					for (std::size_t k = 0; k < a_tints.size() && pick == a_tints.size(); ++k) {
-						if (!used[k] && a_tints[k].type == type && a_tints[k].texture == tex) {
+						if (!used[k] && a_tints[k].texture == tex && (!tex.empty() || a_tints[k].type == type)) {
 							pick = k;
 						}
+					}
+					if (pick != a_tints.size() && a_tints[pick].type != type && a_tints[pick].type < kTintTypes) {
+						logger::warn("  colour mask {}{} '{}' was labelled type {}: set back to {}", list, lm.pos, tex, type, a_tints[pick].type);
+						m->type = static_cast<RE::TintMask::Type>(a_tints[pick].type);
 					}
 					if (pick == a_tints.size()) {
 						if (m->alpha > 0.0f) {
@@ -626,6 +632,346 @@ namespace protean::Face
 			}
 		}
 
+		// ---- the true face ----------------------------------------------------------------------------
+		//
+		// The player's face as it was when Protean was gained (or last set in RaceMenu): kept in the co-save AND in a
+		// file per character under the SKSE log folder. Taking a stolen face off paints it back, and every load and
+		// change back from an animal compares the face with it and repairs any drift (user's design, 2026-11-19, after
+		// Mercer's war paint drifted save by save). Every repair is logged in detail and shown on screen.
+
+		std::filesystem::path TintFile(std::string_view a_name)
+		{
+			auto dir = SKSE::log::log_directory().value_or(std::filesystem::path{});
+			return dir / std::format("Protean-tints-{}.txt", a_name.empty() ? "dump" : a_name);
+		}
+
+		// A tint dump (dev "tintdump"): the base list's layers. Empty when there is no such file.
+		std::vector<Tint> ReadDump(std::string_view a_name)
+		{
+			std::vector<Tint> tints;
+			std::ifstream     in(TintFile(a_name));
+			std::string       line;
+			while (std::getline(in, line)) {
+				std::istringstream ls(line);
+				std::string        where, tex;
+				std::uint32_t      type = 0, r = 0, g = 0, b = 0, a = 0;
+				float              alpha = 0.0f;
+				if (!(ls >> where >> type >> r >> g >> b >> a >> alpha) || where.empty() || where[0] != 'b') {
+					continue;  // the base list is the record of the face; an overlay copy would double it
+				}
+				std::getline(ls >> std::ws, tex);
+				Tint t;
+				t.type = static_cast<std::uint8_t>(type);
+				t.rgba[0] = static_cast<std::uint8_t>(r);
+				t.rgba[1] = static_cast<std::uint8_t>(g);
+				t.rgba[2] = static_cast<std::uint8_t>(b);
+				t.rgba[3] = static_cast<std::uint8_t>(a);
+				t.alpha = alpha;
+				t.texture = tex;
+				tints.push_back(std::move(t));
+			}
+			return tints;
+		}
+
+		// A form as "<plugin>|<local id>", so the file survives a changed load order
+		std::string FormKey(RE::FormID a_id)
+		{
+			auto* form = a_id ? RE::TESForm::LookupByID(a_id) : nullptr;
+			auto* file = form ? form->GetFile(0) : nullptr;
+			if (!form || !file) {
+				return a_id ? std::format("|{:08X}", a_id) : "-";
+			}
+			const bool light = file->recordFlags.all(RE::TESFile::RecordFlag::kSmallFile);
+			return std::format("{}|{:06X}", file->GetFilename(), a_id & (light ? 0xFFFu : 0xFFFFFFu));
+		}
+
+		RE::FormID ParseFormKey(const std::string& a_key)
+		{
+			if (a_key.empty() || a_key == "-") {
+				return 0;
+			}
+			const auto bar = a_key.find('|');
+			if (bar == std::string::npos) {
+				return 0;
+			}
+			const auto local = static_cast<RE::FormID>(std::stoul(a_key.substr(bar + 1), nullptr, 16));
+			if (bar == 0) {
+				return local;  // a game-made form, kept as is
+			}
+			auto* dh = RE::TESDataHandler::GetSingleton();
+			return dh ? dh->LookupFormID(local, a_key.substr(0, bar)) : 0;
+		}
+
+		std::string SafeName(const char* a_name)
+		{
+			std::string s = a_name ? a_name : "";
+			std::ranges::replace_if(s, [](unsigned char c) { return !std::isalnum(c) && c != '-' && c != '_'; }, '_');
+			return s.empty() ? "player" : s;
+		}
+
+		std::filesystem::path TrueFolder()
+		{
+			return SKSE::log::log_directory().value_or(std::filesystem::path{}) / "Protean-faces";
+		}
+
+		std::filesystem::path TrueFile(std::uint32_t a_id)
+		{
+			return TrueFolder() / std::format("{}-{:08X}.txt", SafeName(Player()->GetName()), a_id);
+		}
+
+		void WriteTrueFile(const Look& a_l, std::uint32_t a_id)
+		{
+			std::error_code ec;
+			std::filesystem::create_directories(TrueFolder(), ec);
+			const auto    path = TrueFile(a_id);
+			std::ofstream out(path, std::ios::trunc);
+			out << "# Protean true face. Lines: key values. Forms are plugin|local id.\n";
+			out << std::format("race {}\nfemale {}\nheight {:.6f}\nweight {:.6f}\nbody {} {} {}\n", FormKey(a_l.race), a_l.female ? 1 : 0, a_l.height,
+				a_l.weight, a_l.body[0], a_l.body[1], a_l.body[2]);
+			out << std::format("hair {}\ndetails {}\nskin {}\nfacenpc {}\nhasface {}\n", FormKey(a_l.hairColor), FormKey(a_l.faceDetails),
+				FormKey(a_l.skin), FormKey(a_l.faceNpc), a_l.hasFaceData ? 1 : 0);
+			for (auto id : a_l.headParts) {
+				out << "part " << FormKey(id) << "\n";
+			}
+			out << "morphs";
+			for (float m : a_l.morphs) {
+				out << std::format(" {:.9g}", m);
+			}
+			out << "\npresets";
+			for (auto p : a_l.presets) {
+				out << " " << p;
+			}
+			out << "\n";
+			for (const auto& t : a_l.tints) {
+				out << std::format("tint {} {} {} {} {} {:.6f} {}\n", t.type, t.rgba[0], t.rgba[1], t.rgba[2], t.rgba[3], t.alpha, t.texture);
+			}
+			logger::info("true face written to {}", path.string());
+		}
+
+		bool ReadTrueFile(const std::filesystem::path& a_path, Look& a_l)
+		{
+			std::ifstream in(a_path);
+			if (!in) {
+				return false;
+			}
+			Look        l;
+			std::string line;
+			std::uint8_t nth[kTintTypes]{};
+			while (std::getline(in, line)) {
+				std::istringstream ls(line);
+				std::string        key, v;
+				ls >> key;
+				if (key == "race") {
+					ls >> v;
+					l.race = ParseFormKey(v);
+				} else if (key == "female") {
+					int f = 0;
+					ls >> f;
+					l.female = f != 0;
+				} else if (key == "height") {
+					ls >> l.height;
+				} else if (key == "weight") {
+					ls >> l.weight;
+				} else if (key == "body") {
+					int r = 0, g = 0, b = 0;
+					ls >> r >> g >> b;
+					l.body[0] = static_cast<std::uint8_t>(r);
+					l.body[1] = static_cast<std::uint8_t>(g);
+					l.body[2] = static_cast<std::uint8_t>(b);
+				} else if (key == "hair") {
+					ls >> v;
+					l.hairColor = ParseFormKey(v);
+				} else if (key == "details") {
+					ls >> v;
+					l.faceDetails = ParseFormKey(v);
+				} else if (key == "skin") {
+					ls >> v;
+					l.skin = ParseFormKey(v);
+				} else if (key == "facenpc") {
+					ls >> v;
+					l.faceNpc = ParseFormKey(v);
+				} else if (key == "hasface") {
+					int f = 0;
+					ls >> f;
+					l.hasFaceData = f != 0;
+				} else if (key == "part") {
+					ls >> v;
+					if (auto id = ParseFormKey(v)) {
+						l.headParts.push_back(id);
+					}
+				} else if (key == "morphs") {
+					for (auto& m : l.morphs) {
+						ls >> m;
+					}
+				} else if (key == "presets") {
+					for (auto& p : l.presets) {
+						ls >> p;
+					}
+				} else if (key == "tint") {
+					Tint          t;
+					std::uint32_t type = 0, r = 0, g = 0, b = 0, a = 0;
+					ls >> type >> r >> g >> b >> a >> t.alpha;
+					std::getline(ls >> std::ws, t.texture);
+					t.type = static_cast<std::uint8_t>(type);
+					t.index = type < kTintTypes ? nth[type]++ : 0;
+					t.rgba[0] = static_cast<std::uint8_t>(r);
+					t.rgba[1] = static_cast<std::uint8_t>(g);
+					t.rgba[2] = static_cast<std::uint8_t>(b);
+					t.rgba[3] = static_cast<std::uint8_t>(a);
+					l.tints.push_back(std::move(t));
+				}
+			}
+			l.valid = l.race != 0 && !l.headParts.empty();
+			if (!l.valid) {
+				return false;
+			}
+			a_l = std::move(l);
+			return true;
+		}
+
+		// Everything in which the face now differs from a look (empty: the same)
+		std::vector<std::string> Differences(const Look& a_want)
+		{
+			std::vector<std::string> out;
+			const Look               now = OwnLook();
+			auto                     form = [](RE::FormID id) { return FormKey(id); };
+			if (now.female != a_want.female) {
+				out.push_back("sex");
+			}
+			if (std::abs(now.height - a_want.height) > 0.001f) {
+				out.push_back(std::format("height {:.3f} (true {:.3f})", now.height, a_want.height));
+			}
+			if (std::abs(now.weight - a_want.weight) > 0.01f) {
+				out.push_back(std::format("weight {:.1f} (true {:.1f})", now.weight, a_want.weight));
+			}
+			if (!std::ranges::equal(now.body, a_want.body)) {
+				out.push_back("body colour");
+			}
+			if (now.hairColor != a_want.hairColor) {
+				out.push_back(std::format("hair colour {} (true {})", form(now.hairColor), form(a_want.hairColor)));
+			}
+			if (now.faceDetails != a_want.faceDetails) {
+				out.push_back("face details");
+			}
+			if (now.skin != a_want.skin) {
+				out.push_back(std::format("skin {} (true {})", form(now.skin), form(a_want.skin)));
+			}
+			if (now.faceNpc != a_want.faceNpc) {
+				out.push_back("face files");
+			}
+			{
+				auto a = now.headParts, b = a_want.headParts;
+				std::ranges::sort(a);
+				std::ranges::sort(b);
+				if (a != b) {
+					out.push_back(std::format("head parts ({} now, {} true)", a.size(), b.size()));
+				}
+			}
+			if (now.hasFaceData && a_want.hasFaceData) {
+				for (std::size_t i = 0; i < now.morphs.size(); ++i) {
+					if (std::abs(now.morphs[i] - a_want.morphs[i]) > 0.001f) {
+						out.push_back(std::format("face slider {} {:.2f} (true {:.2f})", i, now.morphs[i], a_want.morphs[i]));
+					}
+				}
+				if (now.presets != a_want.presets) {
+					out.push_back("face presets");
+				}
+			}
+			// colour layers by texture; off layers (alpha 0) only matter for their label
+			for (const auto& w : a_want.tints) {
+				auto it = std::ranges::find_if(now.tints, [&](const Tint& t) { return t.texture == w.texture && (!w.texture.empty() || t.type == w.type); });
+				if (it == now.tints.end()) {
+					if (w.alpha > 0.0f) {
+						out.push_back(std::format("colour layer '{}' missing", w.texture));
+					}
+					continue;
+				}
+				if (it->type != w.type) {
+					out.push_back(std::format("colour layer '{}' labelled type {} (true {})", w.texture, it->type, w.type));
+				}
+				const bool on = it->alpha > 0.001f || w.alpha > 0.001f;
+				if (on && (std::abs(it->alpha - w.alpha) > 0.005f || !std::equal(it->rgba, it->rgba + 3, w.rgba))) {
+					out.push_back(std::format("colour layer '{}' type {}: rgb {} {} {} alpha {:.2f} (true rgb {} {} {} alpha {:.2f})", w.texture, w.type,
+						it->rgba[0], it->rgba[1], it->rgba[2], it->alpha, w.rgba[0], w.rgba[1], w.rgba[2], w.alpha));
+				}
+			}
+			for (const auto& t : now.tints) {
+				if (t.alpha > 0.001f && std::ranges::none_of(a_want.tints, [&](const Tint& w) { return w.texture == t.texture; })) {
+					out.push_back(std::format("colour layer '{}' on but not in the true face", t.texture));
+				}
+			}
+			return out;
+		}
+
+		int g_checkIn{ 0 };       // frames until the true face is checked (0 = none)
+		std::string g_checkWhy;
+		int g_takeTick{ 0 };
+
+		bool OwnFormNow()
+		{
+			const auto& s = State::Get();
+			auto*       p = Player();
+			return p && s.active.empty() && !s.disguised && g_redraw == 0 && p->Is3DLoaded();
+		}
+
+		void TakeTrueFace(std::string_view a_why)
+		{
+			auto& s = State::Get();
+			s.truth = OwnLook();
+			if (!s.truthId) {
+				s.truthId = static_cast<std::uint32_t>(std::chrono::system_clock::now().time_since_epoch().count() & 0xFFFFFFFF);
+			}
+			logger::info("=== true face taken ({}): {} head part(s), {} colour layer(s) ===", a_why, s.truth.headParts.size(), s.truth.tints.size());
+			WriteTrueFile(s.truth, s.truthId);
+		}
+
+		void CheckTrueFace()
+		{
+			auto& s = State::Get();
+			if (!s.truth.valid || !OwnFormNow()) {
+				return;
+			}
+			if (Id(Player()->GetRace()) != s.truth.race) {
+				logger::info("true face not checked ({}): the race is not the true face's (a vampire?)", g_checkWhy);
+				return;
+			}
+			const auto diffs = Differences(s.truth);
+			if (diffs.empty()) {
+				logger::info("true face checked ({}): unchanged", g_checkWhy);
+				return;
+			}
+			logger::warn("=== true face DRIFTED ({}): {} difference(s); repairing ===", g_checkWhy, diffs.size());
+			for (const auto& d : diffs) {
+				logger::warn("  {}", d);
+			}
+			Wear(s.truth, true);
+			Shift::Notify(std::format("Protean: your true face was restored ({} difference(s), see Protean.log).", diffs.size()));
+		}
+
+		void ScheduleCheck(std::string_view a_why, int a_frames = 120)
+		{
+			g_checkIn = a_frames;
+			g_checkWhy = a_why;
+		}
+
+		// every frame: the scheduled check, and taking the true face once Protean is there and none is kept
+		void TrueFaceTick()
+		{
+			if (g_checkIn > 0 && --g_checkIn == 0) {
+				CheckTrueFace();
+			}
+			if (++g_takeTick < 60) {
+				return;
+			}
+			g_takeTick = 0;
+			auto& s = State::Get();
+			auto* p = Player();
+			auto* starter = Registry::Get().Starter();
+			if (!s.truth.valid && starter && p && p->HasSpell(starter) && OwnFormNow() && g_checkIn == 0) {
+				TakeTrueFace("Protean is known and no true face was kept");
+			}
+		}
+
 		// ---- factions and witnesses ------------------------------------------------------------------
 
 		void JoinFactions(RE::TESNPC* a_src)
@@ -734,6 +1080,17 @@ namespace protean::Face
 
 			RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent* a_event, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
 			{
+				if (a_event && !a_event->opening && a_event->menuName == RE::RaceSexMenu::MENU_NAME) {
+					// RaceMenu closed: a face changed on purpose becomes the true face (once Protean is known)
+					SKSE::GetTaskInterface()->AddTask([]() {
+						auto* p = Player();
+						auto* starter = Registry::Get().Starter();
+						if (p && starter && p->HasSpell(starter) && State::Get().active.empty() && !State::Get().disguised) {
+							g_redraw = 0;
+							TakeTrueFace("RaceMenu closed");
+						}
+					});
+				}
 				if (a_event && a_event->opening && a_event->menuName == RE::JournalMenu::MENU_NAME && g_menuTakeOff && State::Get().disguised) {
 					// Saving, loading and quitting with a stolen face on is not safe yet: take it off when the game menu opens
 					SKSE::GetTaskInterface()->AddTask([]() {
@@ -862,7 +1219,10 @@ namespace protean::Face
 		}
 		logger::info("=== take off the stolen face ({}) ===", a_why);
 		LeaveFactions();
-		if (s.own.valid) {
+		if (s.truth.valid && (!s.own.valid || s.own.race == s.truth.race)) {
+			Wear(s.truth, true);  // the true face, never a copy taken when the stolen one went on
+		} else if (s.own.valid) {
+			logger::info("own race differs from the true face's (a vampire?): the face from before the theft goes back");
 			Wear(s.own, true);
 		} else {
 			logger::error("no own look saved; cannot take the stolen face off cleanly");
@@ -913,13 +1273,40 @@ namespace protean::Face
 	void OnFrame()
 	{
 		RedrawTick();
+		TrueFaceTick();
+	}
+
+	void AfterRevert()
+	{
+		ScheduleCheck("changed back from an animal");
 	}
 
 	void OnGameLoaded()
 	{
 		auto& s = State::Get();
 		g_redraw = 0;
+		if (!s.truth.valid) {
+			// no true face in this save's co-save: the character's file, when there is exactly one for this name
+			std::error_code ec;
+			std::vector<std::filesystem::path> found;
+			const auto prefix = SafeName(Player()->GetName()) + "-";
+			for (const auto& e : std::filesystem::directory_iterator(TrueFolder(), ec)) {
+				const auto n = e.path().filename().string();
+				if (n.starts_with(prefix) && n.ends_with(".txt") && n.size() == prefix.size() + 12) {
+					found.push_back(e.path());
+				}
+			}
+			if (found.size() == 1 && ReadTrueFile(found[0], s.truth)) {
+				s.truthId = static_cast<std::uint32_t>(std::stoul(found[0].stem().string().substr(prefix.size()), nullptr, 16));
+				logger::info("true face read from {} (not in this save)", found[0].string());
+			} else if (found.size() > 1) {
+				logger::warn("true face: {} files for '{}', none used", found.size(), Player()->GetName());
+			}
+		}
 		if (!s.disguised) {
+			if (s.active.empty()) {
+				ScheduleCheck("loaded a save", 150);
+			}
 			return;
 		}
 		if (!s.bank.valid) {
@@ -934,15 +1321,6 @@ namespace protean::Face
 	{
 		g_redraw = 0;
 		g_pendingTints.clear();
-	}
-
-	namespace
-	{
-		std::filesystem::path TintFile(std::string_view a_name)
-		{
-			auto dir = SKSE::log::log_directory().value_or(std::filesystem::path{});
-			return dir / std::format("Protean-tints-{}.txt", a_name.empty() ? "dump" : a_name);
-		}
 	}
 
 	// dev "tintdump <name>": every colour mask of both lists, one per line:
@@ -971,35 +1349,11 @@ namespace protean::Face
 			Shift::Notify("Protean: wear your own face in your own form first.");
 			return;
 		}
-		const auto    path = TintFile(a_name);
-		std::ifstream in(path);
-		if (!in) {
+		const auto path = TintFile(a_name);
+		auto       tints = ReadDump(a_name);
+		if (tints.empty()) {
 			Shift::Notify(std::format("Protean: no tint dump named {}.", a_name));
 			return;
-		}
-		std::vector<Tint> tints;
-		std::string       line;
-		while (std::getline(in, line)) {
-			std::istringstream ls(line);
-			std::string        where, tex;
-			std::uint32_t      type = 0, r = 0, g = 0, b = 0, a = 0;
-			float              alpha = 0.0f;
-			if (!(ls >> where >> type >> r >> g >> b >> a >> alpha) || where.empty()) {
-				continue;
-			}
-			std::getline(ls >> std::ws, tex);
-			if (where[0] != 'b') {  // the base list is the record of the face; an overlay copy would double it
-				continue;
-			}
-			Tint t;
-			t.type = static_cast<std::uint8_t>(type);
-			t.rgba[0] = static_cast<std::uint8_t>(r);
-			t.rgba[1] = static_cast<std::uint8_t>(g);
-			t.rgba[2] = static_cast<std::uint8_t>(b);
-			t.rgba[3] = static_cast<std::uint8_t>(a);
-			t.alpha = alpha;
-			t.texture = tex;
-			tints.push_back(std::move(t));
 		}
 		logger::info("=== tint restore from {}: {} layer(s) ===", path.string(), tints.size());
 		WriteTintsExact(tints);
@@ -1007,6 +1361,38 @@ namespace protean::Face
 		g_pendingExact = true;
 		g_redraw = kRedrawDelay;
 		Shift::Notify(std::format("Protean: {} colour layers painted from {}.", tints.size(), a_name));
+	}
+
+	void TrueFaceCommand(std::string_view a_cmd, std::string_view a_arg)
+	{
+		auto& s = State::Get();
+		if (a_cmd == "truetake") {
+			if (!OwnFormNow()) {
+				Shift::Notify("Protean: wear your own face in your own form first.");
+				return;
+			}
+			TakeTrueFace("dev command");
+			Shift::Notify("Protean: this face is now the true face.");
+		} else if (a_cmd == "truetints") {
+			// the true face's colour layers from a tint dump (Mercer's from Save1, 2026-11-19), then a repair
+			auto tints = ReadDump(a_arg);
+			if (tints.empty() || !s.truth.valid) {
+				Shift::Notify("Protean: no such dump, or no true face yet.");
+				return;
+			}
+			std::uint8_t nth[kTintTypes]{};
+			for (auto& t : tints) {
+				t.index = t.type < kTintTypes ? nth[t.type]++ : 0;
+			}
+			s.truth.tints = std::move(tints);
+			logger::info("true face colour layers replaced from dump '{}' ({} layer(s))", a_arg, s.truth.tints.size());
+			WriteTrueFile(s.truth, s.truthId);
+			g_checkWhy = "dev truetints";
+			CheckTrueFace();
+		} else if (a_cmd == "truecheck") {
+			g_checkWhy = "dev command";
+			CheckTrueFace();
+		}
 	}
 
 	void Dump()

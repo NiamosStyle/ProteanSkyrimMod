@@ -8,7 +8,7 @@ namespace protean
 	{
 		constexpr std::uint32_t kUniqueId = 'PRTN';
 		constexpr std::uint32_t kRecord = 'STAT';
-		constexpr std::uint32_t kVersion = 29;  // 3 to 16 are still read
+		constexpr std::uint32_t kVersion = 30;  // 3 to 16 are still read
 
 		template <class T>
 		void Put(SKSE::SerializationInterface* a, const T& v)
@@ -273,6 +273,8 @@ namespace protean
 			Put(a, s.staminaCombatApplied);
 			Put(a, s.moundRef);
 			Put<std::uint8_t>(a, s.moundUsed ? 1 : 0);
+			PutLook(a, s.truth);
+			Put(a, s.truthId);
 			logger::info("co-save written: {} known form(s), active '{}'", s.known.size(), s.active);
 		}
 
@@ -535,6 +537,13 @@ namespace protean
 								if (std::uint8_t used = 0; Get(a, used)) {
 									s.moundUsed = used != 0;
 								}
+							}
+							if (version >= 30) {
+								if (!GetLook(a, s.truth)) {
+									s.truth = {};
+									logger::warn("co-save: the true face could not be read");
+								}
+								Get(a, s.truthId);
 							}
 						}
 					}

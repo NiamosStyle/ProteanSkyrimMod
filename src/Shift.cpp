@@ -848,6 +848,7 @@ namespace protean::Shift
 		s.active.clear();
 		s.healthBonus = 0.0f;
 		s.witnesses.clear();
+		Face::AfterRevert();  // the true face is checked once the human model is back
 		s.crime.clear();
 		LogVitals("after", p);
 		SendModEvent("Protean_Reverted", was, wasNumber);

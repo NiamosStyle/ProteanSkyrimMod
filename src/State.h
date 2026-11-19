@@ -103,6 +103,8 @@ namespace protean
 		};
 		Look own;   // the player's own look, valid while disguised
 		Look bank;  // the stolen look
+		Look          truth;        // the true face (src/Face.cpp; co-save 30)
+		std::uint32_t truthId{ 0 };  // names its file: <name>-<id>.txt
 
 		// Evolution points and the perks (src/Evolve.cpp). The count only goes up; perk points are worked out from it.
 		std::uint32_t                        evoTotal{ 0 };
