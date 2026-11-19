@@ -260,4 +260,10 @@ game twice (render code, Protean not in the stack).
   so layers landed on the wrong slots, and the next put-on copied the wrong face as "own".
 - Fixes: exact-texture restore (ef3613f, 6f1f7b8: mask lists via GetPlayerRuntimeData - a hard-coded 1.6 offset
   crashed on 1.7.104); the true face (d5818dd, co-save v30), user's design. Mercer repaired from a Save1 dump and his
-  true face set from Save1 (user's choice). Open: the in-game round trip in FACTS section 12 item 4.
+  true face set from Save1 (user's choice).
+- ROOT CAUSE (found by the round-trip test): the game builds the player's colour-mask list only at chargen and on
+  load (from race-asset numbers); a race/sex change keeps the old list. A save made in a female stolen face loads
+  with the female list, and taking it off left a male player on it. Fix f619d29: RebuildMasks() makes the list the
+  look's race+sex asset list before painting (main thread only). Round trip VERIFIED by the user 2026-11-19 (female
+  Redguard face: 33 -> 31 -> 34 masks, all 34 own layers painted, truecheck unchanged). Untested: a female player
+  wearing a male face (Meiya saves in the Protean profile).

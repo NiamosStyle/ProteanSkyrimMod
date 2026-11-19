@@ -220,7 +220,9 @@ are placeholders).
     (Metamorphosis included). It lives in the co-save and in `<SKSE log folder>/Protean-faces/<name>-<id>.txt`.
     Taking a stolen face off paints the true face back; after every load and every change back from an animal the
     face is compared with it and any drift is repaired, logged in detail and shown on screen ("Protean: your true face
-    was restored..."). Not checked while the race differs (a vampire). Own colour layers are matched by texture only.
+    was restored..."). Not checked while the race differs (a vampire). Own colour layers are matched by texture only,
+    after the colour-mask list is rebuilt for the look's race and sex (the game keeps the old list on a race or sex
+    change). Verified with a male player and a female stolen face, including a save and load in the face.
     Cause it guards against: a save stores colour layers only as race-asset numbers; after loading a save made in a
     stolen face, the old position-based restore moved Mercer's war paint, eyeliner and dirt (drifts at Save33 and
     Save58). Dev: `tintdump/tintrestore <name>`, `truetake`, `truetints <dump>`, `truecheck`.
@@ -272,8 +274,8 @@ are placeholders).
 3. **The spell tome:** on a fresh character, add it with the console and read it. Can you consume, learn a form and
    shapeshift?
 
-4. **The true face:** wear a stolen face, save, load that save, take the face off. Is your own face exact, and does
-   Protean.log say "true face checked ... unchanged" (or name what it repaired)?
+4. **The true face, female player:** as a female character, wear a male face, save, load that save, take it off.
+   (The male round trip was verified 2026-11-19.)
 
 Verified 2026-11-19: Infected, Subtle Carapace magic resistance, Hammerfist left arm.
 
