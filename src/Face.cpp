@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <thread>
 
 namespace protean::Face
 {
@@ -486,6 +487,73 @@ namespace protean::Face
 			logger::info("colour layers: {} painted, {} turned off, {} of the look's not placed", set, off, std::ranges::count(used, false));
 		}
 
+		// Make the player's colour-mask list the race's own list for a sex: one mask per tint asset, in the race's order,
+		// with its texture and type. The game builds that list only in character creation and when a save loads (a save
+		// keeps each layer as a race-asset number); a race or sex change leaves the old list in place. So after loading a
+		// save made in a female stolen face, a male player kept the female list (33 masks, femalehead... textures) and
+		// his own layers had nowhere to go (Mercer, 2026-11-19). Masks are reused; any new one is zeroed (off).
+		void RebuildMasks(RE::TESRace* a_race, bool a_female)
+		{
+			auto* p = Player();
+			auto* related = a_race ? a_race->faceRelatedData[a_female ? 1 : 0] : nullptr;
+			if (!p || !related || !related->tintMasks) {
+				return;
+			}
+			auto& rd = p->GetPlayerRuntimeData();
+			if (reinterpret_cast<std::uintptr_t>(rd.overlayTintMasks) >= 0x10000) {
+				logger::warn("colour masks: the game keeps an overlay list now (RaceMenu?); the list is not rebuilt");
+				return;
+			}
+			std::vector<RE::TESRace::FaceRelatedData::TintAsset*> assets;
+			for (auto* a : *related->tintMasks) {
+				if (a) {
+					assets.push_back(a);
+				}
+			}
+			if (assets.empty() || assets.size() > 256) {
+				return;
+			}
+			auto& list = rd.tintMasks;
+			if (list.size() > 256) {
+				return;
+			}
+			bool same = list.size() == assets.size();
+			for (std::uint32_t i = 0; same && i < list.size(); ++i) {
+				auto* m = list[i];
+				same = reinterpret_cast<std::uintptr_t>(m) >= 0x10000 && m->texture == &assets[i]->texture.file &&
+				       static_cast<std::uint32_t>(m->type.get()) == static_cast<std::uint32_t>(assets[i]->texture.skinTone.get());
+			}
+			if (same) {
+				return;
+			}
+			std::vector<RE::TintMask*> old;
+			for (auto* m : list) {
+				if (reinterpret_cast<std::uintptr_t>(m) >= 0x10000) {
+					old.push_back(m);
+				}
+			}
+			const auto before = list.size();
+			const auto firstTex = !old.empty() ? MaskTexture(old.front()) : std::string{};
+			list.clear();
+			std::size_t made = 0;
+			for (std::size_t i = 0; i < assets.size(); ++i) {
+				RE::TintMask* m = i < old.size() ? old[i] : nullptr;
+				if (!m) {
+					m = RE::malloc<RE::TintMask>();
+					std::memset(m, 0, sizeof(RE::TintMask));
+					++made;
+				}
+				m->texture = &assets[i]->texture.file;
+				m->type = static_cast<RE::TintMask::Type>(assets[i]->texture.skinTone.get());
+				m->color = RE::Color(255, 255, 255, 0);
+				m->alpha = 0.0f;
+				list.push_back(m);
+			}
+			// masks beyond the race's count are left unused (a few bytes; freeing what the game allocated is not worth the risk)
+			logger::warn("colour masks rebuilt for race '{}' ({}): {} -> {} mask(s), {} new (the list was another race's or sex's: first was '{}')",
+				a_race->GetName(), a_female ? "female" : "male", before, list.size(), made, firstTex);
+		}
+
 		// Paint the player's OWN colour layers back: every mask takes the layer with exactly its texture and type,
 		// never one picked by position (a list rebuilt by a load can be ordered or sized differently, and a position
 		// match put one layer's colour on another: Mercer's war paint, 2026-11-19). Masks the look has no layer for are
@@ -572,7 +640,12 @@ namespace protean::Face
 
 		// Put a look on: the record, colours and race now (a race change rebuilds the model), then the head, face
 		// colours and hair are redrawn a few frames later once the model is back.
-		bool g_pendingExact{ false };  // the pending layers are the player's own: painted by exact texture only
+		bool            g_pendingExact{ false };  // the pending layers are the player's own: painted by exact texture only
+		RE::FormID      g_pendingRace{ 0 };       // the pending look's race and sex: its colour-mask list
+		bool            g_pendingFemale{ false };
+		std::thread::id g_mainThread{};           // set every frame; the mask list is rebuilt only on the main thread
+
+		bool OnMainThread() { return std::this_thread::get_id() == g_mainThread; }
 
 		void Paint(const std::vector<Tint>& a_tints, bool a_exact)
 		{
@@ -587,9 +660,12 @@ namespace protean::Face
 		void Wear(const Look& a_l, bool a_own = false)
 		{
 			auto* p = Player();
-			WriteRecord(a_l);
-			Paint(a_l.tints, a_own);  // before the rebuild: the body takes its colour from these when the model is built
 			auto* race = RE::TESForm::LookupByID<RE::TESRace>(a_l.race);
+			WriteRecord(a_l);
+			if (OnMainThread()) {
+				RebuildMasks(race, a_l.female);  // the list must be this race's and sex's before anything is painted
+			}  // (off the main thread: at the redraw, before the layers are painted again)
+			Paint(a_l.tints, a_own);  // before the rebuild: the body takes its colour from these when the model is built
 			if (race && p->GetRace() != race) {
 				p->SwitchRace(race, true);
 			} else {
@@ -601,6 +677,8 @@ namespace protean::Face
 			}
 			g_pendingTints = a_l.tints;
 			g_pendingExact = a_own;
+			g_pendingRace = a_l.race;
+			g_pendingFemale = a_l.female;
 			g_redraw = kRedrawDelay;
 		}
 
@@ -620,7 +698,8 @@ namespace protean::Face
 			if (g_redraw == kHeadAt) {
 				CallPlayer("RegenerateHead");
 			}
-			if (std::ranges::find(kPaintAt, g_redraw) != std::end(kPaintAt)) {
+			if (g_redraw == kRedrawDelay - 1 || std::ranges::find(kPaintAt, g_redraw) != std::end(kPaintAt)) {
+				RebuildMasks(RE::TESForm::LookupByID<RE::TESRace>(g_pendingRace), g_pendingFemale);
 				Paint(g_pendingTints, g_pendingExact);
 				CallGame("UpdateTintMaskColors");
 				CallGame("UpdateHairColor");
@@ -1272,6 +1351,7 @@ namespace protean::Face
 
 	void OnFrame()
 	{
+		g_mainThread = std::this_thread::get_id();
 		RedrawTick();
 		TrueFaceTick();
 	}
@@ -1359,6 +1439,8 @@ namespace protean::Face
 		WriteTintsExact(tints);
 		g_pendingTints = tints;
 		g_pendingExact = true;
+		g_pendingRace = Id(Player()->GetRace());
+		g_pendingFemale = Player()->GetActorBase()->actorData.actorBaseFlags.all(RE::ACTOR_BASE_DATA::Flag::kFemale);
 		g_redraw = kRedrawDelay;
 		Shift::Notify(std::format("Protean: {} colour layers painted from {}.", tints.size(), a_name));
 	}
