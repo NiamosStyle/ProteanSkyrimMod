@@ -179,6 +179,10 @@ GLIDE_EFFECTS = [0x99C]
 GLIDE_SPELLS = [0x99F]
 # Predator rank 2: the poison a power attack in animal form leaves (Protean casts it on the hit, magnitude from the level)
 PREDATOR_POISON_EFFECT, PREDATOR_POISON_SPELL = 0x9A2, 0x9A3
+# Apex's kin aura (user, 2026-11-19; replaces joining every animal's faction, which befriended Forsworn, Falmer, draugr
+# and vampires through the animals' own faction relations): a Calm like vanilla Kyne's Peace (not hostile, level cap
+# far above any animal's), with no shader, art or sound; Protean casts it on nearby animals of the creature table
+APEX_CALM_EFFECT, APEX_CALM_SPELL = 0xA39, 0xA3A
 # The Strange Mound (2026-11-14): a heap of burnt flesh in Helgen's ruins ("Search" it) that poisons the player and
 # infects them with Protean (Unbound Form). Placed and handled by src/Mound.cpp; the model is tools/build_mound.py's.
 MOUND_ACTI, MOUND_POISON_EFFECT, MOUND_POISON = 0xA36, 0xA37, 0xA38
@@ -299,6 +303,8 @@ GLOBALS = {
     "Protean_ApexDamagePerLevel":  (0xA1E, 2.6,  "Float", "Apex: the per-level part of the damage floor"),
     "Protean_CallSeconds":         (0xA1F, 180,  "Float", "Apex Call: seconds the summoned pack stays (user 2026-11-14: was 60)"),
     "Protean_CallCooldown":        (0xA20, 60,   "Float", "Apex Call: seconds before the next call (user 2026-11-14: was 180)"),
+    "Protean_ApexAuraRange":       (0xA3B, 4000, "Float", "Apex kin aura: animals within this distance (game units) are calmed towards you; 0 = off"),
+    "Protean_ApexAuraForgetSeconds": (0xA3C, 60, "Float", "Apex kin aura: an animal you hit is left out of the aura for this long after your last hit"),
     "Protean_CallCountMult":       (0xA22, 1.0,  "Float", "Apex Call: multiplies the pack size (small 5, medium 3, large 2, mammoth and giant 1)"),
     "Protean_HammerfistDamageMult": (0xA18, 1.25, "Float", "Hammerfist damage as a multiple of Rending Claws' at the same Stamina and level"),
     "Protean_HammerfistSwingCost": (0xA19, 7,    "Float", "stamina each Hammerfist swing costs; 0 = free"),
@@ -907,6 +913,22 @@ def main():
           "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 5\n    Duration: %d\n"  # Protean sets both before each cast
           % (fid(PREDATOR_POISON_EFFECT), PLUGIN, GLOBALS["Protean_PredatorPoisonSeconds"][1]))
 
+    # ---- Apex's kin aura: a hidden Calm, as Kyne's Peace (VoiceKynesPeaceEffect: Calm, not hostile) without its shader
+    write(os.path.join(y, "MagicEffects", "Protean_ApexCalmEffect - %s_%s.yaml" % (fid(APEX_CALM_EFFECT), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_ApexCalmEffect\n" % (fid(APEX_CALM_EFFECT), PLUGIN)
+          + name_block("Kin")
+          + "Flags:\n- Recover\n- NoArea\n- HideInUI\n- Painless\n- NoHitEffect\nBaseCost: 0\nMagicSkill: Illusion\n"
+          "Archetype:\n  MutagenObjectType: MagicEffectArchetype\n  Type: Calm\n"
+          "CastType: FireAndForget\nTargetType: TargetActor\nSkillUsageMultiplier: 0\nDualCastScale: 1\n"
+          "Description:\n  TargetLanguage: English\n  Value: ''\n")
+    write(os.path.join(y, "Spells", "Protean_ApexCalm - %s_%s.yaml" % (fid(APEX_CALM_SPELL), PLUGIN)),
+          "FormKey: %s:%s\nEditorID: Protean_ApexCalm\n" % (fid(APEX_CALM_SPELL), PLUGIN)
+          + name_block("Kin")
+          + "EquipmentType: 013F44:Skyrim.esm\nDescription:\n  TargetLanguage: English\n  Value: ''\n"
+          "BaseCost: 0\nFlags:\n- ManualCostCalc\n- NoAbsorbOrReflect\nType: Spell\nChargeTime: 0\n"
+          "CastType: FireAndForget\nTargetType: TargetActor\n"
+          "Effects:\n- BaseEffect: %s:%s\n  Data:\n    Magnitude: 1000\n    Duration: 3\n" % (fid(APEX_CALM_EFFECT), PLUGIN))
+
     # ---- the Strange Mound: the activator ("Search"), and the poison its touch leaves, cast by the mound itself like a
     # poison dart trap's, so the player is hit (and cries out) as by any poison
     lo, hi = (-58, -47, -5), (50, 40, 56)   # the model's extent (art/mound/export.json "box", rounded out)
@@ -1204,7 +1226,7 @@ def main():
                            "keen": {"powers": KEEN_POWERS, "senses": KEEN_SENSES}, "killBoost": KILL_BOOST_SPELL, "glideMarkers": GLIDE_SPELLS,
                            "perks": {**{pid: v[0] for pid, v in PERKS.items()}, **{pid + "_2": v[0] for pid, v in RANK2.items()}},
                            "perksBuilt": sorted(BUILT | {pid + "_2" for pid in BUILT if pid in RANK2 and pid not in RANK2_UNBUILT}),
-                           "predatorPoison": PREDATOR_POISON_SPELL,
+                           "predatorPoison": PREDATOR_POISON_SPELL, "apexCalm": APEX_CALM_SPELL,
                            "mound": {"activator": MOUND_ACTI, "poison": MOUND_POISON},
                            "stalker": {"fade": STALKER_FADE_SPELL, "ambush": STALKER_AMBUSH_PERK, "power": STALKER_POWER},
                            "call": {"power": CALL_POWER},

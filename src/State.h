@@ -105,6 +105,7 @@ namespace protean
 		Look bank;  // the stolen look
 		Look          truth;        // the true face (src/Face.cpp; co-save 30)
 		std::uint32_t truthId{ 0 };  // names its file: <name>-<id>.txt
+		bool          apexFactionsCleared{ false };  // Apex's old faction kin taken off this character (co-save 31)
 
 		// Evolution points and the perks (src/Evolve.cpp). The count only goes up; perk points are worked out from it.
 		std::uint32_t                        evoTotal{ 0 };

@@ -3,13 +3,15 @@
 namespace protean::Apex
 {
 	// Apex (capstone, user 2026-11-14). Three effects:
-	//  1. Kin: while the perk is owned the player belongs to every animal's own species faction, in any form (human
-	//     too), so animals treat the player as one of their own. Not joined: the broad groups (CreatureFaction, Predator,
-	//     Prey, Spriggan), Bandit, Riekling, the Dawnguard vampire hounds' faction and PlayerWerewolfFaction (guards
-	//     attack its members on sight).
+	//  1. Kin: an invisible aura (user, 2026-11-19): every animal of the creature table within Protean_ApexAuraRange
+	//     gets a hidden Calm (as vanilla Kyne's Peace, no shader) every second, in any form. Not the Call pack or other
+	//     followers, summons, animals the player hit in the last Protean_ApexAuraForgetSeconds, or animals fighting
+	//     something else. (Until 2026-11-19 the player joined every animal's faction instead, which made Forsworn,
+	//     Falmer, draugr and vampires friendly through those factions' relations; that is taken off once, in human form.)
+	//     In animal form the player still joins that animal's own factions (Shift), as a real one has them.
 	//  2. Damage: an animal's hit never falls below a two-hander's (Predator.cpp).
 	//  3. Call: a power in animal form (Call.cpp).
 
 	[[nodiscard]] bool Owned();
-	void               OnFrame(RE::PlayerCharacter* a_p, float a_delta);  // once a second: join any species faction missing
+	void               OnFrame(RE::PlayerCharacter* a_p, float a_delta);  // once a second: the old-kin clean-up and the kin aura
 }

@@ -70,6 +70,12 @@ namespace protean::Shield
 					logger::info("shield: hit seen: from '{}', damage {:.1f}, blocked {:.2f}, flags {:X}", who ? who->GetName() : "?",
 						a_hit.totalDamage, a_hit.percentBlocked, a_hit.flags.underlying());
 				}
+				if (Holds(a_p) && a_p->IsBlocking()) {  // every hit while blocking with the Shield: what it was, and what the game made of it
+					auto who = a_hit.aggressor.get();
+					logger::info("shield: hit while blocking: from '{}', weapon '{}', damage {:.1f}, blocked {:.2f}, flags {:X}{}",
+						who ? who->GetName() : "?", a_hit.weapon ? a_hit.weapon->GetName() : "-", a_hit.totalDamage, a_hit.percentBlocked,
+						a_hit.flags.underlying(), a_hit.flags.any(RE::HitData::Flag::kBlocked) ? " (blocked)" : " (NOT blocked)");
+				}
 				if (!a_hit.flags.any(RE::HitData::Flag::kBlocked) || !Holds(a_p)) {
 					return;
 				}
@@ -222,9 +228,35 @@ namespace protean::Shield
 			REL::Relocation<std::uintptr_t> fn{ RELOCATION_ID(37673, 38627) };
 			const auto site = fn.address() + REL::Relocate(0x3C0, 0x4A8);
 			if (*reinterpret_cast<const std::uint8_t*>(site) == 0xE8) {
-				SKSE::AllocTrampoline(14);
-				ProcessHit::func = SKSE::GetTrampoline().write_call<5>(site, ProcessHit::thunk);
-				logger::info("shield: hit patch written at +{:X}", site - REL::Module::get().base());
+				// the function that call reaches (it applies a worked-out hit). The melee swing calls it from the site
+				// above; arrows and other projectiles call it from elsewhere and went through unblocked (user,
+				// 2026-11-19). Every call to it in the game's code gets the same patch.
+				const auto base = REL::Module::get().base();
+				const auto target = site + 5 + *reinterpret_cast<const std::int32_t*>(site + 1);
+				const auto text = REL::Module::get().segment(REL::Segment::textx);
+				const auto* b = reinterpret_cast<const std::uint8_t*>(text.address());
+				std::vector<std::uintptr_t> sites;
+				for (std::size_t i = 0; i + 5 <= text.size(); ++i) {
+					if (b[i] == 0xE8) {
+						const auto at = text.address() + i;
+						if (at + 5 + *reinterpret_cast<const std::int32_t*>(at + 1) == target) {
+							sites.push_back(at);
+						}
+					}
+				}
+				if (std::ranges::find(sites, site) == sites.end()) {
+					sites.push_back(site);
+				}
+				SKSE::AllocTrampoline(14 * sites.size());
+				std::string list;
+				for (auto at : sites) {
+					const auto was = SKSE::GetTrampoline().write_call<5>(at, ProcessHit::thunk);
+					if (!ProcessHit::func.address()) {
+						ProcessHit::func = was;
+					}
+					list += std::format(" +{:X}{}", at - base, at == site ? " (melee)" : "");
+				}
+				logger::info("shield: hit patch on {} call(s) of +{:X}:{}", sites.size(), target - base, list);
 			} else {
 				logger::warn("shield: no call at +{:X} (byte {:02X}); the hit patch is not written",
 					site - REL::Module::get().base(), *reinterpret_cast<const std::uint8_t*>(site));

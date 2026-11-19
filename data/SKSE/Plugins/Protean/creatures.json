@@ -123,6 +123,7 @@
   "unbound_form"
  ],
  "predatorPoison": 2467,
+ "apexCalm": 2618,
  "mound": {
   "activator": 2614,
   "poison": 2616
@@ -247,6 +248,8 @@
   "Protean_ApexDamagePerLevel": 2590,
   "Protean_CallSeconds": 2591,
   "Protean_CallCooldown": 2592,
+  "Protean_ApexAuraRange": 2619,
+  "Protean_ApexAuraForgetSeconds": 2620,
   "Protean_CallCountMult": 2594,
   "Protean_HammerfistDamageMult": 2584,
   "Protean_HammerfistSwingCost": 2585,

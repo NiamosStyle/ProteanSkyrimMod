@@ -408,6 +408,46 @@ namespace protean::Dev
 				} else {
 					logger::warn("dev: power {}: no such spell", a_arg);
 				}
+			} else if (a_cmd == "whyfriendly" && !a_arg.empty()) {
+				// whyfriendly <ref id hex>: the engine's reaction of that actor to the player, and every faction pair behind it
+				auto* a = RE::TESForm::LookupByID<RE::Actor>(static_cast<RE::FormID>(std::stoul(std::string(a_arg), nullptr, 16)));
+				if (!a) {
+					logger::warn("dev: whyfriendly {}: no such actor", a_arg);
+				} else {
+					static constexpr const char* kNames[] = { "neutral", "enemy", "ally", "friend" };
+					const auto r = static_cast<int>(a->GetFactionReaction(p));
+					logger::info("dev: whyfriendly '{}' {:08X}: reaction to the player {} ({}), aggression {:.0f}, hostile {}, crime faction {:08X}",
+						a->GetName(), a->GetFormID(), r, r >= 0 && r < 4 ? kNames[r] : "?", a->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAggression),
+						a->IsHostileToActor(p), a->GetCrimeFaction() ? a->GetCrimeFaction()->GetFormID() : 0u);
+					std::vector<RE::TESFaction*> mine;
+					p->VisitFactions([&](RE::TESFaction* f, std::int8_t rank) {
+						if (f && rank >= 0) {
+							mine.push_back(f);
+						}
+						return false;
+					});
+					a->VisitFactions([&](RE::TESFaction* f, std::int8_t rank) {
+						if (!f) {
+							return false;
+						}
+						logger::info("  its faction {:08X} '{}' rank {}{}", f->GetFormID(), f->GetName(), rank, p->IsInFaction(f) ? " (the player is in it too)" : "");
+						for (auto* gr : f->reactions) {
+							if (gr && gr->form && std::ranges::find(mine, gr->form) != mine.end()) {
+								const auto fr = static_cast<int>(gr->fightReaction);
+								logger::info("    -> towards the player's {:08X} '{}': {}", gr->form->GetFormID(), gr->form->GetName(), fr >= 0 && fr < 4 ? kNames[fr] : "?");
+							}
+						}
+						for (auto* pf : mine) {
+							for (auto* gr : pf->reactions) {
+								if (gr && gr->form == f) {
+									const auto fr = static_cast<int>(gr->fightReaction);
+									logger::info("    <- the player's {:08X} '{}' towards it: {}", pf->GetFormID(), pf->GetName(), fr >= 0 && fr < 4 ? kNames[fr] : "?");
+								}
+							}
+						}
+						return false;
+					});
+				}
 			} else if (a_cmd == "kill") {
 				p->KillImpl(nullptr, 0.0f, true, false);
 				logger::info("dev: player killed");

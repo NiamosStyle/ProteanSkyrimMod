@@ -155,6 +155,11 @@ namespace protean
 			logger::warn("Predator poison missing from {}", plugin);
 			_predatorPoison = nullptr;
 		}
+		_apexCalm = dh->LookupForm<RE::SpellItem>(j.value("apexCalm", 0u), plugin);
+		if (!_apexCalm || _apexCalm->effects.empty()) {
+			logger::warn("Apex kin aura (calm) missing from {}", plugin);
+			_apexCalm = nullptr;
+		}
 		const auto& mound = j.value("mound", nlohmann::json::object());
 		_moundActivator = dh->LookupForm<RE::TESObjectACTI>(mound.value("activator", 0u), plugin);
 		_moundPoison = dh->LookupForm<RE::SpellItem>(mound.value("poison", 0u), plugin);
