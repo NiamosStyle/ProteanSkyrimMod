@@ -117,6 +117,11 @@ namespace protean::Shield
 						a_hit.totalDamage, a_hit.percentBlocked, a_hit.flags.underlying(),
 						a_hit.flags.any(RE::HitData::Flag::kBlocked) ? " (blocked)" : " (NOT blocked)", a_from - REL::Module::get().base() - 5);
 				}
+				// a hit Protean already blocked (fully blocked, nothing left: the game's own block stops at fBlockMax, 70%):
+				// an arrow's hit comes through here twice, the second time already blocked, and was paid twice (2026-11-19)
+				if (a_hit.flags.any(RE::HitData::Flag::kBlocked) && a_hit.percentBlocked >= 1.0f && a_hit.totalDamage <= 0.0f) {
+					return;
+				}
 				const bool ranged = blocking && !a_hit.flags.any(RE::HitData::Flag::kBlocked) && RangedFromFront(a_p, a_hit);
 				if (!ranged && (!a_hit.flags.any(RE::HitData::Flag::kBlocked) || !Holds(a_p))) {
 					return;
