@@ -268,3 +268,18 @@ game twice (render code, Protean not in the stack).
   Redguard face: 33 -> 31 -> 34 masks, all 34 own layers painted, truecheck unchanged). Female player wearing a male
   face also VERIFIED (Meiya, Wood Elf: 34 -> 30 masks, all 30 painted; her true face matches her character-creation
   save exactly; truecheck unchanged).
+
+## 2026-11-19: Apex kin aura, Shield arrows
+
+- Forsworn ignored Mercer: Apex had put the player in every animal's faction, and those factions are friends of
+  people and monsters (Goat: Forsworn; Skeever and Spider: draugr, Falmer, skeletons, vampires; Chaurus: Falmer,
+  hagravens; Troll: hagravens; Wolf: vampires). Found with dev `whyfriendly <ref>`. User chose an invisible calm aura
+  (c802a54, 0e30d58): spell xxA3A / effect xxA39, globals xxA3B range, xxA3C forget seconds; old faction kin taken off
+  once (co-save 31). First build killed every animal it touched: the Calm's actor value was None (-1); it must be
+  Aggression like every vanilla Calm. The game reports the calm as a hit by the player, so the aura's own hit tracker
+  skips its spell. A safety switch turns the aura off if an animal dies within 2 s of a calm. Verified: animals live
+  and ignore the player; Forsworn hostile again.
+- Shield: arrows never reached the melee-only patch, and the game never counts an arrow blocked (vanilla blocks arrows
+  by the shield model's collision; ours has none). Patch now on all 8 calls of the apply-hit function (+6CA640) and a
+  Protean rule blocks bows/crossbows within Protean_ShieldWardAngle. Each arrow passes twice (+6CD798, then +66A35D,
+  same HitData); b9d5102 stops the second charge (recheck: 5 Stamina per arrow).

@@ -123,6 +123,8 @@ your value.
 | `Protean_FeedPlantHeal` | xx9AF | Float | 0.2 | Survivor rank 2: share of maximum health a plant heals |
 | `Protean_FeedSeconds` | xx9B0 | Float | 3 | Survivor rank 2: seconds a plant takes to eat, standing still |
 | `Protean_FeedReach` | xx9B1 | Float | 250 | animal form: how near a body to consume or a plant to eat must be, game units |
+| `Protean_ApexAuraRange` | xxA3B | Float | 4000 | Apex kin aura: animals within this distance (game units) are calmed towards the player; 0 = off |
+| `Protean_ApexAuraForgetSeconds` | xxA3C | Float | 60 | Apex kin aura: an animal the player hit is left out of the aura this long after the last hit |
 
 Notes:
 - **Health bonus** is worked out when the player changes, so new values take effect at the next change. Health keeps its
@@ -215,6 +217,7 @@ not contiguous.
 | `Protean_PredatorPoison` (spell) / `Protean_PredatorPoisonEffect` | xx9A3 / xx9A2 | Predator rank 2's poison (Damage Health over time, poison resistance counts); Protean sets magnitude and duration from the player's level |
 | `Protean_StalkerFade` (spell) / `Protean_StalkerAmbush` (perk) / `Protean_StalkPower` | xx9B3 / xx9B4 / xx9B8 | Stalker: the fade (the game's Invisibility effect), the hidden ambush perk held from the swing to the hit, and the Stalk toggle in the animal's Favorites |
 | `Protean_AnimalArms` / `Protean_AnimalDeftMovement` (perks) | xx9BB / xx9BC | Hidden. In animal form: One-Handed perks for bites (Armsman, Savage Strike: attack damage; Fighting Stance: power attack stamina). In animal form or with the carapace, if Deft Movement is owned: incoming weapon damage x0 one hit in ten (drawn by Protean) |
+| `Protean_ApexCalm` (spell) / `Protean_ApexCalmEffect` | xxA3A / xxA39 | Apex's kin aura: a hidden Calm (as vanilla Kyne's Peace: actor value Aggression, not hostile, no shader, art or sound; magnitude 100 = highest level calmed, 3 s), cast by Protean each second on nearby animals of the creature table. Since 2026-11-19 Apex no longer puts the player in the animals' factions |
 | Rending Claws keyword | `WeapTypeSword` (Skyrim.esm 01E711) | The game's sword perks reach the claws |
 
 ## 6. Rules a larger mod should know

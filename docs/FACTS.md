@@ -177,6 +177,13 @@ are placeholders).
 - **Apex** (needs Survivor, Predator and Stalker): *"Animals treat you as one of their own in any form, your animal
   forms hit at least as hard as a two-hander of your level, and in animal form you can call a pack of your kind to
   fight for you."* Power **Call**: a pack for 3 minutes (60-second cooldown). Verified (including Call in caves).
+  - **Kin is an invisible aura** (since 2026-11-19, user's choice): every animal of the creature table within 4000
+    units gets a hidden Calm (like Kyne's Peace, no visible effect) each second. Left alone: the Call pack and other
+    followers, summons, animals in their own fight (wolves still hunt deer), and any animal the player hit in the last
+    60 s (it fights back). Verified: animals near the player live and ignore them. Before, Apex put the player in
+    every animal's faction, which made Forsworn (goat), draugr, Falmer, skeletons, vampires (skeever, spider) and
+    hagravens (chaurus, troll) friendly; that is taken off once, in human form. In animal form the player still
+    joins that animal's own factions, as a real one has them.
 
 ### Hunter branch (middle)
 - **Rending Claws** (after Unbound Form): *"Claws grow from your hands, a weapon for each hand. They strike hardest
@@ -203,7 +210,10 @@ are placeholders).
   2026-11-19).
 - **Shield** (after Subtle Carapace): *"A shield of dark chitin grows from your left forearm while your weapons are
   drawn. Blocking with it stops all damage from the front, spells too, for 5 Stamina a hit. With no Stamina left it
-  blocks nothing."* The shield appears in the showcase videos; the blocking rule is not yet verified.
+  blocks nothing."* The shield appears in the showcase videos. Verified 2026-11-19: melee from within the game's
+  block angle blocked for 5 Stamina, from the side or behind it lands; arrows and bolts from within 60 degrees are
+  blocked by Protean's own rule (the Shield has no collision for the game's own arrow block), 5 Stamina each (an
+  arrow passes the hit code twice; fixed to charge once, recheck). Spells: the ward (not yet seen in game).
 - **Regeneration** (after Subtle Carapace): *"Cast Regeneration to switch it on or off: while on, Stamina drains and
   Health returns by the same amount."* 8 a second. Verified.
 - **Devastator** (needs Rending Claws, Prey's Flight and Subtle Carapace): *"In human form, with full Stamina and at
@@ -268,8 +278,8 @@ are placeholders).
 
 ## 12. Still to verify in game (a short checklist)
 
-1. **Shield blocking:** block a few hits and a spell from the front. Is all damage stopped, and does each block cost
-   5 Stamina?
+1. **Shield:** a blocked arrow costs 5 Stamina, not 10; a spell from the front is warded. (Melee and arrows
+   verified 2026-11-19.)
 2. **Stalker rank 2** (tested by script only): in a fight, break line of sight and stand still. Do you fade, and do
    enemies give up after about 3 seconds?
 3. **The spell tome:** on a fresh character, add it with the console and read it. Can you consume, learn a form and
