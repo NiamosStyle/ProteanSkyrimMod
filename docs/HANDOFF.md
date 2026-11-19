@@ -1,11 +1,61 @@
-# Protean handoff (state at 1.0.0, 2026-10-21)
+# Protean handoff
 
 What exists, what was decided and why, and what is known and accepted. Read the section you need.
 
-## Done
+**What the mod does today is in `docs/FACTS.md`** (the source of truth, built from the code and data). This file
+holds the current state, the open items, and the history: decisions, engine findings and dated notes. Older
+sections below describe the mod as it was on their date; where a rule has since changed, it is marked
+**[Replaced]** or **[Removed]**.
+
+## Current state (2026-11-18)
+
+- **Version 1.1.0, in testing:** `dist/Protean-1.1.0-test.zip` (2026-11-15). Everything in FACTS is built: the
+  Strange Mound start, consuming, evolution, 35 forms, face stealing, the full 21-perk tree (25 ranks) and the five
+  weapons.
+- **Not yet released.** The `skill-tree` branch is not merged into `main`; the repo
+  (`github.com/NiamosStyle/Protean`) is private until the Nexus release.
+- **Docs cleaned up 2026-11-18:** FACTS created; README rewritten for players; CLAUDE.md updated; old plans,
+  research and the perk spec moving to `docs/archive/`.
+
+## Open items
+
+**Check in game** (built, never seen working; steps in FACTS section 12):
+1. ~~Infected.~~ Verified 2026-11-19.
+2. ~~Subtle Carapace magic resistance.~~ Verified 2026-11-19.
+3. Shield blocking (all damage from the front, spells too; 5 Stamina a hit).
+4. ~~Hammerfist left arm.~~ Verified 2026-11-19.
+5. Stalker rank 2 (tested by script only).
+
+**Fix in the mod** (needs a rebuild):
+6. Unbound Form's description: the Stamina-recovery boost comes from **kills**, not bodies consumed (the user's
+   decision, 2026-11-18: the code is right, the text is wrong).
+7. "a" before a vowel in the shapeshift power descriptions: "a ash hopper", "a elk", "a ice wolf" should use "an".
+8. The spell tome (`Protean_SpellTomeInstinct`, xx803) **stays** (the user's decision, 2026-11-18): the console way in
+   for a player whose load order breaks Helgen or the Strange Mound. Reading it teaches only Shapeshifter's
+   Instinct; the Mound also gives Unbound Form for free, so a tome player spends their first perk point on it.
+   Decided: the tome stays as it is (no free Unbound Form). Still to do: try the tome route once in game.
+9. Strange Mound: appear when Helgen's ruins are enabled instead of when MQ101 is not running (a safety for untested
+   alternate starts). Recommended, not done.
+
+**Before release:**
+10. Build a new package (it carries the new README; update INTEGRATION first).
+11. Merge `skill-tree` into `main`.
+12. Rewrite git history to clear old `.blend` versions that still hold a Windows account path (needs the user's OK
+    and a force push), before the repo goes public.
+
+**Ideas, postponed:**
+13. Hammerfist "gorilla stance": hunched over, arms hanging heavily while the Hammerfists are out (a written
+    animation, or the body bent at runtime).
+14. The Blade's optional blood burst.
+
+
+## Done at 1.0.0 (2026-10-21)
+
+History. Several of these rules were replaced on 2026-10-22 and later: see FACTS for how the mod works now.
 
 - 35 forms (table: `docs/INTEGRATION.md` section 4). Each is the vanilla race, skin and size; attacks are
   the race's own, sent to the animation graph. Health bonus = half the animal's health at the player's level.
+  **[Replaced 2026-10-22:** 25% of the player's max + 25% of the gap; Health keeps its percentage. See FACTS.**]**
 - Controls: A/S/D steer (the mouse turns the camera at a person's rate), tap/hold mouse buttons for
   attacks/power attacks, sprint for four-legged animals (stamina), Jump = flight (Chaurus Hunters) or a
   leap (ash hopper, hare).
@@ -13,13 +63,15 @@ What exists, what was decided and why, and what is known and accepted. Read the 
   Lord's transformation sound at 1 s, the Vampire Lord's blood burst at 1.5 s as the body switches.
   Forced changes (death, load, too big indoors) are instant.
 - Changing back is refused once (cast again within 10 s, or press Z again) when it would kill the player
-  (damage taken beyond their own maximum) or drop them from the sky.
+  (damage taken beyond their own maximum) or drop them from the sky. **[Replaced 2026-10-22:** only when flying;
+  changing back can no longer kill.**]**
 - HUD: the health bar shows a black tick at the danger line, turns orange-yellow below it, stays visible
-  while hurt; out of combat health tops up at 2%/s until changing back is safe.
+  while hurt; out of combat health tops up at 2%/s until changing back is safe. **[Removed 2026-10-22.]**
 - World: witnesses of the change know; werewolf/werebear join PlayerWerewolfFaction so guards attack on
   sight (vanilla); mammoth/giant outdoors only; troll/horker caves but not buildings.
-- Face stealing (Stolen Face power).
-- Integration: keywords, Protean_ActiveForm, 13 dials, mod events (`docs/INTEGRATION.md`); all verified
+- Face stealing (Stolen Face power). **[Replaced:** a face is taken by consuming a person, with the Borrowed Visage
+  perk. See FACTS.**]**
+- Integration: keywords, Protean_ActiveForm, 13 dials (many more since: see INTEGRATION), mod events (`docs/INTEGRATION.md`); all verified
   live except watching the mod events arrive in a script.
 
 ## User decisions worth knowing
@@ -103,10 +155,12 @@ Spec: `docs/protean-perk-spec.md`. Changes to Protean itself, all tested live un
 - Gear put back after a revert no longer carries the prevent-removal lock.
 - Evolution points (`src/Evolve.cpp`): a running count of feedings; perk points cost 1, 1, 2, 2, 3, 3... (totals 1, 2, 4,
   6, 9, 12...; 2026-10-25, was 1, 2, 3...); the 1st/3rd/5th/10th/15th/20th heart of a kind give points; 5 kill boosts at
-  once give one a fight; named faces will add perk points directly.
+  once give one a fight; named faces will add perk points directly. **[Replaced 2026-10-28:** perk points cost 1, 2,
+  3...; every consumed body gives evolution points by its size; hearts and fight points are gone; 21 renowned people
+  give a perk point each. See FACTS section 5.**]**
 - Perk tree via Custom Skills Framework (user installs it): `data/SKSE/Plugins/CustomSkills/Protean.json` from the
   PERKS table in `tools/build_plugin.py`; points in `Protean_PerkPoints`; the Evolution power opens it. All 18 perks
-  are placed; Unbound Form, Keen, Rending Claws and Tendril work (Unbound Form: Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
+  are placed **[now 21 perks, all built, no placeholders]**; Unbound Form, Keen, Rending Claws and Tendril work (Unbound Form: Instinct, disease immunity, kill boost +15% stamina regen per kill for 90 s,
   stacking); placeholders are taken back when the menu closes. Changing form costs 15 stamina.
 - Rending Claws: done and tested in game (damage follows the stamina bar, 5 stamina a swing, werewolf hit
   sounds, claw animations in either hand via OAR). See `src/Claws.cpp`, `tools/build_claws.py`,
@@ -196,3 +250,14 @@ game twice (render code, Protean not in the stack).
   The README now names it as the fix to install **if** anyone sees an enchantment missing after changing back
   (Protean re-equips by code in `Shift::RestoreGear`, the path where the engine is known to drop enchantments).
   If such a report ever comes in, point them to it first.
+
+## 2026-11-19: face drift and the true face
+
+- Mercer's war paint/eyeliner/dirt had drifted. Save scan (ReSaver `changeform 0x14`, tint table at the end of the
+  player ACHR's unparsed tail, see KNOWLEDGEBASE.local.md): head parts and sliders never drifted; colour layers drifted
+  at Save33 (10-27) and Save58 (11-15), both after saves made in a stolen face. Cause in code: TakeOff restored own
+  colour layers with a type+position fallback; after loading a stolen-face save the list had 33 masks (one mislabelled)
+  so layers landed on the wrong slots, and the next put-on copied the wrong face as "own".
+- Fixes: exact-texture restore (ef3613f, 6f1f7b8: mask lists via GetPlayerRuntimeData - a hard-coded 1.6 offset
+  crashed on 1.7.104); the true face (d5818dd, co-save v30), user's design. Mercer repaired from a Save1 dump and his
+  true face set from Save1 (user's choice). Open: the in-game round trip in FACTS section 12 item 4.
