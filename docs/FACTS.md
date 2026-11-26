@@ -70,12 +70,15 @@ What the files depend on:
   item per creature was dropped.
 - Consuming a **person** that someone sees is a crime: **1,000 bounty**, witnesses within about 43 m.
 - **Draugr** can be consumed but give no evolution points.
+- **Not edible:** children, skeletons, ghosts and other undead without flesh (vampires and draugr are edible),
+  Dwarven machines, and **dragons** (a dead dragon is bones; keyword ActorTypeDragon, so Alduin and the DLC dragons
+  too; 2026-11-25).
 - With **Borrowed Visage**, consuming a person takes their face. With **Assassin**, an unseen consume goes unnoticed.
 
 ## 5. Evolution points and perk points
 
 - Consuming gives **evolution points** by the body's size: small animal **1**, medium animal **2**, large **3**,
-  Mammoth/Giant size **5**, a person **2**, a draugr **0**. Creatures with no form (dragons, spriggans and so on)
+  Mammoth/Giant size **5**, a person **2**, a draugr **0**. Creatures with no form (spriggans, Hagravens and so on)
   count by height (1, 2, 3 or 5).
 - **Perk points cost 1 more each time:** the 1st costs 1 evolution point, the 2nd 2, the 3rd 3, and so on (totals
   1, 3, 6, 10, 15...). Each body tells you how many points remain until the next perk point.

@@ -97,7 +97,9 @@ namespace protean::Consume
 			// bones, dust and machines are no biomass; a vampire is, and a draugr's dried flesh still heals
 			const bool undead = a_body->HasKeywordString("ActorTypeUndead") && !a_body->HasKeywordString("Vampire") &&
 			                    !IsDraugr(a_body);
-			return !undead && !a_body->HasKeywordString("ActorTypeDwarven") && !a_body->HasKeywordString("ActorTypeGhost");
+			// a dead dragon is bones (ActorTypeDragon: the dragon races and Alduin only, vanilla races checked 2026-11-25)
+			return !undead && !a_body->HasKeywordString("ActorTypeDwarven") && !a_body->HasKeywordString("ActorTypeGhost") &&
+			       !a_body->HasKeywordString("ActorTypeDragon");
 		}
 
 		// people who see the player now (only people count, as for a stolen face and a change of form)
@@ -205,7 +207,7 @@ namespace protean::Consume
 			if (a_c) {
 				return a_c->size == "small" ? 1 : a_c->size == "medium" ? 2 : a_c->size == "outdoor_only" ? 5 : 3;
 			}
-			// a creature with no form (a dragon, a spriggan...): by its height
+			// a creature with no form (a spriggan, a Hagraven...): by its height
 			const float h = a_body->GetHeight();
 			return h < 70.0f ? 1 : h < 180.0f ? 2 : h < 320.0f ? 3 : 5;
 		}

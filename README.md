@@ -17,6 +17,7 @@ there. Search it. It poisons you and a shadow passes over you: you gain **Unboun
 - **Sneak and activate a body to consume it** (in animal form, just activate it). It takes 2 seconds (1 in combat).
 - Every body restores **50 Stamina** and heals **20%** of your Health.
 - **Consuming an animal teaches you its form.**
+- Dragons, skeletons, ghosts and Dwarven machines can't be consumed: there's no flesh left to take.
 - Consuming a person in front of witnesses is a crime (1,000 bounty).
 
 ## Evolving

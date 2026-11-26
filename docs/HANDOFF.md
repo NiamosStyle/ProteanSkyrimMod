@@ -25,6 +25,8 @@ sections below describe the mod as it was on their date; where a rule has since 
 3. Shield blocking (all damage from the front, spells too; 5 Stamina a hit).
 4. ~~Hammerfist left arm.~~ Verified 2026-11-19.
 5. Stalker rank 2 (tested by script only).
+5a. Dragons no longer edible (2026-11-25, the user's decision: a dead dragon is bones). Built and installed; a dead
+   dragon should open its loot window as normal, with no consume prompt.
 
 **Fix in the mod** (needs a rebuild):
 6. Unbound Form's description: the Stamina-recovery boost comes from **kills**, not bodies consumed (the user's
