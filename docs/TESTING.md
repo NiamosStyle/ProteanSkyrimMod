@@ -1,60 +1,55 @@
 # Testing Protean
 
-Everything below is in the `wip/offline` branch until it has been run live.
+What the mod should do is in `docs/FACTS.md`; test against that.
 
-## One-time setup (already done on this PC)
-- MO2 profile **Protean**, mod **Protean** enabled (`mods/Protean`, deployed by `tools/build.bat "<mod folder>"`).
-- `Data/SKSE/Plugins/Protean.cmd` must exist **before** the game starts (MO2's virtual file system does not
-  show files created while the game runs). The deploy copies an empty one.
-- `Protean.ini` `[Dev] Commands=1` enables the test command channel. Set it to 0 for any release.
+## One-time setup (already done on the dev PC)
 
-## Automated live tests (game running, save loaded)
+- MO2 profile **Protean**, with the mod **Protean** enabled (`mods/Protean`, installed by
+  `tools/build.bat "<mod folder>"`).
+- `Data/SKSE/Plugins/Protean.cmd` must exist **before** the game starts (MO2's virtual file system doesn't show
+  files created while the game runs). The install copies an empty one.
+- `Protean.ini` `[Dev] Commands=1` turns on the dev channel. Release packages have it at 0 (`tools/package.py`
+  does that).
+
+## The dev channel
+
+Append lines `<increasing number> <command> [arg]` to the installed `Protean.cmd`; numbers must rise across
+batches too. Results go to `<Documents>/My Games/Skyrim Special Edition/SKSE/Protean.log` (the previous session's
+log is kept as `Protean.1.log`). The full command list is `Run()` in `src/Dev.cpp`. The everyday ones:
+
+- `starter`, `learn <id>`, `unlearn <id>`, `transform <id>`, `revert`, `dump`
+- `evo [n]` (add n evolution points; no number prints the state), `buyperk <id>`, `boost` (a biomass boost, as if
+  from a kill), `power <hex id>` (cast a power the way the game does; console casts don't reach Protean)
+- `spawn <hex base FormID>`, `consume` (the nearest body), `kill` (**kills the player**)
+- `moundhere [spot]`, `moundreset` (the Strange Mound)
+
+## Automated scripts (game running, a save loaded, dev channel on)
+
 ```
-cd C:/Modding/Protean
-python -I tools/devtest.py core        # learn, transform, health/race/camera checks, revert, restore
-python -I tools/devtest.py reactions   # spawn a wolf, scan how it treats you before/after transforming
-python -I tools/devtest.py attacks     # does the wolf graph accept its own attack events?
-python -I tools/devtest.py death       # KILLS the player: checks the revert-death rule and death camera
+python -I tools/devtest.py reactions        # spawn animals; how they treat you before/after transforming
+python -I tools/devtest.py attacks          # does the wolf's graph accept its own attack events?
+python -I tools/devtest.py face             # face stealing through the dev channel
+python -I tools/perktest.py list            # the perk scenarios
+python -I tools/perktest.py <name> | all    # assassin, stealth_consume, stalker2, stalker2_seen
 ```
-The harness writes commands into `Protean.cmd`, reads `Documents/My Games/Skyrim Special Edition/SKSE/Protean.log`
-and cross-checks the plugin against DevBench (race, health, camera).
 
-## Dev commands (Protean.cmd lines: `<increasing number> <command> [arg]`)
-`starter` `consume` `learn <id>` `unlearn <id>` `transform <id>` `revert` `dump` `scan` `spawn <hex base FormID>`
-`anim <graph event>` `draw` `kill`
+`perktest.py` moves the player to the empty test cell and changes the character: **never save after running it.**
 
-## Things only a human can judge (ask the user to look)
-- Camera: height, distance, centred, smooth, first-person start vs third-person start.
-- Death: sound, animation, death camera after the revert-kill.
-- Looks: wolf model with no armor floating on it; gear back on after reverting.
-- Real eating through the inventory menu (verified once), real shout-key revert (verified once).
+**Out of date, fix before relying on them:** `devtest.py core` still sends `hearts` (that command was removed when
+hearts were, 2026-10-28), and `devtest.py death` tests the old rule that changing back could kill (removed
+2026-10-22: Health now keeps its percentage). Check them with the user before rewriting.
 
-## Known open questions to settle live
-1. Does an Enemy relation (Witness vs Beast faction) really override the Friend relation of a shared
-   CreatureFaction? (`reactions` scenario shows hostile flags before/after.)
-2. Does the animal's graph accept `attackStart_*` events for the player, and does damage apply?
-3. Crime: does attacking a guard/livestock as an animal create a bounty? (Reference mods remove bounties; we
-   have not touched crime yet.)
-4. Save and load while transformed (state restored from the co-save; camera/controls re-applied).
-5. Consuming: sneak-activate a dead wolf as a shapeshifter (hearts were dropped 2026-10-28).
+## In-game checklist (built, never seen working)
 
-## Manual checks for Phase 2 (need a person)
-- Transform (console: `player.addspell FE004811` after learning, or the dev channel), then press **B**: the Beast Moves
-  window should open with the animal's moves; click LMB/RMB beside a move; the strip at the bottom should update.
-- Keys **1-8** set the left mouse button, **Shift+1-8** the right one; tapping the button then fires that move.
-- Press **E** as an animal: nothing opens, a short message appears (at most every 3 seconds).
-- Assignments should survive save and load (they live in the co-save).
-- Clicking inside the window must NOT make the animal attack.
+From FACTS section 12 and HANDOFF's open items; tick them off in both.
 
-## Face stealing (built offline, nothing tested live)
-- Automated (no corpse needed): `python -I tools/devtest.py face` — steals Ulfric's face, takes it off, re-wears the bank with the
-  Stolen Face power, then transforms into a wolf (which must end the disguise but keep the bank).
-- Dev commands: `steal <hex NPC base id>` (witnesses count), `stealq <id>` (nobody sees it), `facepower`, `takeoff`, `facedump`.
-- Give yourself the starter first (`starter`). The Stolen Face power is `FE004807` (`player.addspell FE004807`, also given... see PLAN.md).
-- By hand: sneak next to a dead NPC and press E. The loot window should be replaced by a small window with
-  **Loot / Copy appearance / Cancel**. Copy: look at yourself in third person — face, hair, body, sex, race should match the corpse.
-  Walk up to a guard/townsperson while wearing it: they should treat you as one of their own faction.
-  Have an NPC watch you do it: they should turn hostile ("You were seen!").
-- Open questions to settle live: (1) does the player's face actually change (`faceNPC` and/or the shared head-part pointers,
-  `[Face] CopyHeadData=` in Protean.ini)? (2) does an Exposed relation beat a shared faction? (3) save while disguised, quit, load.
-- Dev: `stealdata <id>` builds the face from the record even when finished face files exist (tests that path).
+1. **Shield blocking:** block hits, arrows and a spell from the front. All damage stopped, 5 Stamina a hit?
+2. **Stalker rank 2:** in a fight, break line of sight and keep still. Do you fade, and do enemies give up after
+   about 3 seconds?
+3. **The spell tome:** on a fresh character, add the tome with the console and read it. Can you consume, learn a form
+   and shapeshift?
+
+## Things only a person can judge
+
+Camera height and smoothness; how sounds, effects and animations look and feel; models (nothing floating, gear back
+on after changing back); anything about how a fight *feels*. Ask the user to look, and keep it short.

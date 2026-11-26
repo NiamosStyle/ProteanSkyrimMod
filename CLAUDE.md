@@ -1,57 +1,30 @@
 # Protean: notes for Claude
 
-Animal shapeshifting for Skyrim SE 1.7.104 (SKSE plugin + light ESP). Version 1.0.0 is done and tagged
-(`v1.0.0`). New work (for example the skill tree) builds **on** it: go through `docs/INTEGRATION.md`
-(keywords, dials, mod events), not through Protean's internals. History and decisions: `docs/HANDOFF.md`
-(read when needed, not up front).
+A Prototype-inspired shapeshifter mod for Skyrim SE 1.7.104 (SKSE plugin + light ESP): consuming, 35 animal
+forms, face stealing, a 21-perk tree and five flesh weapons. Version 1.0.0 is tagged (`v1.0.0`); **1.1.0** (the
+perk tree, weapons and Strange Mound) is in testing (`dist/Protean-1.1.0-test.zip`).
+
+## Read first
+
+- **`docs/FACTS.md` is the source of truth** for what the mod actually does. Read it before working on any
+  feature. It was built from the code, plugin and data files, not from older documents.
+- **When the mod changes, update FACTS first**, then whatever else the change touches (see "When the mod
+  changes" below). Every other document takes its facts from FACTS.
+- `docs/HANDOFF.md`: the current state and open items on top, then decisions, engine findings and dated notes.
+  Read the part you need, not the whole file.
+- `docs/archive/` holds old plans, research and the original perk spec. **History only:** it may contradict the
+  mod. Don't take facts from it.
 
 ## Working with the user
 
-- Plain English; the user is not a modder. Give confidence ratings (%).
+- Plain English; the user is not a programmer or modder. Explain technical terms or avoid them. Give confidence
+  ratings (%).
 - **Plan first, wait for the user's "yes"** before each phase or sizable change.
+- The user wants to save Claude Code usage: keep sessions short and focused on the task asked.
 - Keep live tests short; do what you can yourself through DevBench and the dev channel.
 - Preview look-and-feel choices live (sounds, effects, timings) before building them in.
 - Commit to git as you go; commit messages end with the Co-Authored-By / Claude-Session lines.
 - Never hand-install third-party mods into `Data/`; the user installs mods with MO2.
-
-## Layout
-
-```
-src/                 SKSE plugin (C++, CommonLibSSE-NG). Shift = transform/revert, Attacks, Move (steering,
-                     sprint), Fly (flight, leaps), Camera, Hud, Face (face stealing), State (co-save), Dev
-tools/build_creature_table.py   data/creatures.json from research/raw (game-data dumps)
-tools/build_plugin.py           Protean.esp (via Spriggit YAML in esp-yaml/) + SKSE/Plugins/Protean/creatures.json;
-                                per-animal tuning lives in its tables (MELEE, SPRINT, BLOCKED, GLOBALS...)
-tools/build.bat [mod folder]    builds the DLL; with the folder, installs DLL + data there
-tools/package.py <version>      dist/Protean-<version>.zip, dev channel off
-docs/INTEGRATION.md  the contract for mods built on Protean
-```
-
-## Building and installing
-
-- MO2 mod folder: `%LOCALAPPDATA%/ModOrganizer/Skyrim Special Edition/mods/Protean`.
-  Test profile: MO2 `Protean`.
-- `python -I tools/build_plugin.py`, then `cmd /c tools\build.bat "<mod folder>"`.
-- **Installing fails while Skyrim runs.** If the game is running, build without the folder and install
-  after the user closes it.
-- `build.bat` copies the ESP and `creatures.json` only when the DLL relinks. After a data-only change,
-  copy `data/Protean.esp` and `data/SKSE/Plugins/Protean/*` into the mod folder yourself.
-- **New creatures are appended** to the list in `tools/build_creature_table.py`, never inserted: each
-  creature's record IDs come from its position, and saves remember them.
-- The co-save layout has a version (`State.cpp`, `kVersion`); add fields at the end and bump it.
-
-## Testing live
-
-- Skyrim tools live in the game folder `C:/Games/steamapps/common/Skyrim Special Edition/tools/`:
-  DevBench (`bash tools/devbench-cli.sh alive|exec|call|notify`), Spriggit (`tools/spriggit-cli.sh`),
-  xeditlib for reading game data (run node scripts from the game folder). The toolkit's own CLAUDE.md
-  and KNOWLEDGEBASE(.local).md there hold the engine gotchas.
-- Dev channel: with `[Dev] Commands=1` in the installed `Protean.ini`, append lines
-  `<number> <command> [arg]` to the installed `SKSE/Plugins/Protean.cmd`; numbers must increase and stay
-  below 2,147,483,647 (use `date +%s`, then +1 per line). Commands: see `Run()` in `src/Dev.cpp`
-  (transform, revert, learn, anim, graph, dial, sound, spawn, attack, leap, fly, cc...).
-- Log: `<Documents>/My Games/Skyrim Special Edition/SKSE/Protean.log` (Documents is under OneDrive on the dev machine).
-- Release builds must have `Commands=0` (`tools/package.py` does it).
 
 ## Map the connections before building (user's rule, 2026-11-19)
 
@@ -88,3 +61,72 @@ So, **before writing a feature, and again before building on anything new mid-fe
    into the first live test.
 5. **Test the transitions, not just the feature:** save and load in every state the feature creates, the other sex
    and another race, animal form and back. That is where state the engine rebuilds behind our back shows up.
+
+## When the mod changes
+
+1. `docs/FACTS.md`: the facts, numbers and in-game text.
+2. `README.md`: if players would notice the change (it ships in the download).
+3. `docs/INTEGRATION.md`: if you added or changed a setting (`Protean_` global), record, keyword or mod event.
+   It ships in the download as `docs/Protean-INTEGRATION.md`.
+4. `docs/HANDOFF.md`: the open items, and a dated note for decisions or engine findings.
+
+## Layout
+
+```
+README.md            for players; ships in the download
+docs/FACTS.md        what the mod actually is (source of truth)
+docs/HANDOFF.md      current state, open items, decisions, engine findings
+docs/INTEGRATION.md  for mods built on Protean: markers, events, every setting and record ID
+docs/TESTING.md      setup, test scripts, in-game checklist
+docs/archive/        history (may be out of date)
+src/                 the SKSE plugin (C++, CommonLibSSE-NG):
+                       core: main, Hooks, Registry (settings and the creature table), State (co-save),
+                             Dev (dev channel), Hud, Journal (the Evolution page)
+                       shapeshifting: Shift (transform/revert), Attacks, Move (steering, sprint),
+                             Fly (flight, leaps), Camera
+                       consuming and evolving: Consume, Feed, Evolve, Mound (the Strange Mound), Skills
+                       faces: Face, Deceiver, Metamorphosis
+                       perks and weapons: one file each, named after it (Keen, Predator, Stalker, Apex, Call,
+                             Claws, Hammerfist, Blade, Shield, Tendril, Rush, Flight, Carapace, Devastator...)
+data/                the mod's files as installed (Protean.esp, SKSE/Plugins/..., meshes, textures)
+data/creatures.json  the table that drives every creature (generated)
+esp-yaml/            Spriggit source of Protean.esp (generated by tools/build_plugin.py)
+tools/               extraction, table, plugin, mesh and animation builders, packager, test scripts
+```
+
+## Building and installing
+
+```
+python -I tools/build_creature_table.py   # data/creatures.json from research/raw (game-data dumps)
+python -I tools/build_plugin.py           # Protean.esp + SKSE/Plugins/Protean/creatures.json
+tools\build.bat [MO2 mod folder]          # the DLL; with a folder, also installs everything there
+python -I tools/package.py 1.1.0          # dist/Protean-1.1.0.zip, dev channel off
+```
+
+- `tools/build_plugin.py`: per-animal tuning and every `Protean_` setting live in its tables (MELEE, SPRINT,
+  BLOCKED, GLOBALS...).
+- MO2 mod folder: `%LOCALAPPDATA%/ModOrganizer/Skyrim Special Edition/mods/Protean`.
+  Test profile: MO2 `Protean`.
+- `python -I tools/build_plugin.py`, then `cmd /c tools\build.bat "<mod folder>"`.
+- **Installing fails while Skyrim runs.** If the game is running, build without the folder and install
+  after the user closes it.
+- `build.bat` copies the ESP and `creatures.json` only when the DLL relinks. After a data-only change,
+  copy `data/Protean.esp` and `data/SKSE/Plugins/Protean/*` into the mod folder yourself.
+- **New creatures are appended** to the list in `tools/build_creature_table.py`, never inserted: each
+  creature's record IDs come from its position, and saves remember them.
+- The co-save layout has a version (`State.cpp`, `kVersion`); add fields at the end and bump it.
+- The package takes `README.md` from the project's main folder and `docs/INTEGRATION.md` (shipped as
+  `docs/Protean-INTEGRATION.md`).
+
+## Testing live
+
+- Skyrim tools live in the game folder `C:/Games/steamapps/common/Skyrim Special Edition/tools/`:
+  DevBench (`bash tools/devbench-cli.sh alive|exec|call|notify`), Spriggit (`tools/spriggit-cli.sh`),
+  xeditlib for reading game data (run node scripts from the game folder). The toolkit's own CLAUDE.md
+  and KNOWLEDGEBASE(.local).md there hold the engine gotchas.
+- Dev channel: with `[Dev] Commands=1` in the installed `Protean.ini`, append lines
+  `<number> <command> [arg]` to the installed `SKSE/Plugins/Protean.cmd`; numbers must increase and stay
+  below 2,147,483,647 (use `date +%s`, then +1 per line). Commands: see `Run()` in `src/Dev.cpp`
+  (transform, revert, learn, anim, graph, dial, sound, spawn, attack, leap, fly, cc...).
+- Log: `<Documents>/My Games/Skyrim Special Edition/SKSE/Protean.log` (Documents is under OneDrive on the dev machine).
+- Release builds must have `Commands=0` (`tools/package.py` does it).

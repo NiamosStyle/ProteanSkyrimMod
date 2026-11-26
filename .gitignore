@@ -30,3 +30,6 @@ art/tendril/export*.json
 art/tendril/ref/
 art/mound/export*.json
 art/mound/textures/_game/
+# Reference art from the Prototype games, other people's fan art and the Nexus page images (not ours to share; the
+# Nexus images go to Nexus)
+Prototype/
