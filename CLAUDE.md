@@ -24,6 +24,10 @@ perk tree, weapons and Strange Mound) is in testing (`dist/Protean-1.1.0-test.zi
 - Keep live tests short; do what you can yourself through DevBench and the dev channel.
 - Preview look-and-feel choices live (sounds, effects, timings) before building them in.
 - Commit to git as you go; commit messages end with the Co-Authored-By / Claude-Session lines.
+- **Commit with `TZ=UTC git commit ...`** (Bash): a commit otherwise records the local time zone, which the public
+  history must not show. Check with `git log -1 --format=%ad --date=raw` (must end `+0000`).
+- The repo is `github.com/NiamosStyle/ProteanSkyrimMod`. The old `NiamosStyle/Protean` repo holds the pre-cleanup
+  history: never push to it, make it public or share it.
 - Never hand-install third-party mods into `Data/`; the user installs mods with MO2.
 
 ## Map the connections before building (user's rule, 2026-11-19)

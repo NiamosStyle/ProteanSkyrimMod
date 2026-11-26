@@ -13,7 +13,8 @@ sections below describe the mod as it was on their date; where a rule has since 
   Strange Mound start, consuming, evolution, 35 forms, face stealing, the full 21-perk tree (25 ranks) and the five
   weapons.
 - **Not yet released.** The `skill-tree` branch is not merged into `main`; the repo
-  (`github.com/NiamosStyle/Protean`) is private until the Nexus release.
+  (`github.com/NiamosStyle/ProteanSkyrimMod`) is private until the Nexus release. The old
+  `github.com/NiamosStyle/Protean` holds the pre-cleanup history: it must stay private (never public, shared or forked).
 - **Docs cleaned up 2026-11-18:** FACTS created; README rewritten for players; CLAUDE.md updated; old plans,
   research and the perk spec moving to `docs/archive/`.
 
@@ -42,8 +43,9 @@ sections below describe the mod as it was on their date; where a rule has since 
 **Before release:**
 10. Build a new package (it carries the new README; update INTEGRATION first).
 11. Merge `skill-tree` into `main`.
-12. Rewrite git history to clear old `.blend` versions that still hold a Windows account path (needs the user's OK
-    and a force push), before the repo goes public.
+12. ~~Rewrite git history.~~ Done 2026-11-25: 42 old `.blend` versions swapped for the clean ones, every date set to
+    UTC; pushed to the new repo `ProteanSkyrimMod`. Backups: `C:/Modding/Protean-backup-2026-11-25.git` (mirror) and
+    `...-dotgit`.
 
 **Ideas, postponed:**
 13. Hammerfist "gorilla stance": hunched over, arms hanging heavily while the Hammerfists are out (a written
@@ -215,7 +217,7 @@ game twice (render code, Protean not in the stack).
   recovery pause is held at zero. Measured in a fight: 11.7/s = full speed. Dials `Protean_StaminaNoCombatSlow`,
   `Protean_StaminaNoRegenDelay`.
 - **Public identity:** the author is **NiamosStyle**; history rewritten so no real name, email or time zone remains;
-  repo `github.com/NiamosStyle/Protean` (private until the Nexus release; merge `skill-tree` into `main` first).
+  repo `github.com/NiamosStyle/ProteanSkyrimMod` (private until the Nexus release; merge `skill-tree` into `main` first).
   Never put a Windows user path or personal detail in tracked files.
 
 ## 2026-11-14/15: sleeves, Tendril sleeve, Strange Mound (all user-verified in game unless noted)
