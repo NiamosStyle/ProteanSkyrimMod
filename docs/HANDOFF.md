@@ -34,7 +34,8 @@ sections below describe the mod as it was on their date; where a rule has since 
 8. The spell tome (`Protean_SpellTomeInstinct`, xx803) **stays** (the user's decision, 2026-11-18): the console way in
    for a player whose load order breaks Helgen or the Strange Mound. Reading it teaches only Shapeshifter's
    Instinct; the Mound also gives Unbound Form for free, so a tome player spends their first perk point on it.
-   Decided: the tome stays as it is (no free Unbound Form). Still to do: try the tome route once in game.
+   Decided: the tome stays as it is (no free Unbound Form). Tried in game 2026-11-25: read it, consumed a deer, Evolution
+   appeared with the first perk point (verified).
 9. Strange Mound: appear when Helgen's ruins are enabled instead of when MQ101 is not running (a safety for untested
    alternate starts). Recommended, not done.
 

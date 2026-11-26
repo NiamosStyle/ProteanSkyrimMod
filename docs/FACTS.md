@@ -57,8 +57,8 @@ What the files depend on:
 - **Console fallback: "Spell Tome: Shapeshifter's Instinct"** (kept on purpose, 2026-11-18). Nothing places it in
   the world and there's no recipe; it's for players whose load order breaks Helgen or the Strange Mound, added with
   the console. Reading it teaches **only** the Shapeshifter's Instinct power (consuming and the forms); it doesn't give
-  Unbound Form, so the player's first perk point goes on Unbound Form, which the Mound gives for free. Not yet tried
-  in game.
+  Unbound Form, so the player's first perk point goes on Unbound Form, which the Mound gives for free. Tried in game
+  2026-11-25: Evolution appears with the first perk point (first body consumed).
 
 ## 4. Consuming bodies
 
@@ -272,10 +272,8 @@ are placeholders).
 
 ## 11. Problems found in the mod itself (not just the docs)
 
-1. **Unbound Form's description** says bodies give the Stamina-recovery boost; the code gives it for kills. Decided:
-   change the description to say kills.
-2. **Grammar in 4 shapeshift power descriptions:** "Become **a** ash hopper", "**a** elk", "**a** ice wolf". The
-   Ice Wolf and Elk lines come from the same template; it needs "an" before a vowel.
+1. ~~Unbound Form's description~~ (said bodies, not kills): fixed 2026-11-25.
+2. ~~"a ash hopper", "a elk", "a ice wolf"~~: fixed 2026-11-25.
 3. **The spell tome** gives less than the Strange Mound (no free Unbound Form). Kept that way on purpose (decided
    2026-11-18) as the console fallback.
 4. **The package ships `docs/Protean-INTEGRATION.md` dated 2026-11-03**, older than the perks added since (Hammerfist,
@@ -287,15 +285,14 @@ are placeholders).
    verified 2026-11-19.)
 2. **Stalker rank 2** (tested by script only): in a fight, break line of sight and stand still. Do you fade, and do
    enemies give up after about 3 seconds?
-3. **The spell tome:** on a fresh character, add it with the console and read it. Can you consume, learn a form and
-   shapeshift?
+3. ~~**The spell tome**~~: verified 2026-11-25 (read it, consumed a deer, Evolution appeared with the perk point).
 
 
 Verified 2026-11-19: Infected, Subtle Carapace magic resistance, Hammerfist left arm.
 
 ## 13. Decisions recorded
 
-- 2026-11-18: Unbound Form's boost comes from **kills**; its description is to be corrected (not yet done).
+- 2026-11-18: Unbound Form's boost comes from **kills**; its description was corrected 2026-11-25.
 - 2026-11-18: the spell tome **stays** as the console way in when the Strange Mound can't load, and keeps giving only
   Shapeshifter's Instinct (not made to match the Mound).
 - 2026-11-18: Rending Claws train **One-Handed** and count as a **sword (blade)** for perks (confirmed by the author).
