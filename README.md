@@ -119,4 +119,12 @@ Protean is a new build on the ideas of these mods. No files or scripts from them
 - **PyNifly** by BadDog (GPL-3.0): its HKX writer is used at build time to write Protean's own glide animation.
   None of its code ships with Protean.
 
+## Permissions
+
+- **Code** (the SKSE plugin's source, the build tools and the plugin they generate): MIT licence. Use it, change it
+  and share it, keeping the copyright notice. The source is on GitHub.
+- **Art** (meshes, textures, animations and their Blender sources): please **ask first** before using them in
+  another mod. Ask through Nexus. Parts made from Skyrim's own files remain Bethesda's.
+- Translations and patches are welcome. Please tell me and credit Protean.
+
 **For mod authors:** `docs/Protean-INTEGRATION.md` lists everything a larger mod can read, listen to and tune.

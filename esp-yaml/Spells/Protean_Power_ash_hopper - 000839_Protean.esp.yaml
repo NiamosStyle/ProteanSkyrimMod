@@ -7,7 +7,7 @@ MenuDisplayObject: 0435A5:Skyrim.esm
 EquipmentType: 025BEE:Skyrim.esm
 Description:
   TargetLanguage: English
-  Value: 'Become a ash hopper. Cast again, or use Revert Form, to return.'
+  Value: 'Become an ash hopper. Cast again, or use Revert Form, to return.'
 Type: LesserPower
 ChargeTime: 0.5
 CastType: FireAndForget

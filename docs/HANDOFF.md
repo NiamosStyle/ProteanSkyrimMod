@@ -29,9 +29,8 @@ sections below describe the mod as it was on their date; where a rule has since 
    dragon should open its loot window as normal, with no consume prompt.
 
 **Fix in the mod** (needs a rebuild):
-6. Unbound Form's description: the Stamina-recovery boost comes from **kills**, not bodies consumed (the user's
-   decision, 2026-11-18: the code is right, the text is wrong).
-7. "a" before a vowel in the shapeshift power descriptions: "a ash hopper", "a elk", "a ice wolf" should use "an".
+6. ~~Unbound Form's description says kills.~~ Fixed 2026-11-25 (installed, not yet seen in game).
+7. ~~"an ash hopper", "an elk", "an ice wolf".~~ Fixed 2026-11-25 (installed, not yet seen in game).
 8. The spell tome (`Protean_SpellTomeInstinct`, xx803) **stays** (the user's decision, 2026-11-18): the console way in
    for a player whose load order breaks Helgen or the Strange Mound. Reading it teaches only Shapeshifter's
    Instinct; the Mound also gives Unbound Form for free, so a tome player spends their first perk point on it.

@@ -45,7 +45,7 @@ TREE_SCALE_X = 1.0
 TREE_SCALE_Y = 1.0
 PERKS = {
     "unbound_form": (0x960, "Unbound Form",
-                     "Take the form of any animal you have consumed. Immunity to all diseases. Every body you consume "
+                     "Take the form of any animal you have consumed. Immunity to all diseases. Every kill you make "
                      "boosts your Stamina recovery for a while (15% for 90 seconds, stacks).", 0, 0,
                      ["keen", "rending_claws", "predators_rush", "subtle_carapace", "borrowed_visage"]),
     # Beast
@@ -1158,7 +1158,8 @@ def main():
             continue
         pw = FIRST_CREATURE + 2 * index + 1
         power(pw, "Protean_Power_%s" % c["id"], "Shapeshift: %s" % c["name"],
-              "Become a %s. Cast again, or use Revert Form, to return." % c["name"].lower())
+              "Become %s %s. Cast again, or use Revert Form, to return."
+              % ("an" if c["name"][0].lower() in "aeiou" else "a", c["name"].lower()))
 
         # The marker the player carries while in this form: a hidden ability whose effect has the keywords
         # Protean_Transformed and Protean_Form_<id> (conditions: HasMagicEffectKeyword).

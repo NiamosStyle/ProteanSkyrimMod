@@ -159,11 +159,9 @@ Three branches grow from **Unbound Form**. On the menu: **Beast** on the left, *
 are placeholders).
 
 ### Root
-- **Unbound Form**: *"Take the form of any animal you have consumed. Immunity to all diseases. Every body you consume
-  boosts your Stamina recovery for a while (15% for 90 seconds, stacks)."*
-  ⚠ **The text is wrong:** the code gives the boost for every **kill**, not every body consumed (bodies give 50
-  Stamina at once). **Decided (2026-11-18):** the code is right; the description must be changed to say kills.
-  Not fixed yet.
+- **Unbound Form**: *"Take the form of any animal you have consumed. Immunity to all diseases. Every kill you make
+  boosts your Stamina recovery for a while (15% for 90 seconds, stacks)."* (The text said "every body you consume"
+  until 2026-11-25; the boost has always come from kills.)
 
 ### Beast branch (left)
 - **Keen** (after Unbound Form): *"Enhance your senses while wearing an animal's form. Open Favorites to access night

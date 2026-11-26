@@ -5,6 +5,6 @@ Name:
   Value: 'Unbound Form'
 Description:
   TargetLanguage: English
-  Value: 'Take the form of any animal you have consumed. Immunity to all diseases. Every body you consume boosts your Stamina recovery for a while (15% for 90 seconds, stacks).'
+  Value: 'Take the form of any animal you have consumed. Immunity to all diseases. Every kill you make boosts your Stamina recovery for a while (15% for 90 seconds, stacks).'
 NumRanks: 1
 Playable: True
