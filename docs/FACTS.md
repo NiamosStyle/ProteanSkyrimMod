@@ -87,7 +87,8 @@ What the files depend on:
   Calixto, Movarth, Sinding, Silus Vesuius, Tyranus, Harkon, Vyrthur, the Ebony Warrior, Ralis Sedarys, Ildari.
 - Power **Evolution** opens the Protean perk tree: *"Look into what you are becoming: spend Protean perk points,
   earned by feeding."* The tree's own text: *"New perks come with consuming. Perk points take a little more biomass
-  as you go."*
+  as you go."* It is given with the **first evolution point** (or a renowned person's point, or a perk owned), not
+  before: a spell-tome player gets it on their first body (`src/Evolve.cpp`, the check after each change).
 - **Kills** (not bodies) add a **biomass boost** with Unbound Form: +15% Stamina recovery for 90 seconds per kill,
   stacking with no limit. Devastator kills give none.
 - With Unbound Form, Stamina is **never slowed**: no combat slowdown and no pause before it recovers.
