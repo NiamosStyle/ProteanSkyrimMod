@@ -178,7 +178,7 @@ are placeholders).
 - **Stalker** (after Keen). Rank 1: Stalk, toggled from Favorites; fade after standing still or walking for 2
   seconds out of a fight; moving drains 2 Stamina a second (running double); a bite from hiding does double damage.
   Rank 2: Stalk works in a fight once no enemy can see you; enemies give up after 3 seconds. Rank 1 verified; rank 2
-  tested by script only.
+  verified in game 2026-11-25.
 - **Apex** (needs Survivor, Predator and Stalker): *"Animals treat you as one of their own in any form, your animal
   forms hit at least as hard as a two-hander of your level, and in animal form you can call a pack of your kind to
   fight for you."* Power **Call**: a pack for 3 minutes (60-second cooldown). Verified (including Call in caves).
@@ -218,7 +218,7 @@ are placeholders).
   blocks nothing."* The shield appears in the showcase videos. Verified 2026-11-19: melee from within the game's
   block angle blocked for 5 Stamina, from the side or behind it lands; arrows and bolts from within 60 degrees are
   blocked by Protean's own rule (the Shield has no collision for the game's own arrow block), 5 Stamina each (an
-  arrow passes the hit code twice; fixed to charge once, recheck). Spells: the ward (not yet seen in game).
+  arrow passes the hit code twice; charged once). Spells: the ward. All verified in game 2026-11-25.
 - **Regeneration** (after Subtle Carapace): *"Cast Regeneration to switch it on or off: while on, Stamina drains and
   Health returns by the same amount."* 8 a second. Verified.
 - **Devastator** (needs Rending Claws, Prey's Flight and Subtle Carapace): *"In human form, with full Stamina and at
@@ -281,10 +281,9 @@ are placeholders).
 
 ## 12. Still to verify in game (a short checklist)
 
-1. **Shield:** a blocked arrow costs 5 Stamina, not 10; a spell from the front is warded. (Melee and arrows
-   verified 2026-11-19.)
-2. **Stalker rank 2** (tested by script only): in a fight, break line of sight and stand still. Do you fade, and do
-   enemies give up after about 3 seconds?
+1. ~~**Shield**~~: verified 2026-11-25 (spells from the front warded, 5 Stamina a hit; melee and arrows 2026-11-19).
+2. ~~**Stalker rank 2**~~: verified 2026-11-25 in game.
+4. **Dragons not edible** (2026-11-25): a dead dragon opens its loot window, with no consume prompt.
 3. ~~**The spell tome**~~: verified 2026-11-25 (read it, consumed a deer, Evolution appeared with the perk point).
 
 
