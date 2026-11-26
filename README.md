@@ -122,7 +122,7 @@ Protean is a new build on the ideas of these mods. No files or scripts from them
 ## Permissions
 
 - **Code** (the SKSE plugin's source, the build tools and the plugin they generate): MIT licence. Use it, change it
-  and share it, keeping the copyright notice. The source is on GitHub.
+  and share it, keeping the copyright notice. Source: https://github.com/NiamosStyle/ProteanSkyrimMod
 - **Art** (meshes, textures, animations and their Blender sources): please **ask first** before using them in
   another mod. Ask through Nexus. Parts made from Skyrim's own files remain Bethesda's.
 - Translations and patches are welcome. Please tell me and credit Protean.
