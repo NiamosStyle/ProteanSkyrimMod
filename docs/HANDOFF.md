@@ -41,8 +41,10 @@ sections below describe the mod as it was on their date; where a rule has since 
    alternate starts). Recommended, not done.
 
 **Before release:**
-10. Build a new package (it carries the new README; update INTEGRATION first).
-11. Merge `skill-tree` into `main`.
+10. ~~Build a new package.~~ `dist/Protean-1.1.0.zip` built 2026-11-25 (Commands=0, GitHub link in README and
+    INTEGRATION, no personal details).
+11. ~~Merge `skill-tree` into `main`.~~ Done 2026-11-25, tagged `v1.1.0`. Still to do: make the repo public on
+    release day.
 12. ~~Rewrite git history.~~ Done 2026-11-25: 42 old `.blend` versions swapped for the clean ones, every date set to
     UTC; pushed to the new repo `ProteanSkyrimMod`. Backups: `C:/Modding/Protean-backup-2026-11-25.git` (mirror) and
     `...-dotgit`.
