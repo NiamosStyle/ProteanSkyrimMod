@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Shift.h"
+#include "Papyrus.h"
 
 #include "Attacks.h"
 #include "Camera.h"
@@ -375,7 +376,7 @@ namespace protean::Shift
 					pl->StopCombatAndAlarmOnActor(a_p, false);
 				}
 				// and the animal's bounty comes off the lifetime total in General Stats (the user's wish)
-				if (auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton(); vm && forgiven > 0) {
+				if (auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton(); vm && forgiven > 0 && Papyrus::Has("Game", "IncrementStat", true)) {
 					RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
 					vm->DispatchStaticCall("Game", "IncrementStat",
 						RE::MakeFunctionArguments(RE::BSFixedString("Total Lifetime Bounty"), static_cast<std::int32_t>(-forgiven)), cb);
@@ -608,7 +609,7 @@ namespace protean::Shift
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
 			auto* p = Player();
-			if (!vm || !p) {
+			if (!vm || !p || !Papyrus::Has("Actor", "SetHeadTracking", false)) {
 				return;
 			}
 			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(p->GetFormType(), p);

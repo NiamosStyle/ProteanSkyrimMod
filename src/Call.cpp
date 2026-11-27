@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Call.h"
+#include "Papyrus.h"
 
 #include "Apex.h"
 #include "Registry.h"
@@ -75,7 +76,7 @@ namespace protean::Call
 		void SetTeammate(RE::Actor* a_actor, bool a_on)
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
+			if (!vm || !Papyrus::Has("Actor", "SetPlayerTeammate", false)) {
 				return;
 			}
 			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_actor->GetFormType(), a_actor);

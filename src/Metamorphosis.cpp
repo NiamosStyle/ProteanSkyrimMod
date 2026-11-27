@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Metamorphosis.h"
+#include "Papyrus.h"
 
 #include "Evolve.h"
 #include "Face.h"
@@ -180,7 +181,7 @@ namespace protean::Metamorphosis
 		Shift::ForgiveAll("Every bounty on you is gone.");
 		Take(p);
 		auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-		if (!vm) {
+		if (!vm || !Papyrus::Has("Game", "ShowRaceMenu", true)) {
 			g_snap = {};
 			return;
 		}

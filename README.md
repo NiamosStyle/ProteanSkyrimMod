@@ -83,7 +83,8 @@ Most weapons and powers cost Stamina. Protean is built around keeping your Stami
 ## Requirements
 
 - Skyrim SE **1.7.104** (the version Protean is built and tested on)
-- SKSE64
+- SKSE64, including its Scripts folder (face stealing uses SKSE's script functions; if another mod overwrites
+  SKSE's `Game.pex` or `Actor.pex`, Protean warns you on screen)
 - Address Library for SKSE Plugins
 - Dawnguard and Dragonborn
 - The monster race crash fix: https://www.nexusmods.com/skyrimspecialedition/mods/19899

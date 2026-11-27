@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Blade.h"
+#include "Papyrus.h"
 
 #include "Evolve.h"
 #include "Registry.h"
@@ -253,7 +254,7 @@ namespace protean::Blade
 		void UnequipLeftSpell(RE::PlayerCharacter* a_p, RE::SpellItem* a_spell)
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
+			if (!vm || !Papyrus::Has("Actor", "UnequipSpell", false)) {
 				return;
 			}
 			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_p->GetFormType(), a_p);

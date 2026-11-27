@@ -29,7 +29,10 @@ Each feature is marked:
 ## 2. Requirements
 
 What the files depend on:
-- **Skyrim SE 1.7.104** (the version it was built and tested on), **SKSE64**, **Address Library**.
+- **Skyrim SE 1.7.104** (the version it was built and tested on), **SKSE64** with its script files (`Scripts/*.pex`),
+  **Address Library**. Face stealing calls three SKSE script functions (`Game.UpdateTintMaskColors`,
+  `Game.UpdateHairColor`, `Actor.RegenerateHead`). Since 1.1.1 every Papyrus call is checked first (`src/Papyrus.cpp`):
+  a missing function is skipped, logged and shown on screen once, instead of crashing the game.
 - **Dawnguard and Dragonborn.** The plugin's only master is Skyrim.esm, but the code uses both DLCs at runtime
   (Death Hound, Chaurus Hunters, Boar, Ash Hopper, blood bursts, sounds), so both are needed.
 - **Custom Skills Framework**: the perk tree.

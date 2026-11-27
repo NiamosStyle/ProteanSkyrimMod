@@ -20,6 +20,10 @@ sections below describe the mod as it was on their date; where a rule has since 
 
 ## Open items
 
+**1.1.1 (2026-11-26), Papyrus check:** built and installed, not yet tested live. Check: steal a face and take it
+off, save and load between; the log shows `papyrus: Game.UpdateTintMaskColors found`; `papyrus Game.Nope` logs
+NOT FOUND and shows the warning. Then package 1.1.1 and send the reporter a test build.
+
 **Check in game** (built, never seen working; steps in FACTS section 12):
 1. ~~Infected.~~ Verified 2026-11-19.
 2. ~~Subtle Carapace magic resistance.~~ Verified 2026-11-19.
@@ -104,6 +108,14 @@ History. Several of these rules were replaced on 2026-10-22 and later: see FACTS
 - A crash at game exit (2026-10-21 09:43, SkyrimSE.exe+1193E50, UI code) was seen once; not reproduced.
 
 ## Engine findings (also in the game folder's KNOWLEDGEBASE.local.md)
+
+- **A Papyrus call to a missing function crashes the game (2026-11-26, first Nexus bug report).** The VM's static
+  dispatch (`DispatchStaticCall`, ID 104802 on 1.6.1170 and 1.7.104, same code) looks the type up, then the function
+  by name, and calls a virtual on the result without a null check (+0xAE `mov rax,[rcx]`). A player on 1.6.1170
+  crashed on `Game.UpdateTintMaskColors` (SKSE's; their SKSE scripts missing or overwritten). Fix in 1.1.1:
+  `Papyrus::Has` checks the type's function list before every call Protean makes; the dev command
+  `papyrus Class.Fn` / `papyrusm Class.Fn` reports it. Read offline from the 1.7.104 exe with the format-5
+  address library (header 0x60 bytes, then a dense u32 offset per ID).
 
 - Flight/leaps: after `PlayerCharacter::Update`, set the character controller's gravity 0, state InAir,
   then `SetLinearVelocityImpl`; the engine keeps exactly what is set.

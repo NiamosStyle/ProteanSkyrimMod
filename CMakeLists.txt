@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(
 	Protean
-	VERSION 1.0.0
+	VERSION 1.1.1
 	LANGUAGES CXX
 )
 
@@ -37,6 +37,7 @@ add_commonlibsse_plugin(
 		src/Dev.cpp
 		src/Evolve.cpp
 		src/Face.cpp
+		src/Papyrus.cpp
 		src/Fly.cpp
 		src/Hooks.cpp
 		src/Hud.cpp

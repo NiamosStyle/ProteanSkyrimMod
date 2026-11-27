@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Face.h"
+#include "Papyrus.h"
 
 #include "Evolve.h"
 
@@ -627,7 +628,7 @@ namespace protean::Face
 		void CallGame(const char* a_fn)
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
+			if (!vm || !Papyrus::Has("Game", a_fn, true)) {
 				return;
 			}
 			RE::BSTSmartPointer<RE::BSScript::IStackCallbackFunctor> cb;
@@ -638,7 +639,7 @@ namespace protean::Face
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
 			auto* p = Player();
-			if (!vm || !p) {
+			if (!vm || !p || !Papyrus::Has("Actor", a_fn, false)) {
 				return;
 			}
 			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(p->GetFormType(), p);

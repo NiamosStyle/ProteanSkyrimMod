@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Dev.h"
+#include "Papyrus.h"
 
 #include "Attacks.h"
 #include "Blade.h"
@@ -243,6 +244,11 @@ namespace protean::Dev
 					reg.SetGlobal(name, value);
 				}
 				logger::info("dev: dial {} = {}", name, reg.Dial(name, -1.0f));
+			} else if ((a_cmd == "papyrus" || a_cmd == "papyrusm") && a_arg.find('.') != std::string::npos) {
+				// papyrus Class.Function (static) / papyrusm Class.Function (member): does the game have it? (Papyrus::Has)
+				const auto dot = a_arg.find('.');
+				const std::string cls = a_arg.substr(0, dot), fn = a_arg.substr(dot + 1);
+				logger::info("dev: papyrus {} -> {}", a_arg, Papyrus::Has(cls.c_str(), fn.c_str(), a_cmd == "papyrus"));
 			} else if (a_cmd == "sound" && !a_arg.empty()) {
 				// sound <SNDR editor ID>: play it on the player (to audition sounds)
 				RE::BSSoundHandle h;

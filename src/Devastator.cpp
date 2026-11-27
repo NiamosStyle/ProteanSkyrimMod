@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Devastator.h"
+#include "Papyrus.h"
 
 #include "Evolve.h"
 #include "Registry.h"
@@ -241,7 +242,7 @@ namespace protean::Devastator
 		void Push(RE::PlayerCharacter* a_p, RE::Actor* a_target, float a_force)
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
+			if (!vm || !Papyrus::Has("ObjectReference", "PushActorAway", false)) {
 				return;
 			}
 			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_p->GetFormType(), a_p);

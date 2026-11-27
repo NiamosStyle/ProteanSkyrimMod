@@ -7,6 +7,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the LICENSE file or <https://www.gnu.org/licenses/>.
 
 #include "Deceiver.h"
+#include "Papyrus.h"
 
 #include "Evolve.h"
 #include "Face.h"
@@ -128,7 +129,7 @@ namespace protean::Deceiver
 		void SetCrime(RE::Actor* a_a, RE::TESFaction* a_faction)
 		{
 			auto* vm = RE::BSScript::Internal::VirtualMachine::GetSingleton();
-			if (!vm) {
+			if (!vm || !Papyrus::Has("Actor", "SetCrimeFaction", false)) {
 				return;
 			}
 			const auto handle = vm->GetObjectHandlePolicy()->GetHandleForObject(a_a->GetFormType(), a_a);
