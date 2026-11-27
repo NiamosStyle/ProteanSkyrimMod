@@ -20,9 +20,9 @@ sections below describe the mod as it was on their date; where a rule has since 
 
 ## Open items
 
-**1.1.1 (2026-11-26), Papyrus check:** built and installed, not yet tested live. Check: steal a face and take it
-off, save and load between; the log shows `papyrus: Game.UpdateTintMaskColors found`; `papyrus Game.Nope` logs
-NOT FOUND and shows the warning. Then package 1.1.1 and send the reporter a test build.
+**1.1.1 (2026-11-26), Papyrus check:** verified live 2026-11-26 (SKSE functions found, made-up ones logged and
+warned on screen, inherited ones found; face stolen, taken off, saved and loaded: unchanged). Packaged as
+`dist/Protean-1.1.1.zip`. Waiting on the reporter (1.6.1170) to confirm, and on which mod provides their Game.pex.
 
 **Check in game** (built, never seen working; steps in FACTS section 12):
 1. ~~Infected.~~ Verified 2026-11-19.

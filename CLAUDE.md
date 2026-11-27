@@ -1,8 +1,9 @@
 # Protean: notes for Claude
 
 A Prototype-inspired shapeshifter mod for Skyrim SE 1.7.104 (SKSE plugin + light ESP): consuming, 35 animal
-forms, face stealing, a 21-perk tree and five flesh weapons. Version 1.0.0 is tagged (`v1.0.0`); **1.1.0** (the
-perk tree, weapons and Strange Mound) is in testing (`dist/Protean-1.1.0-test.zip`).
+forms, face stealing, a 21-perk tree and five flesh weapons. Released on Nexus: 1.0.0, 1.1.0 (the perk tree,
+weapons and Strange Mound) and **1.1.1** (every Papyrus call checked first; `dist/Protean-1.1.1.zip`), each tagged.
+The code is GPL-3.0-or-later.
 
 ## Read first
 
