@@ -10,6 +10,8 @@ What the mod should do is in `docs/FACTS.md`; test against that.
   files created while the game runs). The install copies an empty one.
 - `Protean.ini` `[Dev] Commands=1` turns on the dev channel. Release packages have it at 0 (`tools/package.py`
   does that).
+- Before a release, check the licences: every third-party piece in the zip (today only CommonLibSSE-NG, compiled
+  into the DLL: GPL-3.0) must allow how we ship it. The zip carries `LICENSE.txt` (`tools/package.py`).
 
 ## The dev channel
 

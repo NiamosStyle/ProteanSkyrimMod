@@ -121,8 +121,12 @@ Protean is a new build on the ideas of these mods. No files or scripts from them
 
 ## Permissions
 
-- **Code** (the SKSE plugin's source, the build tools and the plugin they generate): MIT licence. Use it, change it
-  and share it, keeping the copyright notice. Source: https://github.com/NiamosStyle/ProteanSkyrimMod
+- **Code** (the SKSE plugin's source, the build tools and the plugin they generate): Copyright (C) 2026 NiamosStyle,
+  licensed under the GNU General Public License version 3 or later (GPL-3.0-or-later), because it is built on
+  CommonLibSSE-NG, which is GPL-3.0. You may use, change and share it under that licence; anything you share that is
+  built from it must also be GPL and come with its source. It comes WITHOUT ANY WARRANTY. The full licence is
+  `LICENSE.txt` in this download, or https://www.gnu.org/licenses/gpl-3.0.txt.
+  Source: https://github.com/NiamosStyle/ProteanSkyrimMod
 - **Art** (meshes, textures, animations and their Blender sources): please **ask first** before using them in
   another mod. Ask through Nexus. Parts made from Skyrim's own files remain Bethesda's.
 - Translations and patches are welcome. Please tell me and credit Protean.

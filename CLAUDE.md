@@ -66,6 +66,11 @@ So, **before writing a feature, and again before building on anything new mid-fe
 5. **Test the transitions, not just the feature:** save and load in every state the feature creates, the other sex
    and another race, animal form and back. That is where state the engine rebuilds behind our back shows up.
 
+**Licences are connections too (2026-11-26).** Protean shipped under MIT although CommonLibSSE-NG (12.x) is
+GPL-3.0, which binds any plugin built on it; a Nexus moderator caught it. Before adding a library, tool or asset
+whose code or content ends up in the download, or changing Protean's licence, read its licence file and check what
+it requires of us. Protean is GPL-3.0-or-later; the art is "ask first"; source files carry the GPL notice header.
+
 ## When the mod changes
 
 1. `docs/FACTS.md`: the facts, numbers and in-game text.

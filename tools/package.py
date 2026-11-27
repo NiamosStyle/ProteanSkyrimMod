@@ -67,5 +67,6 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         z.write(path, name)
     z.writestr("SKSE/Plugins/Protean.ini", ini)
     z.write(os.path.join(ROOT, "README.md"), "README.md")
+    z.write(os.path.join(ROOT, "LICENSE"), "LICENSE.txt")  # GPL-3.0 text, required by CommonLibSSE-NG's licence
     z.write(os.path.join(ROOT, "docs", "INTEGRATION.md"), "docs/Protean-INTEGRATION.md")  # for mods built on it
 print("wrote", out, os.path.getsize(out), "bytes")

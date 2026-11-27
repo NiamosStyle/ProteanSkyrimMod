@@ -2,7 +2,7 @@
 
 For a larger mod built on Protean: how to tell what the player is, how to react when it changes, and
 how to tune what Protean does. Everything here is in `Protean.esp` (a light plugin) or the SKSE plugin.
-The source (MIT licence): https://github.com/NiamosStyle/ProteanSkyrimMod
+The source (GPL-3.0-or-later): https://github.com/NiamosStyle/ProteanSkyrimMod
 
 Form IDs are given as `xxNNN`: the local ID inside `Protean.esp`. In Papyrus use
 `Game.GetFormFromFile(0xNNN, "Protean.esp")`; in a plugin that masters `Protean.esp`, the records are

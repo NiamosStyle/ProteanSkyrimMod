@@ -82,6 +82,11 @@ History. Several of these rules were replaced on 2026-10-22 and later: see FACTS
 
 ## User decisions worth knowing
 
+- **Licence (2026-11-26):** the code is GPL-3.0-or-later, not MIT. CommonLibSSE-NG 12.x (in `extern/`) is
+  GPL-3.0 and binds plugins built on it; a Nexus moderator flagged the MIT licence. `LICENSE` is the official gnu.org
+  text (CommonLib's own `COPYING.txt` has its indentation stripped, so it is not the unmodified text); every `src/`
+  file has the notice header; the zip carries `LICENSE.txt`. Art stays "ask first". Nexus page: GitHub link in the
+  description, permissions open for the code.
 - Giant fights bare-handed (no club appearing from nowhere).
 - No natural armour for were-forms (the `Protean_ArmorBonus` dial exists for a larger mod).
 - Slaughterfish: no shoreline wall; it may change on land and slither into water; the game suffocates it on land.
